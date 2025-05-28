@@ -6,7 +6,7 @@ import { FetchRelationsOptions, FindWithRelationsOptions } from "./types";
 // =============================================================================
 
 /**
- * Helper class for managing relationships
+ * Helper class for managing Neo4j relationships using Neogma models
  */
 export class RelationshipManager {
   constructor(
@@ -16,13 +16,13 @@ export class RelationshipManager {
   ) {}
 
   /**
-   * Load relationships for an entity
+   * Load specified relationships for an entity with optional filters and limits
    */
   async loadRelations(entity: any, options: FetchRelationsOptions = {}): Promise<any> {
     const relationships = this.model.relationships || {};
     let relationAliases = Object.keys(relationships);
 
-    // Apply filters
+    // Filter relation aliases by include/exclude options
     if (options.include?.length) {
       relationAliases = relationAliases.filter((alias) => options.include!.includes(alias));
     }
@@ -30,16 +30,14 @@ export class RelationshipManager {
       relationAliases = relationAliases.filter((alias) => !options.exclude!.includes(alias));
     }
 
+    // Get base data of entity
     const result = entity.getDataValues ? entity.getDataValues() : { ...entity };
 
-    // Load relationships in parallel
+    // Load all relationships concurrently
     const loadPromises = relationAliases.map(async (alias) => {
       try {
         const { isArray } = this.getRelationInfo(alias);
-        const relationOptions: any = {
-          alias,
-          session: options.session,
-        };
+        const relationOptions: any = { alias, session: options.session };
 
         if (options.limits?.[alias]) {
           relationOptions.limit = options.limits[alias];
@@ -62,6 +60,7 @@ export class RelationshipManager {
       }
     });
 
+    // Await all relationship data and attach to result
     const results = await Promise.all(loadPromises);
     results.forEach(({ alias, data }) => {
       result[alias] = data;
@@ -71,7 +70,7 @@ export class RelationshipManager {
   }
 
   /**
-   * Find one entity with relationships
+   * Find a single entity by conditions and load its relationships
    */
   async findOneWithRelations(
     where: WhereParamsI,
@@ -91,7 +90,7 @@ export class RelationshipManager {
   }
 
   /**
-   * Find many entities with relationships
+   * Find multiple entities by conditions and load their relationships
    */
   async findManyWithRelations(
     where: WhereParamsI = {},
@@ -113,7 +112,7 @@ export class RelationshipManager {
   }
 
   /**
-   * Search within relationships
+   * Search for related nodes within relationships matching criteria
    */
   async searchInRelations(
     where: WhereParamsI,
@@ -147,7 +146,7 @@ export class RelationshipManager {
 
         allResults.push(...results);
       } catch {
-        // Skip failed searches
+        // Skip errors silently
       }
     }
 
@@ -155,7 +154,7 @@ export class RelationshipManager {
   }
 
   /**
-   * Create multiple relationships
+   * Create multiple relationships from source entities to target entities
    */
   async createMultipleRelations(
     sourceWhere: WhereParamsI,
@@ -209,17 +208,16 @@ export class RelationshipManager {
   }
 
   /**
-   * Get relationship information with cardinality
+   * Get relationship cardinality info
    */
   private getRelationInfo(alias: string): { isArray: boolean } {
     const definition = this.relationshipDefinitions[alias];
 
-    // Use explicit cardinality if defined
     if (definition?.cardinality) {
       return { isArray: definition.cardinality === "many" };
     }
 
-    // Default to 'many' for safety - can be overridden by cardinality
+    // Default to array if not specified
     return { isArray: true };
   }
 }

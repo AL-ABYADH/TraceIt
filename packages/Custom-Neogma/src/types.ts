@@ -3,9 +3,11 @@ import { Neo4jSupportedProperties, NeogmaModel, RelationshipsI, WhereParamsI } f
 // =============================================================================
 // TYPES & INTERFACES
 // =============================================================================
+
 export type NeogmaSchema<Properties> = {
   [K in keyof Properties]: any;
 };
+
 /**
  * Enhanced relationship definition with cardinality info
  */
@@ -15,7 +17,7 @@ export type EnhancedRelationshipsI<RelatedNodes extends Record<string, any>> = {
     name: string;
     direction: "out" | "in" | "none";
     properties?: RelationshipsI<RelatedNodes>[alias]["properties"];
-    cardinality?: "one" | "many"; // NEW: Explicit cardinality definition
+    cardinality?: "one" | "many"; // Explicit cardinality definition
   };
 };
 
@@ -52,6 +54,7 @@ export type EnhancedNeogmaModel<
   Statics extends Record<string, any>,
 > = NeogmaModel<Properties, RelatedNodes, Methods, Statics> & {
   // Static methods
+
   findOneWithRelations(
     where: WhereParamsI,
     options?: FindWithRelationsOptions,

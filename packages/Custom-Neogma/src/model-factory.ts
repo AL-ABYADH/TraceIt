@@ -21,7 +21,8 @@ import { RelationshipManager } from "./relationship-manager";
 // =============================================================================
 
 /**
- * Enhanced Model Factory with relationship management
+ * Creates an enhanced Neogma model with support for relationships and
+ * additional utility methods for handling complex queries with relations.
  *
  * @example
  * const User = ModelFactory({
@@ -36,18 +37,18 @@ import { RelationshipManager } from "./relationship-manager";
  *       model: 'Profile',
  *       direction: 'out',
  *       name: 'HAS_PROFILE',
- *       cardinality: 'one'  // Explicit: returns single object
+ *       cardinality: 'one'  // Returns single related entity
  *     },
  *     posts: {
  *       model: 'Post',
  *       direction: 'out',
  *       name: 'AUTHORED',
- *       cardinality: 'many' // Explicit: returns array
+ *       cardinality: 'many' // Returns multiple related entities
  *     }
  *   }
  * }, neogmaInstance);
  *
- * // Usage
+ * // Query example with relations included
  * const userWithRelations = await User.findOneWithRelations(
  *   { id: '123' },
  *   { include: ['profile', 'posts'], limits: { posts: 5 } }
@@ -70,10 +71,13 @@ export function ModelFactory<
   },
   neogma: Neogma,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+  // Get the singleton model registry instance
   const registry = ModelRegistry.getInstance();
+
+  // Destructure parameters, separating relationships from others
   const { name: modelName, relationships: enhancedRelationships, ...restParams } = parameters;
 
-  // Store relationship definitions for cardinality info
+  // Store relationship definitions for cardinality reference (one/many)
   const relationshipDefinitions: Record<string, { cardinality?: "one" | "many" }> = {};
   if (enhancedRelationships) {
     Object.entries(enhancedRelationships).forEach(([alias, rel]) => {
@@ -83,7 +87,10 @@ export function ModelFactory<
     });
   }
 
-  // Resolve relationships
+  /**
+   * Resolve and map the relationships by replacing model names
+   * with actual NeogmaModel instances or "self" reference.
+   */
   const resolveRelationships = (): Partial<RelationshipsI<RelatedNodes>> => {
     if (!enhancedRelationships) return {};
 
@@ -96,8 +103,9 @@ export function ModelFactory<
 
       if (typeof rel.model === "string") {
         if (rel.model === "self") {
-          model = "self";
+          model = "self"; // Self-reference for recursive relations
         } else {
+          // Lookup model instance from the registry
           const found = registry.get(rel.model);
           if (!found) {
             throw new Error(`Model "${rel.model}" not found`);
@@ -105,7 +113,7 @@ export function ModelFactory<
           model = found;
         }
       } else {
-        model = rel.model;
+        model = rel.model; // Model provided directly
       }
 
       resolved[alias as keyof RelatedNodes] = {
@@ -122,7 +130,7 @@ export function ModelFactory<
   let model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
 
   try {
-    // Try to create with resolved relationships
+    // Try creating the model with relationships resolved
     const relationships = resolveRelationships();
     model = OriginalModelFactory(
       {
@@ -132,7 +140,7 @@ export function ModelFactory<
       neogma,
     ) as any;
   } catch {
-    // Create without relationships first (circular dependency)
+    // If circular dependency detected, create model without relationships first
     model = OriginalModelFactory(
       {
         ...restParams,
@@ -141,7 +149,7 @@ export function ModelFactory<
       neogma,
     ) as any;
 
-    // Schedule relationship resolution
+    // Schedule relationship resolution later
     if (enhancedRelationships) {
       registry.addPendingRelationship(modelName, () => {
         const relationships = resolveRelationships();
@@ -150,14 +158,16 @@ export function ModelFactory<
     }
   }
 
-  // Add enhanced methods
+  // Instantiate relationship manager for enhanced relation methods
   const manager = new RelationshipManager(model, neogma, relationshipDefinitions);
 
-  // Save labels
+  // Store labels as an array (support multiple labels)
   const modelLabels = Array.isArray(parameters.label) ? parameters.label : [parameters.label];
 
+  // Expose labels on the model
   model.getLabels = () => modelLabels;
 
+  // Add static method to find entities by a single label with optional filtering and pagination
   model.findByLabel = async (
     label: string,
     where?: WhereParamsI,
@@ -181,6 +191,7 @@ export function ModelFactory<
     const result = await neogma.queryRunner.run(query, where || {});
     const entities = result.records.map((record) => record.get("n").properties);
 
+    // Load relations if requested in options
     if (options?.include || options?.exclude) {
       return Promise.all(entities.map((entity) => manager.loadRelations(entity, options)));
     }
@@ -188,7 +199,7 @@ export function ModelFactory<
     return entities;
   };
 
-  // Add function to search by multiple labels
+  // Add static method to find entities by multiple labels
   model.findByLabels = async (
     labels: string[],
     where?: WhereParamsI,
@@ -220,7 +231,7 @@ export function ModelFactory<
     return entities;
   };
 
-  // Static methods
+  // Enhanced static methods using the relationship manager
   model.findOneWithRelations = (where: WhereParamsI, options?: FindWithRelationsOptions) =>
     manager.findOneWithRelations(where, options);
 
@@ -233,11 +244,12 @@ export function ModelFactory<
   model.createMultipleRelations = (sourceWhere: WhereParamsI, relations: any[], options?: any) =>
     manager.createMultipleRelations(sourceWhere, relations, options);
 
-  // Instance methods
+  // Instance method to load related entities for a given model instance
   (model as any).prototype.loadRelations = function (options?: FindWithRelationsOptions) {
     return manager.loadRelations(this, options);
   };
 
+  // Instance method to create multiple relationships from this entity to others
   (model as any).prototype.createMultipleRelations = function (relations: any[], options?: any) {
     const primaryKey = model.getPrimaryKeyField();
     if (!primaryKey) {
@@ -247,7 +259,7 @@ export function ModelFactory<
     return manager.createMultipleRelations(where, relations, options);
   };
 
-  // Register model
+  // Register the model in the registry for future lookup
   registry.register(modelName, model);
 
   return model;
