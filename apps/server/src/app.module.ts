@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { Neo4jGlobalModule } from "./core/neo4j/neo4j.module";
+import { Neo4jModule } from "./core/neo4j/neo4j.module";
 import { ConfigModule } from "@nestjs/config";
 
 @Module({
@@ -8,7 +8,7 @@ import { ConfigModule } from "@nestjs/config";
       isGlobal: true,
       envFilePath: [".env", ".env.local"],
     }),
-    Neo4jGlobalModule,
+    Neo4jModule,
   ],
   controllers: [],
   providers: [],

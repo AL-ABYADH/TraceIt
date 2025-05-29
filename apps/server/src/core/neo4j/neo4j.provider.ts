@@ -1,12 +1,13 @@
 import { ConfigService } from "@nestjs/config";
 import { Neogma } from "@repo/custom-neogma";
 import { NEOGMA_TOKEN } from "./neo4j.constants";
+import { Logger } from "@nestjs/common";
 
 /**
  * Factory provider for creating and configuring a Neogma instance.
  * Handles Neo4j database connection with environment-based configuration.
  */
-export const NeogmaProvider = {
+export const Neo4jProvider = {
   provide: NEOGMA_TOKEN,
   useFactory: async (configService: ConfigService): Promise<Neogma> => {
     const exposePort = configService.get<string>("NEO4J_SERVICE_PORT_EXPOSE");
@@ -41,9 +42,9 @@ export const NeogmaProvider = {
 
     try {
       await neogma.verifyConnectivity();
-      console.log("✅ Neo4j connected successfully");
+      Logger.log("✅ Connected to Neo4j", "Neo4jModule");
     } catch (error) {
-      console.error("❌ Neo4j connection failed:", error);
+      Logger.error("❌ Neo4j connection failed:", error, "Neo4jModule");
       throw error;
     }
 
