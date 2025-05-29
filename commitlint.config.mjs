@@ -8,6 +8,7 @@ export default {
         "feat",
         "fix",
         "docs",
+        "config",
         "style",
         "refactor",
         "perf",
@@ -23,7 +24,7 @@ export default {
     "scope-enum": [
       2,
       "always",
-      ["web", "server", "packages", "db", "config", "deps", "all"],
+      ["web", "server", "packages", "root", "db", "deps", "all"],
     ],
     "subject-case": [2, "never", ["start-case", "pascal-case", "upper-case"]],
     "subject-full-stop": [2, "never", "."],
