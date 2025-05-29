@@ -46,10 +46,10 @@ export function UserModel(neogma: Neogma) {
           name: "OWNS",
           cardinality: "many",
         },
-        collaboratingProjects: {
-          model: "Project",
+        collaborations: {
+          model: "ProjectCollaboration",
           direction: "out",
-          name: "COLLABORATES_AT",
+          name: "HAS_COLLABORATION",
           cardinality: "many",
         },
       },
