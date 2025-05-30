@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
-import { AtLeastOneOf } from "../../helper/custom-validators";
+import { AtLeastOneOf } from "../../../../../../packages/Custom-Validators/src";
 
 /**
  * Data Transfer Object for user login

@@ -11,7 +11,7 @@ import {
  * Custom validator constraint to ensure that at least one specified field has a value.
  */
 @ValidatorConstraint({ name: "atLeastOneOf", async: false })
-export class AtLeastOneOfConstraint implements ValidatorConstraintInterface {
+class AtLeastOneOfConstraint implements ValidatorConstraintInterface {
   validate(_: any, args: ValidationArguments): boolean {
     const object = args.object as Record<string, any>;
     const fields = args.constraints[0] as string[];
