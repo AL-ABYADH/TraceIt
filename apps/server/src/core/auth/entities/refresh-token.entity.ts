@@ -4,7 +4,6 @@
 export class RefreshToken {
   id: string;
   token: string;
-  userId: string;
   issuedIp: string;
   userAgent: string;
   expiresAt: Date;
