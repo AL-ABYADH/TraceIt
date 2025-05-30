@@ -4,4 +4,5 @@ export interface CreateProjectInvitationInterface {
   projectId: string;
   projectRoleIds: string[];
   expirationDate: Date;
+  createdAt: Date;
 }

@@ -11,4 +11,5 @@ export class ProjectInvitation {
   projectRoles: ProjectRole[] | null;
   expirationDate: Date;
   status: ProjectInvitationStatus;
+  createdAt: Date;
 }

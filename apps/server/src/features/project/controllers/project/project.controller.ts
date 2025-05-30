@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { ProjectService } from "../../services/project/project.service";
 import { Project } from "../../entities/project.entity";
-import { CreateProjectDto } from "../../dtos/create-project.dto";
+import { CreateProjectDto } from "../../dtos/create-project-params.dto";
 import { UpdateProjectDto } from "../../dtos/update-project.dto";
 import { InjectUserIdPipe } from "../../../../common/pipes/inject-user-id.pipe";
 import { ProjectStatus } from "../../enums/project-status.enum";

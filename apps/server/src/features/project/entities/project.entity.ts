@@ -10,6 +10,7 @@ export class Project {
   name: string;
   description: string;
   status: ProjectStatus;
+  createdAt: Date;
   owner: User;
   collaborations: ProjectCollaboration[] | null;
   actors: Actor[] | null;

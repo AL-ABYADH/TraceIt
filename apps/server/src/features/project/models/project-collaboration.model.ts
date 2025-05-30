@@ -8,6 +8,11 @@ export function ProjectCollaborationModel(neogma: Neogma) {
       label: "ProjectCollaboration",
       schema: {
         id: idField,
+        createdAt: {
+          type: "string",
+          required: true,
+          format: "date-time",
+        },
       },
       primaryKeyField: "id",
       relationships: {

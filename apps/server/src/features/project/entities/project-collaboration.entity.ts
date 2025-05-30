@@ -6,4 +6,5 @@ export class ProjectCollaboration {
   user: User;
   project: Project;
   projectRoles: ProjectRole[] | null;
+  createdAt: Date;
 }

@@ -1,14 +1,14 @@
 import { Injectable, NotImplementedException } from "@nestjs/common";
 import { ProjectRepository } from "../../repositories/project/project.repository";
 import { Project } from "../../entities/project.entity";
-import { CreateProjectInterface } from "../../interfaces/create-project.interface";
 import { UpdateProjectInterface } from "../../interfaces/update-project.interface";
+import { CreateProjectParamsInterface } from "../../interfaces/create-project-params.interface";
 
 @Injectable()
 export class ProjectService {
   constructor(private readonly projectRepository: ProjectRepository) {}
 
-  async create(project: CreateProjectInterface): Promise<Project> {
+  async create(project: CreateProjectParamsInterface): Promise<Project> {
     throw new NotImplementedException();
   }
   async find(id: string): Promise<Project> {
