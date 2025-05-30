@@ -16,6 +16,14 @@ export class UserService {
     throw new NotImplementedException();
   }
 
+  async findByEmail(email: string): Promise<User> {
+    throw new NotImplementedException();
+  }
+
+  async findByUsername(username: string): Promise<User> {
+    throw new NotImplementedException();
+  }
+
   async updateProfile(id: string, user: UpdateUserInterface): Promise<User> {
     throw new NotImplementedException();
   }
