@@ -21,7 +21,7 @@ export class UserRepository {
     throw new NotImplementedException();
   }
 
-  async update(user: UpdateUserInterface): Promise<User> {
+  async update(id: string, user: UpdateUserInterface): Promise<User> {
     throw new NotImplementedException();
   }
 

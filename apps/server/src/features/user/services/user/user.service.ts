@@ -16,7 +16,7 @@ export class UserService {
     throw new NotImplementedException();
   }
 
-  async updateProfile(user: UpdateUserInterface): Promise<User> {
+  async updateProfile(id: string, user: UpdateUserInterface): Promise<User> {
     throw new NotImplementedException();
   }
 
