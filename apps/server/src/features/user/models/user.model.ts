@@ -37,6 +37,11 @@ export function UserModel(neogma: Neogma) {
           type: "string",
           required: true,
         },
+        createdAt: {
+          type: "string",
+          required: true,
+          format: "date-time",
+        },
       },
       primaryKeyField: "id",
       relationships: {

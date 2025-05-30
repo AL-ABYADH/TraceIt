@@ -21,7 +21,15 @@ export class UserRepository {
     throw new NotImplementedException();
   }
 
-  async update(user: UpdateUserInterface): Promise<User> {
+  async getByEmail(email: string): Promise<User> {
+    throw new NotImplementedException();
+  }
+
+  async getByUsername(username: string): Promise<User> {
+    throw new NotImplementedException();
+  }
+
+  async update(id: string, user: UpdateUserInterface): Promise<User> {
     throw new NotImplementedException();
   }
 
