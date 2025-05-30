@@ -1,7 +1,6 @@
-import { CreateProjectCollaborationInterface } from "../interfaces/create-project-collaboration.interface";
+import { CreateProjectPermissionInterface } from "../interfaces/create-project-permission.interface";
 
-export class CreateProjectPermissionDto implements CreateProjectCollaborationInterface {
-  projectId: string;
-  userId: string;
-  roleIds: string[];
+export class CreateProjectPermissionDto implements CreateProjectPermissionInterface {
+  permission: string;
+  code: string;
 }
