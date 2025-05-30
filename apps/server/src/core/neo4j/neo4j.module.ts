@@ -2,7 +2,7 @@ import { ConfigModule } from "@nestjs/config";
 import { Global, Module } from "@nestjs/common";
 
 import { Neo4jService } from "./neo4j.service";
-import { NeogmaProvider } from "./neo4j.provider";
+import { Neo4jProvider } from "./neo4j.provider";
 
 /**
  * Global module that provides Neo4j database connectivity throughout the application.
@@ -21,7 +21,7 @@ import { NeogmaProvider } from "./neo4j.provider";
 @Global()
 @Module({
   imports: [ConfigModule],
-  providers: [NeogmaProvider, Neo4jService],
+  providers: [Neo4jProvider, Neo4jService],
   exports: [Neo4jService],
 })
-export class Neo4jGlobalModule {}
+export class Neo4jModule {}
