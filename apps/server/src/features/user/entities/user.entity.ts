@@ -1,3 +1,5 @@
+import { Exclude } from "class-transformer";
+
 export class User {
   id: string;
   username: string;
@@ -5,4 +7,7 @@ export class User {
   email: string;
   emailVerified: boolean;
   createdAt: Date;
+
+  @Exclude({ toPlainOnly: true })
+  password: string;
 }
