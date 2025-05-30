@@ -2,7 +2,7 @@ import { Body, Controller, Get, NotImplementedException, Param, Put } from "@nes
 import { UserService } from "../../services/user/user.service";
 import { UpdateUserDto } from "../../dtos/update-user.dto";
 
-@Controller("user")
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
