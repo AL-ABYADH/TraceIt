@@ -23,6 +23,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "neogma": "^1.14.1"
+    "neogma": "^1.14.1",
+    "uuid": "^11.1.0"
   }
 }

@@ -1,3 +1,4 @@
+// model-factory.ts
 import {
   ModelFactory as OriginalModelFactory,
   Neo4jSupportedProperties,
@@ -13,16 +14,21 @@ import {
   FindWithRelationsOptions,
   NeogmaSchema,
 } from "./types";
+
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
+import { v4 as uuidv4 } from "uuid";
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
 // =============================================================================
 
 /**
- * Creates an enhanced Neogma model with support for relationships and
- * additional utility methods for handling complex queries with relations.
+ * Factory function for creating enhanced Neogma models with:
+ * - Relationship resolution (including circular/self-referencing)
+ * - Automatic bidirectional relationships detection (even with different names)
+ * - Custom statics and methods
+ * - Extended query utilities like `findOneWithRelations`
  *
  * @example
  * const User = ModelFactory({
@@ -30,29 +36,35 @@ import { RelationshipManager } from "./relationship-manager";
  *   label: 'User',
  *   schema: {
  *     id: { type: 'string', required: true },
- *     name: { type: 'string', required: true }
+ *     name: { type: 'string', required: true },
  *   },
  *   relationships: {
- *     profile: {
- *       model: 'Profile',
- *       direction: 'out',
- *       name: 'HAS_PROFILE',
- *       cardinality: 'one'  // Returns single related entity
- *     },
  *     posts: {
  *       model: 'Post',
  *       direction: 'out',
  *       name: 'AUTHORED',
- *       cardinality: 'many' // Returns multiple related entities
+ *       cardinality: 'many',
  *     }
  *   }
  * }, neogmaInstance);
  *
- * // Query example with relations included
- * const userWithRelations = await User.findOneWithRelations(
- *   { id: '123' },
- *   { include: ['profile', 'posts'], limits: { posts: 5 } }
- * );
+ * // The Post model can have a different relationship name pointing back to User
+ * const Post = ModelFactory({
+ *   name: 'Post',
+ *   label: 'Post',
+ *   schema: {
+ *     id: { type: 'string', required: true },
+ *     title: { type: 'string', required: true },
+ *   },
+ *   relationships: {
+ *     author: {
+ *       model: 'User',
+ *       direction: 'in',
+ *       name: 'AUTHORED',
+ *       cardinality: 'one',
+ *     }
+ *   }
+ * }, neogmaInstance);
  */
 export function ModelFactory<
   Properties extends Neo4jSupportedProperties,
@@ -71,13 +83,11 @@ export function ModelFactory<
   },
   neogma: Neogma,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
-  // Get the singleton model registry instance
   const registry = ModelRegistry.getInstance();
 
-  // Destructure parameters, separating relationships from others
   const { name: modelName, relationships: enhancedRelationships, ...restParams } = parameters;
 
-  // Store relationship definitions for cardinality reference (one/many)
+  // Capture relationship metadata (mainly for cardinality support)
   const relationshipDefinitions: Record<string, { cardinality?: "one" | "many" }> = {};
   if (enhancedRelationships) {
     Object.entries(enhancedRelationships).forEach(([alias, rel]) => {
@@ -88,8 +98,8 @@ export function ModelFactory<
   }
 
   /**
-   * Resolve and map the relationships by replacing model names
-   * with actual NeogmaModel instances or "self" reference.
+   * Helper function to resolve model references in relationships.
+   * Converts string-based model references to actual model instances.
    */
   const resolveRelationships = (): Partial<RelationshipsI<RelatedNodes>> => {
     if (!enhancedRelationships) return {};
@@ -103,17 +113,14 @@ export function ModelFactory<
 
       if (typeof rel.model === "string") {
         if (rel.model === "self") {
-          model = "self"; // Self-reference for recursive relations
+          model = "self";
         } else {
-          // Lookup model instance from the registry
           const found = registry.get(rel.model);
-          if (!found) {
-            throw new Error(`Model "${rel.model}" not found`);
-          }
+          if (!found) throw new Error(`Model "${rel.model}" not found`);
           model = found;
         }
       } else {
-        model = rel.model; // Model provided directly
+        model = rel.model;
       }
 
       resolved[alias as keyof RelatedNodes] = {
@@ -130,26 +137,13 @@ export function ModelFactory<
   let model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
 
   try {
-    // Try creating the model with relationships resolved
+    // Initial creation with resolved relationships
     const relationships = resolveRelationships();
-    model = OriginalModelFactory(
-      {
-        ...restParams,
-        relationships,
-      },
-      neogma,
-    ) as any;
+    model = OriginalModelFactory({ ...restParams, relationships }, neogma) as any;
   } catch {
-    // If circular dependency detected, create model without relationships first
-    model = OriginalModelFactory(
-      {
-        ...restParams,
-        relationships: {},
-      },
-      neogma,
-    ) as any;
+    // Fallback for circular dependencies: register model first, resolve relationships later
+    model = OriginalModelFactory({ ...restParams, relationships: {} }, neogma) as any;
 
-    // Schedule relationship resolution later
     if (enhancedRelationships) {
       registry.addPendingRelationship(modelName, () => {
         const relationships = resolveRelationships();
@@ -158,16 +152,14 @@ export function ModelFactory<
     }
   }
 
-  // Instantiate relationship manager for enhanced relation methods
   const manager = new RelationshipManager(model, neogma, relationshipDefinitions);
-
-  // Store labels as an array (support multiple labels)
   const modelLabels = Array.isArray(parameters.label) ? parameters.label : [parameters.label];
 
-  // Expose labels on the model
   model.getLabels = () => modelLabels;
 
-  // Add static method to find entities by a single label with optional filtering and pagination
+  /**
+   * Find nodes by a single label with optional filtering and pagination.
+   */
   model.findByLabel = async (
     label: string,
     where?: WhereParamsI,
@@ -231,7 +223,7 @@ export function ModelFactory<
     return entities;
   };
 
-  // Enhanced static methods using the relationship manager
+  // Static utilities with relationship-aware querying
   model.findOneWithRelations = (where: WhereParamsI, options?: FindWithRelationsOptions) =>
     manager.findOneWithRelations(where, options);
 
@@ -244,23 +236,114 @@ export function ModelFactory<
   model.createMultipleRelations = (sourceWhere: WhereParamsI, relations: any[], options?: any) =>
     manager.createMultipleRelations(sourceWhere, relations, options);
 
-  // Instance method to load related entities for a given model instance
+  // Instance-level utilities for relationship management
   (model as any).prototype.loadRelations = function (options?: FindWithRelationsOptions) {
     return manager.loadRelations(this, options);
   };
 
-  // Instance method to create multiple relationships from this entity to others
   (model as any).prototype.createMultipleRelations = function (relations: any[], options?: any) {
     const primaryKey = model.getPrimaryKeyField();
-    if (!primaryKey) {
-      throw new Error("Primary key field is required");
-    }
+    if (!primaryKey) throw new Error("Primary key field is required");
     const where = { [primaryKey]: this[primaryKey] };
     return manager.createMultipleRelations(where, relations, options);
   };
 
-  // Register the model in the registry for future lookup
-  registry.register(modelName, model);
+  // Override the original createOne method to handle bidirectional relationships
+  const originalCreateOne = model.createOne;
+  model.createOne = async function (data: any, options?: any) {
+    // First, execute the original createOne method
+    const entity = await originalCreateOne.call(this, data, options);
 
-  return model;
+    // Then, handle the bidirectional relationships
+    if (entity) {
+      // Extract the relationship data from the original data object
+      const relationData: Record<string, any> = {};
+
+      if (data) {
+        Object.keys(data).forEach((key) => {
+          // Check if this key is a relationship alias (exists in the model's relationships)
+          if (model.relationships && model.relationships[key]) {
+            relationData[key] = data[key];
+          }
+        });
+      }
+
+      // Process the relationships to ensure bidirectionality
+      await manager.handleCreateOneRelationships(entity, relationData, options);
+    }
+
+    return entity;
+  };
+
+  // Override the original createMany method to handle bidirectional relationships
+  const originalCreateMany = model.createMany;
+  model.createMany = async function (dataArray: any[], options?: any) {
+    // First, execute the original createMany method
+    const entities = await originalCreateMany.call(this, dataArray, options);
+
+    // Then, handle the bidirectional relationships for each entity
+    if (entities && entities.length > 0) {
+      for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        const data = dataArray[i];
+
+        // Extract the relationship data from the original data object
+        const relationData: Record<string, any> = {};
+
+        if (data) {
+          Object.keys(data).forEach((key) => {
+            // Check if this key is a relationship alias
+            if (model.relationships && model.relationships[key]) {
+              relationData[key] = data[key];
+            }
+          });
+        }
+
+        // Process the relationships to ensure bidirectionality
+        await manager.handleCreateOneRelationships(entity, relationData, options);
+      }
+    }
+
+    return entities;
+  };
+
+  // Override deleteRelationships to use our enhanced manager
+  const originalDeleteRelationships = (model as any).prototype.deleteRelationships;
+  (model as any).prototype.deleteRelationships = function (options: any) {
+    return manager.deleteRelationships(this, options);
+  };
+
+  /**
+   * Automatically inject `id` and `createdAt` if defined in schema during creation.
+   */
+  model.beforeCreate = (data: any) => {
+    if (restParams.schema.hasOwnProperty("id")) {
+      data.id = data.id || uuidv4();
+    }
+    if (restParams.schema.hasOwnProperty("createdAt")) {
+      data.createdAt = new Date().toISOString();
+    }
+  };
+
+  /**
+   * Proxy to auto-assign `updatedAt` field on update (if defined in schema).
+   */
+  const proxiedModel = new Proxy(model, {
+    get(target, prop, receiver) {
+      if (prop === "update") {
+        return async (data: any, params: any) => {
+          if (data && restParams.schema.hasOwnProperty("updatedAt")) {
+            data.updatedAt = new Date().toISOString();
+          }
+          return target.update.call(target, data, params);
+        };
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+
+  // Final step: register the model in the shared registry
+  registry.register(modelName, proxiedModel);
+
+  return proxiedModel;
 }

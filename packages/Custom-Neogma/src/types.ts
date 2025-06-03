@@ -1,3 +1,4 @@
+// types.ts
 import { Neo4jSupportedProperties, NeogmaModel, RelationshipsI, WhereParamsI } from "neogma";
 
 // =============================================================================
