@@ -57,6 +57,12 @@ export function UserModel(neogma: Neogma) {
           name: "HAS_COLLABORATION",
           cardinality: "many",
         },
+        refreshTokens: {
+          model: "refresh_token",
+          direction: "out",
+          name: "BELONGS_TO_USER",
+          cardinality: "many",
+        },
       },
     },
     neogma,
