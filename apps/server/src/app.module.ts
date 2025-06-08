@@ -3,6 +3,7 @@ import { Neo4jModule } from "./core/neo4j/neo4j.module";
 import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./features/user/user.module";
 import { ProjectModule } from "./features/project/project.module";
+import { AuthModule } from "./core/auth/auth.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProjectModule } from "./features/project/project.module";
     Neo4jModule,
     UserModule,
     ProjectModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
