@@ -1,17 +1,13 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
+import { idField } from "../../../common/neogma-model-fields/id.schema";
 
 export function RefreshTokenModel(neogma: Neogma) {
   return ModelFactory(
     {
-      name: "refresh-token",
-      label: "refresh-token",
+      name: "refresh_token",
+      label: "refresh_token",
       schema: {
-        id: {
-          type: "string",
-          unique: true,
-          required: true,
-          primaryKey: true,
-        },
+        id: idField,
         token: {
           type: "string",
           unique: true,
@@ -19,7 +15,8 @@ export function RefreshTokenModel(neogma: Neogma) {
         },
         issuedIp: {
           type: "string",
-          format: "ip-address",
+          pattern:
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$",
           required: true,
         },
         userAgent: {
@@ -33,14 +30,12 @@ export function RefreshTokenModel(neogma: Neogma) {
         },
         revoked: {
           type: "boolean",
-          required: true,
           default: false,
         },
         createdAt: {
           type: "string",
           format: "date-time",
-          required: true,
-          default: () => new Date().toString(),
+          hidden: true,
         },
         updatedAt: {
           type: "string",
@@ -53,7 +48,15 @@ export function RefreshTokenModel(neogma: Neogma) {
           required: false,
         },
       },
-      relationships: {},
+      primaryKeyField: "id",
+      relationships: {
+        user: {
+          model: "User",
+          direction: "in",
+          name: "BELONGS_TO_USER",
+          cardinality: "one",
+        },
+      },
     },
     neogma,
   );
