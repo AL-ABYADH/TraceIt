@@ -8,7 +8,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: "The name is required" })
   @IsString({ message: "The name must be a string" })
   @MaxLength(50, { message: "The name cannot exceed 50 characters" })
-  fullName: string;
+  displayName: string;
 
   @IsNotEmpty({ message: "Email is required" })
   @IsEmail({}, { message: "Please enter a valid email address" })
