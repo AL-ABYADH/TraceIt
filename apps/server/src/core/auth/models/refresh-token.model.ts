@@ -53,7 +53,7 @@ export function RefreshTokenModel(neogma: Neogma) {
         user: {
           model: "User",
           direction: "in",
-          name: "BELONGS_TO_USER",
+          name: "HAS_TOKEN",
           cardinality: "one",
         },
       },

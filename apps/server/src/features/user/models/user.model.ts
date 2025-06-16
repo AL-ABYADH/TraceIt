@@ -60,7 +60,7 @@ export function UserModel(neogma: Neogma) {
         refreshTokens: {
           model: "refresh_token",
           direction: "out",
-          name: "BELONGS_TO_USER",
+          name: "HAS_TOKEN",
           cardinality: "many",
         },
       },
