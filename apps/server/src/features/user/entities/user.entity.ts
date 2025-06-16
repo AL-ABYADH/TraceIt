@@ -8,12 +8,6 @@ export class User {
   emailVerified: boolean;
   createdAt: Date;
 
-  authProvider: string;
-
-  isTwoFactorEnabled: boolean;
-
-  twoFactorToken: string;
-
   @Exclude({ toPlainOnly: true })
   password: string;
 }
