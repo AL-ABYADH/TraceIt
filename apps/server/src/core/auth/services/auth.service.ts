@@ -10,7 +10,6 @@ import { CleanupExpiredTokensOperation } from "../operations/cleanup-expired-tok
 import { LoginDto } from "../dtos/login.dto";
 import { RegisterDto } from "../dtos/register.dto";
 import { Response, Request } from "express";
-import { GenerateKeysCommand } from "../../commands/generate-keys.command";
 
 @Injectable()
 export class AuthService {

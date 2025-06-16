@@ -19,7 +19,6 @@ import { LogoutUserOperation } from "./operations/logout-user.operation";
 import { LogoutAllDevicesOperation } from "./operations/logout-all-devices.operation";
 import { CleanupExpiredTokensOperation } from "./operations/cleanup-expired-tokens.operation";
 import { GenerateTokensOperation } from "./operations/generate-tokens.operation";
-import { CustomCommandModule } from "../commands/command.module";
 
 @Module({
   imports: [
