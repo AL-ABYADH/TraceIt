@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ProjectCollaborationRepository } from "../../repositories/project-collaboration/project-collaboration.repository";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
 import { UpdateProjectCollaborationInterface } from "../../interfaces/update-project-collaboration.interface";
@@ -8,17 +8,17 @@ export class ProjectCollaborationService {
   constructor(private readonly projectCollaborationRepository: ProjectCollaborationRepository) {}
 
   async listProjectCollaborations(projectId: string): Promise<ProjectCollaboration[]> {
-    throw new NotImplementedException();
+    return this.projectCollaborationRepository.getByProject(projectId);
   }
 
   async removeProjectCollaboration(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+    return this.projectCollaborationRepository.delete(id);
   }
 
   async updateProjectCollaborationRoles(
     id: string,
     projectCollaboration: UpdateProjectCollaborationInterface,
   ): Promise<ProjectCollaboration> {
-    throw new NotImplementedException();
+    return this.projectCollaborationRepository.update(id, projectCollaboration);
   }
 }
