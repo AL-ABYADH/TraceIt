@@ -1,5 +1,4 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
-import { idField } from "src/common/neogma-model-fields/id.schema";
 
 export function UserModel(neogma: Neogma) {
   return ModelFactory(
@@ -7,7 +6,6 @@ export function UserModel(neogma: Neogma) {
       name: "User",
       label: "User",
       schema: {
-        id: idField,
         username: {
           type: "string",
           required: true,
@@ -36,11 +34,6 @@ export function UserModel(neogma: Neogma) {
         password: {
           type: "string",
           required: true,
-        },
-        createdAt: {
-          type: "string",
-          required: true,
-          format: "date-time",
         },
       },
       primaryKeyField: "id",

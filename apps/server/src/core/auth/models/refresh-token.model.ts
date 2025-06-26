@@ -1,5 +1,4 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
-import { idField } from "../../../common/neogma-model-fields/id.schema";
 
 export function RefreshTokenModel(neogma: Neogma) {
   return ModelFactory(
@@ -7,7 +6,6 @@ export function RefreshTokenModel(neogma: Neogma) {
       name: "refresh_token",
       label: "refresh_token",
       schema: {
-        id: idField,
         token: {
           type: "string",
           unique: true,

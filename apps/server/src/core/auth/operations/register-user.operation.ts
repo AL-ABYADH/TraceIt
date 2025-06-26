@@ -22,7 +22,7 @@ export class RegisterUserOperation {
       displayName: registerDto.displayName,
       email: registerDto.email,
       password: hashedPassword,
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     });
 
     return this.generateTokensOperation.execute(user, userAgent, ip, res);

@@ -11,7 +11,7 @@ export class UserRepository {
   private userModel;
 
   constructor(private readonly neo4jService: Neo4jService) {
-    this.userModel = UserModel(neo4jService.getNeogma());
+    this.userModel = UserModel(this.neo4jService.getNeogma());
   }
 
   async create(userData: CreateUserInterface): Promise<User> {
