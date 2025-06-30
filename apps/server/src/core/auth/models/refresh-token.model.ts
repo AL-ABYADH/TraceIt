@@ -1,7 +1,35 @@
-import { ModelFactory, Neogma } from "@repo/custom-neogma";
+import {
+  ModelFactory,
+  Neogma,
+  EnhancedNeogmaModel,
+  AbstractModelFactory,
+} from "@repo/custom-neogma";
 
-export function RefreshTokenModel(neogma: Neogma) {
-  return ModelFactory(
+export type RefreshTokenAttributes = {
+  id: string;
+  token: string;
+  issuedIp: string;
+  userAgent: string;
+  expiresAt: string;
+  revoked?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+};
+
+interface RefreshTokenUserRelation {
+  user: any;
+}
+
+export type RefreshTokenModelType = EnhancedNeogmaModel<
+  RefreshTokenAttributes,
+  RefreshTokenUserRelation,
+  object,
+  object
+>;
+
+export function RefreshTokenModel(neogma: Neogma): RefreshTokenModelType {
+  return AbstractModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>(
     {
       name: "refresh_token",
       label: "refresh_token",
@@ -14,7 +42,11 @@ export function RefreshTokenModel(neogma: Neogma) {
         issuedIp: {
           type: "string",
           pattern:
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$",
+            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|" +
+            "([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$",
           required: true,
         },
         userAgent: {
@@ -38,15 +70,12 @@ export function RefreshTokenModel(neogma: Neogma) {
         updatedAt: {
           type: "string",
           format: "date-time",
-          required: false,
         },
         deletedAt: {
           type: "date",
           format: "date-time",
-          required: false,
         },
       },
-      primaryKeyField: "id",
       relationships: {
         user: {
           model: "User",
