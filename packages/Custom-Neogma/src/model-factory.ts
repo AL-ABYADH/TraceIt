@@ -8,6 +8,7 @@ import {
 } from "neogma";
 
 import {
+  AnyObject,
   EnhancedNeogmaModel,
   EnhancedRelationshipsI,
   FindWithRelationsOptions,
@@ -60,18 +61,23 @@ import { v4 as uuidv4 } from "uuid"; // Added: UUID import for automatic ID gene
  */
 export function ModelFactory<
   Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends Record<string, any> = Record<string, any>,
-  Statics extends Record<string, any> = Record<string, any>,
-  Methods extends Record<string, any> = Record<string, any>,
+  RelatedNodes extends AnyObject = object,
+  Statics extends AnyObject = object,
+  Methods extends AnyObject = object,
 >(
   parameters: {
     name: string;
-    schema: NeogmaSchema<Properties>;
+    schema: NeogmaSchema<Omit<Properties, "id">>;
+    /** the label of the nodes */
     label: string | string[];
-    statics?: Partial<Statics>;
-    methods?: Partial<Methods>;
-    primaryKeyField?: Extract<keyof Properties, string>;
-    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>>;
+    /** statics of the Model */
+    statics?: Partial<Statics> | undefined;
+    /** method of the Instance */
+    methods?: Partial<Methods> | undefined;
+    /** the id key of this model. Is required in order to perform specific instance methods */
+    primaryKeyField?: Extract<keyof Properties, string> | undefined;
+    /** relationships with other models or itself. Alternatively, relationships can be added using Model.addRelationships */
+    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
   },
   neogma: Neogma,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
