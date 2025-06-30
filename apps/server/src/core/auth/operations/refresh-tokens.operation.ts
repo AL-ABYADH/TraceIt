@@ -23,7 +23,7 @@ export class RefreshTokensOperation {
       throw new UnauthorizedException("Invalid or expired refresh token");
     }
 
-    const userId = (storedToken as any).user.id;
+    const userId = storedToken.user.id;
     if (!userId) {
       throw new UnauthorizedException("Could not verify token owner");
     }
