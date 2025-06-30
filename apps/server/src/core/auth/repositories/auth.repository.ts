@@ -1,17 +1,22 @@
 import { Injectable } from "@nestjs/common";
 import { RefreshToken } from "../entities/refresh-token.entity";
-import { RefreshTokenModel } from "../models/refresh-token.model";
+import {
+  RefreshTokenAttributes,
+  RefreshTokenModel,
+  RefreshTokenModelType,
+} from "../models/refresh-token.model";
 import { Neo4jService } from "../../neo4j/neo4j.service";
 import { UserModel } from "../../../features/user/models/user.model";
+import { Op } from "@repo/custom-neogma";
 
 @Injectable()
 export class AuthRepository {
-  private refreshTokenModel: any;
+  private refreshTokenModel: RefreshTokenModelType;
   private userModel: any;
 
   constructor(private readonly neo4jService: Neo4jService) {
-    this.refreshTokenModel = RefreshTokenModel(neo4jService.getNeogma());
-    this.userModel = UserModel(neo4jService.getNeogma());
+    this.refreshTokenModel = RefreshTokenModel(this.neo4jService.getNeogma());
+    this.userModel = UserModel(this.neo4jService.getNeogma());
   }
 
   /**
@@ -23,11 +28,11 @@ export class AuthRepository {
     userAgent: string,
     ip: string,
     expiresIn: number,
-  ): Promise<RefreshToken> {
+  ): Promise<RefreshTokenAttributes> {
     const expiresAt = new Date();
     expiresAt.setSeconds(expiresAt.getSeconds() + expiresIn);
 
-    const refreshToken: any = await this.refreshTokenModel.createOne({
+    const refreshToken = await this.refreshTokenModel.createOne({
       token,
       issuedIp: ip,
       userAgent,
@@ -42,13 +47,13 @@ export class AuthRepository {
       },
     });
 
-    return refreshToken.getDataValues() as RefreshToken;
+    return refreshToken.getDataValues();
   }
 
   /**
    * Finds a refresh token with associated user using the token string.
    */
-  async findRefreshTokenWithUserId(token: string): Promise<RefreshToken | null> {
+  async findRefreshTokenWithUserId(token: string): Promise<any | null> {
     const result = await this.refreshTokenModel.findOneWithRelations(
       {
         token,
@@ -158,7 +163,8 @@ export class AuthRepository {
 
     const expiredTokens = await this.refreshTokenModel.findMany({
       where: {
-        $or: [{ expiresAt: { $lt: now } }, { createdAt: { $lt: cutoffDateStr } }],
+        expiresAt: { [Op.lte]: now },
+        createdAt: { [Op.lte]: cutoffDateStr },
       },
     });
 
