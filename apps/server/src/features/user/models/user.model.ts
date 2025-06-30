@@ -1,19 +1,34 @@
-import { ModelFactory, Neogma } from "@repo/custom-neogma";
-import { idField } from "src/common/neogma-model-fields/id.schema";
+import { EnhancedNeogmaModel, ModelFactory, Neogma } from "@repo/custom-neogma";
 
-export function UserModel(neogma: Neogma) {
-  return ModelFactory(
+export type UserAttributes = {
+  id: string;
+  username: string;
+  displayName: string;
+  email: string;
+  emailVerified: boolean;
+  password: string;
+};
+
+interface UserRelationships {
+  projects: any;
+  collaborations: any;
+  refreshTokens: any;
+}
+
+export type UserModelType = EnhancedNeogmaModel<UserAttributes, UserRelationships, object, object>;
+
+export function UserModel(neogma: Neogma): UserModelType {
+  return ModelFactory<UserAttributes, UserRelationships>(
     {
       name: "User",
       label: "User",
       schema: {
-        id: idField,
         username: {
           type: "string",
           required: true,
           minLength: 3,
           maxLength: 30,
-          pattern: "^[a-zA-Z0-9_]+$", // Only allow alphanumeric characters, numbers, and underscores
+          pattern: "^[a-zA-Z0-9_]+$",
           message:
             "is not a valid username. It can only contain letters, numbers, and underscores.",
         },
@@ -37,11 +52,6 @@ export function UserModel(neogma: Neogma) {
           type: "string",
           required: true,
         },
-        createdAt: {
-          type: "string",
-          required: true,
-          format: "date-time",
-        },
       },
       primaryKeyField: "id",
       relationships: {
@@ -55,6 +65,12 @@ export function UserModel(neogma: Neogma) {
           model: "ProjectCollaboration",
           direction: "out",
           name: "HAS_COLLABORATION",
+          cardinality: "many",
+        },
+        refreshTokens: {
+          model: "refresh_token",
+          direction: "out",
+          name: "HAS_TOKEN",
           cardinality: "many",
         },
       },

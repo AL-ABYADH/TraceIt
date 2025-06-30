@@ -3,5 +3,5 @@ export interface CreateUserInterface {
   displayName: string;
   email: string;
   password: string;
-  createdAt: Date;
+  createdAt: string;
 }

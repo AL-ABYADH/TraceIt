@@ -8,6 +8,7 @@ import {
 } from "neogma";
 
 import {
+  AnyObject,
   EnhancedNeogmaModel,
   EnhancedRelationshipsI,
   FindWithRelationsOptions,
@@ -15,14 +16,18 @@ import {
 } from "./types";
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
+import { v4 as uuidv4 } from "uuid"; // Added: UUID import for automatic ID generation
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
 // =============================================================================
 
 /**
- * Creates an enhanced Neogma model with support for relationships and
- * additional utility methods for handling complex queries with relations.
+ * Factory function for creating enhanced Neogma models with the following features:
+ * - Support for complex relationships, including self-referencing and circular dependencies
+ * - Ability to define custom static and instance methods
+ * - Extended query utilities like `findOneWithRelations`
+ * - Automatic generation of unique identifiers and timestamp fields
  *
  * @example
  * const User = ModelFactory({
@@ -37,18 +42,18 @@ import { RelationshipManager } from "./relationship-manager";
  *       model: 'Profile',
  *       direction: 'out',
  *       name: 'HAS_PROFILE',
- *       cardinality: 'one'  // Returns single related entity
+ *       cardinality: 'one'  // Single related entity
  *     },
  *     posts: {
  *       model: 'Post',
  *       direction: 'out',
  *       name: 'AUTHORED',
- *       cardinality: 'many' // Returns multiple related entities
+ *       cardinality: 'many' // Multiple related entities
  *     }
  *   }
  * }, neogmaInstance);
  *
- * // Query example with relations included
+ * // Usage example: Fetching a user with related profile and posts (limited to 5 posts)
  * const userWithRelations = await User.findOneWithRelations(
  *   { id: '123' },
  *   { include: ['profile', 'posts'], limits: { posts: 5 } }
@@ -56,28 +61,71 @@ import { RelationshipManager } from "./relationship-manager";
  */
 export function ModelFactory<
   Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends Record<string, any> = Record<string, any>,
-  Statics extends Record<string, any> = Record<string, any>,
-  Methods extends Record<string, any> = Record<string, any>,
+  RelatedNodes extends AnyObject = object,
+  Statics extends AnyObject = object,
+  Methods extends AnyObject = object,
 >(
   parameters: {
     name: string;
-    schema: NeogmaSchema<Properties>;
+    schema: NeogmaSchema<Omit<Properties, "id">>;
+    /** the label of the nodes */
     label: string | string[];
-    statics?: Partial<Statics>;
-    methods?: Partial<Methods>;
-    primaryKeyField?: Extract<keyof Properties, string>;
-    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>>;
+    /** statics of the Model */
+    statics?: Partial<Statics> | undefined;
+    /** method of the Instance */
+    methods?: Partial<Methods> | undefined;
+    /** the id key of this model. Is required in order to perform specific instance methods */
+    primaryKeyField?: Extract<keyof Properties, string> | undefined;
+    /** relationships with other models or itself. Alternatively, relationships can be added using Model.addRelationships */
+    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
   },
   neogma: Neogma,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
-  // Get the singleton model registry instance
+  // Retrieve a singleton instance of the model registry
   const registry = ModelRegistry.getInstance();
 
-  // Destructure parameters, separating relationships from others
+  // Destructure parameters and separate relationship definitions
   const { name: modelName, relationships: enhancedRelationships, ...restParams } = parameters;
 
-  // Store relationship definitions for cardinality reference (one/many)
+  // Enhance schema with required fields if they don't exist
+  const enhancedSchema: any = { ...restParams.schema };
+
+  // Add id field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("id")) {
+    enhancedSchema["id"] = {
+      type: "string",
+      required: true,
+      pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      message: "is not a valid UUID v4",
+    };
+  }
+
+  // Add createdAt field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("createdAt")) {
+    enhancedSchema["createdAt"] = {
+      type: "string",
+      format: "date-time",
+    };
+  }
+
+  // Add updatedAt field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("updatedAt")) {
+    enhancedSchema["updatedAt"] = {
+      type: "string",
+      format: "date-time",
+      required: false,
+    };
+  }
+
+  const enhancedSchemaWithDataType: NeogmaSchema<Properties> = enhancedSchema;
+
+  // Create updated parameters with enhanced schema
+  const enhancedParams = {
+    ...restParams,
+    schema: enhancedSchemaWithDataType,
+  };
+
+  // Map relationship definitions to retain cardinality info (e.g., 'one' or 'many')
   const relationshipDefinitions: Record<string, { cardinality?: "one" | "many" }> = {};
   if (enhancedRelationships) {
     Object.entries(enhancedRelationships).forEach(([alias, rel]) => {
@@ -88,8 +136,8 @@ export function ModelFactory<
   }
 
   /**
-   * Resolve and map the relationships by replacing model names
-   * with actual NeogmaModel instances or "self" reference.
+   * Resolves the relationship configurations by converting model names
+   * to actual NeogmaModel instances or a self-reference string for recursive models.
    */
   const resolveRelationships = (): Partial<RelationshipsI<RelatedNodes>> => {
     if (!enhancedRelationships) return {};
@@ -103,9 +151,9 @@ export function ModelFactory<
 
       if (typeof rel.model === "string") {
         if (rel.model === "self") {
-          model = "self"; // Self-reference for recursive relations
+          model = "self"; // Self-reference for models with recursive relationships
         } else {
-          // Lookup model instance from the registry
+          // Attempt to retrieve the corresponding model from the global registry
           const found = registry.get(rel.model);
           if (!found) {
             throw new Error(`Model "${rel.model}" not found`);
@@ -130,26 +178,26 @@ export function ModelFactory<
   let model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
 
   try {
-    // Try creating the model with relationships resolved
+    // Try to create the model with resolved relationships
     const relationships = resolveRelationships();
     model = OriginalModelFactory(
       {
-        ...restParams,
+        ...enhancedParams, // Use enhanced parameters with updated schema
         relationships,
       },
       neogma,
     ) as any;
   } catch {
-    // If circular dependency detected, create model without relationships first
+    // Fallback: In case of circular dependencies, initialize the model without relationships
     model = OriginalModelFactory(
       {
-        ...restParams,
+        ...enhancedParams, // Use enhanced parameters with updated schema
         relationships: {},
       },
       neogma,
     ) as any;
 
-    // Schedule relationship resolution later
+    // Schedule the relationship injection after model instantiation
     if (enhancedRelationships) {
       registry.addPendingRelationship(modelName, () => {
         const relationships = resolveRelationships();
@@ -158,98 +206,37 @@ export function ModelFactory<
     }
   }
 
-  // Instantiate relationship manager for enhanced relation methods
+  // Create a relationship manager instance to handle advanced relationship features
   const manager = new RelationshipManager(model, neogma, relationshipDefinitions);
 
-  // Store labels as an array (support multiple labels)
-  const modelLabels = Array.isArray(parameters.label) ? parameters.label : [parameters.label];
-
-  // Expose labels on the model
-  model.getLabels = () => modelLabels;
-
-  // Add static method to find entities by a single label with optional filtering and pagination
-  model.findByLabel = async (
-    label: string,
-    where?: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ) => {
-    const query = `
-    MATCH (n:${label})
-    ${
-      where
-        ? "WHERE " +
-          Object.entries(where)
-            .map(([key, value]) => `n.${key} = $${key}`)
-            .join(" AND ")
-        : ""
-    }
-    RETURN n
-    ${options?.limit ? `LIMIT ${options.limit}` : ""}
-    ${options?.skip ? `SKIP ${options.skip}` : ""}
-  `;
-
-    const result = await neogma.queryRunner.run(query, where || {});
-    const entities = result.records.map((record) => record.get("n").properties);
-
-    // Load relations if requested in options
-    if (options?.include || options?.exclude) {
-      return Promise.all(entities.map((entity) => manager.loadRelations(entity, options)));
-    }
-
-    return entities;
-  };
-
-  // Add static method to find entities by multiple labels
-  model.findByLabels = async (
-    labels: string[],
-    where?: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ) => {
-    const labelQuery = labels.map((l) => `:${l}`).join("");
-    const query = `
-    MATCH (n${labelQuery})
-    ${
-      where
-        ? "WHERE " +
-          Object.entries(where)
-            .map(([key, value]) => `n.${key} = $${key}`)
-            .join(" AND ")
-        : ""
-    }
-    RETURN n
-    ${options?.limit ? `LIMIT ${options.limit}` : ""}
-    ${options?.skip ? `SKIP ${options.skip}` : ""}
-  `;
-
-    const result2 = await neogma.queryRunner.run(query, where || {});
-    const entities = result2.records.map((record) => record.get("n").properties);
-
-    if (options?.include || options?.exclude) {
-      return Promise.all(entities.map((entity) => manager.loadRelations(entity, options)));
-    }
-
-    return entities;
-  };
-
-  // Enhanced static methods using the relationship manager
+  // Relationship-aware query: fetch a single entity and load its relations
   model.findOneWithRelations = (where: WhereParamsI, options?: FindWithRelationsOptions) =>
     manager.findOneWithRelations(where, options);
 
+  // Fetch multiple entities along with their associated relationships
   model.findManyWithRelations = (where?: WhereParamsI, options?: FindWithRelationsOptions) =>
     manager.findManyWithRelations(where || {}, options);
 
+  // Search within a specific relationship connected to a node
   model.searchInRelations = (where: WhereParamsI, relationAlias: string, searchOptions?: any) =>
     manager.searchInRelations(where, relationAlias, searchOptions);
 
+  // Create multiple relationships from a source node to several target nodes
   model.createMultipleRelations = (sourceWhere: WhereParamsI, relations: any[], options?: any) =>
     manager.createMultipleRelations(sourceWhere, relations, options);
 
-  // Instance method to load related entities for a given model instance
+  /**
+   * Loads relationships for a given instance.
+   * Can be used within instance methods to load linked nodes.
+   */
   (model as any).prototype.loadRelations = function (options?: FindWithRelationsOptions) {
     return manager.loadRelations(this, options);
   };
 
-  // Instance method to create multiple relationships from this entity to others
+  /**
+   * Instance method for creating multiple relationships from this node to others.
+   * Requires the existence of a primary key field.
+   */
   (model as any).prototype.createMultipleRelations = function (relations: any[], options?: any) {
     const primaryKey = model.getPrimaryKeyField();
     if (!primaryKey) {
@@ -259,8 +246,42 @@ export function ModelFactory<
     return manager.createMultipleRelations(where, relations, options);
   };
 
-  // Register the model in the registry for future lookup
-  registry.register(modelName, model);
+  // Updated: Always generate UUID and timestamps during model creation
+  /**
+   * Automatically populates `id` and `createdAt` fields during entity creation,
+   * regardless of whether they were provided.
+   */
+  model.beforeCreate = (data: any) => {
+    // Always set id if not provided
+    data.id = data.id || uuidv4();
 
-  return model;
+    // Always set createdAt if not provided
+    data.createdAt = data.createdAt || new Date().toISOString();
+  };
+
+  // Proxy wrapper to auto-update `updatedAt` field during updates
+  /**
+   * Wraps the update method using a proxy to ensure the `updatedAt` timestamp
+   * is automatically refreshed when updating the entity.
+   */
+  const proxiedModel = new Proxy(model, {
+    get(target, prop, receiver) {
+      if (prop === "update") {
+        return async (data: any, params: any) => {
+          if (data) {
+            // Always update the updatedAt field
+            data.updatedAt = new Date().toISOString();
+          }
+          return target.update.call(target, data, params);
+        };
+      }
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+
+  // Register the model instance into the global registry for reuse
+  registry.register(modelName, proxiedModel);
+
+  // Return the proxied model with enhanced features
+  return proxiedModel;
 }

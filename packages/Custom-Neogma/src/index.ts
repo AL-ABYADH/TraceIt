@@ -9,3 +9,7 @@ export * from "neogma";
 
 // Export your custom ModelFactory from a local file
 export { ModelFactory } from "./model-factory";
+
+export * from "./types";
+
+export { AbstractModelFactory } from "./abstract-factory";

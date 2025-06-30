@@ -1,5 +1,5 @@
-import { Neo4jSupportedProperties, NeogmaModel, RelationshipsI, WhereParamsI } from "neogma";
-
+import { Neo4jSupportedProperties, RelationshipsI, WhereParamsI } from "neogma";
+import { NeogmaModel } from "./NeogmaModelTypesWithChanges";
 // =============================================================================
 // TYPES & INTERFACES
 // =============================================================================
@@ -8,12 +8,14 @@ export type NeogmaSchema<Properties> = {
   [K in keyof Properties]: any;
 };
 
+export type AnyObject = Record<string, any>;
+
 /**
  * Enhanced relationship definition with cardinality info
  */
 export type EnhancedRelationshipsI<RelatedNodes extends Record<string, any>> = {
   [alias in keyof RelatedNodes]: {
-    model: string | NeogmaModel<any, any, any, any> | "self";
+    model: string | EnhancedNeogmaModel<any, any, any, any> | "self";
     name: string;
     direction: "out" | "in" | "none";
     properties?: RelationshipsI<RelatedNodes>[alias]["properties"];
@@ -49,9 +51,9 @@ export interface FindWithRelationsOptions extends FetchRelationsOptions {
  */
 export type EnhancedNeogmaModel<
   Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends Record<string, any>,
-  Methods extends Record<string, any>,
-  Statics extends Record<string, any>,
+  RelatedNodes extends AnyObject,
+  Methods extends AnyObject = object,
+  Statics extends AnyObject = object,
 > = NeogmaModel<Properties, RelatedNodes, Methods, Statics> & {
   // Static methods
 
@@ -88,18 +90,4 @@ export type EnhancedNeogmaModel<
     }>,
     options?: { session?: any; assertCreatedRelationships?: number },
   ): Promise<{ success: boolean; created: number; errors: string[] }>;
-
-  findByLabel(
-    label: string,
-    where?: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ): Promise<Array<Properties & Partial<RelatedNodes>>>;
-
-  findByLabels(
-    labels: string[],
-    where?: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ): Promise<Array<Properties & Partial<RelatedNodes>>>;
-
-  getLabels(): string[];
 };

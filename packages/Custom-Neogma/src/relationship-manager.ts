@@ -1,9 +1,6 @@
+// relationship-manager.ts
 import { Neogma, WhereParamsI } from "neogma";
 import { FetchRelationsOptions, FindWithRelationsOptions } from "./types";
-
-// =============================================================================
-// RELATIONSHIP UTILITIES
-// =============================================================================
 
 /**
  * Helper class for managing Neo4j relationships using Neogma models
