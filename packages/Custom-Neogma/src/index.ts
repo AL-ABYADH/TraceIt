@@ -1,6 +1,5 @@
 // Import the original ModelFactory from the neogma package and rename it locally
 import { ModelFactory as OriginalModelFactory } from "neogma";
-import { AbstractModelFactory } from "./abstract-factory";
 
 // Re-export the original ModelFactory under its original name
 export { OriginalModelFactory };
