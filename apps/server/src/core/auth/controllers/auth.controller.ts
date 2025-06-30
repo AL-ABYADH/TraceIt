@@ -15,7 +15,6 @@ import { GetUserAgent } from "../decorators/http-info.decorator";
 import { RealIP } from "nestjs-real-ip";
 import { LoginDto } from "../dtos/login.dto";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
-import { JwtAuthGuard } from "../guards/jwt-auth.guard";
 import { Public } from "../decorators/public.decorator";
 
 // Importing only types for Request and Response from Express
