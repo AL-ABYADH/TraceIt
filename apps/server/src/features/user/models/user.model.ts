@@ -1,7 +1,24 @@
-import { ModelFactory, Neogma } from "@repo/custom-neogma";
+import { EnhancedNeogmaModel, ModelFactory, Neogma } from "@repo/custom-neogma";
 
-export function UserModel(neogma: Neogma) {
-  return ModelFactory(
+export type UserAttributes = {
+  id: string;
+  username: string;
+  displayName: string;
+  email: string;
+  emailVerified: boolean;
+  password: string;
+};
+
+interface UserRelationships {
+  projects: any;
+  collaborations: any;
+  refreshTokens: any;
+}
+
+export type UserModelType = EnhancedNeogmaModel<UserAttributes, UserRelationships, object, object>;
+
+export function UserModel(neogma: Neogma): UserModelType {
+  return ModelFactory<UserAttributes, UserRelationships>(
     {
       name: "User",
       label: "User",
@@ -11,7 +28,7 @@ export function UserModel(neogma: Neogma) {
           required: true,
           minLength: 3,
           maxLength: 30,
-          pattern: "^[a-zA-Z0-9_]+$", // Only allow alphanumeric characters, numbers, and underscores
+          pattern: "^[a-zA-Z0-9_]+$",
           message:
             "is not a valid username. It can only contain letters, numbers, and underscores.",
         },
