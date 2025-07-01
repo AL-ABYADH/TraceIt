@@ -14,6 +14,7 @@ import {
   EnhancedRelationshipsI,
   FindWithRelationsOptions,
   NeogmaSchema,
+  ModelFactoryDefinition,
 } from "./types";
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
@@ -282,9 +283,11 @@ export function defineModelFactory<
   Statics extends AnyObject = AnyObject,
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
-): { (neogma: Neogma): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> } {
-  // Create a model function that returns an AbstractModelFactory instance
-  const ModelFunction = function (neogma: Neogma) {
+): ModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
+  // Create a model function that returns a ModelFactory instance
+  const ModelFunction = function (
+    neogma: Neogma,
+  ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
     return ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
   };
 

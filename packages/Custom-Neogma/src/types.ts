@@ -1,4 +1,4 @@
-import { Neo4jSupportedProperties, RelationshipsI, WhereParamsI } from "neogma";
+import { Neo4jSupportedProperties, Neogma, RelationshipsI, WhereParamsI } from "neogma";
 import { NeogmaModel } from "./Neogma/types";
 // =============================================================================
 // TYPES & INTERFACES
@@ -22,6 +22,16 @@ export interface ModelParams<
   primaryKeyField?: Extract<keyof Properties, string> | undefined;
   /** relationships with other models or itself. Alternatively, relationships can be added using Model.addRelationships */
   relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
+}
+
+export interface ModelFactoryDefinition<
+  Properties extends Neo4jSupportedProperties,
+  RelatedNodes extends AnyObject = AnyObject,
+  Methods extends AnyObject = AnyObject,
+  Statics extends AnyObject = AnyObject,
+> {
+  (neogma: Neogma): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
 }
 
 export type NeogmaSchema<Properties> = {

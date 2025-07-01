@@ -1,5 +1,5 @@
 import { Neo4jSupportedProperties, Neogma } from "neogma";
-import { EnhancedNeogmaModel, ModelParams, AnyObject } from "./types";
+import { EnhancedNeogmaModel, ModelParams, AnyObject, ModelFactoryDefinition } from "./types";
 import { ModelFactory } from "./model-factory";
 
 /**
@@ -118,7 +118,7 @@ export function defineAbstractModelFactory<
   Statics extends AnyObject = AnyObject,
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
-): { (neogma: Neogma): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> } {
+): ModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
   // Create a model function that returns an AbstractModelFactory instance
   const ModelFunction = function (neogma: Neogma) {
     return AbstractModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);

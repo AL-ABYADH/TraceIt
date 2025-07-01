@@ -9,7 +9,7 @@ import {
 } from "neogma";
 import { QueryResult } from "neo4j-driver";
 
-type AnyObject = AnyObject;
+type AnyObject = Record<string, any>;
 /** the type of the properties to be added to a relationship */
 export type RelationshipPropertiesI = Record<string, Neo4jSupportedTypes | undefined>;
 interface GenericConfiguration {
