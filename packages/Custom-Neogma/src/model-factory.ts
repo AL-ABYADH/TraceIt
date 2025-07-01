@@ -257,6 +257,7 @@ export function ModelFactory<
   const proxiedModel = new Proxy(model, {
     get(target, prop, receiver) {
       if (prop === "update") {
+        // Update the `updatedAt` field during updates
         return async (data: any, params: any) => {
           if (data) {
             // Always update the updatedAt field
@@ -264,7 +265,30 @@ export function ModelFactory<
           }
           return target.update.call(target, data, params);
         };
+      } else if (prop === "findMany") {
+        // Set plain to true by default
+        return async (params?: any) => {
+          params = params || {};
+
+          if (params.plain === undefined) {
+            params.plain = true;
+          }
+
+          return target.findMany.call(target, params);
+        };
+      } else if (prop === "findOne") {
+        // Set plain to true by default
+        return async (params?: any) => {
+          params = params || {};
+
+          if (params.plain === undefined) {
+            params.plain = true;
+          }
+
+          return target.findOne.call(target, params);
+        };
       }
+
       return Reflect.get(target, prop, receiver);
     },
   });
