@@ -1,9 +1,4 @@
-import {
-  ModelFactory,
-  Neogma,
-  EnhancedNeogmaModel,
-  AbstractModelFactory,
-} from "@repo/custom-neogma";
+import { Neogma, EnhancedNeogmaModel, ModelFactory } from "@repo/custom-neogma";
 
 export type RefreshTokenAttributes = {
   id: string;
@@ -29,7 +24,7 @@ export type RefreshTokenModelType = EnhancedNeogmaModel<
 >;
 
 export function RefreshTokenModel(neogma: Neogma): RefreshTokenModelType {
-  return AbstractModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>(
+  return ModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>(
     {
       name: "refresh_token",
       label: "refresh_token",
