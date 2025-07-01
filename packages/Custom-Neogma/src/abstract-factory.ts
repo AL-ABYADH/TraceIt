@@ -1,21 +1,21 @@
 import { Neo4jSupportedProperties, Neogma } from "neogma";
-import { EnhancedNeogmaModel, EnhancedRelationshipsI, NeogmaSchema } from "./types";
+import { EnhancedNeogmaModel, ModelParams, AnyObject, ModelFactoryDefinition } from "./types";
 import { ModelFactory } from "./model-factory";
 
 /**
- * Custom error for operations disallowed on abstract (read-only) models.
+ * Error thrown when write operations are attempted on read-only models.
  */
 export class ReadOnlyModelError extends Error {
   constructor(operation: string, modelName: string) {
     super(
-      `The operation '${operation}' is not allowed on the '${modelName}' model because it is defined as an abstract (read-only) model.`,
+      `Operation '${operation}' is not allowed on '${modelName}' model because it is defined as abstract (read-only).`,
     );
     this.name = "ReadOnlyModelError";
   }
 }
 
 /**
- * List of write-related methods that are forbidden for abstract models.
+ * List of write operations that are forbidden on abstract models.
  */
 const FORBIDDEN_METHODS = [
   "createOne",
@@ -30,124 +30,101 @@ const FORBIDDEN_METHODS = [
   "deleteRelationships",
   "getRelationshipProperties",
   "createMultipleRelations",
-];
+] as const;
+
+type ForbiddenMethod = (typeof FORBIDDEN_METHODS)[number];
 
 /**
- * AbstractModelFactory creates a model that is intended to serve as a base
- * (read-only) model. It blocks write operations and exposes accessors for
- * inspecting the model configuration.
+ * Interface for AbstractModelFactory parameters
+ */
+
+/**
+ * Creates a read-only model that blocks write operations.
+ *
+ * @param parameters Configuration for the model
+ * @param neogma Neogma instance
+ * @returns A read-only model that throws errors for write operations
  */
 export function AbstractModelFactory<
   Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends Record<string, any> = Record<string, any>,
-  Methods extends Record<string, any> = Record<string, any>,
-  Statics extends Record<string, any> = Record<string, any>,
+  RelatedNodes extends AnyObject = AnyObject,
+  Methods extends AnyObject = AnyObject,
+  Statics extends AnyObject = AnyObject,
 >(
-  parameters: {
-    name: string;
-    schema: NeogmaSchema<Omit<Properties, "id">>;
-    label: string | string[];
-    statics?: Partial<Statics>;
-    methods?: Partial<Methods>;
-    primaryKeyField?: Extract<keyof Properties, string>;
-    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>>;
-  },
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
   neogma: Neogma,
-): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> & {
-  getModelName: () => string;
-  getModelSchema: () => NeogmaSchema<Omit<Properties, "id">>;
-  getModelLabel: () => string | string[];
-  getModelStatics: () => Partial<Statics>;
-  getModelMethods: () => Partial<Methods>;
-  getModelPrimaryKeyField: () => Extract<keyof Properties, string> | undefined;
-  getModelRelationships: () => Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
-  getAllModelParameters: () => {
-    name: string;
-    schema: NeogmaSchema<Omit<Properties, "id">>;
-    label: string | string[];
-    statics?: Partial<Statics>;
-    methods?: Partial<Methods>;
-    primaryKeyField?: Extract<keyof Properties, string>;
-    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>>;
-  };
-} {
-  // Create the base model
-  const sourceModel = ModelFactory<Properties, RelatedNodes, Statics, Methods>(parameters, neogma);
+): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+  // Create the base model using the standard ModelFactory
+  const baseModel = ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
 
-  // Define accessor methods for retrieving model metadata
-  const paramGetters = {
-    getModelName: () => parameters.name,
-    getModelSchema: () => parameters.schema,
-    getModelLabel: () => parameters.label,
-    getModelStatics: () => parameters.statics || {},
-    getModelMethods: () => parameters.methods || {},
-    getModelPrimaryKeyField: () => parameters.primaryKeyField,
-    getModelRelationships: () => parameters.relationships || {},
-    getAllModelParameters: () => ({ ...parameters }),
-  };
-
-  // Attach the accessor methods to the model instance
-  Object.assign(sourceModel, paramGetters);
-
-  // Wrap the model with a proxy that restricts write operations
-  return createReadOnlyModel(sourceModel, parameters.name) as EnhancedNeogmaModel<
-    Properties,
-    RelatedNodes,
-    Methods,
-    Statics
-  > &
-    typeof paramGetters;
+  // Apply the read-only proxy wrapper
+  return createReadOnlyProxy(baseModel, parameters.name);
 }
 
 /**
- * Applies a Proxy wrapper to a model instance that intercepts access
- * to forbidden (write-related) methods and throws an error if called.
+ * Creates a proxy that intercepts and blocks write operations on a model.
+ *
+ * @param model The original model to make read-only
+ * @param modelName Name of the model for error messages
+ * @returns Proxied model that blocks write operations
  */
-function createReadOnlyModel<
+function createReadOnlyProxy<
   Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends Record<string, any>,
-  Methods extends Record<string, any>,
-  Statics extends Record<string, any>,
+  RelatedNodes extends AnyObject,
+  Methods extends AnyObject,
+  Statics extends AnyObject,
 >(
-  sourceModel: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>,
+  model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>,
   modelName: string,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
-  return new Proxy(sourceModel, {
-    get(target, prop: string, receiver) {
+  return new Proxy(model, {
+    get(target, prop, receiver) {
       const value = Reflect.get(target, prop, receiver);
+      const propName = String(prop);
 
-      // Intercept forbidden method calls
-      if (typeof value === "function" && FORBIDDEN_METHODS.includes(prop)) {
-        return function (...args: any[]) {
-          throw new ReadOnlyModelError(prop, modelName);
+      // If accessing a forbidden method, return a function that throws an error
+      if (typeof value === "function" && FORBIDDEN_METHODS.includes(propName as ForbiddenMethod)) {
+        return function (..._args: unknown[]) {
+          throw new ReadOnlyModelError(propName, modelName);
         };
       }
 
-      // Bind context correctly for allowed methods
+      // Preserve method binding for allowed methods
       if (typeof value === "function") {
-        return function (...args: any[]) {
-          return value.apply(target, args);
+        // Use type assertion to help TypeScript understand this is a function
+        return function (this: unknown, ...args: unknown[]) {
+          return (value as Function).apply(target, args);
         };
       }
 
-      // Return non-function properties as-is
+      // Return non-function properties unchanged
       return value;
     },
-
-    set(target, prop: string, value, receiver) {
-      return Reflect.set(target, prop, value, receiver);
-    },
-
-    has(target, prop) {
-      return Reflect.has(target, prop);
-    },
-
-    ownKeys(target) {
-      return Reflect.ownKeys(target);
-    },
-
-    getOwnPropertyDescriptor(target, prop) {
-      return Reflect.getOwnPropertyDescriptor(target, prop);
-    },
   });
+}
+
+/**
+ * Creates a model factory function with static properties.
+ * This helper function returns a function that creates models and has model metadata
+ * attached directly to it as static properties.
+ *
+ * @param parameters Configuration for the model
+ * @returns A function that creates a read-only model with static model properties
+ */
+export function defineAbstractModelFactory<
+  Properties extends Neo4jSupportedProperties,
+  RelatedNodes extends AnyObject = AnyObject,
+  Methods extends AnyObject = AnyObject,
+  Statics extends AnyObject = AnyObject,
+>(
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
+): ModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
+  // Create a model function that returns an AbstractModelFactory instance
+  const ModelFunction = function (neogma: Neogma) {
+    return AbstractModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
+  };
+
+  ModelFunction.parameters = { ...parameters };
+
+  return ModelFunction;
 }

@@ -77,7 +77,7 @@ export class RelationshipManager {
       where,
       session: options.session,
       order: options.order,
-      plain: options.plain,
+      plain: options.plain ?? true,
       throwIfNotFound: options.throwIfNotFound || false,
     });
 
@@ -99,7 +99,7 @@ export class RelationshipManager {
       skip: options.skip,
       order: options.order,
       session: options.session,
-      plain: options.plain,
+      plain: options.plain ?? true,
       throwIfNoneFound: options.throwIfNoneFound || false,
     });
 

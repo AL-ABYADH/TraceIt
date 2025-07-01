@@ -9,14 +9,17 @@ import {
 
 import {
   AnyObject,
+  ModelParams,
   EnhancedNeogmaModel,
   EnhancedRelationshipsI,
   FindWithRelationsOptions,
   NeogmaSchema,
+  ModelFactoryDefinition,
 } from "./types";
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
-import { v4 as uuidv4 } from "uuid"; // Added: UUID import for automatic ID generation
+import { v4 as uuidv4 } from "uuid";
+import { AbstractModelFactory } from "./abstract-factory"; // Added: UUID import for automatic ID generation
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
@@ -62,23 +65,10 @@ import { v4 as uuidv4 } from "uuid"; // Added: UUID import for automatic ID gene
 export function ModelFactory<
   Properties extends Neo4jSupportedProperties,
   RelatedNodes extends AnyObject = object,
-  Statics extends AnyObject = object,
   Methods extends AnyObject = object,
+  Statics extends AnyObject = object,
 >(
-  parameters: {
-    name: string;
-    schema: NeogmaSchema<Omit<Properties, "id">>;
-    /** the label of the nodes */
-    label: string | string[];
-    /** statics of the Model */
-    statics?: Partial<Statics> | undefined;
-    /** method of the Instance */
-    methods?: Partial<Methods> | undefined;
-    /** the id key of this model. Is required in order to perform specific instance methods */
-    primaryKeyField?: Extract<keyof Properties, string> | undefined;
-    /** relationships with other models or itself. Alternatively, relationships can be added using Model.addRelationships */
-    relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
-  },
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
   neogma: Neogma,
 ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   // Retrieve a singleton instance of the model registry
@@ -267,6 +257,7 @@ export function ModelFactory<
   const proxiedModel = new Proxy(model, {
     get(target, prop, receiver) {
       if (prop === "update") {
+        // Update the `updatedAt` field during updates
         return async (data: any, params: any) => {
           if (data) {
             // Always update the updatedAt field
@@ -274,7 +265,30 @@ export function ModelFactory<
           }
           return target.update.call(target, data, params);
         };
+      } else if (prop === "findMany") {
+        // Set plain to true by default
+        return async (params?: any) => {
+          params = params || {};
+
+          if (params.plain === undefined) {
+            params.plain = true;
+          }
+
+          return target.findMany.call(target, params);
+        };
+      } else if (prop === "findOne") {
+        // Set plain to true by default
+        return async (params?: any) => {
+          params = params || {};
+
+          if (params.plain === undefined) {
+            params.plain = true;
+          }
+
+          return target.findOne.call(target, params);
+        };
       }
+
       return Reflect.get(target, prop, receiver);
     },
   });
@@ -284,4 +298,24 @@ export function ModelFactory<
 
   // Return the proxied model with enhanced features
   return proxiedModel;
+}
+
+export function defineModelFactory<
+  Properties extends Neo4jSupportedProperties,
+  RelatedNodes extends AnyObject = AnyObject,
+  Methods extends AnyObject = AnyObject,
+  Statics extends AnyObject = AnyObject,
+>(
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
+): ModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
+  // Create a model function that returns a ModelFactory instance
+  const ModelFunction = function (
+    neogma: Neogma,
+  ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+    return ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
+  };
+
+  ModelFunction.parameters = { ...parameters };
+
+  return ModelFunction;
 }

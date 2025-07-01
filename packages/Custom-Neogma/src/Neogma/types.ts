@@ -97,7 +97,10 @@ interface NeogmaModelStaticsI<
   Properties extends Neo4jSupportedProperties,
   RelatedNodesToAssociateI extends AnyObject = object,
   MethodsI extends AnyObject = object,
-  CreateData = CreateDataI<Omit<Properties, "id">, RelatedNodesToAssociateI>,
+  CreateData = CreateDataI<
+    Omit<Properties, "id" | "createdAt" | "updatedAt">,
+    RelatedNodesToAssociateI
+  >,
   UpdateData = UpdateDataI<Properties>,
   Instance = NeogmaInstance<Properties, RelatedNodesToAssociateI, MethodsI>,
 > {

@@ -1,11 +1,10 @@
 import {
-  ModelFactory,
-  Neogma,
   EnhancedNeogmaModel,
-  AbstractModelFactory,
+  defineModelFactory,
+  ModelFactoryDefinition,
 } from "@repo/custom-neogma";
 
-export type RefreshTokenAttributes = {
+type RefreshTokenAttributes = {
   id: string;
   token: string;
   issuedIp: string;
@@ -23,68 +22,55 @@ interface RefreshTokenUserRelation {
 
 export type RefreshTokenModelType = EnhancedNeogmaModel<
   RefreshTokenAttributes,
-  RefreshTokenUserRelation,
-  object,
-  object
+  RefreshTokenUserRelation
 >;
 
-export function RefreshTokenModel(neogma: Neogma): RefreshTokenModelType {
-  return AbstractModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>(
-    {
-      name: "refresh_token",
-      label: "refresh_token",
-      schema: {
-        token: {
-          type: "string",
-          unique: true,
-          required: true,
-        },
-        issuedIp: {
-          type: "string",
-          pattern:
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
-            "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|" +
-            "([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$",
-          required: true,
-        },
-        userAgent: {
-          type: "string",
-          required: true,
-        },
-        expiresAt: {
-          type: "string",
-          format: "date-time",
-          required: true,
-        },
-        revoked: {
-          type: "boolean",
-          default: false,
-        },
-        createdAt: {
-          type: "string",
-          format: "date-time",
-          hidden: true,
-        },
-        updatedAt: {
-          type: "string",
-          format: "date-time",
-        },
-        deletedAt: {
-          type: "date",
-          format: "date-time",
-        },
-      },
-      relationships: {
-        user: {
-          model: "User",
-          direction: "in",
-          name: "HAS_TOKEN",
-          cardinality: "one",
-        },
-      },
+export const RefreshTokenModel: ModelFactoryDefinition<
+  RefreshTokenAttributes,
+  RefreshTokenUserRelation
+> = defineModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>({
+  name: "refresh_token",
+  label: "refresh_token",
+  schema: {
+    token: {
+      type: "string",
+      unique: true,
+      required: true,
     },
-    neogma,
-  );
-}
+    issuedIp: {
+      type: "string",
+      pattern:
+        "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+        "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+        "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\." +
+        "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|" +
+        "([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$",
+      required: true,
+    },
+    userAgent: {
+      type: "string",
+      required: true,
+    },
+    expiresAt: {
+      type: "string",
+      format: "date-time",
+      required: true,
+    },
+    revoked: {
+      type: "boolean",
+      default: false,
+    },
+    deletedAt: {
+      type: "date",
+      format: "date-time",
+    },
+  },
+  relationships: {
+    user: {
+      model: "User",
+      direction: "in",
+      name: "HAS_TOKEN",
+      cardinality: "one",
+    },
+  },
+});
