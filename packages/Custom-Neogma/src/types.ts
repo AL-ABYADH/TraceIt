@@ -13,7 +13,7 @@ export interface ModelParams<
   name: string;
   schema: NeogmaSchema<Omit<Properties, "id" | "createdAt" | "updatedAt">>;
   /** the label of the nodes */
-  label: string | string[];
+  label: string[];
   /** statics of the Model */
   statics?: Partial<Statics> | undefined;
   /** method of the Instance */
