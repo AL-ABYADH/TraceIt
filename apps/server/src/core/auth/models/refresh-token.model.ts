@@ -1,10 +1,6 @@
-import {
-  EnhancedNeogmaModel,
-  defineModelFactory,
-  ModelFactoryDefinition,
-} from "@repo/custom-neogma";
+import { NeogmaModel, defineModelFactory, ModelFactoryDefinition } from "@repo/custom-neogma";
 
-type RefreshTokenAttributes = {
+export type RefreshTokenAttributes = {
   id: string;
   token: string;
   issuedIp: string;
@@ -20,17 +16,14 @@ interface RefreshTokenUserRelation {
   user: any;
 }
 
-export type RefreshTokenModelType = EnhancedNeogmaModel<
-  RefreshTokenAttributes,
-  RefreshTokenUserRelation
->;
+export type RefreshTokenModelType = NeogmaModel<RefreshTokenAttributes, RefreshTokenUserRelation>;
 
 export const RefreshTokenModel: ModelFactoryDefinition<
   RefreshTokenAttributes,
   RefreshTokenUserRelation
 > = defineModelFactory<RefreshTokenAttributes, RefreshTokenUserRelation>({
   name: "refresh_token",
-  label: "refresh_token",
+  label: ["refresh_token"],
   schema: {
     token: {
       type: "string",

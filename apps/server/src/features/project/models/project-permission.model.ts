@@ -5,7 +5,7 @@ export function ProjectPermissionModel(neogma: Neogma) {
   return ModelFactory(
     {
       name: "ProjectPermission",
-      label: "ProjectPermission",
+      label: ["ProjectPermission"],
       schema: {
         id: idField,
         permission: {
