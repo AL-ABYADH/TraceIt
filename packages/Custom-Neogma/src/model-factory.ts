@@ -2,7 +2,6 @@ import {
   ModelFactory as OriginalModelFactory,
   Neo4jSupportedProperties,
   Neogma,
-  NeogmaModel,
   RelationshipsI,
   WhereParamsI,
 } from "neogma";
@@ -10,8 +9,6 @@ import {
 import {
   AnyObject,
   ModelParams,
-  EnhancedNeogmaModel,
-  EnhancedRelationshipsI,
   FindWithRelationsOptions,
   NeogmaSchema,
   ModelFactoryDefinition,
@@ -19,7 +16,7 @@ import {
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
 import { v4 as uuidv4 } from "uuid";
-import { AbstractModelFactory } from "./abstract-factory"; // Added: UUID import for automatic ID generation
+import { GenericConfiguration, NeogmaModel } from "./Neogma/types";
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
@@ -70,7 +67,7 @@ export function ModelFactory<
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
   neogma: Neogma,
-): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   // Retrieve a singleton instance of the model registry
   const registry = ModelRegistry.getInstance();
 
@@ -165,7 +162,7 @@ export function ModelFactory<
     return resolved;
   };
 
-  let model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
+  let model: NeogmaModel<Properties, RelatedNodes, Methods, Statics>;
 
   try {
     // Try to create the model with resolved relationships
@@ -197,15 +194,35 @@ export function ModelFactory<
   }
 
   // Create a relationship manager instance to handle advanced relationship features
-  const manager = new RelationshipManager(model, neogma, relationshipDefinitions);
+  const manager = new RelationshipManager(model, relationshipDefinitions);
 
   // Relationship-aware query: fetch a single entity and load its relations
-  model.findOneWithRelations = (where: WhereParamsI, options?: FindWithRelationsOptions) =>
-    manager.findOneWithRelations(where, options);
+  model.findOneWithRelations = <Plain extends boolean = false>(
+    params: GenericConfiguration & {
+      where?: WhereParamsI;
+      order?: Array<[string, "ASC" | "DESC"]>;
+      plain?: Plain;
+      throwIfNotFound?: boolean;
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    } = {},
+  ) => manager.findOneWithRelations(params);
 
   // Fetch multiple entities along with their associated relationships
-  model.findManyWithRelations = (where?: WhereParamsI, options?: FindWithRelationsOptions) =>
-    manager.findManyWithRelations(where || {}, options);
+  model.findManyWithRelations = <Plain extends boolean = false>(
+    params: GenericConfiguration & {
+      where?: WhereParamsI;
+      limit?: number;
+      skip?: number;
+      order?: Array<[string, "ASC" | "DESC"]>;
+      plain?: Plain;
+      throwIfNoneFound?: boolean;
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    } = {},
+  ) => manager.findManyWithRelations(params);
 
   // Search within a specific relationship connected to a node
   model.searchInRelations = (where: WhereParamsI, relationAlias: string, searchOptions?: any) =>
@@ -311,7 +328,7 @@ export function defineModelFactory<
   // Create a model function that returns a ModelFactory instance
   const ModelFunction = function (
     neogma: Neogma,
-  ): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+  ): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
     return ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
   };
 

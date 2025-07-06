@@ -30,7 +30,7 @@ export interface ModelFactoryDefinition<
   Methods extends AnyObject = AnyObject,
   Statics extends AnyObject = AnyObject,
 > {
-  (neogma: Neogma): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
+  (neogma: Neogma): NeogmaModel<Properties, RelatedNodes, Methods, Statics>;
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
 }
 
@@ -45,7 +45,7 @@ export type AnyObject = Record<string, any>;
  */
 export type EnhancedRelationshipsI<RelatedNodes extends AnyObject> = {
   [alias in keyof RelatedNodes]: {
-    model: string | EnhancedNeogmaModel<any, any, any, any> | "self";
+    model: string | NeogmaModel<any, any, any, any> | "self";
     name: string;
     direction: "out" | "in" | "none";
     properties?: RelationshipsI<RelatedNodes>[alias]["properties"];
@@ -75,49 +75,3 @@ export interface FindWithRelationsOptions extends FetchRelationsOptions {
   throwIfNoneFound?: boolean;
   plain?: boolean;
 }
-
-/**
- * Enhanced model interface - only available when using our ModelFactory
- */
-export type EnhancedNeogmaModel<
-  Properties extends Neo4jSupportedProperties,
-  RelatedNodes extends AnyObject,
-  Methods extends AnyObject = object,
-  Statics extends AnyObject = object,
-> = NeogmaModel<Properties, RelatedNodes, Methods, Statics> & {
-  // Static methods
-
-  findOneWithRelations(
-    where: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ): Promise<Properties & Partial<RelatedNodes>>;
-
-  findManyWithRelations(
-    where?: WhereParamsI,
-    options?: FindWithRelationsOptions,
-  ): Promise<Array<Properties & Partial<RelatedNodes>>>;
-
-  searchInRelations(
-    where: WhereParamsI,
-    relationAlias: keyof RelatedNodes,
-    searchOptions?: {
-      where?: {
-        source?: WhereParamsI;
-        target?: WhereParamsI;
-        relationship?: WhereParamsI;
-      };
-      limit?: number;
-      session?: any;
-    },
-  ): Promise<any[]>;
-
-  createMultipleRelations(
-    sourceWhere: WhereParamsI,
-    relations: Array<{
-      alias: keyof RelatedNodes;
-      targetWhere: WhereParamsI | WhereParamsI[];
-      properties?: any;
-    }>,
-    options?: { session?: any; assertCreatedRelationships?: number },
-  ): Promise<{ success: boolean; created: number; errors: string[] }>;
-};
