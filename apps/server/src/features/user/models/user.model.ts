@@ -1,4 +1,4 @@
-import { EnhancedNeogmaModel, ModelFactory, Neogma } from "@repo/custom-neogma";
+import { NeogmaModel, ModelFactory, Neogma } from "@repo/custom-neogma";
 
 export type UserAttributes = {
   id: string;
@@ -15,13 +15,13 @@ interface UserRelationships {
   refreshTokens: any;
 }
 
-export type UserModelType = EnhancedNeogmaModel<UserAttributes, UserRelationships, object, object>;
+export type UserModelType = NeogmaModel<UserAttributes, UserRelationships, object, object>;
 
 export function UserModel(neogma: Neogma): UserModelType {
   return ModelFactory<UserAttributes, UserRelationships>(
     {
       name: "User",
-      label: "User",
+      label: ["User"],
       schema: {
         username: {
           type: "string",

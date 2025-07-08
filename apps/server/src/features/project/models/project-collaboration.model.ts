@@ -5,7 +5,7 @@ export function ProjectCollaborationModel(neogma: Neogma) {
   return ModelFactory(
     {
       name: "ProjectCollaboration",
-      label: "ProjectCollaboration",
+      label: ["ProjectCollaboration"],
       schema: {
         id: idField,
         createdAt: {

@@ -6,7 +6,7 @@ export function ProjectInvitationModel(neogma: Neogma) {
   return ModelFactory(
     {
       name: "ProjectInvitation",
-      label: "ProjectInvitation",
+      label: ["ProjectInvitation"],
       schema: {
         id: idField,
         expirationDate: {

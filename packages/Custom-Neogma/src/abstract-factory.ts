@@ -1,5 +1,6 @@
 import { Neo4jSupportedProperties, Neogma } from "neogma";
-import { EnhancedNeogmaModel, ModelParams, AnyObject, ModelFactoryDefinition } from "./types";
+import { ModelParams, AnyObject, ModelFactoryDefinition } from "./types";
+import { NeogmaModel } from "./Neogma/types";
 import { ModelFactory } from "./model-factory";
 
 /**
@@ -53,7 +54,7 @@ export function AbstractModelFactory<
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
   neogma: Neogma,
-): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   // Create the base model using the standard ModelFactory
   const baseModel = ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
 
@@ -74,9 +75,9 @@ function createReadOnlyProxy<
   Methods extends AnyObject,
   Statics extends AnyObject,
 >(
-  model: EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics>,
+  model: NeogmaModel<Properties, RelatedNodes, Methods, Statics>,
   modelName: string,
-): EnhancedNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   return new Proxy(model, {
     get(target, prop, receiver) {
       const value = Reflect.get(target, prop, receiver);

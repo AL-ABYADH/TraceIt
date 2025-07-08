@@ -12,7 +12,7 @@ import { QueryResult } from "neo4j-driver";
 type AnyObject = Record<string, any>;
 /** the type of the properties to be added to a relationship */
 export type RelationshipPropertiesI = Record<string, Neo4jSupportedTypes | undefined>;
-interface GenericConfiguration {
+export interface GenericConfiguration {
   session?: Runnable | null;
 }
 
@@ -103,6 +103,11 @@ interface NeogmaModelStaticsI<
   >,
   UpdateData = UpdateDataI<Properties>,
   Instance = NeogmaInstance<Properties, RelatedNodesToAssociateI, MethodsI>,
+  InstanceWithRelations = NeogmaInstance<
+    Properties & RelatedNodesToAssociateI,
+    RelatedNodesToAssociateI,
+    MethodsI
+  >,
 > {
   prototype: MethodsI;
   relationships: Partial<RelationshipsI<RelatedNodesToAssociateI>>;
@@ -249,6 +254,68 @@ interface NeogmaModelStaticsI<
     };
     session?: GenericConfiguration["session"];
   }) => Promise<number>;
+
+  findOneWithRelations: <Plain extends boolean = false>(
+    params?: GenericConfiguration & {
+      /** where params for the nodes of this Model */
+      where?: WhereParamsI;
+      order?: Array<[Extract<keyof Properties, string>, "ASC" | "DESC"]>;
+      /** returns the plain properties, instead of Instance */
+      plain?: Plain;
+      /** throws an error if the node is not found */
+      throwIfNotFound?: boolean;
+      // Special additions for relations
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    },
+  ) => Promise<
+    (Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations) | null
+  >;
+
+  findManyWithRelations: <Plain extends boolean = false>(
+    params?: GenericConfiguration & {
+      /** where params for the nodes of this Model */
+      where?: WhereParamsI;
+      limit?: number;
+      skip?: number;
+      order?: Array<[Extract<keyof Properties, string>, "ASC" | "DESC"]>;
+      /** returns an array of the plain properties, instead of Instances */
+      plain?: Plain;
+      /** throws an error if no nodes are found (results length 0) */
+      throwIfNoneFound?: boolean;
+      // Special additions for relations
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    },
+  ) => Promise<
+    Array<Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations>
+  >;
+
+  searchInRelations(
+    where: WhereParamsI,
+    relationAlias: keyof RelatedNodesToAssociateI,
+    searchOptions?: {
+      where?: {
+        source?: WhereParamsI;
+        target?: WhereParamsI;
+        relationship?: WhereParamsI;
+      };
+      limit?: number;
+      session?: any;
+    },
+  ): Promise<any[]>;
+
+  createMultipleRelations(
+    sourceWhere: WhereParamsI,
+    relations: Array<{
+      alias: keyof RelatedNodesToAssociateI;
+      targetWhere: WhereParamsI | WhereParamsI[];
+      properties?: any;
+    }>,
+    options?: { session?: any; assertCreatedRelationships?: number },
+  ): Promise<{ success: boolean; created: number; errors: string[] }>;
 }
 /** the methods of a Neogma Instance */
 interface NeogmaInstanceMethodsI<

@@ -6,7 +6,7 @@ export function ProjectModel(neogma: Neogma) {
   return ModelFactory(
     {
       name: "Project",
-      label: "Project",
+      label: ["Project"],
       schema: {
         id: idField,
         name: {

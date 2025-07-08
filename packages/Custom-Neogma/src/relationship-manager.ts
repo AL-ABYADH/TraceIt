@@ -1,6 +1,5 @@
-// relationship-manager.ts
-import { Neogma, WhereParamsI } from "neogma";
-import { FetchRelationsOptions, FindWithRelationsOptions } from "./types";
+import { FetchRelationsOptions } from "./types";
+import { WhereParamsI } from "neogma";
 
 /**
  * Helper class for managing Neo4j relationships using Neogma models
@@ -8,7 +7,6 @@ import { FetchRelationsOptions, FindWithRelationsOptions } from "./types";
 export class RelationshipManager {
   constructor(
     private model: any,
-    private neogma: Neogma,
     private relationshipDefinitions: Record<string, { cardinality?: "one" | "many" }>,
   ) {}
 
@@ -68,44 +66,69 @@ export class RelationshipManager {
 
   /**
    * Find a single entity by conditions and load its relationships
+   * Parameters mirror the original findOne method for consistency
    */
   async findOneWithRelations(
-    where: WhereParamsI,
-    options: FindWithRelationsOptions = {},
+    params: {
+      where?: WhereParamsI;
+      order?: Array<[string, "ASC" | "DESC"]>;
+      plain?: boolean;
+      throwIfNotFound?: boolean;
+      session?: any;
+      // Special additions for relations
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    } = {},
   ): Promise<any> {
     const entity = await this.model.findOne({
-      where,
-      session: options.session,
-      order: options.order,
-      plain: options.plain ?? true,
-      throwIfNotFound: options.throwIfNotFound || false,
+      where: params?.where,
+      order: params?.order,
+      session: params?.session,
+      plain: params?.plain,
+      throwIfNotFound: params?.throwIfNotFound || false,
     });
 
     if (!entity) return null;
+    console.log(this.model.relationships);
 
-    return this.loadRelations(entity, options);
+    // Use the same params object as options for loading relations
+    return this.loadRelations(entity, params);
   }
 
   /**
    * Find multiple entities by conditions and load their relationships
+   * Parameters mirror the original findMany method for consistency
    */
   async findManyWithRelations(
-    where: WhereParamsI = {},
-    options: FindWithRelationsOptions = {},
+    params: {
+      where?: WhereParamsI;
+      limit?: number;
+      skip?: number;
+      order?: Array<[string, "ASC" | "DESC"]>;
+      plain?: boolean;
+      throwIfNoneFound?: boolean;
+      session?: any;
+      // Special additions for relations
+      include?: string[];
+      exclude?: string[];
+      limits?: Record<string, number>;
+    } = {},
   ): Promise<any[]> {
     const entities = await this.model.findMany({
-      where,
-      limit: options.limit,
-      skip: options.skip,
-      order: options.order,
-      session: options.session,
-      plain: options.plain ?? true,
-      throwIfNoneFound: options.throwIfNoneFound || false,
+      where: params?.where,
+      limit: params?.limit,
+      skip: params?.skip,
+      order: params?.order,
+      session: params?.session,
+      plain: params?.plain,
+      throwIfNoneFound: params?.throwIfNoneFound || false,
     });
 
     if (!entities.length) return [];
 
-    return Promise.all(entities.map((entity: any) => this.loadRelations(entity, options)));
+    // Use the same params object as options for loading relations
+    return Promise.all(entities.map((entity: any) => this.loadRelations(entity, params)));
   }
 
   /**

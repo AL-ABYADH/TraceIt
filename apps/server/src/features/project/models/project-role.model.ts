@@ -5,7 +5,7 @@ export function ProjectRoleModel(neogma: Neogma) {
   return ModelFactory(
     {
       name: "ProjectRole",
-      label: "ProjectRole",
+      label: ["ProjectRole"],
       schema: {
         id: idField,
         name: {
