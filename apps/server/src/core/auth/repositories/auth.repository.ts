@@ -67,7 +67,7 @@ export class AuthRepository {
       where: {
         token,
         revoked: false,
-        expiresAt: { [Op.lte]: now.toISOString() },
+        expiresAt: { [Op.gte]: now.toISOString() },
       },
       include: ["user"],
     });
