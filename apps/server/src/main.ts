@@ -4,6 +4,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
 import { JwtAuthGuard } from "./core/auth/guards/jwt-auth.guard";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import { AuthRepository } from "./core/auth/repositories/auth.repository";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,7 +24,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const reflector = app.get(Reflector);
-  app.useGlobalGuards(new JwtAuthGuard(reflector));
+  const authRepository = app.get(AuthRepository);
+  app.useGlobalGuards(new JwtAuthGuard(reflector, authRepository));
 
   app.enableCors({
     origin: ["http://localhost:3000"],
