@@ -1,5 +1,6 @@
-// src/core/auth/services/auth.service.ts
 import { Injectable } from "@nestjs/common";
+import { Response, Request } from "express";
+
 import { ValidateUserOperation } from "../operations/validate-user.operation";
 import { RegisterUserOperation } from "../operations/register-user.operation";
 import { LoginUserOperation } from "../operations/login-user.operation";
@@ -7,47 +8,90 @@ import { RefreshTokensOperation } from "../operations/refresh-tokens.operation";
 import { LogoutUserOperation } from "../operations/logout-user.operation";
 import { LogoutAllDevicesOperation } from "../operations/logout-all-devices.operation";
 import { CleanupExpiredTokensOperation } from "../operations/cleanup-expired-tokens.operation";
-import { LoginDto } from "../dtos/login.dto";
-import { RegisterDto } from "../dtos/register.dto";
-import { Response, Request } from "express";
+
+import { LoginInterface } from "../interfaces/login.interface";
+import { RegisterInterface } from "../interfaces/register.interface";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private validateUserOperation: ValidateUserOperation,
-    private registerUserOperation: RegisterUserOperation,
-    private loginUserOperation: LoginUserOperation,
-    private refreshTokensOperation: RefreshTokensOperation,
-    private logoutUserOperation: LogoutUserOperation,
-    private logoutAllDevicesOperation: LogoutAllDevicesOperation,
-    private cleanupExpiredTokensOperation: CleanupExpiredTokensOperation,
+    private readonly validateUserOp: ValidateUserOperation,
+    private readonly registerUserOp: RegisterUserOperation,
+    private readonly loginUserOp: LoginUserOperation,
+    private readonly refreshTokensOp: RefreshTokensOperation,
+    private readonly logoutUserOp: LogoutUserOperation,
+    private readonly logoutAllDevicesOp: LogoutAllDevicesOperation,
+    private readonly cleanupExpiredTokensOp: CleanupExpiredTokensOperation,
   ) {}
 
-  async validateUser(loginDto: LoginDto): Promise<any> {
-    return this.validateUserOperation.execute(loginDto);
+  /**
+   * Validates the user's credentials.
+   * @param credentials - Login credentials.
+   */
+  async validateUser(credentials: LoginInterface): Promise<any> {
+    return this.validateUserOp.execute(credentials);
   }
 
-  async register(registerDto: RegisterDto, userAgent: string, ip: string, res: Response) {
-    return this.registerUserOperation.execute(registerDto, userAgent, ip, res);
+  /**
+   * Registers a new user and issues tokens.
+   * @param registrationData - Registration payload.
+   * @param userAgent - User-Agent string from the request.
+   * @param ipAddress - Client IP address.
+   * @param res - Express Response object for setting cookies.
+   */
+  async register(
+    registrationData: RegisterInterface,
+    userAgent: string,
+    ipAddress: string,
+    res: Response,
+  ) {
+    return this.registerUserOp.execute(registrationData, userAgent, ipAddress, res);
   }
 
-  async login(loginDto: LoginDto, userAgent: string, ip: string, res: Response) {
-    return this.loginUserOperation.execute(loginDto, userAgent, ip, res);
+  /**
+   * Authenticates a user and issues tokens.
+   * @param credentials - Login payload.
+   * @param userAgent - User-Agent string from the request.
+   * @param ipAddress - Client IP address.
+   * @param res - Express Response object for setting cookies.
+   */
+  async login(credentials: LoginInterface, userAgent: string, ipAddress: string, res: Response) {
+    return this.loginUserOp.execute(credentials, userAgent, ipAddress, res);
   }
 
-  async refreshTokens(refreshToken: string, userAgent: string, ip: string, res: Response) {
-    return this.refreshTokensOperation.execute(refreshToken, userAgent, ip, res);
+  /**
+   * Refreshes access and refresh tokens using the provided refresh token.
+   * @param refreshToken - Refresh token string.
+   * @param userAgent - User-Agent string.
+   * @param ipAddress - IP address of the client.
+   * @param res - Express response object.
+   */
+  async refreshTokens(refreshToken: string, userAgent: string, ipAddress: string, res: Response) {
+    return this.refreshTokensOp.execute(refreshToken, userAgent, ipAddress, res);
   }
 
-  async logout(res: Response): Promise<boolean> {
-    return this.logoutUserOperation.execute(res);
+  /**
+   * Logs the user out by revoking the current refresh token.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   */
+  async logout(req: Request, res: Response): Promise<boolean> {
+    return this.logoutUserOp.execute(req, res);
   }
 
+  /**
+   * Logs the user out from all devices by revoking all refresh tokens.
+   * @param req - Express request object.
+   * @param res - Express response object.
+   */
   async logoutAll(req: Request, res: Response): Promise<boolean> {
-    return this.logoutAllDevicesOperation.execute(req, res);
+    return this.logoutAllDevicesOp.execute(req, res);
   }
 
+  /**
+   * Cleans up expired refresh tokens that are no longer valid.
+   */
   async cleanupExpiredTokens(): Promise<void> {
-    return this.cleanupExpiredTokensOperation.execute();
+    return this.cleanupExpiredTokensOp.execute();
   }
 }
