@@ -1,6 +1,5 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
 import { ProjectStatus } from "../enums/project-status.enum";
-import { idField } from "src/common/neogma-model-fields/id.schema";
 
 export function ProjectModel(neogma: Neogma) {
   return ModelFactory(
@@ -8,7 +7,6 @@ export function ProjectModel(neogma: Neogma) {
       name: "Project",
       label: ["Project"],
       schema: {
-        id: idField,
         name: {
           type: "string",
           required: true,
