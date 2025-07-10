@@ -1,6 +1,7 @@
 import { NeogmaModel, defineModelFactory, ModelFactoryDefinition } from "@repo/custom-neogma";
+import { User } from "../../../features/user/entities/user.entity";
 
-export type RefreshTokenAttributes = {
+type RefreshTokenAttributes = {
   id: string;
   token: string;
   issuedIp: string;
@@ -13,7 +14,7 @@ export type RefreshTokenAttributes = {
 };
 
 interface RefreshTokenUserRelation {
-  user: any;
+  user: User;
 }
 
 export type RefreshTokenModelType = NeogmaModel<RefreshTokenAttributes, RefreshTokenUserRelation>;
@@ -52,10 +53,6 @@ export const RefreshTokenModel: ModelFactoryDefinition<
     revoked: {
       type: "boolean",
       default: false,
-    },
-    deletedAt: {
-      type: "date",
-      format: "date-time",
     },
   },
   relationships: {
