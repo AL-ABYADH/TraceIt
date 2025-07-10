@@ -1,5 +1,4 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
-import { idField } from "src/common/neogma-model-fields/id.schema";
 
 export function ProjectCollaborationModel(neogma: Neogma) {
   return ModelFactory(
@@ -7,7 +6,6 @@ export function ProjectCollaborationModel(neogma: Neogma) {
       name: "ProjectCollaboration",
       label: ["ProjectCollaboration"],
       schema: {
-        id: idField,
         createdAt: {
           type: "string",
           required: true,

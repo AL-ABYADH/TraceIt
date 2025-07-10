@@ -1,10 +1,20 @@
-import { IsEmail, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+  IsStrongPassword,
+} from "class-validator";
+import { BaseDto } from "../../../common/dto/base.dto";
+import { RegisterInterface } from "../interfaces/register.interface";
 
 /**
  * Data Transfer Object for user registration
  * Contains all required fields to create a new user account
  */
-export class RegisterDto {
+export class RegisterDto extends BaseDto<RegisterInterface> {
   @IsNotEmpty({ message: "The name is required" })
   @IsString({ message: "The name must be a string" })
   @MaxLength(50, { message: "The name cannot exceed 50 characters" })
@@ -26,9 +36,18 @@ export class RegisterDto {
   @IsNotEmpty({ message: "Password is required" })
   @IsString({ message: "Password must be a string" })
   @MinLength(8, { message: "Password must be at least 8 characters long" })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]+$/, {
-    message:
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
-  })
+  @IsStrongPassword(
+    {
+      minLength: 8,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
+    },
+    {
+      message:
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+    },
+  )
   password: string;
 }

@@ -5,9 +5,9 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  Ip,
   Req,
   Res,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
 import { RegisterDto } from "../dtos/register.dto";
@@ -17,29 +17,37 @@ import { LoginDto } from "../dtos/login.dto";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
 import { Public } from "../decorators/public.decorator";
 
-// Importing only types for Request and Response from Express
-import type { Response, Request } from "express";
+// Import types only
+import type { Request, Response } from "express";
+import { plainToInstance } from "class-transformer";
+import { TokensDto } from "../dtos/tokens.dto";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   /**
-   * Handles user registration.
+   * Registers a new user and returns authentication tokens.
    */
   @Public()
   @Post("register")
   async register(
     @Body() registerDto: RegisterDto,
     @GetUserAgent() userAgent: string,
-    @RealIP() ip: string,
-    @Res({ passthrough: true }) res: Response,
+    @RealIP() ipAddress: string,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return await this.authService.register(registerDto, userAgent, ip, res);
+    const tokens = await this.authService.register(
+      registerDto.toInterface(),
+      userAgent,
+      ipAddress,
+      response,
+    );
+    return plainToInstance(TokensDto, tokens);
   }
 
   /**
-   * Handles user login using local strategy.
+   * Logs in a user using local strategy and returns tokens.
    */
   @Public()
   @Post("login")
@@ -48,46 +56,67 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @GetUserAgent() userAgent: string,
-    @Ip() ip: string,
-    @Res({ passthrough: true }) res: Response,
+    @RealIP() ipAddress: string,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.login(loginDto, userAgent, ip, res);
+    const tokens = await this.authService.login(
+      loginDto.toInterface(),
+      userAgent,
+      ipAddress,
+      response,
+    );
+    return plainToInstance(TokensDto, tokens);
   }
 
   /**
-   * Refreshes access and refresh tokens using the refresh token from cookies.
+   * Issues new access and refresh tokens using the refresh token stored in cookies.
    */
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
   async refreshTokens(
-    @Req() req: Request,
+    @Req() request: Request,
     @GetUserAgent() userAgent: string,
-    @Ip() ip: string,
-    @Res({ passthrough: true }) res: Response,
+    @RealIP() ipAddress: string,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    // Extract refresh token from cookies
-    const refreshToken = req.cookies["refreshToken"];
-    console.log("refreshToken", refreshToken);
-    return this.authService.refreshTokens(refreshToken, userAgent, ip, res);
+    const refreshToken = request.cookies["refreshToken"] as string | undefined;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException("Refresh token is missing.");
+    }
+
+    const tokens = await this.authService.refreshTokens(
+      refreshToken,
+      userAgent,
+      ipAddress,
+      response,
+    );
+    return plainToInstance(TokensDto, tokens);
   }
 
   /**
-   * Logs the current user out by revoking the current refresh token.
+   * Logs out the user and revokes the active refresh token.
    */
   @Post("logout")
   @HttpCode(HttpStatus.OK)
-  async logout(@Res({ passthrough: true }) res: Response): Promise<{ success: boolean }> {
-    const success = await this.authService.logout(res);
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<{ success: boolean }> {
+    const success = await this.authService.logout(request, response);
     return { success };
   }
 
+  /**
+   * Logs the user out from all sessions by revoking all active refresh tokens.
+   */
   @Post("logout-all")
   @HttpCode(HttpStatus.OK)
-  async logout_all(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+  async logoutAll(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<{ success: boolean }> {
-    const success = await this.authService.logoutAll(req, res);
+    const success = await this.authService.logoutAll(request, response);
     return { success };
   }
 }

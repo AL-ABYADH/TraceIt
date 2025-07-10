@@ -90,7 +90,6 @@ export class RelationshipManager {
     });
 
     if (!entity) return null;
-    console.log(this.model.relationships);
 
     // Use the same params object as options for loading relations
     return this.loadRelations(entity, params);

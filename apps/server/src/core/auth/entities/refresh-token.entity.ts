@@ -10,5 +10,4 @@ export class RefreshToken {
   revoked: boolean;
   createdAt: Date;
   updatedAt?: Date;
-  deletedAt?: Date;
 }

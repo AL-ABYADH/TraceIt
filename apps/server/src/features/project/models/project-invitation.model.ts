@@ -1,5 +1,4 @@
 import { ModelFactory, Neogma } from "@repo/custom-neogma";
-import { idField } from "src/common/neogma-model-fields/id.schema";
 import { ProjectInvitationStatus } from "../enums/project-invitation-status.enum";
 
 export function ProjectInvitationModel(neogma: Neogma) {
@@ -8,7 +7,6 @@ export function ProjectInvitationModel(neogma: Neogma) {
       name: "ProjectInvitation",
       label: ["ProjectInvitation"],
       schema: {
-        id: idField,
         expirationDate: {
           type: "string",
           required: true,

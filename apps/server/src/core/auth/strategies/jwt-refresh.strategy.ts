@@ -31,19 +31,16 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, "jwt-refresh"
    * Token is expected to be sent in the cookie (not from Authorization header).
    */
   async validate(req: Request, payload: JwtPayload) {
-    const refreshToken = req.cookies["refreshToken"];
+    const refreshToken = req.cookies["refreshToken"] as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token is missing");
     }
 
     // Verify that the refresh token exists and has not been revoked
-    const tokenExists = await this.authRepository.findRefreshTokenByUserIdAndToken(
-      payload.sub,
-      refreshToken,
-    );
+    const tokenExists = await this.authRepository.findUserIdByRefreshToken(refreshToken);
 
-    if (!tokenExists) {
+    if (!tokenExists && tokenExists === payload.sub) {
       throw new UnauthorizedException("Refresh token is invalid or expired");
     }
 

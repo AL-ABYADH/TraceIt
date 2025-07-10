@@ -1,5 +1,7 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 import { AtLeastOneOf } from "@repo/custom-validators";
+import { BaseDto } from "../../../common/dto/base.dto";
+import { LoginInterface } from "../interfaces/login.interface";
 
 /**
  * Data Transfer Object for user login
@@ -7,7 +9,7 @@ import { AtLeastOneOf } from "@repo/custom-validators";
  */
 
 @AtLeastOneOf(["email", "username"])
-export class LoginDto {
+export class LoginDto extends BaseDto<LoginInterface> {
   @IsOptional()
   @IsEmail({}, { message: "Please enter a valid email address" })
   email?: string;
@@ -18,6 +20,6 @@ export class LoginDto {
 
   @IsNotEmpty({ message: "Password is required" })
   @IsString({ message: "Password must be a string" })
-  @MinLength(6, { message: "Password must be at least 6 characters long" })
+  @MinLength(8, { message: "Password must be at least 8 characters long" })
   password: string;
 }

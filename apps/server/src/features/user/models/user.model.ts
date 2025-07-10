@@ -53,7 +53,6 @@ export function UserModel(neogma: Neogma): UserModelType {
           required: true,
         },
       },
-      primaryKeyField: "id",
       relationships: {
         projects: {
           model: "Project",

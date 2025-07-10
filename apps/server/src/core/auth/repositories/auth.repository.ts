@@ -1,22 +1,21 @@
-import { Injectable } from "@nestjs/common";
-import { RefreshToken } from "../entities/refresh-token.entity";
-import {
-  RefreshTokenAttributes,
-  RefreshTokenModel,
-  RefreshTokenModelType,
-} from "../models/refresh-token.model";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { RefreshTokenModel, RefreshTokenModelType } from "../models/refresh-token.model";
 import { Neo4jService } from "../../neo4j/neo4j.service";
-import { UserModel } from "../../../features/user/models/user.model";
 import { Op } from "@repo/custom-neogma";
+import { UserService } from "../../../features/user/services/user/user.service";
+import { plainToInstance } from "class-transformer";
+import { RefreshToken } from "../entities/refresh-token.entity";
+import { User } from "../../../features/user/entities/user.entity";
 
 @Injectable()
 export class AuthRepository {
-  private refreshTokenModel: RefreshTokenModelType;
-  private userModel: any;
+  private readonly refreshTokenModel: RefreshTokenModelType;
 
-  constructor(private readonly neo4jService: Neo4jService) {
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly userService: UserService,
+  ) {
     this.refreshTokenModel = RefreshTokenModel(this.neo4jService.getNeogma());
-    this.userModel = UserModel(this.neo4jService.getNeogma());
   }
 
   /**
@@ -26,159 +25,145 @@ export class AuthRepository {
     userId: string,
     token: string,
     userAgent: string,
-    ip: string,
-    expiresIn: number,
-  ): Promise<RefreshTokenAttributes> {
+    ipAddress: string,
+    expiresInSeconds: number,
+  ): Promise<RefreshToken> {
     const expiresAt = new Date();
-    expiresAt.setSeconds(expiresAt.getSeconds() + expiresIn);
+    expiresAt.setSeconds(expiresAt.getSeconds() + expiresInSeconds);
 
-    const refreshToken = await this.refreshTokenModel.createOne({
+    const newToken = await this.refreshTokenModel.createOne({
       token,
-      issuedIp: ip,
+      issuedIp: ipAddress,
       userAgent,
       expiresAt: expiresAt.toISOString(),
       revoked: false,
       user: {
-        where: [
-          {
-            params: { id: userId },
-          },
-        ],
+        where: [{ params: { id: userId } }],
       },
     });
 
-    return refreshToken.getDataValues();
+    return this.mapToRefreshTokenEntity(newToken.getDataValues());
   }
 
   /**
-   * Finds a refresh token with associated user using the token string.
+   * Retrieves all refresh tokens linked to a user.
    */
-  async findRefreshTokenWithUserId(token: string): Promise<any | null> {
-    const result = await this.refreshTokenModel.findOneWithRelations(
-      {
-        token,
-        revoked: false,
-      },
-      {
-        include: ["user"],
-      },
-    );
-
-    return result || null;
-  }
-
-  /**
-   * Finds a refresh token by user ID and token string.
-   */
-  async findRefreshTokenByUserIdAndToken(
-    userId: string,
-    token: string,
-  ): Promise<RefreshToken | null> {
+  async getAllRefreshTokensByUserId(userId: string): Promise<any> {
     try {
-      const userWithTokens = await this.userModel.findOneWithRelations(
-        { id: userId },
-        {
-          include: ["refreshTokens"],
-          where: {
-            refreshTokens: { token },
-          },
-        },
-      );
-
-      if (!userWithTokens) {
-        return null;
-      }
-
-      return userWithTokens.refreshTokens.find((t) => t.token === token) || null;
+      return await this.userService.findUserWithActiveRefreshTokens(userId);
     } catch (error) {
-      console.error("Error finding refresh tokens:", error);
+      console.error("Error retrieving user refresh tokens:", error);
       throw error;
     }
   }
 
   /**
-   * Retrieves the user ID associated with a specific refresh token.
+   * Finds the user associated with a specific refresh token.
    */
-  async findUserIdByRefreshToken(token: string): Promise<string | null> {
-    const result = await this.refreshTokenModel.findOneWithRelations(
-      {
+  async findUserByRefreshToken(token: string): Promise<User | null> {
+    const now = new Date();
+
+    const result = await this.refreshTokenModel.findOneWithRelations({
+      where: {
         token,
         revoked: false,
+        expiresAt: { [Op.gte]: now.toISOString() },
       },
-      {
-        include: ["user"],
-      },
-    );
+      include: ["user"],
+    });
 
-    return result?.user?.id || null;
+    return result?.user ?? null;
+  }
+
+  /**
+   * Retrieves the user ID associated with a given refresh token.
+   */
+  async findUserIdByRefreshToken(token: string): Promise<string | null> {
+    const user = await this.findUserByRefreshToken(token);
+    if (!user) {
+      throw new NotFoundException("User not found for this token.");
+    }
+
+    return user.id || null;
   }
 
   /**
    * Revokes a specific refresh token.
    */
   async revokeRefreshToken(token: string): Promise<void> {
-    await this.refreshTokenModel.update(
-      { revoked: true, updatedAt: new Date().toISOString() },
-      { where: { token } },
-    );
+    await this.refreshTokenModel.update({ revoked: true }, { where: { token } });
   }
 
   /**
-   * Revokes all refresh tokens belonging to a specific user.
+   * Revokes all refresh tokens for a user.
    */
   async revokeAllUserRefreshTokens(userId: string): Promise<void> {
-    const userWithTokens = await this.userModel.findOneWithRelations(
-      { id: userId },
-      { include: ["refreshTokens"] },
-    );
+    const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
 
-    if (!userWithTokens || !userWithTokens.refreshTokens?.length) {
-      return;
+    if (userWithTokens?.refreshTokens) {
+      for (const token of userWithTokens.refreshTokens) {
+        await this.revokeRefreshToken(token);
+      }
     }
-
-    const now = new Date().toISOString();
-
-    const updatePromises = userWithTokens.refreshTokens.map((token) =>
-      this.refreshTokenModel.update(
-        {
-          revoked: true,
-          updatedAt: now,
-        },
-        { where: { id: token.id } },
-      ),
-    );
-
-    await Promise.all(updatePromises);
   }
 
   /**
-   * Deletes expired refresh tokens that were created more than 7 days ago.
+   * Revokes all refresh tokens except the provided one for a user.
+   */
+  async revokeAllUserRefreshTokensExceptOne(userId: string, exceptToken: string): Promise<void> {
+    const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
+
+    if (userWithTokens?.refreshTokens) {
+      for (const token of userWithTokens.refreshTokens) {
+        if (token !== exceptToken) {
+          await this.revokeRefreshToken(token);
+        }
+      }
+    }
+  }
+
+  /**
+   * Deletes expired refresh tokens created more than 7 days ago.
    */
   async deleteExpiredTokens(): Promise<void> {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 7);
-
-    const cutoffDateStr = cutoffDate.toISOString();
-    const now = new Date().toISOString();
-
+    const now = new Date();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(now.getDate() - 7);
     const expiredTokens = await this.refreshTokenModel.findMany({
       where: {
-        expiresAt: { [Op.lte]: now },
-        createdAt: { [Op.lte]: cutoffDateStr },
+        expiresAt: {
+          [Op.lte]: now.toISOString(),
+        },
       },
     });
 
-    if (!expiredTokens.length) {
-      return;
-    }
+    if (!expiredTokens.length) return;
 
-    const deletePromises = expiredTokens.map((token) =>
-      this.refreshTokenModel.delete({
-        where: { id: token.id },
-        detach: true,
-      }),
+    await Promise.all(
+      expiredTokens.map((token) =>
+        this.refreshTokenModel.delete({
+          where: { id: token.id },
+          detach: true,
+        }),
+      ),
     );
+  }
 
-    await Promise.all(deletePromises);
+  /**
+   * Checks if a valid, non-revoked refresh token exists and returns its details.
+   */
+  async checkIfExists(token: string): Promise<any> {
+    const tokenData = await this.refreshTokenModel.findOneWithRelations({
+      where: { token, revoked: false },
+    });
+
+    return tokenData ? this.mapToRefreshTokenEntity(tokenData) : null;
+  }
+
+  /**
+   * Transforms raw data into a RefreshToken entity instance.
+   */
+  private mapToRefreshTokenEntity(data: any): RefreshToken {
+    return plainToInstance(RefreshToken, data);
   }
 }
