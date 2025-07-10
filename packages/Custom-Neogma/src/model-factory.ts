@@ -71,6 +71,11 @@ export function ModelFactory<
   // Retrieve a singleton instance of the model registry
   const registry = ModelRegistry.getInstance();
 
+  const primaryKeyField = parameters.primaryKeyField;
+  if (!primaryKeyField) {
+    parameters.primaryKeyField = "id" as Extract<keyof Properties, string>;
+  }
+
   // Destructure parameters and separate relationship definitions
   const { name: modelName, relationships: enhancedRelationships, ...restParams } = parameters;
 
@@ -100,7 +105,6 @@ export function ModelFactory<
     enhancedSchema["updatedAt"] = {
       type: "string",
       format: "date-time",
-      required: false,
     };
   }
 
@@ -264,6 +268,7 @@ export function ModelFactory<
 
     // Always set createdAt if not provided
     data.createdAt = data.createdAt || new Date().toISOString();
+    data.updatedAt = data.updatedAt || new Date().toISOString();
   };
 
   // Proxy wrapper to auto-update `updatedAt` field during updates
