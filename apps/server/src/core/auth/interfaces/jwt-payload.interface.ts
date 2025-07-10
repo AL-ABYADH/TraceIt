@@ -1,11 +1,14 @@
 /**
  * Interface representing the structure of the JWT payload.
- * Aligns with JWT standards by using `sub` (subject) to denote user identity.
+ *
+ * This payload conforms to JWT standards and includes additional fields
+ * for enhanced authentication and token tracking.
  */
 export interface JwtPayload {
-  sub: string; // Subject: Unique user ID (commonly used as `sub` in JWT standard)
-  username: string; // Username of the authenticated user
-  email: string; // Email of the authenticated user
-  iat?: number; // Issued At (timestamp automatically added by JWT)
-  exp?: number; // Expiration Time (timestamp automatically added by JWT)
+  sub: string; // Subject: Unique user ID (as per JWT standard)
+  data: string; // Refresh token ID stored in the database
+  username: string; // Authenticated user's username
+  email: string; // Authenticated user's email address
+  iat?: number; // Issued At (timestamp when the token was issued)
+  exp?: number; // Expiration Time (timestamp when the token expires)
 }

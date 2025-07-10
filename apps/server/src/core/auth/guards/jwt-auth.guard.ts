@@ -1,67 +1,68 @@
-// import { Injectable, ExecutionContext, UnauthorizedException } from "@nestjs/common";
-// import { AuthGuard } from "@nestjs/passport";
-// import { Reflector } from "@nestjs/core";
-// import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
-//
-// @Injectable()
-// export class JwtAuthGuard extends AuthGuard("jwt") {
-//   constructor(private reflector: Reflector) {
-//     super();
-//   }
-//
-//   canActivate(context: ExecutionContext) {
-//     // Check if the route is marked as public
-//     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-//       context.getHandler(),
-//       context.getClass(),
-//     ]);
-//
-//     if (isPublic) {
-//       return true;
-//     }
-//
-//     // If not public, perform JWT authentication
-//     return super.canActivate(context);
-//   }
-//
-//   handleRequest(err, user, info) {
-//     // If there's an error or no user found
-//     if (err || !user) {
-//       throw err || new UnauthorizedException("Access is unauthorized");
-//     }
-//     return user;
-//   }
-// }
-
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { Reflector } from "@nestjs/core";
+import { Request } from "express";
+import jwt from "jsonwebtoken";
+
+import { JwtPayload } from "../interfaces/jwt-payload.interface";
+import { AuthRepository } from "../repositories/auth.repository";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private jwtAuthGuard = new (AuthGuard("jwt"))();
+  private readonly jwtStrategyGuard = new (AuthGuard("jwt"))();
 
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    private readonly reflector: Reflector,
+    private readonly authRepository: AuthRepository,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.get<boolean>("isPublic", context.getHandler());
-    if (isPublic) return true;
+    try {
+      // Allow access if the route is marked as public
+      const isRoutePublic = this.reflector.get<boolean>("isPublic", context.getHandler());
+      if (isRoutePublic) return true;
 
-    const request = context.switchToHttp().getRequest();
+      const request: Request = context.switchToHttp().getRequest();
 
-    const authHeader = request.headers["authorization"];
-    const accessToken = authHeader && authHeader.split(" ")[1];
-    const refreshToken = request.headers["x-refresh-token"] || request.cookies?.refreshToken;
+      // Extract access token from Authorization header
+      const authorizationHeader = request.headers.authorization;
+      const accessToken = authorizationHeader?.split(" ")[1];
 
-    if (!accessToken || !refreshToken) {
-      throw new UnauthorizedException("Access token or Refresh token missing");
+      // Get refresh token either from custom header or cookies
+      const refreshToken = request.headers["x-refresh-token"] || request.cookies?.refreshToken;
+
+      // Reject if either token is missing
+      if (!accessToken || !refreshToken) {
+        throw new UnauthorizedException("Access and refresh tokens are required.");
+      }
+
+      // Decode JWT to extract payload
+      const decodedPayload = jwt.decode(accessToken) as JwtPayload;
+
+      // Validate refresh token in the database
+      const storedRefreshToken = await this.authRepository.checkIfExists(refreshToken);
+      if (!storedRefreshToken) {
+        throw new UnauthorizedException("Invalid refresh Token details.");
+      }
+
+      const isTokenValid =
+        storedRefreshToken &&
+        decodedPayload.data === storedRefreshToken.id &&
+        decodedPayload.sub === storedRefreshToken?.user?.id;
+
+      if (!isTokenValid) {
+        throw new UnauthorizedException("Invalid token details.");
+      }
+
+      // Check if JWT strategy guard authorizes this request
+      const isJwtAuthenticated = await this.jwtStrategyGuard.canActivate(context);
+      if (!isJwtAuthenticated) {
+        throw new UnauthorizedException("Access token is invalid or expired.");
+      }
+
+      return true;
+    } catch (error) {
+      throw new UnauthorizedException(error);
     }
-
-    const canActivateJwt = await this.jwtAuthGuard.canActivate(context);
-    if (!canActivateJwt) {
-      throw new UnauthorizedException("Invalid access token");
-    }
-
-    return true;
   }
 }
