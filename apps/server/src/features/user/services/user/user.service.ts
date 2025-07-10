@@ -70,4 +70,14 @@ export class UserService {
     }
     return result;
   }
+
+  /**
+   * Finds a user and returns only their non-revoked refresh tokens.
+   *
+   * @param userId - The ID of the user to look up.
+   * @returns The user entity with active refresh tokens, or null if not found.
+   */
+  async findUserWithActiveRefreshTokens(userId: string): Promise<any> {
+    return this.userRepository.getUserWithActiveRefreshTokens(userId);
+  }
 }
