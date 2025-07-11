@@ -1,10 +1,11 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Project } from "../../entities/project.entity";
 import { CreateProjectInterface } from "../../interfaces/create-project.interface";
 import { UpdateProjectInterface } from "../../interfaces/update-project.interface";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectModel } from "../../models/project.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
+import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectRepository {
@@ -14,27 +15,77 @@ export class ProjectRepository {
     this.projectModel = ProjectModel(neo4jService.getNeogma());
   }
 
-  async create(project: CreateProjectInterface): Promise<Project> {
-    throw new NotImplementedException();
+  async create(projectData: CreateProjectInterface): Promise<Project> {
+    const newProject = {
+      ...projectData,
+    };
+
+    const project = await this.projectModel.createOne(newProject);
+    return plainToInstance(Project, project.getDataValues());
   }
 
   async getById(id: string): Promise<Project> {
-    throw new NotImplementedException();
+    const project = await this.projectModel.findOne({ where: { id } });
+
+    return plainToInstance(Project, project.getDataValues());
   }
 
   async getByOwnerOrCollaboration(userId: string, status: ProjectStatus): Promise<Project[]> {
-    throw new NotImplementedException();
+    const projects = await this.projectModel.find({
+      where: {
+        status,
+      },
+      or: [
+        {
+          whereRelated: {
+            owner: {
+              where: {
+                id: userId,
+              },
+            },
+          },
+        },
+        {
+          whereRelated: {
+            collaborations: {
+              whereRelated: {
+                user: {
+                  where: {
+                    id: userId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    return projects.map((project) => plainToInstance(Project, project.getDataValues()));
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<Project> {
-    throw new NotImplementedException();
+    const [updatedProject] = await this.projectModel.update(
+      {
+        id,
+      },
+      project,
+    );
+
+    return plainToInstance(Project, updatedProject.getDataValues());
   }
 
   async delete(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+    const deletedCount = await this.projectModel.delete({
+      where: { id },
+    });
+
+    return deletedCount > 0;
   }
 
   async setStatus(id: string, status: ProjectStatus): Promise<boolean> {
-    throw new NotImplementedException();
+    const updated = await this.projectModel.update({ id }, { status: status });
+
+    return updated.length > 0;
   }
 }

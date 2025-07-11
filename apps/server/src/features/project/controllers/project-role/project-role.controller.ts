@@ -19,26 +19,27 @@ export class ProjectRoleController {
 
   @Post()
   async create(@Body() dto: CreateProjectRoleDto): Promise<ProjectRole> {
-    throw new NotImplementedException();
+    return this.projectRoleService.create(dto);
   }
 
   @Get(":id")
   async find(@Param("id") id: string): Promise<ProjectRole> {
-    throw new NotImplementedException();
+    return this.projectRoleService.find(id);
   }
 
   @Get()
   async list(): Promise<ProjectRole[]> {
-    throw new NotImplementedException();
+    return this.projectRoleService.list();
   }
 
   @Put(":id")
   async update(@Param("id") id: string, @Body() dto: UpdateProjectRoleDto): Promise<ProjectRole> {
-    throw new NotImplementedException();
+    return this.projectRoleService.update(id, dto);
   }
 
   @Delete(":id")
   async delete(@Param("id") id: string): Promise<{ success: boolean }> {
-    throw new NotImplementedException();
+    const result = await this.projectRoleService.delete(id);
+    return { success: result };
   }
 }

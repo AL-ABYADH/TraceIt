@@ -1,9 +1,10 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
 import { CreateProjectCollaborationInterface } from "../../interfaces/create-project-collaboration.interface";
 import { UpdateProjectCollaborationInterface } from "../../interfaces/update-project-collaboration.interface";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { ProjectCollaborationModel } from "../../models/project-collaboration.model";
+import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectCollaborationRepository {
@@ -16,21 +17,49 @@ export class ProjectCollaborationRepository {
   async create(
     projectCollaboration: CreateProjectCollaborationInterface,
   ): Promise<ProjectCollaboration> {
-    throw new NotImplementedException();
+    const newProjectCollaboration = {
+      ...projectCollaboration,
+    };
+
+    const collaboration = await this.projectCollaborationModel.createOne(newProjectCollaboration);
+    return plainToInstance(ProjectCollaboration, collaboration.getDataValues());
   }
 
   async getByProject(projectId: string): Promise<ProjectCollaboration[]> {
-    throw new NotImplementedException();
+    const projectCollaborations = await this.projectCollaborationModel.find({
+      whereRelated: {
+        project: {
+          where: {
+            id: projectId,
+          },
+        },
+      },
+    });
+
+    return projectCollaborations.map((collaboration) =>
+      plainToInstance(ProjectCollaboration, collaboration.getDataValues()),
+    );
   }
 
   async update(
     id: string,
     projectCollaboration: UpdateProjectCollaborationInterface,
   ): Promise<ProjectCollaboration> {
-    throw new NotImplementedException();
+    const [updatedCollaboration] = await this.projectCollaborationModel.update(
+      {
+        id,
+      },
+      projectCollaboration,
+    );
+
+    return plainToInstance(ProjectCollaboration, updatedCollaboration.getDataValues());
   }
 
   async delete(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+    const deletedCount = await this.projectCollaborationModel.delete({
+      where: { id },
+    });
+
+    return deletedCount > 0;
   }
 }

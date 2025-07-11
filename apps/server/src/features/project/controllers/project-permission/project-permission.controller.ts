@@ -19,17 +19,17 @@ export class ProjectPermissionController {
 
   @Post()
   async create(@Body() dto: CreateProjectPermissionDto): Promise<ProjectPermission> {
-    throw new NotImplementedException();
+    return this.projectPermissionService.create(dto);
   }
 
   @Get(":id")
   async find(@Param("id") id: string): Promise<ProjectPermission> {
-    throw new NotImplementedException();
+    return this.projectPermissionService.find(id);
   }
 
   @Get()
   async list(): Promise<ProjectPermission[]> {
-    throw new NotImplementedException();
+    return this.projectPermissionService.list();
   }
 
   @Put(":id")
@@ -37,11 +37,12 @@ export class ProjectPermissionController {
     @Param("id") id: string,
     @Body() dto: UpdateProjectPermissionDto,
   ): Promise<ProjectPermission> {
-    throw new NotImplementedException();
+    return this.projectPermissionService.update(id, dto);
   }
 
   @Delete(":id")
   async delete(@Param("id") id: string): Promise<{ success: boolean }> {
-    throw new NotImplementedException();
+    const result = await this.projectPermissionService.delete(id);
+    return { success: result };
   }
 }
