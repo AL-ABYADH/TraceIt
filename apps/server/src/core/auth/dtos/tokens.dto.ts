@@ -7,7 +7,7 @@ import { Expose } from "class-transformer";
  * Used when returning authentication tokens to the client
  * The refresh token is sent as an HTTP-only cookie and not included in the response body
  */
-export class TokensDto extends BaseDto<TokensInterface> {
+export class TokensDto implements TokensInterface {
   /**
    * JWT access token for authenticating API requests
    * Short-lived (15-60 minutes)

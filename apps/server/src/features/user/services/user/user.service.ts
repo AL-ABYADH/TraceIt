@@ -2,12 +2,13 @@ import { Injectable, NotFoundException, ConflictException } from "@nestjs/common
 import { UserRepository } from "../../repositories/user/user.repository";
 import { CreateUserInterface } from "../../interfaces/create-user.interface";
 import { UpdateUserInterface } from "../../interfaces/update-user.interface";
+import { User } from "../../entities/user.entity";
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async register(userData: CreateUserInterface) {
+  async register(userData: CreateUserInterface): Promise<User> {
     const { email, username } = userData;
 
     const existingEmailUser = await this.userRepository.getByEmail(email);
@@ -23,7 +24,7 @@ export class UserService {
     return this.userRepository.create(userData);
   }
 
-  async find(id: string) {
+  async find(id: string): Promise<User> {
     const user = await this.userRepository.getById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -31,15 +32,20 @@ export class UserService {
     return user;
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<User | null> {
     return (await this.userRepository.getByEmail(email)) ?? null;
   }
 
-  async findByUsername(username: string) {
+  async findByUsername(username: string): Promise<User | null> {
     return (await this.userRepository.getByUsername(username)) ?? null;
   }
 
-  async updateProfile(id: string, userData: UpdateUserInterface) {
+  async updateProfile(id: string, userData: UpdateUserInterface): Promise<User> {
+    const user = await this.find(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
     if (userData.username) {
       const existingUser = await this.userRepository.getByUsername(userData.username);
       if (existingUser && existingUser.id !== id) {
@@ -55,20 +61,20 @@ export class UserService {
     return updatedUser;
   }
 
-  async resetPassword(id: string, password: string) {
-    const result = await this.userRepository.updatePassword(id, password);
-    if (!result) {
+  async resetPassword(id: string, password: string): Promise<User> {
+    const user = await this.userRepository.updatePassword(id, password);
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return result;
+    return user;
   }
 
-  async verifyEmail(id: string) {
-    const result = await this.userRepository.setEmailVerified(id, true);
-    if (!result) {
+  async verifyEmail(id: string): Promise<User> {
+    const user = await this.userRepository.setEmailVerified(id, true);
+    if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return result;
+    return user;
   }
 
   /**
@@ -77,7 +83,11 @@ export class UserService {
    * @param userId - The ID of the user to look up.
    * @returns The user entity with active refresh tokens, or null if not found.
    */
-  async findUserWithActiveRefreshTokens(userId: string): Promise<any> {
-    return this.userRepository.getUserWithActiveRefreshTokens(userId);
+  async findUserWithActiveRefreshTokens(userId: string): Promise<User> {
+    const user = await this.userRepository.getUserWithActiveRefreshTokens(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    return user;
   }
 }

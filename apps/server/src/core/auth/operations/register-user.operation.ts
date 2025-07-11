@@ -25,7 +25,6 @@ export class RegisterUserOperation {
       displayName: registerInterface.displayName,
       email: registerInterface.email,
       password: hashedPassword,
-      createdAt: new Date().toISOString(),
     });
 
     return this.generateTokensOperation.execute(user, userAgent, ip, res);

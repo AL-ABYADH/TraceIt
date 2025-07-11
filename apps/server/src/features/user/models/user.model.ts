@@ -7,6 +7,7 @@ export type UserAttributes = {
   email: string;
   emailVerified: boolean;
   password: string;
+  createdAt: string;
 };
 
 interface UserRelationships {
