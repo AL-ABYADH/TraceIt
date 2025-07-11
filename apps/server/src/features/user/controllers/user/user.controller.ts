@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotImplementedException, Param, Put } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put } from "@nestjs/common";
 import { UserService } from "../../services/user/user.service";
 import { UpdateUserDto } from "../../dtos/update-user.dto";
 import { User } from "../../entities/user.entity";
@@ -9,11 +9,11 @@ export class UserController {
 
   @Put(":id")
   updateProfile(@Param("id") id: string, @Body() dto: UpdateUserDto): Promise<User> {
-    throw new NotImplementedException();
+    return this.userService.updateProfile(id, dto);
   }
 
   @Get(":id")
   find(@Param("id") id: string): Promise<User> {
-    throw new NotImplementedException();
+    return this.userService.find(id);
   }
 }
