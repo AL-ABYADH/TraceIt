@@ -1,3 +1,6 @@
+import { User } from "../../../features/user/entities/user.entity";
+import { Transform } from "class-transformer";
+
 /**
  * Entity for storing refresh tokens in the database
  */
@@ -7,7 +10,8 @@ export class RefreshToken {
   issuedIp: string;
   userAgent: string;
   expiresAt: Date;
-  revoked: boolean;
   createdAt: Date;
+  revoked: boolean;
   updatedAt?: Date;
+  user?: User | null;
 }
