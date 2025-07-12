@@ -53,7 +53,12 @@ export class UserService {
       }
     }
 
-    const updatedUser = await this.userRepository.update(id, userData);
+    // Filter out undefined fields from userData
+    const filteredData = Object.fromEntries(
+      Object.entries(userData).filter(([_, value]) => value !== undefined),
+    );
+
+    const updatedUser = await this.userRepository.update(id, filteredData);
     if (!updatedUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
