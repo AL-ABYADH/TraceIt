@@ -1,4 +1,3 @@
-import { BaseDto } from "../../../common/dto/base.dto";
 import { TokensInterface } from "../interfaces/tokens.interface";
 import { Expose } from "class-transformer";
 
