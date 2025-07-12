@@ -16,4 +16,9 @@ export class UserController {
   find(@Param("id") id: string): Promise<User> {
     return this.userService.find(id);
   }
+
+  @Put(":id/verify-email")
+  verifyEmail(@Param("id") id: string): Promise<User> {
+    return this.userService.verifyEmail(id);
+  }
 }
