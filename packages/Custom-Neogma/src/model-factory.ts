@@ -278,39 +278,47 @@ export function ModelFactory<
    */
   const proxiedModel = new Proxy(model, {
     get(target, prop, receiver) {
+      // Always return plain object for createOne
+      if (prop === "createOne") {
+        return async (data: any, params?: any) => {
+          const instance = await target.createOne.call(target, data, params);
+          return instance.getDataValues();
+        };
+      }
+      // Always return array of plain objects for createMany
+      if (prop === "createMany") {
+        return async (data: any[], params?: any) => {
+          const instances = await target.createMany.call(target, data, params);
+          return instances.map((i: any) => i.getDataValues());
+        };
+      }
+      // Always update updatedAt and return plain array for update
       if (prop === "update") {
-        // Update the `updatedAt` field during updates
         return async (data: any, params: any) => {
           if (data) {
-            // Always update the updatedAt field
             data.updatedAt = new Date().toISOString();
           }
-          return target.update.call(target, data, params);
+          const [instances, result] = await target.update.call(target, data, params);
+          return [instances.map((i: any) => i.getDataValues()), result];
         };
-      } else if (prop === "findMany") {
-        // Set plain to true by default
+      }
+      // Set plain: true by default for findMany
+      if (prop === "findMany") {
         return async (params?: any) => {
           params = params || {};
-
-          if (params.plain === undefined) {
-            params.plain = true;
-          }
-
+          if (params.plain === undefined) params.plain = true;
           return target.findMany.call(target, params);
         };
-      } else if (prop === "findOne") {
-        // Set plain to true by default
+      }
+      // Set plain: true by default for findOne
+      if (prop === "findOne") {
         return async (params?: any) => {
           params = params || {};
-
-          if (params.plain === undefined) {
-            params.plain = true;
-          }
-
+          if (params.plain === undefined) params.plain = true;
           return target.findOne.call(target, params);
         };
       }
-
+      // Default to standard property/method
       return Reflect.get(target, prop, receiver);
     },
   });
