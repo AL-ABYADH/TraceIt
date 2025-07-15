@@ -30,11 +30,6 @@ export function ProjectModel(neogma: Neogma) {
           required: true,
           enum: Object.values(ProjectStatus),
         },
-        createdAt: {
-          type: "string",
-          required: true,
-          format: "date-time",
-        },
       },
       primaryKeyField: "id",
       relationships: {

@@ -17,11 +17,6 @@ export function ProjectInvitationModel(neogma: Neogma) {
           required: true,
           enum: Object.values(ProjectInvitationStatus),
         },
-        createdAt: {
-          type: "string",
-          required: true,
-          format: "date-time",
-        },
       },
       primaryKeyField: "id",
       relationships: {

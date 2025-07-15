@@ -5,13 +5,7 @@ export function ProjectCollaborationModel(neogma: Neogma) {
     {
       name: "ProjectCollaboration",
       label: ["ProjectCollaboration"],
-      schema: {
-        createdAt: {
-          type: "string",
-          required: true,
-          format: "date-time",
-        },
-      },
+      schema: {},
       primaryKeyField: "id",
       relationships: {
         user: {
