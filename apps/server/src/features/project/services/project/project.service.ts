@@ -15,7 +15,6 @@ export class ProjectService {
       name: project.name,
       description: project.description,
       ownerId: project.userId,
-      createdAt: new Date(),
     };
 
     return this.projectRepository.create(newProject);
