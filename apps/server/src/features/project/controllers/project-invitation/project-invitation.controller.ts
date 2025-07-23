@@ -1,14 +1,14 @@
 import { Body, Controller, Param, Patch, Post } from "@nestjs/common";
 import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { ProjectInvitationService } from "../../services/project-invitation/project-invitation.service";
-import { InviteParamsDto } from "../../dtos/invite-params.dto";
+import { CreateProjectInvitationDto } from "../../dtos/create-project-invitation.dto";
 
 @Controller("project-invitations")
 export class ProjectInvitationController {
   constructor(private readonly projectInvitationService: ProjectInvitationService) {}
 
   @Post()
-  async invite(@Body() dto: InviteParamsDto): Promise<ProjectInvitation> {
+  async invite(@Body() dto: CreateProjectInvitationDto): Promise<ProjectInvitation> {
     return this.projectInvitationService.invite(dto);
   }
 
