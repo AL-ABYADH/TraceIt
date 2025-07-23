@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { ProjectInvitationRepository } from "../../repositories/project-invitation/project-invitation.repository";
-import { InviteParamsInterface } from "../../interfaces/invite-params.interface";
 import { ProjectInvitationStatus } from "../../enums/project-invitation-status.enum";
+import { CreateProjectInvitationInterface } from "../../interfaces/create-project-invitation.interface";
 
 @Injectable()
 export class ProjectInvitationService {
   constructor(private readonly projectInvitationRepository: ProjectInvitationRepository) {}
 
-  async invite(params: InviteParamsInterface): Promise<ProjectInvitation> {
-    throw new NotImplementedException();
+  async invite(params: CreateProjectInvitationInterface): Promise<ProjectInvitation> {
+    return this.projectInvitationRepository.create(params);
   }
 
   private handleInvitationNotFound(id: string): never {
