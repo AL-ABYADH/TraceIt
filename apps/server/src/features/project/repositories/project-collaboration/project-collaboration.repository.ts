@@ -4,7 +4,6 @@ import { CreateProjectCollaborationInterface } from "../../interfaces/create-pro
 import { UpdateProjectCollaborationInterface } from "../../interfaces/update-project-collaboration.interface";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { ProjectCollaborationModel } from "../../models/project-collaboration.model";
-import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectCollaborationRepository {
@@ -17,12 +16,10 @@ export class ProjectCollaborationRepository {
   async create(
     projectCollaboration: CreateProjectCollaborationInterface,
   ): Promise<ProjectCollaboration> {
-    const newProjectCollaboration = {
+    const collaboration = await this.projectCollaborationModel.createOne({
       ...projectCollaboration,
-    };
-
-    const collaboration = await this.projectCollaborationModel.createOne(newProjectCollaboration);
-    return plainToInstance(ProjectCollaboration, collaboration.getDataValues());
+    });
+    return { ...collaboration, createdAt: new Date(collaboration.createdAt) };
   }
 
   async getByProject(projectId: string): Promise<ProjectCollaboration[]> {
@@ -36,23 +33,25 @@ export class ProjectCollaborationRepository {
       },
     });
 
-    return projectCollaborations.map((collaboration) =>
-      plainToInstance(ProjectCollaboration, collaboration.getDataValues()),
-    );
+    return projectCollaborations.map((collaboration) => ({
+      ...collaboration,
+      createdAt: new Date(collaboration.createdAt),
+    }));
   }
 
   async update(
     id: string,
     projectCollaboration: UpdateProjectCollaborationInterface,
   ): Promise<ProjectCollaboration> {
-    const [updatedCollaboration] = await this.projectCollaborationModel.update(
-      {
-        id,
-      },
-      projectCollaboration,
-    );
+    const updatedCollaboration = await this.projectCollaborationModel.update(projectCollaboration, {
+      where: { id },
+      return: true,
+    })[0][0];
 
-    return plainToInstance(ProjectCollaboration, updatedCollaboration.getDataValues());
+    return {
+      ...updatedCollaboration,
+      createdAt: new Date(updatedCollaboration.createdAt),
+    };
   }
 
   async delete(id: string): Promise<boolean> {

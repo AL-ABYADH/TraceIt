@@ -4,7 +4,6 @@ import { CreateProjectPermissionInterface } from "../../interfaces/create-projec
 import { UpdateProjectPermissionInterface } from "../../interfaces/update-project-permission.interface";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { ProjectPermissionModel } from "../../models/project-permission.model";
-import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectPermissionRepository {
@@ -14,40 +13,36 @@ export class ProjectPermissionRepository {
     this.projectPermissionModel = ProjectPermissionModel(neo4jService.getNeogma());
   }
 
-  async create(projectPermission: CreateProjectPermissionInterface): Promise<ProjectPermission> {
-    const newProjectPermission = {
-      ...projectPermission,
-    };
-
-    const permission = await this.projectPermissionModel.createOne(newProjectPermission);
-    return plainToInstance(ProjectPermission, permission.getDataValues());
+  async create(permission: CreateProjectPermissionInterface): Promise<ProjectPermission> {
+    const projectPermission = await this.projectPermissionModel.createOne({
+      ...permission,
+    });
+    return { ...projectPermission };
   }
 
-  async getById(id: string): Promise<ProjectPermission> {
+  async getById(id: string): Promise<ProjectPermission | null> {
     const projectPermission = await this.projectPermissionModel.findOne({ where: { id } });
 
-    return plainToInstance(ProjectPermission, projectPermission.getDataValues());
+    return projectPermission != null ? { ...projectPermission } : null;
   }
 
   async getAll(): Promise<ProjectPermission[]> {
     const projectPermissions = await this.projectPermissionModel.find({});
-    return projectPermissions.map((permission) =>
-      plainToInstance(ProjectPermission, permission.getDataValues()),
-    );
+    return projectPermissions.map((permission) => ({
+      ...permission,
+    }));
   }
 
   async update(
     id: string,
     projectPermission: UpdateProjectPermissionInterface,
   ): Promise<ProjectPermission> {
-    const [updatedProjectPermission] = await this.projectPermissionModel.update(
-      {
-        id,
-      },
-      projectPermission,
-    );
+    const updatedProjectPermission = await this.projectPermissionModel.update(projectPermission, {
+      where: { id },
+      return: true,
+    });
 
-    return plainToInstance(ProjectPermission, updatedProjectPermission.getDataValues());
+    return { ...updatedProjectPermission };
   }
 
   async delete(id: string): Promise<boolean> {

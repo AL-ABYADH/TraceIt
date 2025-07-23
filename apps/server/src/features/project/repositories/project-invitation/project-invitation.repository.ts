@@ -4,7 +4,6 @@ import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { CreateProjectInvitationInterface } from "../../interfaces/create-project-invitation.interface";
 import { ProjectInvitationModel } from "../../models/project-invitation.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectInvitationRepository {
@@ -15,12 +14,10 @@ export class ProjectInvitationRepository {
   }
 
   async create(projectInvitation: CreateProjectInvitationInterface): Promise<ProjectInvitation> {
-    const newInvitation = {
+    const invitation = await this.projectInvitationModel.createOne({
       ...projectInvitation,
-    };
-
-    const invitation = await this.projectInvitationModel.createOne(newInvitation);
-    return plainToInstance(ProjectInvitation, invitation.getDataValues());
+    });
+    return { ...invitation, createdAt: new Date(invitation.createdAt) };
   }
 
   async getBySender(
@@ -40,7 +37,10 @@ export class ProjectInvitationRepository {
       },
     });
 
-    return invitations.map((inv) => plainToInstance(ProjectInvitation, inv.getDataValues()));
+    return invitations.map((invitation) => ({
+      ...invitation,
+      createdAt: new Date(invitation.createdAt),
+    }));
   }
 
   async getByReceiver(
@@ -60,7 +60,10 @@ export class ProjectInvitationRepository {
       },
     });
 
-    return invitations.map((inv) => plainToInstance(ProjectInvitation, inv.getDataValues()));
+    return invitations.map((invitation) => ({
+      ...invitation,
+      createdAt: new Date(invitation.createdAt),
+    }));
   }
 
   async setStatus(id: string, status: ProjectInvitationStatus): Promise<boolean> {

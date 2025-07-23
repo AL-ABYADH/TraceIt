@@ -5,7 +5,6 @@ import { UpdateProjectInterface } from "../../interfaces/update-project.interfac
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectModel } from "../../models/project.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectRepository {
@@ -16,18 +15,14 @@ export class ProjectRepository {
   }
 
   async create(projectData: CreateProjectInterface): Promise<Project> {
-    const newProject = {
-      ...projectData,
-    };
-
-    const project = await this.projectModel.createOne(newProject);
-    return plainToInstance(Project, project.getDataValues());
+    const project = await this.projectModel.createOne({ ...projectData });
+    return { ...project, createdAt: new Date(project.createdAt) };
   }
 
-  async getById(id: string): Promise<Project> {
+  async getById(id: string): Promise<Project | null> {
     const project = await this.projectModel.findOne({ where: { id } });
 
-    return plainToInstance(Project, project.getDataValues());
+    return project != null ? { ...project, createdAt: new Date(project.createdAt) } : null;
   }
 
   async getByOwnerOrCollaboration(userId: string, status: ProjectStatus): Promise<Project[]> {
@@ -61,18 +56,19 @@ export class ProjectRepository {
       ],
     });
 
-    return projects.map((project) => plainToInstance(Project, project.getDataValues()));
+    return projects.map((project) => ({ ...project, createdAt: new Date(project.createdAt) }));
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<Project> {
-    const [updatedProject] = await this.projectModel.update(
-      {
-        id,
-      },
-      project,
-    );
+    const updatedProject = await this.projectModel.update(project, {
+      where: { id },
+      return: true,
+    })[0][0];
 
-    return plainToInstance(Project, updatedProject.getDataValues());
+    return {
+      ...updatedProject,
+      createdAt: new Date(updatedProject.createdAt),
+    };
   }
 
   async delete(id: string): Promise<boolean> {

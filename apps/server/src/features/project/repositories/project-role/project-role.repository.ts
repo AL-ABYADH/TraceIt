@@ -4,7 +4,6 @@ import { CreateProjectRoleInterface } from "../../interfaces/create-project-role
 import { UpdateProjectRoleInterface } from "../../interfaces/update-project-role.interface";
 import { ProjectRoleModel } from "../../models/project-role.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { plainToInstance } from "class-transformer";
 
 @Injectable()
 export class ProjectRoleRepository {
@@ -14,29 +13,35 @@ export class ProjectRoleRepository {
     this.projectRoleModel = ProjectRoleModel(neo4jService.getNeogma());
   }
 
-  async create(projectRole: CreateProjectRoleInterface): Promise<ProjectRole> {
-    const newProjectRole = {
-      ...projectRole,
-    };
-
-    const role = await this.projectRoleModel.createOne(newProjectRole);
-    return plainToInstance(ProjectRole, role.getDataValues());
+  async create(role: CreateProjectRoleInterface): Promise<ProjectRole> {
+    const projectRole = await this.projectRoleModel.createOne({
+      ...role,
+    });
+    return { ...projectRole };
   }
 
-  async getById(id: string): Promise<ProjectRole> {
+  async getById(id: string): Promise<ProjectRole | null> {
     const projectRole = await this.projectRoleModel.findOne({ where: { id } });
 
-    return plainToInstance(ProjectRole, projectRole.getDataValues());
+    return projectRole != null
+      ? {
+          ...projectRole,
+          createdAt: new Date(projectRole.createdAt),
+        }
+      : null;
   }
 
   async getAll(): Promise<ProjectRole[]> {
     const projectRoles = await this.projectRoleModel.findMany({});
-    return projectRoles.map((role) => plainToInstance(ProjectRole, role.getDataValues()));
+    return projectRoles.map((role) => ({ ...role }));
   }
 
   async update(id: string, projectRole: UpdateProjectRoleInterface): Promise<ProjectRole> {
-    const [updatedProjectRole] = await this.projectRoleModel.update({ id }, projectRole);
-    return plainToInstance(ProjectRole, updatedProjectRole.getDataValues());
+    const updatedProjectRole = await this.projectRoleModel.update(projectRole, {
+      where: { id },
+      return: true,
+    })[0][0];
+    return { ...updatedProjectRole };
   }
 
   async delete(id: string): Promise<boolean> {
