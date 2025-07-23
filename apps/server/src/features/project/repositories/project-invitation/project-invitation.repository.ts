@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ProjectInvitationStatus } from "../../enums/project-invitation-status.enum";
 import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { CreateProjectInvitationInterface } from "../../interfaces/create-project-invitation.interface";

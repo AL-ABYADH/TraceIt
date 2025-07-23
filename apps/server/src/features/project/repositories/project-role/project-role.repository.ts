@@ -1,4 +1,4 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ProjectRole } from "../../entities/project-role.entity";
 import { CreateProjectRoleInterface } from "../../interfaces/create-project-role.interface";
 import { UpdateProjectRoleInterface } from "../../interfaces/update-project-role.interface";
