@@ -11,11 +11,6 @@ export class ProjectInvitationService {
   async invite(params: CreateProjectInvitationInterface): Promise<ProjectInvitation> {
     return this.projectInvitationRepository.create(params);
   }
-
-  private handleInvitationNotFound(id: string): never {
-    throw new NotFoundException(`Invitation with ID ${id} not found`);
-  }
-
   async accept(id: string): Promise<boolean> {
     const updated = await this.projectInvitationRepository.setStatus(
       id,
