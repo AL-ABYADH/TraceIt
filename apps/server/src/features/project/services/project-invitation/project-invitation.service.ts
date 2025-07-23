@@ -21,7 +21,9 @@ export class ProjectInvitationService {
       id,
       ProjectInvitationStatus.ACCEPTED,
     );
-    if (!updated) this.handleInvitationNotFound(id);
+    if (!updated) {
+      throw new NotFoundException(`Invitation with ID ${id} not found`);
+    }
     return true;
   }
 
@@ -30,7 +32,9 @@ export class ProjectInvitationService {
       id,
       ProjectInvitationStatus.DENIED,
     );
-    if (!updated) this.handleInvitationNotFound(id);
+    if (!updated) {
+      throw new NotFoundException(`Invitation with ID ${id} not found`);
+    }
     return true;
   }
 
@@ -39,7 +43,9 @@ export class ProjectInvitationService {
       id,
       ProjectInvitationStatus.CANCELLED,
     );
-    if (!updated) this.handleInvitationNotFound(id);
+    if (!updated) {
+      throw new NotFoundException(`Invitation with ID ${id} not found`);
+    }
     return true;
   }
 }
