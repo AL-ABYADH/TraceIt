@@ -16,7 +16,7 @@ import {
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
 import { v4 as uuidv4 } from "uuid";
-import { GenericConfiguration, NeogmaModel } from "./Neogma/types";
+import { GenericConfiguration, NeogmaModel } from "./Neogma/normal-model-types";
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
@@ -59,6 +59,10 @@ import { GenericConfiguration, NeogmaModel } from "./Neogma/types";
  *   { include: ['profile', 'posts'], limits: { posts: 5 } }
  * );
  */
+
+function removeUndefined(obj: Record<string, any>) {
+  return Object.fromEntries(Object.entries(obj).filter(([_, value]) => value !== undefined));
+}
 export function ModelFactory<
   Properties extends Neo4jSupportedProperties,
   RelatedNodes extends AnyObject = object,
@@ -296,6 +300,7 @@ export function ModelFactory<
       if (prop === "update") {
         return async (data: any, params: any) => {
           if (data) {
+            data = removeUndefined(data);
             data.updatedAt = new Date().toISOString();
           }
           const [instances, result] = await target.update.call(target, data, params);
