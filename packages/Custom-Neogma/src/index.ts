@@ -10,10 +10,10 @@ export type { OriginalNeogmaModel };
 export * from "neogma";
 
 // Export your custom ModelFactory from a local file
-export { ModelFactory, defineModelFactory } from "./model-factory";
+export { defineModelFactory } from "./model-factory";
 
 export * from "./types";
 
-export type { NeogmaModel } from "./Neogma/types";
-
+export type { NeogmaModel } from "./Neogma/normal-model-types";
+export type { NeogmaModel as AbstractNeogmaModel } from "./Neogma/abstract-model-types";
 export { AbstractModelFactory, defineAbstractModelFactory } from "./abstract-factory";
