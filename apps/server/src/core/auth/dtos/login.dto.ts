@@ -1,6 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from "class-validator";
 import { AtLeastOneOf } from "@repo/custom-validators";
-import { BaseDto } from "../../../common/dto/base.dto";
 import { LoginInterface } from "../interfaces/login.interface";
 
 /**
@@ -9,7 +8,7 @@ import { LoginInterface } from "../interfaces/login.interface";
  */
 
 @AtLeastOneOf(["email", "username"])
-export class LoginDto extends BaseDto<LoginInterface> {
+export class LoginDto implements LoginInterface {
   @IsOptional()
   @IsEmail({}, { message: "Please enter a valid email address" })
   email?: string;

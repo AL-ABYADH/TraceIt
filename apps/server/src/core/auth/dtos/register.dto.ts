@@ -7,14 +7,13 @@ import {
   MinLength,
   IsStrongPassword,
 } from "class-validator";
-import { BaseDto } from "../../../common/dto/base.dto";
 import { RegisterInterface } from "../interfaces/register.interface";
 
 /**
  * Data Transfer Object for user registration
  * Contains all required fields to create a new user account
  */
-export class RegisterDto extends BaseDto<RegisterInterface> {
+export class RegisterDto implements RegisterInterface {
   @IsNotEmpty({ message: "The name is required" })
   @IsString({ message: "The name must be a string" })
   @MaxLength(50, { message: "The name cannot exceed 50 characters" })

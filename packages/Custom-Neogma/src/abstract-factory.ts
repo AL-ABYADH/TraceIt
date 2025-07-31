@@ -1,6 +1,6 @@
 import { Neo4jSupportedProperties, Neogma } from "neogma";
-import { ModelParams, AnyObject, ModelFactoryDefinition } from "./types";
-import { NeogmaModel } from "./Neogma/types";
+import { ModelParams, AnyObject, AbstractModelFactoryDefinition } from "./types";
+import { NeogmaModel as AbstractNeogmaModel } from "./Neogma/abstract-model-types";
 import { ModelFactory } from "./model-factory";
 
 /**
@@ -21,8 +21,6 @@ export class ReadOnlyModelError extends Error {
 const FORBIDDEN_METHODS = [
   "createOne",
   "createMany",
-  "delete",
-  "update",
   "build",
   "buildFromRecord",
   "createRelationship",
@@ -54,9 +52,12 @@ export function AbstractModelFactory<
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
   neogma: Neogma,
-): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+): AbstractNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   // Create the base model using the standard ModelFactory
-  const baseModel = ModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);
+  const baseModel: any = ModelFactory<Properties, RelatedNodes, Methods, Statics>(
+    parameters,
+    neogma,
+  );
 
   // Apply the read-only proxy wrapper
   return createReadOnlyProxy(baseModel, parameters.name);
@@ -75,9 +76,9 @@ function createReadOnlyProxy<
   Methods extends AnyObject,
   Statics extends AnyObject,
 >(
-  model: NeogmaModel<Properties, RelatedNodes, Methods, Statics>,
+  model: AbstractNeogmaModel<Properties, RelatedNodes, Methods, Statics>,
   modelName: string,
-): NeogmaModel<Properties, RelatedNodes, Methods, Statics> {
+): AbstractNeogmaModel<Properties, RelatedNodes, Methods, Statics> {
   return new Proxy(model, {
     get(target, prop, receiver) {
       const value = Reflect.get(target, prop, receiver);
@@ -119,7 +120,7 @@ export function defineAbstractModelFactory<
   Statics extends AnyObject = AnyObject,
 >(
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>,
-): ModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
+): AbstractModelFactoryDefinition<Properties, RelatedNodes, Methods, Statics> {
   // Create a model function that returns an AbstractModelFactory instance
   const ModelFunction = function (neogma: Neogma) {
     return AbstractModelFactory<Properties, RelatedNodes, Methods, Statics>(parameters, neogma);

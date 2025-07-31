@@ -2,6 +2,8 @@ import {
   NeogmaModel,
   ModelFactoryDefinition,
   defineAbstractModelFactory,
+  AbstractNeogmaModel,
+  AbstractModelFactoryDefinition,
 } from "@repo/custom-neogma";
 
 export interface ActorAttributes {
@@ -14,9 +16,9 @@ export interface ActorRelationships {
   project: any;
 }
 
-export type ActorModelType = NeogmaModel<ActorAttributes, ActorRelationships>;
+export type ActorModelType = AbstractNeogmaModel<ActorAttributes, ActorRelationships>;
 
-export const ActorModel: ModelFactoryDefinition<ActorAttributes, ActorRelationships> =
+export const ActorModel: AbstractModelFactoryDefinition<ActorAttributes, ActorRelationships> =
   defineAbstractModelFactory<ActorAttributes, ActorRelationships>({
     name: "Actor",
     label: ["Actor"],

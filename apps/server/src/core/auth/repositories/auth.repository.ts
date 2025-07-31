@@ -3,7 +3,6 @@ import { RefreshTokenModel, RefreshTokenModelType } from "../models/refresh-toke
 import { Neo4jService } from "../../neo4j/neo4j.service";
 import { Op } from "@repo/custom-neogma";
 import { UserService } from "../../../features/user/services/user/user.service";
-import { plainToInstance } from "class-transformer";
 import { RefreshToken } from "../entities/refresh-token.entity";
 import { User } from "../../../features/user/entities/user.entity";
 
@@ -42,7 +41,7 @@ export class AuthRepository {
       },
     });
 
-    return this.mapToRefreshTokenEntity(newToken.getDataValues());
+    return this.mapToRefreshTokenEntity(newToken);
   }
 
   /**
@@ -152,18 +151,20 @@ export class AuthRepository {
   /**
    * Checks if a valid, non-revoked refresh token exists and returns its details.
    */
-  async checkIfExists(token: string): Promise<any> {
+  async checkIfExists(token: string): Promise<RefreshToken | null> {
     const tokenData = await this.refreshTokenModel.findOneWithRelations({
       where: { token, revoked: false },
     });
-
-    return tokenData ? this.mapToRefreshTokenEntity(tokenData) : null;
+    return this.mapToRefreshTokenEntity(tokenData);
   }
 
   /**
    * Transforms raw data into a RefreshToken entity instance.
    */
   private mapToRefreshTokenEntity(data: any): RefreshToken {
-    return plainToInstance(RefreshToken, data);
+    return {
+      ...data,
+      expiresAt: new Date(data?.expiresAt),
+    } as RefreshToken;
   }
 }

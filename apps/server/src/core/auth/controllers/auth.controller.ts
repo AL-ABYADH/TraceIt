@@ -1,13 +1,13 @@
 import {
-  Controller,
-  Post,
   Body,
-  UseGuards,
+  Controller,
   HttpCode,
   HttpStatus,
+  Post,
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
 import { RegisterDto } from "../dtos/register.dto";
@@ -19,7 +19,6 @@ import { Public } from "../decorators/public.decorator";
 
 // Import types only
 import type { Request, Response } from "express";
-import { plainToInstance } from "class-transformer";
 import { TokensDto } from "../dtos/tokens.dto";
 
 @Controller("auth")
@@ -36,14 +35,8 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const tokens = await this.authService.register(
-      registerDto.toInterface(),
-      userAgent,
-      ipAddress,
-      response,
-    );
-    return plainToInstance(TokensDto, tokens);
+  ): Promise<TokensDto> {
+    return await this.authService.register(registerDto, userAgent, ipAddress, response);
   }
 
   /**
@@ -58,14 +51,8 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ) {
-    const tokens = await this.authService.login(
-      loginDto.toInterface(),
-      userAgent,
-      ipAddress,
-      response,
-    );
-    return plainToInstance(TokensDto, tokens);
+  ): Promise<TokensDto> {
+    return await this.authService.login(loginDto, userAgent, ipAddress, response);
   }
 
   /**
@@ -78,20 +65,14 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<TokensDto> {
     const refreshToken = request.cookies["refreshToken"] as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token is missing.");
     }
 
-    const tokens = await this.authService.refreshTokens(
-      refreshToken,
-      userAgent,
-      ipAddress,
-      response,
-    );
-    return plainToInstance(TokensDto, tokens);
+    return await this.authService.refreshTokens(refreshToken, userAgent, ipAddress, response);
   }
 
   /**

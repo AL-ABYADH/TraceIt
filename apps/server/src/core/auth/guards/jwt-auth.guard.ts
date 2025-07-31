@@ -38,7 +38,7 @@ export class JwtAuthGuard implements CanActivate {
     let decodedPayload: JwtPayload | null;
     try {
       // Decode JWT to extract payload
-      decodedPayload = jwt.decode(accessToken);
+      decodedPayload = jwt.decode(accessToken) as JwtPayload | null;
     } catch (err) {
       throw new UnauthorizedException("Invalid access token.");
     }
