@@ -19,6 +19,5 @@ export const SoftwareActorModel: ModelFactoryDefinition<
   schema: {
     ...ActorModel.parameters.schema,
   },
-  primaryKeyField: ActorModel.parameters.primaryKeyField,
   relationships: { ...ActorModel.parameters.relationships },
 });
