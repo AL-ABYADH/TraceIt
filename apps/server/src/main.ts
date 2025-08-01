@@ -5,6 +5,7 @@ import { JwtAuthGuard } from "./core/auth/guards/jwt-auth.guard";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { AuthRepository } from "./core/auth/repositories/auth.repository";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +32,16 @@ async function bootstrap() {
     origin: ["http://localhost:3000"],
     credentials: true,
   });
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle("TraceIt API")
+    // .setDescription('Your API Description')
+    .setVersion("1.0")
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup("api-docs", app, document);
 
   await app.listen(8000, "0.0.0.0");
   const t = await app.getUrl();
