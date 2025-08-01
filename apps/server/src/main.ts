@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
+import { ClassSerializerInterceptor, Logger, ValidationPipe } from "@nestjs/common";
 import { JwtAuthGuard } from "./core/auth/guards/jwt-auth.guard";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
@@ -34,7 +34,7 @@ async function bootstrap() {
 
   await app.listen(8000, "0.0.0.0");
   const t = await app.getUrl();
-  console.log(`Application is running on: ${t}`);
+  Logger.log(`Application is running on: ${t}`);
 }
 
 bootstrap();
