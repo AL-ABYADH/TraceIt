@@ -1,16 +1,15 @@
 import {
-  NeogmaModel,
-  ModelFactoryDefinition,
-  defineAbstractModelFactory,
-  AbstractNeogmaModel,
   AbstractModelFactoryDefinition,
+  AbstractNeogmaModel,
+  defineAbstractModelFactory,
 } from "@repo/custom-neogma";
 
-export interface ActorAttributes {
-  [key: string]: any;
+export type ActorAttributes = {
   id: string;
   name: string;
-}
+
+  [key: string]: any;
+};
 
 export interface ActorRelationships {
   project: any;
@@ -33,7 +32,6 @@ export const ActorModel: AbstractModelFactoryDefinition<ActorAttributes, ActorRe
           "is not a valid name. It can only contain letters, numbers, spaces, underscores, hyphens, and no leading or trailing spaces.",
       },
     },
-    primaryKeyField: "id",
     relationships: {
       project: {
         model: "Project",

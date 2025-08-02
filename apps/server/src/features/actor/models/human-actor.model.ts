@@ -1,7 +1,7 @@
-import { NeogmaModel, ModelFactoryDefinition, defineModelFactory } from "@repo/custom-neogma";
+import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { ActorAttributes, ActorModel, ActorRelationships } from "./actor.model";
 
-export interface HumanActorAttributes extends ActorAttributes {}
+export type HumanActorAttributes = ActorAttributes & {};
 
 interface HumanActorRelationships extends ActorRelationships {}
 
