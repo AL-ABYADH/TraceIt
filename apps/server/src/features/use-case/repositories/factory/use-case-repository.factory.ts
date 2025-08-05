@@ -6,10 +6,9 @@ import { UseCaseActorRepository } from "../use-case-actor/use-case-actor.reposit
 import { UseCaseDescriptionRepository } from "../use-case-description/use-case-description.repository";
 import { UseCaseDiagramRepository } from "../use-case-diagram/use-case-diagram.repository";
 import { UseCaseRelationshipRepository } from "../use-case-relationship/use-case-relationship.repository";
-import { ConcreteUseCaseRepositoryInterface } from "../interfaces/concrete-use-case-repository.interface";
-import { UseCase } from "../../entities/use-case.entity";
 import { UseCaseSubtype } from "../../enums/use-case-subtype.enum";
 import { InvalidUseCaseSubtypeError } from "../../errors/invalid-use-case-subtype.error";
+import { ConcreteUseCaseRepositoryInterface } from "../interfaces/concrete-use-case-repository.interface";
 
 @Injectable()
 export class UseCaseRepositoryFactory {
@@ -23,7 +22,15 @@ export class UseCaseRepositoryFactory {
     private readonly relationshipRepo: UseCaseRelationshipRepository,
   ) {}
 
-  getConcreteRepository(subType: UseCaseSubtype): ConcreteUseCaseRepositoryInterface<UseCase> {
+  /**
+   * Retrieves a concrete repository implementation based on the specified use case subtype.
+   * Uses `any` as the generic type because not all entities share a common base type.
+   *
+   * @param subType - The subtype of the use case to determine the repository
+   * @returns An instance of a repository conforming to ConcreteUseCaseRepositoryInterface<any>
+   * @throws InvalidUseCaseSubtypeError if the subtype is unrecognized
+   */
+  getConcreteRepository(subType: UseCaseSubtype): ConcreteUseCaseRepositoryInterface<any> {
     switch (subType) {
       case UseCaseSubtype.PRIMARY:
         return this.primaryRepo;
@@ -42,6 +49,12 @@ export class UseCaseRepositoryFactory {
     }
   }
 
+  /**
+   * Returns the base repository for generic use case operations.
+   * Useful for handling common CRUD operations across all use case types.
+   *
+   * @returns The base UseCaseRepository instance
+   */
   getBaseRepository(): UseCaseRepository {
     return this.baseRepo;
   }

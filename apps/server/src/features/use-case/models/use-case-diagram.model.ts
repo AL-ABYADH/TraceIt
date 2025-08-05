@@ -1,29 +1,43 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseModel, UseCaseAttributes, UseCaseRelationships } from "./use-case.model";
-import { UseCase } from "../entities/use-case.entity";
-import { Actor } from "../../actor/entities/actor.entity";
+import { UseCaseModelType } from "./use-case.model"; // Adjust path if needed
+import { UseCaseActorModelType } from "./use-case-actor.model"; // Adjust path if needed
 
-export type UseCaseDiagramAttributes = UseCaseAttributes & {
-  initial: string;
-  final?: string;
+/**
+ * Defines the model for a use case diagram in the database.
+ * This is not a subtype of UseCaseModel, as diagrams are structural aggregations.
+ */
+export type UseCaseDiagramAttributes = {
+  id: string; // Unique identifier for the diagram
+  initial: string; // Initial state of the diagram (typically serialized JSON)
+  final?: string; // Optional final state (e.g., after user modifications)
 };
 
-interface UseCaseDiagramRelationships extends UseCaseRelationships {
-  useCases: UseCase;
-  actors: Actor;
+/**
+ * Defines relationships for the UseCaseDiagram model.
+ * Includes a collection of use cases and associated actors.
+ */
+export interface UseCaseDiagramRelationships {
+  useCases: UseCaseModelType;
+  actors: UseCaseActorModelType;
 }
 
+/**
+ * Neogma model type for UseCaseDiagram.
+ */
 export type UseCaseDiagramModelType = NeogmaModel<
   UseCaseDiagramAttributes,
   UseCaseDiagramRelationships
 >;
 
+/**
+ * Neogma model factory definition for UseCaseDiagram.
+ */
 export const UseCaseDiagramModel: ModelFactoryDefinition<
   UseCaseDiagramAttributes,
   UseCaseDiagramRelationships
 > = defineModelFactory<UseCaseDiagramAttributes, UseCaseDiagramRelationships>({
   name: "UseCaseDiagram",
-  label: [...UseCaseModel.parameters.label, "UseCaseDiagram"],
+  label: ["UseCaseDiagram"],
   schema: {
     initial: { type: "string", required: true },
     final: { type: "string", required: false },
