@@ -1,4 +1,4 @@
-import { updateUserSchema, uuidParamsSchema } from "@repo/shared";
+import { updateUserSchema, uuidParamsSchema } from "@repo/shared-schemas";
 import { registerMultiple, registry } from "./registry";
 
 // Register schemas
