@@ -10,16 +10,18 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
-import { RegisterDto } from "../dtos/register.dto";
+// import { RegisterDto } from "../dtos/register.dto";
 import { GetUserAgent } from "../decorators/http-info.decorator";
 import { RealIP } from "nestjs-real-ip";
-import { LoginDto } from "../dtos/login.dto";
+// import { LoginDto } from "../dtos/login.dto";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
 import { Public } from "../decorators/public.decorator";
 
 // Import types only
 import type { Request, Response } from "express";
 import { TokensDto } from "../dtos/tokens.dto";
+import { zodBody } from "src/common/pipes/zod";
+import { type LoginDto, loginSchema, type RegisterDto, registerSchema } from "@repo/shared-schemas";
 
 @Controller("auth")
 export class AuthController {
@@ -31,7 +33,7 @@ export class AuthController {
   @Public()
   @Post("register")
   async register(
-    @Body() registerDto: RegisterDto,
+    @Body(zodBody(registerSchema)) registerDto: RegisterDto,
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
@@ -47,7 +49,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   async login(
-    @Body() loginDto: LoginDto,
+    @Body(zodBody(loginSchema)) loginDto: LoginDto,
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,

@@ -1,5 +1,10 @@
 import { registerMultiple, registry } from "./registry";
-import { registerSchema, loginSchema, tokensSchema, refreshTokenCookieSchema } from "@repo/shared";
+import {
+  registerSchema,
+  loginSchema,
+  tokensSchema,
+  refreshTokenCookieSchema,
+} from "@repo/shared-schemas";
 
 // Register DTOs
 registerMultiple(registry, {
@@ -26,7 +31,7 @@ registry.registerPath({
     201: {
       description: "User registered successfully",
       content: {
-        "application/json": { schema: tokensSchema },
+        "application/json": { schema: { $ref: "#/components/schemas/TokensDto" } },
       },
     },
     400: {
@@ -46,7 +51,7 @@ registry.registerPath({
       description: "Login using username or email and password",
       required: true,
       content: {
-        "application/json": { schema: loginSchema },
+        "application/json": { schema: { $ref: "#/components/schemas/LoginDto" } },
       },
     },
   },
@@ -54,7 +59,7 @@ registry.registerPath({
     200: {
       description: "Login successful",
       content: {
-        "application/json": { schema: tokensSchema },
+        "application/json": { schema: { $ref: "#/components/schemas/TokensDto" } },
       },
     },
     401: {
@@ -63,24 +68,6 @@ registry.registerPath({
   },
 });
 
-// /auth/refresh
-// registry.registerPath({
-//   method: "post",
-//   path: "/auth/refresh",
-//   tags: ["Auth"],
-
-//   responses: {
-//     200: {
-//       description: "Tokens refreshed successfully",
-//       content: {
-//         "application/json": { schema: tokensSchema },
-//       },
-//     },
-//     401: {
-//       description: "Missing or invalid refresh token",
-//     },
-//   },
-// });
 registry.registerPath({
   method: "post",
   path: "/auth/refresh",
@@ -93,7 +80,7 @@ registry.registerPath({
       description: "Tokens refreshed successfully",
       content: {
         "application/json": {
-          schema: tokensSchema,
+          schema: { $ref: "#/components/schemas/TokensDto" },
         },
       },
     },
