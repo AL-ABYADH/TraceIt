@@ -64,7 +64,7 @@ importers:
         version: link:../../packages/Custom-Validators
       '@repo/shared-schemas':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/shared-schemas
       argon2:
         specifier: ^0.43.0
         version: 0.43.0
@@ -230,7 +230,7 @@ importers:
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.0))
       '@repo/shared-schemas':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/shared-schemas
       lucide-react:
         specifier: ^0.536.0
         version: 0.536.0(react@19.1.0)
@@ -373,7 +373,7 @@ importers:
         specifier: '>=3.0.0'
         version: 3.5.3
 
-  packages/shared:
+  packages/shared-schemas:
     dependencies:
       '@asteasolutions/zod-to-openapi':
         specifier: ^7.3.2
