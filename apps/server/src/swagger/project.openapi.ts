@@ -8,7 +8,7 @@ import {
   updateProjectCollaborationSchema,
   createProjectInvitationSchema,
   uuidParamsSchema,
-} from "@repo/shared";
+} from "@repo/shared-schemas";
 import { registerMultiple, registry } from "./registry";
 
 // Register all schemas (DTOs)
@@ -34,7 +34,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: createProjectSchema,
+          schema: { $ref: "#/components/schemas/CreateProjectDto" },
         },
       },
     },
@@ -244,7 +244,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: createProjectPermissionSchema,
+          schema: { $ref: "#/components/schemas/CreateProjectPermissionDto" },
         },
       },
     },
@@ -278,7 +278,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: updateProjectPermissionSchema,
+          schema: { $ref: "#/components/schemas/UpdateProjectPermissionDto" },
         },
       },
     },
@@ -312,7 +312,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: createProjectRoleSchema,
+          schema: { $ref: "#/components/schemas/CreateProjectRoleDto" },
         },
       },
     },
@@ -346,7 +346,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: updateProjectRoleSchema,
+          schema: { $ref: "#/components/schemas/UpdateProjectRoleDto" },
         },
       },
     },
@@ -381,7 +381,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: updateProjectCollaborationSchema,
+          schema: { $ref: "#/components/schemas/UpdateProjectCollaborationDto" },
         },
       },
     },
@@ -415,7 +415,7 @@ registry.registerPath({
       required: true,
       content: {
         "application/json": {
-          schema: createProjectInvitationSchema,
+          schema: { $ref: "#/components/schemas/CreateProjectInvitationDto" },
         },
       },
     },
