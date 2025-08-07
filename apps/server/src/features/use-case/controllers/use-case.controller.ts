@@ -19,13 +19,14 @@ export class UseCaseController {
   constructor(private readonly useCaseService: UseCaseService) {}
 
   @Post()
-  async add(@Body() dto: AddUseCaseDto): Promise<UseCase> {
-    throw new NotImplementedException();
+  async add(@Body() dto: AddUseCaseDto) {
+    const useCase = await this.useCaseService.add(dto);
+    return { data: useCase };
   }
 
   @Get()
-  async listByProject(@Query("projectId") projectId: string): Promise<UseCase[]> {
-    throw new NotImplementedException();
+  async listByProject(@Query("projectId") projectId: string) {
+    return { data: await this.useCaseService.listByProject(projectId) };
   }
 
   @Put(":id")

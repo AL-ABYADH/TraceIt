@@ -35,8 +35,15 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
-    return await this.authService.register(registerDto, userAgent, ipAddress, response);
+  ): Promise<{ success: boolean }> {
+    const data: TokensDto = await this.authService.register(
+      registerDto,
+      userAgent,
+      ipAddress,
+      response,
+    );
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**
@@ -51,8 +58,10 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
-    return await this.authService.login(loginDto, userAgent, ipAddress, response);
+  ): Promise<{ success: boolean }> {
+    const data: TokensDto = await this.authService.login(loginDto, userAgent, ipAddress, response);
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**
@@ -65,14 +74,21 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
+  ): Promise<{ success: boolean }> {
     const refreshToken = request.cookies["refreshToken"] as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token is missing.");
     }
 
-    return await this.authService.refreshTokens(refreshToken, userAgent, ipAddress, response);
+    const data: TokensDto = await this.authService.refreshTokens(
+      refreshToken,
+      userAgent,
+      ipAddress,
+      response,
+    );
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**

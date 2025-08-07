@@ -1,28 +1,45 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseModel, UseCaseAttributes, UseCaseRelationships } from "./use-case.model";
 import { UseCaseActorType } from "../enums/use-case-actor-type.enum";
 
-export type UseCaseActorAttributes = UseCaseAttributes & {
-  type: UseCaseActorType;
+/**
+ * Defines the attributes for a UseCaseActor entity in the database.
+ * This entity is no longer considered a subtype of UseCase, as it plays an auxiliary role.
+ */
+export type UseCaseActorAttributes = {
+  id: string; // Unique identifier for the actor relationship
+  type: UseCaseActorType; // Role type (PRIMARY or SECONDARY)
 };
 
-interface UseCaseActorRelationships extends UseCaseRelationships {
-  useCase: any;
+/**
+ * Defines the relationships for the UseCaseActor entity.
+ * Typically connects to a PrimaryUseCase via the ASSIGNED_TO relationship.
+ */
+export interface UseCaseActorRelationships {
+  useCase: any; // Associated use case (usually a PrimaryUseCase)
 }
 
+/**
+ * Neogma model type for the UseCaseActor entity.
+ */
 export type UseCaseActorModelType = NeogmaModel<UseCaseActorAttributes, UseCaseActorRelationships>;
 
+/**
+ * Neogma model factory definition for the UseCaseActor entity.
+ */
 export const UseCaseActorModel: ModelFactoryDefinition<
   UseCaseActorAttributes,
   UseCaseActorRelationships
 > = defineModelFactory<UseCaseActorAttributes, UseCaseActorRelationships>({
   name: "UseCaseActor",
-  label: [...UseCaseModel.parameters.label, "UseCaseActor"],
+  label: ["UseCaseActor"],
   schema: {
-    type: { type: "string", required: true, enum: UseCaseActorType },
+    type: {
+      type: "string",
+      required: true,
+      enum: UseCaseActorType, // Ensures only allowed actor types are stored
+    },
   },
   relationships: {
-    ...UseCaseModel.parameters.relationships,
     useCase: {
       model: "UseCase",
       direction: "out",
