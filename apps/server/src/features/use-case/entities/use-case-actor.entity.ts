@@ -8,7 +8,7 @@ import { UseCaseActorType } from "../enums/use-case-actor-type.enum";
  * This class does not inherit from UseCase but is composed with it.
  */
 export class UseCaseActor {
-  actor: Actor; // The associated actor
-  type: UseCaseActorType; // Role type: PRIMARY or SECONDARY
-  useCase: UseCase; // The related use case
+  actor: Actor;
+  type: UseCaseActorType;
+  useCaseId: string;
 }

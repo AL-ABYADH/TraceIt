@@ -10,9 +10,7 @@ import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interfa
 import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interface";
 
 @Injectable()
-export class UseCaseRelationshipRepository
-  implements ConcreteUseCaseRepositoryInterface<UseCaseRelationship>
-{
+export class UseCaseRelationshipRepository {
   private relationshipModel: UseCaseRelationshipModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {

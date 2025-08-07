@@ -7,9 +7,9 @@ import { UseCaseActorModelType } from "./use-case-actor.model"; // Adjust path i
  * This is not a subtype of UseCaseModel, as diagrams are structural aggregations.
  */
 export type UseCaseDiagramAttributes = {
-  id: string; // Unique identifier for the diagram
-  initial: string; // Initial state of the diagram (typically serialized JSON)
-  final?: string; // Optional final state (e.g., after user modifications)
+  id: string;
+  initial: string;
+  final?: string;
 };
 
 /**
@@ -46,7 +46,7 @@ export const UseCaseDiagramModel: ModelFactoryDefinition<
     useCases: {
       model: "UseCase",
       direction: "out",
-      name: "INCLUDES_CASE",
+      name: "INCLUDES_USE_CASE",
       cardinality: "many",
     },
     actors: {

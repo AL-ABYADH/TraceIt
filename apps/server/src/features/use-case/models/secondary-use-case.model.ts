@@ -1,5 +1,3 @@
-// File: models/secondary-use-case.model.ts
-
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseModel, UseCaseAttributes } from "./use-case.model";
 import { PrimaryUseCaseModelType } from "./primary-use-case.model"; // Use model type, not entity
@@ -42,8 +40,8 @@ export const SecondaryUseCaseModel: ModelFactoryDefinition<
   relationships: {
     primaryUseCase: {
       model: "PrimaryUseCase",
-      direction: "in",
-      name: "HAS_SECONDARY",
+      direction: "out",
+      name: "BELONGS_TO",
       cardinality: "one",
     },
   },

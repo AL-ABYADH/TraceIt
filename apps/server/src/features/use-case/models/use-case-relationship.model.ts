@@ -1,14 +1,14 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseRelationshipType } from "../enums/use-case-relationship-type.enum";
-import { UseCaseModelType } from "./use-case.model"; // Adjust path if necessary
+import { UseCase } from "../entities/use-case.entity";
 
 /**
  * Defines the model for a relationship between use cases (e.g., INCLUDES, EXTENDS).
  * This is not a subtype of UseCaseModel, but an auxiliary entity linking two use cases.
  */
 export type UseCaseRelationshipAttributes = {
-  id: string; // Unique identifier for the relationship
-  type: UseCaseRelationshipType; // Type of relationship (INCLUDES or EXTENDS)
+  id: string;
+  type: UseCaseRelationshipType;
 };
 
 /**
@@ -16,7 +16,7 @@ export type UseCaseRelationshipAttributes = {
  * Links to the target use case involved in the relationship.
  */
 export interface UseCaseRelationshipRelationships {
-  relatedUseCase: any;
+  relatedUseCase: UseCase;
 }
 
 /**
@@ -47,7 +47,7 @@ export const UseCaseRelationshipModel: ModelFactoryDefinition<
     relatedUseCase: {
       model: "UseCase",
       direction: "out",
-      name: "RELATED_TO",
+      name: "RELATES",
       cardinality: "one",
     },
   },

@@ -1,3 +1,4 @@
+import { UseCase } from "../../entities/use-case.entity";
 import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interface";
 
@@ -5,7 +6,7 @@ import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interfa
  * Repository interface for concrete use case implementations.
  * Generic over the returned entity type T, without constraining T to extend a base UseCase.
  */
-export interface ConcreteUseCaseRepositoryInterface<T> {
+export interface ConcreteUseCaseRepositoryInterface<T extends UseCase> {
   /**
    * Persists a new use case based on the provided DTO.
    * @param createDto - Data required to create the use case

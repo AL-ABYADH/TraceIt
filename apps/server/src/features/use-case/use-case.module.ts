@@ -5,7 +5,6 @@ import { UseCaseRepository } from "./repositories/use-case/use-case.repository";
 import { PrimaryUseCaseRepository } from "./repositories/primary-use-case/primary-use-case.repository";
 import { SecondaryUseCaseRepository } from "./repositories/secondary-use-case/secondary-use-case.repository";
 import { UseCaseActorRepository } from "./repositories/use-case-actor/use-case-actor.repository";
-import { UseCaseDescriptionRepository } from "./repositories/use-case-description/use-case-description.repository";
 import { UseCaseDiagramRepository } from "./repositories/use-case-diagram/use-case-diagram.repository";
 import { UseCaseRelationshipRepository } from "./repositories/use-case-relationship/use-case-relationship.repository";
 import { UseCaseRepositoryFactory } from "./repositories/factory/use-case-repository.factory";
@@ -18,7 +17,6 @@ import { UseCaseRepositoryFactory } from "./repositories/factory/use-case-reposi
     PrimaryUseCaseRepository,
     SecondaryUseCaseRepository,
     UseCaseActorRepository,
-    UseCaseDescriptionRepository,
     UseCaseDiagramRepository,
     UseCaseRelationshipRepository,
     UseCaseRepositoryFactory,

@@ -7,9 +7,7 @@ import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interfa
 import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interface";
 
 @Injectable()
-export class UseCaseDiagramRepository
-  implements ConcreteUseCaseRepositoryInterface<UseCaseDiagram>
-{
+export class UseCaseDiagramRepository {
   private diagramModel: UseCaseDiagramModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {
