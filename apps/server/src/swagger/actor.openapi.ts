@@ -1,10 +1,10 @@
 import { registerMultiple, registry } from "./registry";
-import { createActorSchema, updateActorSchema } from "@repo/shared-schemas";
+import { addActorSchema, updateActorSchema } from "@repo/shared-schemas";
 import { uuidParamsSchema } from "@repo/shared-schemas";
 
 // Register DTOs
 registerMultiple(registry, {
-  CreateActorDto: createActorSchema,
+  CreateActorDto: addActorSchema,
   UpdateActorDto: updateActorSchema,
   UuidParamsDto: uuidParamsSchema,
 });

@@ -11,7 +11,7 @@ import {
  * CREATE ACTOR SCHEMA
  * =========================
  */
-export const createActorSchema = z
+export const addActorSchema = z
   .object({
     name: actorNameFieldDoc,
     projectId: actorProjectIdField,

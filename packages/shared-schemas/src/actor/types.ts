@@ -1,5 +1,5 @@
 import { z } from "../zod-openapi-init";
-import { createActorSchema, updateActorSchema } from "./schemas";
+import { addActorSchema, updateActorSchema } from "./schemas";
 
-export type CreateActorDto = z.infer<typeof createActorSchema>;
+export type AddActorDto = z.infer<typeof addActorSchema>;
 export type UpdateActorDto = z.infer<typeof updateActorSchema>;
