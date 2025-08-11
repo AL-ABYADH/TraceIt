@@ -9,7 +9,6 @@ import { Class } from "src/features/class/entities/class.entity";
 export class PrimaryUseCase extends UseCase {
   actors: UseCaseActor[];
   description?: string;
-  projectId: string;
   classes: Class[];
   // sequenceDiagrams: any[];
   // activityDiagram: any;
