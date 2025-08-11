@@ -1,11 +1,10 @@
 import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ClassSerializerInterceptor, Logger, ValidationPipe } from "@nestjs/common";
+import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
 import { JwtAuthGuard } from "./core/auth/guards/jwt-auth.guard";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import { AuthRepository } from "./core/auth/repositories/auth.repository";
-import { setupSwagger } from "./swagger";
+import { AuthService } from "./core/auth/services/auth.service";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,19 +24,17 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const reflector = app.get(Reflector);
-  const authRepository = app.get(AuthRepository);
-  app.useGlobalGuards(new JwtAuthGuard(reflector, authRepository));
+  const authService = app.get(AuthService);
+  app.useGlobalGuards(new JwtAuthGuard(reflector, authService));
 
   app.enableCors({
     origin: ["http://localhost:3000"],
     credentials: true,
   });
 
-  setupSwagger(app);
-
   await app.listen(8000, "0.0.0.0");
   const t = await app.getUrl();
-  Logger.log(`Application is running on: ${t}`);
+  console.log(`Application is running on: ${t}`);
 }
 
 bootstrap();
