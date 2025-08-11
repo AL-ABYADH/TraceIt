@@ -67,33 +67,6 @@ export class AuthController {
   }
 
   /**
-   * Issues new access and refresh tokens using the refresh token stored in cookies.
-   */
-  @Post("refresh")
-  @HttpCode(HttpStatus.OK)
-  async refreshTokens(
-    @Req() request: Request,
-    @GetUserAgent() userAgent: string,
-    @RealIP() ipAddress: string,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<{ success: boolean }> {
-    const refreshToken = request.cookies["refreshToken"] as string | undefined;
-
-    if (!refreshToken) {
-      throw new UnauthorizedException("Refresh token is missing.");
-    }
-
-    const data: TokensDto = await this.authService.refreshTokens(
-      refreshToken,
-      userAgent,
-      ipAddress,
-      response,
-    );
-    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
-    return { success: !!data };
-  }
-
-  /**
    * Logs out the user and revokes the active refresh token.
    */
   @Post("logout")
