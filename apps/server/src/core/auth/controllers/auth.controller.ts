@@ -10,16 +10,16 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
-// import { RegisterDto } from "../dtos/register.dto";
 import { GetUserAgent } from "../decorators/http-info.decorator";
 import { RealIP } from "nestjs-real-ip";
-// import { LoginDto } from "../dtos/login.dto";
 import { LocalAuthGuard } from "../guards/local-auth.guard";
 import { Public } from "../decorators/public.decorator";
 
 // Import types only
 import type { Request, Response } from "express";
 import { TokensDto } from "../dtos/tokens.dto";
+
+// Zod
 import { zodBody } from "src/common/pipes/zod";
 import { type LoginDto, loginSchema, type RegisterDto, registerSchema } from "@repo/shared-schemas";
 
@@ -37,8 +37,15 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
-    return await this.authService.register(registerDto, userAgent, ipAddress, response);
+  ): Promise<{ success: boolean }> {
+    const data: TokensDto = await this.authService.register(
+      registerDto,
+      userAgent,
+      ipAddress,
+      response,
+    );
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**
@@ -53,8 +60,10 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
-    return await this.authService.login(loginDto, userAgent, ipAddress, response);
+  ): Promise<{ success: boolean }> {
+    const data: TokensDto = await this.authService.login(loginDto, userAgent, ipAddress, response);
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**
@@ -67,14 +76,21 @@ export class AuthController {
     @GetUserAgent() userAgent: string,
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<TokensDto> {
+  ): Promise<{ success: boolean }> {
     const refreshToken = request.cookies["refreshToken"] as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token is missing.");
     }
 
-    return await this.authService.refreshTokens(refreshToken, userAgent, ipAddress, response);
+    const data: TokensDto = await this.authService.refreshTokens(
+      refreshToken,
+      userAgent,
+      ipAddress,
+      response,
+    );
+    response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+    return { success: !!data };
   }
 
   /**
