@@ -1,3 +1,4 @@
+// File: core/auth/guards/jwt-auth.guard.ts
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { Reflector } from "@nestjs/core";
@@ -33,16 +34,21 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException("Access and refresh tokens are required.");
     }
 
-    const payload = this.decodeToken(accessToken);
+    //  Verify the Access Token signature (with ignoreExpiration) before using the payload
+    const payload = this.verifyAccessTokenSignatureIgnoreExpiration(accessToken);
+
+    // Ensure the validity of the Refresh Token and its consistency with the Access Token data
     await this.validateRefreshToken(refreshToken, payload);
 
+    // Let Passport perform regular validation (expired Access Token will throw here)
     try {
       const isValid = await this.jwtStrategyGuard.canActivate(context);
       if (!isValid) throw new UnauthorizedException();
     } catch (err) {
       if (err instanceof UnauthorizedException) {
+        // If failure is due only to Access Token expiration, attempt automatic refresh
         try {
-          jwt.verify(accessToken, process.env.JWT_SECRET!);
+          jwt.verify(accessToken, this.getJwtSecret()); // full verification without ignoreExpiration
         } catch (verifyErr) {
           if (verifyErr instanceof TokenExpiredError) {
             const data = await this.authService.refreshTokens(
@@ -70,7 +76,14 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private extractRefreshToken(request: Request): string | undefined {
-    return request.headers["x-refresh-token"] || request.cookies?.refreshToken;
+    const headerValue = request.headers["x-refresh-token"];
+    const headerToken = Array.isArray(headerValue)
+      ? headerValue[0]
+      : typeof headerValue === "string"
+        ? headerValue
+        : undefined;
+
+    return headerToken ?? request.cookies?.refreshToken;
   }
 
   private extractRealIp(request: Request): string {
@@ -95,12 +108,29 @@ export class JwtAuthGuard implements CanActivate {
     return ip;
   }
 
-  private decodeToken(token: string): JwtPayload {
-    const payload = jwt.decode(token) as JwtPayload | null;
-    if (!payload) {
+  /** Verifies the Access Token signature ignoring expiration and returns the trusted payload */
+  private verifyAccessTokenSignatureIgnoreExpiration(token: string): JwtPayload {
+    const secret = this.getJwtSecret();
+
+    try {
+      const payload = jwt.verify(token, secret, { ignoreExpiration: true }) as JwtPayload | null;
+      if (!payload) throw new UnauthorizedException("Invalid access token.");
+      // Basic validation on expected fields
+      if (!payload.sub || !payload.data) {
+        throw new UnauthorizedException("Invalid access token payload.");
+      }
+      return payload;
+    } catch {
       throw new UnauthorizedException("Invalid access token.");
     }
-    return payload;
+  }
+
+  private getJwtSecret(): string {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      throw new UnauthorizedException("JWT secret is not configured.");
+    }
+    return secret;
   }
 
   private async validateRefreshToken(refreshToken: string, payload: JwtPayload) {
