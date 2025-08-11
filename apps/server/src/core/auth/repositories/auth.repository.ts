@@ -79,11 +79,7 @@ export class AuthRepository {
    */
   async findUserIdByRefreshToken(token: string): Promise<string | null> {
     const user = await this.findUserByRefreshToken(token);
-    if (!user) {
-      throw new NotFoundException("User not found for this token.");
-    }
-
-    return user.id || null;
+    return user?.id ?? null;
   }
 
   /**
@@ -98,10 +94,10 @@ export class AuthRepository {
    */
   async revokeAllUserRefreshTokens(userId: string): Promise<void> {
     const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
-
     if (userWithTokens?.refreshTokens) {
-      for (const token of userWithTokens.refreshTokens) {
-        await this.revokeRefreshToken(token);
+      for (const t of userWithTokens.refreshTokens) {
+        const raw = typeof t === "string" ? t : t.token;
+        await this.revokeRefreshToken(raw);
       }
     }
   }
@@ -111,12 +107,10 @@ export class AuthRepository {
    */
   async revokeAllUserRefreshTokensExceptOne(userId: string, exceptToken: string): Promise<void> {
     const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
-
     if (userWithTokens?.refreshTokens) {
-      for (const token of userWithTokens.refreshTokens) {
-        if (token !== exceptToken) {
-          await this.revokeRefreshToken(token);
-        }
+      for (const t of userWithTokens.refreshTokens) {
+        const raw = typeof t === "string" ? t : t.token;
+        if (raw !== exceptToken) await this.revokeRefreshToken(raw);
       }
     }
   }
@@ -152,8 +146,10 @@ export class AuthRepository {
    * Checks if a valid, non-revoked refresh token exists and returns its details.
    */
   async checkIfExists(token: string): Promise<RefreshToken | null> {
+    const nowIso = new Date().toISOString();
     const tokenData = await this.refreshTokenModel.findOneWithRelations({
-      where: { token, revoked: false },
+      where: { token, revoked: false, expiresAt: { [Op.gte]: nowIso } },
+      include: ["user"],
     });
     return this.mapToRefreshTokenEntity(tokenData);
   }
