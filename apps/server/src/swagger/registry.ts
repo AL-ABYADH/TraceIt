@@ -11,3 +11,9 @@ export function registerMultiple(registry: OpenAPIRegistry, schemas: Record<stri
     registry.register(key, schema);
   }
 }
+
+// export const parameterComponents: Record<string, any> = {};
+
+// export function registerParameterComponent(name: string, param: any) {
+//   parameterComponents[name] = param;
+// }

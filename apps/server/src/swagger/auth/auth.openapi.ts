@@ -1,4 +1,4 @@
-import { registerMultiple, registry } from "./registry";
+import { registerMultiple, registry } from "../registry";
 import {
   registerSchema,
   loginSchema,
