@@ -5,8 +5,6 @@
 - NextRequest and NextResponse are special classes  provided by Next.js to handle HTTP requests and responses at the edge (before reaching route/response handlers).
 
 
- Middleware runs before requests reaching route/response, allowing the implementation of  authentication, redirects, logging, and more before any rendering or requests goes out.
-
 ### Guidelines
 - Place only middleware files here (e.g., `auth.ts` for authentication checks).
 
