@@ -1,5 +1,4 @@
 // @repo/shared/schemas/user/update-user-schema.ts
-import { z } from "../zod-openapi-init";
 import { updateUserFields } from "./fields";
 import { atLeastOneOfSchema } from "../common";
 
