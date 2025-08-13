@@ -6,7 +6,7 @@ import { ConfigService, ConfigModule } from "@nestjs/config";
 import { AuthService } from "./services/auth.service";
 import { AuthController } from "./controllers/auth.controller";
 import { AuthRepository } from "./repositories/auth.repository";
-import { JwtStrategy } from "./strategies/jwt.strategy";
+import { JwtAuthGuard } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
 import { UserModule } from "../../features/user/user.module";
 
@@ -50,7 +50,7 @@ import { GenerateTokensOperation } from "./operations/generate-tokens.operation"
 
     // Strategies
     LocalStrategy,
-    JwtStrategy,
+    JwtAuthGuard,
 
     // Use Cases
     ValidateUserOperation,
