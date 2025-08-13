@@ -5,7 +5,19 @@ import { Project, SyntaxKind, SourceFile } from "ts-morph";
 import * as fs from "fs";
 import * as path from "path";
 
-const START_GLOB = "src/features/**/controllers/**/*.controller.ts";
+const START_GLOBS = [
+  // features controllers (nested and direct)
+  "src/features/**/controllers/**/*.controller.ts",
+  "src/features/**/controllers/*.controller.ts",
+  "src/features/**/controllers/**/*.ts",
+  "src/features/**/controllers/*.ts",
+  // core controllers (nested and direct)
+  "src/core/**/controllers/**/*.controller.ts",
+  "src/core/**/controllers/*.controller.ts",
+  "src/core/**/controllers/**/*.ts",
+  "src/core/**/controllers/*.ts",
+];
+
 const SWAGGER_ROOT = "src/swagger";
 const SWAGGER_INDEX = path.join(SWAGGER_ROOT, "index.ts");
 const REGISTRY_FILENAME = "registry";
@@ -174,7 +186,10 @@ ${request}
 function outputDirForController(controllerPath: string) {
   const normalized = path.normalize(controllerPath);
   const parts = normalized.split(path.sep);
-  const idx = parts.lastIndexOf("features");
+  // support both "features" and "core" top-levels
+  const idxFeatures = parts.lastIndexOf("features");
+  const idxCore = parts.lastIndexOf("core");
+  const idx = Math.max(idxFeatures, idxCore);
   if (idx === -1) return SWAGGER_ROOT;
   const rel = parts.slice(idx + 1);
   const controllersIndex = rel.lastIndexOf("controllers");
@@ -285,22 +300,71 @@ async function main() {
     tsConfigFilePath: "tsconfig.json",
     skipAddingFilesFromTsConfig: true,
   });
-  const controllers = project.addSourceFilesAtPaths(START_GLOB);
+
+  // add files using the configured globs
+  const added = project.addSourceFilesAtPaths(START_GLOBS);
+
+  // dedupe by normalized path
+  const seen = new Map<string, SourceFile>();
+  for (const sf of added) {
+    seen.set(path.normalize(sf.getFilePath()), sf);
+  }
+  const candidates = Array.from(seen.values());
+
+  // filter to actual controllers: must live in a 'controllers' path and have a @Controller decorator
+  const controllers: SourceFile[] = [];
+  for (const sf of candidates) {
+    const fp = sf.getFilePath();
+    if (!fp.split(path.sep).some((p) => p === "controllers")) continue;
+    try {
+      const classes = sf.getClasses();
+      let hasControllerDecorator = false;
+      for (const cls of classes) {
+        try {
+          const dec = cls.getDecorator && cls.getDecorator("Controller");
+          if (dec) {
+            hasControllerDecorator = true;
+            break;
+          }
+        } catch {
+          // ignore
+        }
+      }
+      if (hasControllerDecorator) controllers.push(sf);
+    } catch {
+      // ignore parse issues
+    }
+  }
+
   if (!controllers || controllers.length === 0) {
-    console.error("No controllers found. Check START_GLOB:", START_GLOB);
+    console.error("No controllers found. Check START_GLOBS:", START_GLOBS.join(", "));
     process.exit(1);
   }
+
+  // Debug: list discovered controllers
+  // console.log(`Discovered ${controllers.length} controller file(s):`);
+  // for (const sf of controllers) console.log(" -", toPosix(sf.getFilePath()));
+
   ensureDir(SWAGGER_ROOT);
 
   const created: string[] = [];
   const updated: string[] = [];
+
+  // track used names per output directory to avoid collisions across multiple controllers in same dir
+  const outDirUsedNames = new Map<string, Set<string>>();
 
   for (const sf of controllers) {
     const controllerPath = sf.getFilePath();
     const outDir = outputDirForController(controllerPath);
     ensureDir(outDir);
 
-    const usedNames = new Set<string>();
+    // get / create usedNames for this output directory
+    let usedNames = outDirUsedNames.get(outDir);
+    if (!usedNames) {
+      usedNames = new Set<string>();
+      outDirUsedNames.set(outDir, usedNames);
+    }
+
     const outName = outFileName(controllerPath, usedNames);
     const outPath = path.join(outDir, outName);
 
@@ -501,6 +565,13 @@ async function main() {
     ].filter(Boolean);
     const finalContent = pieces.join("\n");
 
+    // Controller debug summary (commented out)
+    // console.log(
+    //   `Controller => src: ${toPosix(controllerPath)}, outDir: ${toPosix(
+    //     outDir,
+    //   )}, outFile: ${outName}, paths: ${pathBlocks.length}, dtos: ${schemaMap.size}`,
+    // );
+
     // write only if normalized/formatted content differs
     const isNew = !fs.existsSync(outPath);
     const changed = writeIfChangedNormalized(outPath, finalContent);
@@ -604,6 +675,14 @@ async function main() {
   if (created.length === 0 && updated.length === 0) {
     console.log("Done. No changes needed.");
   } else {
+    if (created.length) {
+      console.log("Created files:");
+      for (const c of created) console.log("  +", c);
+    }
+    if (updated.length) {
+      console.log("Updated files:");
+      for (const u of updated) console.log("  ~", u);
+    }
     console.log("Done.");
   }
 }
