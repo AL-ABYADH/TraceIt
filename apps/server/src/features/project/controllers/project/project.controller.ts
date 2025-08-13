@@ -14,7 +14,6 @@ import { ProjectService } from "../../services/project/project.service";
 import { Project } from "../../entities/project.entity";
 // import { CreateProjectDto } from "../../dtos/create-project.dto";
 // import { UpdateProjectDto } from "../../dtos/update-project.dto";
-import { InjectUserIdPipe } from "../../../../common/pipes/inject-user-id.pipe";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
 import { ProjectCollaborationService } from "../../services/project-collaboration/project-collaboration.service";
@@ -27,6 +26,7 @@ import {
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
+import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
 @Controller("projects")
 export class ProjectController {
@@ -46,9 +46,11 @@ export class ProjectController {
   }
 
   @Post()
-  @UsePipes(InjectUserIdPipe)
-  async create(@Body(zodBody(createProjectSchema)) dto: CreateProjectDto): Promise<Project> {
-    return this.projectService.create(dto);
+  async create(
+    @CurrentUserId() userId: string,
+    @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
+  ): Promise<Project> {
+    return this.projectService.create({ ...dto, userId });
   }
 
   @Put(":id")
