@@ -11,8 +11,6 @@ import { CleanupExpiredTokensOperation } from "../operations/cleanup-expired-tok
 
 import { LoginInterface } from "../interfaces/login.interface";
 import { RegisterInterface } from "../interfaces/register.interface";
-import { AuthRepository } from "../repositories/auth.repository";
-import { RefreshToken } from "../entities/refresh-token.entity";
 
 @Injectable()
 export class AuthService {
@@ -24,7 +22,6 @@ export class AuthService {
     private readonly logoutUserOp: LogoutUserOperation,
     private readonly logoutAllDevicesOp: LogoutAllDevicesOperation,
     private readonly cleanupExpiredTokensOp: CleanupExpiredTokensOperation,
-    private readonly authRepository: AuthRepository,
   ) {}
 
   /**
@@ -96,9 +93,5 @@ export class AuthService {
    */
   async cleanupExpiredTokens(): Promise<void> {
     return this.cleanupExpiredTokensOp.execute();
-  }
-
-  async checkIfExists(refreshToken: string): Promise<RefreshToken | null> {
-    return this.authRepository.checkIfExists(refreshToken);
   }
 }
