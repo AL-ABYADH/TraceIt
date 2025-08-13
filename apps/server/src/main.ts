@@ -5,6 +5,7 @@ import { JwtAuthGuard } from "./core/auth/guards/jwt-auth.guard";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { AuthService } from "./core/auth/services/auth.service";
+import { setupSwagger } from "./swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,9 +33,13 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // ✅ Swagger setup
+  setupSwagger(app);
+
   await app.listen(8000, "0.0.0.0");
-  const t = await app.getUrl();
-  console.log(`Application is running on: ${t}`);
+  const url = await app.getUrl();
+  console.log(`Application is running on: ${url}`);
+  console.log(`📚 Swagger docs available at: ${url}/api`);
 }
 
 bootstrap();
