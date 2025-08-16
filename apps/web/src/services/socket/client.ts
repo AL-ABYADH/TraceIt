@@ -10,7 +10,7 @@ const socket: Socket = io(process.env.NEXT_PUBLIC_SOCKET_URL as string, {
 export default socket;
 
 /*
-     For full list: https://socket.io/docs/v4/client-api/#new-Manager-url-options better read this shit , useful AF
+     For full list: https://socket.io/docs/v4/client-api/#new-Manager-url-options better read this shit, useful AF
 
     //   The path to connect to the server.
     // path: "/socket.io",
@@ -52,8 +52,7 @@ export default socket;
     // },
 
 
-    for @AL-ABYADH
-      the difference between using extraHeaders and auth for bearer token is 
+    The difference between using extraHeaders and auth for bearer token is 
 
           - `extraHeaders` sends custom HTTP headers (like Authorization: Bearer <token>) with the initial HTTP handshake request. for (Node.js or anything else), because browsers block setting custom headers for WebSocket connections due to security restrictions.
           - `auth` is the recommended way for authentication in browser clients. The object you provide (e.g., { token: "your-auth-token" }) is sent as part of the Socket.io protocol during the handshake, not as an HTTP header, so it works in browsers and Node.js.
@@ -65,13 +64,13 @@ export default socket;
 
 /**
  * --- Usage Example ---
- *  //if u came from the ReadMe i'm not using the hook here 
+ *  // if u came from the ReadMe i'm not using the hook here 
  *  // if u don't then never mind this comment 
  *
  * import socket from '@/services/socket/client';
  *
  * // Connect to the server
- * socket.connect(); // u should connect once preferable put it in this file but if u have credentials then you will figure it out when the times comes
+ * socket.connect(); // u should connect preferably once put it in this file but if u have credentials then you will figure it out when the time comes
  *
  * // Listen for an event
  * socket.on('message', (data) => {
