@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { ProjectRepository } from "../../repositories/project/project.repository";
 import { Project } from "../../entities/project.entity";
 import { UpdateProjectInterface } from "../../interfaces/update-project.interface";
-import { CreateProjectParamsInterface } from "../../interfaces/create-project-params.interface";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { CreateProjectInterface } from "../../interfaces/create-project.interface";
 
@@ -10,7 +9,7 @@ import { CreateProjectInterface } from "../../interfaces/create-project.interfac
 export class ProjectService {
   constructor(private readonly projectRepository: ProjectRepository) {}
 
-  async create(project: CreateProjectParamsInterface): Promise<Project> {
+  async create(project: { name: string; description?: string; userId: string }): Promise<Project> {
     const newProject: CreateProjectInterface = {
       name: project.name,
       description: project.description,
@@ -28,30 +27,30 @@ export class ProjectService {
     return project;
   }
 
-  async listUserProjects(userId: string, status: ProjectStatus): Promise<Project[]> {
-    return this.projectRepository.getByOwnerOrCollaboration(userId, status);
+  async listUserProjects(userId: string, status?: ProjectStatus) {
+    return this.projectRepository.getProjects(userId, status);
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<Project> {
-    this.find(id);
+    await this.find(id);
 
     return this.projectRepository.update(id, project);
   }
 
   async delete(id: string): Promise<boolean> {
-    this.find(id);
+    await this.find(id);
 
     return this.projectRepository.delete(id);
   }
 
   async activate(id: string): Promise<boolean> {
-    this.find(id);
+    await this.find(id);
 
     return this.projectRepository.setStatus(id, ProjectStatus.ACTIVE);
   }
 
   async archive(id: string): Promise<boolean> {
-    this.find(id);
+    await this.find(id);
 
     return this.projectRepository.setStatus(id, ProjectStatus.ARCHIVED);
   }

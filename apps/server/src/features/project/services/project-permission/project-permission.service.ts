@@ -28,14 +28,14 @@ export class ProjectPermissionService {
   async update(
     id: string,
     projectPermission: UpdateProjectPermissionInterface,
-  ): Promise<ProjectPermission> {
-    this.find(id);
+  ): Promise<ProjectPermission[]> {
+    await this.find(id);
 
     return this.projectPermissionRepository.update(id, projectPermission);
   }
 
   async delete(id: string): Promise<boolean> {
-    this.find(id);
+    await this.find(id);
 
     return this.projectPermissionRepository.delete(id);
   }
