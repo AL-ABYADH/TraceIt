@@ -226,8 +226,8 @@ interface NeogmaModelStaticsI<
       /** throws an error if the node is not found */
       throwIfNotFound?: boolean;
       // Special additions for relations
-      include?: string[];
-      exclude?: string[];
+      include?: [keyof RelatedNodesToAssociateI];
+      exclude?: [keyof RelatedNodesToAssociateI];
       limits?: Record<string, number>;
     },
   ) => Promise<
@@ -246,27 +246,37 @@ interface NeogmaModelStaticsI<
       /** throws an error if no nodes are found (results length 0) */
       throwIfNoneFound?: boolean;
       // Special additions for relations
-      include?: string[];
-      exclude?: string[];
+      include?: [keyof RelatedNodesToAssociateI];
+      exclude?: [keyof RelatedNodesToAssociateI];
       limits?: Record<string, number>;
     },
   ) => Promise<
     Array<Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations>
   >;
 
-  searchInRelations(
-    where: WhereParamsI,
-    relationAlias: keyof RelatedNodesToAssociateI,
-    searchOptions?: {
-      where?: {
-        source?: WhereParamsI;
-        target?: WhereParamsI;
-        relationship?: WhereParamsI;
-      };
+  findByRelatedEntity: <Plain extends boolean = false>(
+    params: GenericConfiguration & {
+      /** where params for the related entities to match against */
+      whereRelated: WhereParamsI;
+      /** the alias of the relationship to traverse */
+      relationshipAlias: keyof RelatedNodesToAssociateI;
+      /** additional where params for the nodes of this Model */
+      where?: WhereParamsI;
       limit?: number;
-      session?: any;
+      skip?: number;
+      order?: Array<[Extract<keyof Properties, string>, "ASC" | "DESC"]>;
+      /** returns an array of the plain properties, instead of Instances */
+      plain?: Plain;
+      /** throws an error if no nodes are found (results length 0) */
+      throwIfNoneFound?: boolean;
+      // Special additions for relations
+      include?: [keyof RelatedNodesToAssociateI];
+      exclude?: [keyof RelatedNodesToAssociateI];
+      limits?: Record<string, number>;
     },
-  ): Promise<any[]>;
+  ) => Promise<
+    Array<Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations>
+  >;
 }
 /** the methods of a Neogma Instance */
 interface NeogmaInstanceMethodsI<
