@@ -8,8 +8,24 @@ import { CreateProjectInvitationInterface } from "../../interfaces/create-projec
 export class ProjectInvitationService {
   constructor(private readonly projectInvitationRepository: ProjectInvitationRepository) {}
 
-  async invite(params: CreateProjectInvitationInterface): Promise<ProjectInvitation> {
-    return this.projectInvitationRepository.create(params);
+  async getProjectInvitations(
+    userID: string,
+    status?: ProjectInvitationStatus,
+  ): Promise<ProjectInvitation[]> {
+    return this.projectInvitationRepository.getByReceiver(userID, status);
+  }
+
+  async getSentInvitations(
+    userID: string,
+    status?: ProjectInvitationStatus,
+  ): Promise<ProjectInvitation[]> {
+    return this.projectInvitationRepository.getBySender(userID, status);
+  }
+  async invite(
+    userID: string,
+    params: CreateProjectInvitationInterface,
+  ): Promise<ProjectInvitation> {
+    return this.projectInvitationRepository.create(userID, params);
   }
   async accept(id: string): Promise<boolean> {
     const updated = await this.projectInvitationRepository.setStatus(
