@@ -1,9 +1,32 @@
 import { registerMultiple, registry } from "../registry";
-import { updateProjectCollaborationSchema, uuidParamsSchema } from "@repo/shared-schemas";
+import {
+  createProjectCollaborationSchema,
+  updateProjectCollaborationSchema,
+  uuidParamsSchema,
+} from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
+  CreateProjectCollaborationDto: createProjectCollaborationSchema,
   UpdateProjectCollaborationDto: updateProjectCollaborationSchema,
   UuidParamsDto: uuidParamsSchema,
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/project-collaborations",
+  tags: ["ProjectCollaboration"],
+  request: {
+    body: {
+      description: "CreateProjectCollaborationDto request body",
+      required: true,
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/CreateProjectCollaborationDto" },
+        },
+      },
+    },
+  },
+  responses: { 200: { description: "Successful response" } },
 });
 
 registry.registerPath({

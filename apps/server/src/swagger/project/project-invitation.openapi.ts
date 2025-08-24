@@ -7,6 +7,20 @@ registerMultiple(registry, {
 });
 
 registry.registerPath({
+  method: "get",
+  path: "/project-invitations",
+  tags: ["ProjectInvitation"],
+  responses: { 200: { description: "Successful response" } },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/project-invitations/sent",
+  tags: ["ProjectInvitation"],
+  responses: { 200: { description: "Successful response" } },
+});
+
+registry.registerPath({
   method: "post",
   path: "/project-invitations",
   tags: ["ProjectInvitation"],

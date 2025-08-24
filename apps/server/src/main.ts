@@ -6,8 +6,12 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { AuthService } from "./core/auth/services/auth.service";
 import { setupSwagger } from "./swagger";
+import { ModelRegistry, NeogmaModel } from "@repo/custom-neogma";
 
 async function bootstrap() {
+  ModelRegistry.getInstance().processPendingRelationships();
+  ModelRegistry.getInstance().printFinalSummary();
+
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan("combined"));
