@@ -5,14 +5,20 @@ import {
   permissionNameField,
   roleNameField,
 } from "./fields";
-import { uuidField, nameField, descriptionField, dateField } from "../common";
+import {
+  uuidField,
+  nameField,
+  descriptionField,
+  dateField,
+  dateISOField,
+} from "../common";
 
 export const projectNameField = nameField.openapi({
   example: "Client Website Revamp",
   description: "Name of the project",
 });
 
-export const projectDescriptionField = descriptionField.nullable().openapi({
+export const projectDescriptionField = descriptionField.optional().openapi({
   example: "Redesign the client-facing web platform",
   description: "Brief summary of the project",
 });
@@ -58,7 +64,7 @@ export const projectRoleIdsField = z.array(uuidField).openapi({
   description: "Role IDs to assign to the invited user",
 });
 
-export const expirationDateField = dateField.openapi({
+export const expirationDateField = dateISOField.openapi({
   example: "2025-12-31T23:59:59.999Z",
   description: "Expiration date for the invitation",
 });

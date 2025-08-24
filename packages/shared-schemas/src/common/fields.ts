@@ -50,3 +50,4 @@ export const nameField = z.string().min(1).max(100);
 export const descriptionField = z.string().max(500);
 
 export const dateField = z.date();
+export const dateISOField = z.string().min(1).max(1000);

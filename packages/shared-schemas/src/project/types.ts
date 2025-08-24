@@ -9,6 +9,7 @@ import {
   updateProjectRoleSchema,
   updateProjectCollaborationSchema,
   createProjectInvitationSchema,
+  createProjectCollaborationSchema,
 } from "./schemas";
 
 export type CreateProjectDto = z.infer<typeof createProjectSchema>;
@@ -26,4 +27,7 @@ export type UpdateProjectCollaborationDto = z.infer<
 >;
 export type CreateProjectInvitationDto = z.infer<
   typeof createProjectInvitationSchema
+>;
+export type CreateProjectCollaborationDto = z.infer<
+  typeof createProjectCollaborationSchema
 >;

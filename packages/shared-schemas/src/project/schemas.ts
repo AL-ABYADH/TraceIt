@@ -13,11 +13,18 @@ import {
   expirationDateField,
 } from "./openapi-fields";
 
+export const createProjectCollaborationSchema = z
+  .object({
+    projectId: projectUserIdField,
+    userId: projectUserIdField,
+    roleIds: roleIdsField,
+  })
+  .openapi({ title: "CreateProjectCollaborationDto" });
+
 export const createProjectSchema = z
   .object({
     name: projectNameField,
     description: projectDescriptionField,
-    userId: projectUserIdField,
   })
   .openapi({ title: "CreateProjectDto" });
 
