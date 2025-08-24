@@ -1,7 +1,33 @@
-import { defineModelFactory, ModelFactory, Neogma } from "@repo/custom-neogma";
+import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { ProjectInvitationStatus } from "../enums/project-invitation-status.enum";
+import { UserAttributes } from "../../user/models/user.model";
+import { ProjectAttributes } from "./project.model";
+import { ProjectRole } from "../entities/project-role.entity";
 
-export const ProjectInvitationModel = defineModelFactory({
+export type ProjectInvitationAttributes = {
+  id: string;
+  expirationDate: string; // ISO date string
+  status: ProjectInvitationStatus;
+  createdAt: string; // ISO date string
+  updatedAt?: string; // ISO date string
+};
+
+export interface ProjectInvitationRelationships {
+  sender: UserAttributes;
+  receiver: UserAttributes;
+  project: ProjectAttributes;
+  projectRoles: ProjectRole[];
+}
+
+export type ProjectInvitationModelType = NeogmaModel<
+  ProjectInvitationAttributes,
+  ProjectInvitationRelationships
+>;
+
+export const ProjectInvitationModel: ModelFactoryDefinition<
+  ProjectInvitationAttributes,
+  ProjectInvitationRelationships
+> = defineModelFactory<ProjectInvitationAttributes, ProjectInvitationRelationships>({
   name: "ProjectInvitation",
   label: ["ProjectInvitation"],
   schema: {
@@ -15,13 +41,7 @@ export const ProjectInvitationModel = defineModelFactory({
       required: true,
       enum: Object.values(ProjectInvitationStatus),
     },
-    createdAt: {
-      type: "string",
-      required: true,
-      format: "date-time",
-    },
   },
-  primaryKeyField: "id",
   relationships: {
     sender: {
       model: "User",

@@ -1,6 +1,26 @@
-import { defineModelFactory, ModelFactory, Neogma } from "@repo/custom-neogma";
+import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 
-export const ProjectPermissionModel = defineModelFactory({
+export type ProjectPermissionAttributes = {
+  id: string;
+  permission: string;
+  code: string;
+  createdAt: string; // ISO date string
+  updatedAt?: string; // ISO date string
+};
+
+export interface ProjectPermissionRelationships {
+  projectRoles: string[];
+}
+
+export type ProjectPermissionModelType = NeogmaModel<
+  ProjectPermissionAttributes,
+  ProjectPermissionRelationships
+>;
+
+export const ProjectPermissionModel: ModelFactoryDefinition<
+  ProjectPermissionAttributes,
+  ProjectPermissionRelationships
+> = defineModelFactory<ProjectPermissionAttributes, ProjectPermissionRelationships>({
   name: "ProjectPermission",
   label: ["ProjectPermission"],
   schema: {
@@ -22,5 +42,12 @@ export const ProjectPermissionModel = defineModelFactory({
       message: "is not a valid code. It can only contain letters, numbers, and underscores.",
     },
   },
-  primaryKeyField: "id",
+  relationships: {
+    projectRoles: {
+      model: "ProjectRole",
+      direction: "in",
+      name: "HAS_PERMISSION",
+      cardinality: "many",
+    },
+  },
 });

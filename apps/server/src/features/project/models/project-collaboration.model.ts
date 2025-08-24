@@ -1,16 +1,29 @@
-import { defineModelFactory } from "@repo/custom-neogma";
+import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 
-export const ProjectCollaborationModel = defineModelFactory({
+export type ProjectCollaborationAttributes = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export interface ProjectCollaborationRelationships {
+  user: any;
+  project: any;
+  projectRoles: any[];
+}
+
+export type ProjectCollaborationModelType = NeogmaModel<
+  ProjectCollaborationAttributes,
+  ProjectCollaborationRelationships
+>;
+
+export const ProjectCollaborationModel: ModelFactoryDefinition<
+  ProjectCollaborationAttributes,
+  ProjectCollaborationRelationships
+> = defineModelFactory<ProjectCollaborationAttributes, ProjectCollaborationRelationships>({
   name: "ProjectCollaboration",
   label: ["ProjectCollaboration"],
-  schema: {
-    createdAt: {
-      type: "string",
-      required: true,
-      format: "date-time",
-    },
-  },
-  primaryKeyField: "id",
+  schema: {},
   relationships: {
     user: {
       model: "User",

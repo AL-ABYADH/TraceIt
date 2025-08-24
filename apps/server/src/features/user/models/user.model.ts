@@ -10,7 +10,7 @@ export type UserAttributes = {
   createdAt: string;
 };
 
-interface UserRelationships {
+export interface UserRelationships {
   projects: any;
   collaborations: any;
   refreshTokens: any;
