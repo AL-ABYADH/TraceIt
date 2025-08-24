@@ -211,8 +211,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNotFound?: boolean;
-      include?: string[];
-      exclude?: string[];
+      include?: [keyof RelatedNodes];
+      exclude?: [keyof RelatedNodes];
       limits?: Record<string, number>;
     } = {},
   ) => manager.findOneWithRelations(params);
@@ -226,19 +226,28 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNoneFound?: boolean;
-      include?: string[];
-      exclude?: string[];
+      include?: [keyof RelatedNodes];
+      exclude?: [keyof RelatedNodes];
       limits?: Record<string, number>;
     } = {},
   ) => manager.findManyWithRelations(params);
 
-  // Search within a specific relationship connected to a node
-  model.searchInRelations = (where: WhereParamsI, relationAlias: string, searchOptions?: any) =>
-    manager.searchInRelations(where, relationAlias, searchOptions);
-
-  // Create multiple relationships from a source node to several target nodes
-  model.createMultipleRelations = (sourceWhere: WhereParamsI, relations: any[], options?: any) =>
-    manager.createMultipleRelations(sourceWhere, relations, options);
+  // Add the new findByRelatedEntity method
+  model.findByRelatedEntity = <Plain extends boolean = false>(
+    params: GenericConfiguration & {
+      whereRelated: WhereParamsI;
+      relationshipAlias: keyof RelatedNodes; // تغيير من string
+      where?: WhereParamsI;
+      limit?: number;
+      skip?: number;
+      order?: Array<[string, "ASC" | "DESC"]>;
+      plain?: Plain;
+      throwIfNoneFound?: boolean;
+      include?: [keyof RelatedNodes];
+      exclude?: [keyof RelatedNodes];
+      limits?: Record<string, number>;
+    },
+  ) => manager.findByRelatedEntity(params);
 
   /**
    * Loads relationships for a given instance.
@@ -246,19 +255,6 @@ export function ModelFactory<
    */
   (model as any).prototype.loadRelations = function (options?: FindWithRelationsOptions) {
     return manager.loadRelations(this, options);
-  };
-
-  /**
-   * Instance method for creating multiple relationships from this node to others.
-   * Requires the existence of a primary key field.
-   */
-  (model as any).prototype.createMultipleRelations = function (relations: any[], options?: any) {
-    const primaryKey = model.getPrimaryKeyField();
-    if (!primaryKey) {
-      throw new Error("Primary key field is required");
-    }
-    const where = { [primaryKey]: this[primaryKey] };
-    return manager.createMultipleRelations(where, relations, options);
   };
 
   // Updated: Always generate UUID and timestamps during model creation
@@ -304,7 +300,7 @@ export function ModelFactory<
             data.updatedAt = new Date().toISOString();
           }
           const [instances, result] = await target.update.call(target, data, params);
-          return [instances.map((i: any) => i.getDataValues()), result];
+          return instances.map((i: any) => i.getDataValues());
         };
       }
       // Set plain: true by default for findMany
@@ -321,6 +317,13 @@ export function ModelFactory<
           params = params || {};
           if (params.plain === undefined) params.plain = true;
           return target.findOne.call(target, params);
+        };
+      }
+      if (prop === "findByRelatedEntity") {
+        return async (params?: any) => {
+          params = params || {};
+          if (params.plain === undefined) params.plain = true;
+          return target.findByRelatedEntity.call(target, params);
         };
       }
       // Default to standard property/method

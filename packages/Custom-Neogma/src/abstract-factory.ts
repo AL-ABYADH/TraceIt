@@ -28,7 +28,6 @@ const FORBIDDEN_METHODS = [
   "updateRelationship",
   "deleteRelationships",
   "getRelationshipProperties",
-  "createMultipleRelations",
 ] as const;
 
 type ForbiddenMethod = (typeof FORBIDDEN_METHODS)[number];
