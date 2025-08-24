@@ -50,25 +50,13 @@ export class UserRepository {
     return this.mapUserToEntityWithNull(user);
   }
 
-  /**
-   * Retrieves a user along with their non-revoked (active) refresh tokens.
-   *
-   * @param userId - The ID of the user to retrieve.
-   * @returns User object including only active refresh tokens, or null if not found.
-   */
-  async getUserWithActiveRefreshTokens(userId: string): Promise<User | null> {
+  async getProjectsCreatedByUser(userId: string): Promise<any> {
     const user = await this.userModel.findOneWithRelations({
       where: { id: userId },
-      include: ["refreshTokens"],
+      include: ["projects"],
     });
 
-    if (!user) return null;
-
-    user.refreshTokens = user.refreshTokens.filter(
-      (token) => !token.revoked && new Date(token.expiresAt) > new Date(),
-    );
-
-    return this.mapUserToEntityWithNull(user);
+    return user?.projects;
   }
 
   private mapUserToEntity(user: any): User {
