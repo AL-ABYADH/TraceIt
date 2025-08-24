@@ -12,4 +12,5 @@ export class ProjectInvitation {
   expirationDate: Date;
   status: ProjectInvitationStatus;
   createdAt: Date;
+  updatedAt?: Date;
 }
