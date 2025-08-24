@@ -1,5 +1,5 @@
 export interface CreateProjectParamsInterface {
   name: string;
-  description: string | null;
+  description?: string;
   userId: string;
 }

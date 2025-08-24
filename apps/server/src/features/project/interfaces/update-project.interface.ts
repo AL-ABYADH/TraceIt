@@ -1,4 +1,4 @@
 export interface UpdateProjectInterface {
   name?: string;
-  description?: string | null;
+  description?: string;
 }
