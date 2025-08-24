@@ -4,16 +4,14 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
   Patch,
   Post,
   Put,
   Query,
-  UsePipes,
 } from "@nestjs/common";
 import { ProjectService } from "../../services/project/project.service";
 import { Project } from "../../entities/project.entity";
-// import { CreateProjectDto } from "../../dtos/create-project.dto";
-// import { UpdateProjectDto } from "../../dtos/update-project.dto";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
 import { ProjectCollaborationService } from "../../services/project-collaboration/project-collaboration.service";
@@ -36,8 +34,12 @@ export class ProjectController {
   ) {}
 
   @Get()
-  async listUserProjects(@Query("status") status: ProjectStatus): Promise<Project[]> {
-    return this.projectService.listUserProjects("userId", status);
+  async listUserProjects(
+    @CurrentUserId() userId: string,
+    @Query("status", new ParseEnumPipe(ProjectStatus, { optional: true }))
+    status?: ProjectStatus,
+  ) {
+    return this.projectService.listUserProjects(userId, status);
   }
 
   @Get(":id")
@@ -50,7 +52,7 @@ export class ProjectController {
     @CurrentUserId() userId: string,
     @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
   ): Promise<Project> {
-    return this.projectService.create({ ...dto, userId });
+    return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
   @Put(":id")

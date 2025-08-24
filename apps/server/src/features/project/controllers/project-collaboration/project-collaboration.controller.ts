@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Param, Put, Post } from "@nestjs/common";
 import { ProjectCollaborationService } from "../../services/project-collaboration/project-collaboration.service";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
 // import { UpdateProjectCollaborationDto } from "../../dtos/update-project-collaboration.dto";
@@ -8,11 +8,20 @@ import {
   updateProjectCollaborationSchema,
   type UuidParamsDto,
   uuidParamsSchema,
+  type CreateProjectCollaborationDto,
+  createProjectCollaborationSchema,
 } from "@repo/shared-schemas";
 
 @Controller("project-collaborations")
 export class ProjectCollaborationController {
   constructor(private readonly projectCollaborationService: ProjectCollaborationService) {}
+
+  @Post()
+  async create(
+    @Body(zodBody(createProjectCollaborationSchema)) dto: CreateProjectCollaborationDto,
+  ): Promise<ProjectCollaboration> {
+    return this.projectCollaborationService.create(dto);
+  }
 
   @Put(":id")
   async updateProjectCollaborationRoles(

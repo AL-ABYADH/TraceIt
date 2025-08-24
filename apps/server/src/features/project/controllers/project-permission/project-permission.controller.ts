@@ -40,7 +40,7 @@ export class ProjectPermissionController {
   async update(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
     @Body(zodBody(updateProjectPermissionSchema)) dto: UpdateProjectPermissionDto,
-  ): Promise<ProjectPermission> {
+  ): Promise<ProjectPermission[]> {
     return this.projectPermissionService.update(projectId.id, dto);
   }
 

@@ -1,7 +1,6 @@
-import { Body, Controller, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseEnumPipe, Patch, Post, Query } from "@nestjs/common";
 import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { ProjectInvitationService } from "../../services/project-invitation/project-invitation.service";
-// import { CreateProjectInvitationDto } from "../../dtos/create-project-invitation.dto";
 import {
   type CreateProjectInvitationDto,
   createProjectInvitationSchema,
@@ -9,16 +8,40 @@ import {
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
+import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
+import { ProjectInvitationStatus } from "../../enums/project-invitation-status.enum";
 
 @Controller("project-invitations")
 export class ProjectInvitationController {
   constructor(private readonly projectInvitationService: ProjectInvitationService) {}
 
+  @Get()
+  async getProjectInvitations(
+    @CurrentUserId() userID: string,
+    @Query("status", new ParseEnumPipe(ProjectInvitationStatus, { optional: true }))
+    status?: ProjectInvitationStatus,
+  ): Promise<ProjectInvitation[]> {
+    return this.projectInvitationService.getProjectInvitations(userID, status);
+  }
+
+  @Get("sent")
+  async getSentInvitations(
+    @CurrentUserId() userID: string,
+    @Query("status", new ParseEnumPipe(ProjectInvitationStatus, { optional: true }))
+    status?: ProjectInvitationStatus,
+  ): Promise<ProjectInvitation[]> {
+    return this.projectInvitationService.getSentInvitations(userID, status);
+  }
+
   @Post()
   async invite(
+    @CurrentUserId() userID: string,
     @Body(zodBody(createProjectInvitationSchema)) dto: CreateProjectInvitationDto,
   ): Promise<ProjectInvitation> {
-    return this.projectInvitationService.invite(dto);
+    return this.projectInvitationService.invite(userID, {
+      ...dto,
+      expirationDate: new Date(dto.expirationDate),
+    });
   }
 
   @Patch(":id/accept")
