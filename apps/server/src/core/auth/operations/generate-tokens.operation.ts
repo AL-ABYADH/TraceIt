@@ -35,12 +35,14 @@ export class GenerateTokensOperation {
   ): Promise<TokensInterface> {
     // Load config values
     const accessTokenTTL = this.configService.get<string>("JWT_EXPIRATION", "15m");
-    const refreshTokenTTL = this.configService.get<number>("JWT_REFRESH_EXPIRATION", 604800); // default: 7 days
+    const refreshTokenTTL = this.configService.get<string>("JWT_REFRESH_EXPIRATION", "7d"); // default: 7 days
     const isSecureCookie = this.configService.get<boolean>("COOKIE_SECURE", false);
     const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN", "localhost");
 
     // Generate a new UUID-based refresh token
     const rawRefreshToken = uuidv4();
+
+    const refreshTokenExpiresIn = this.parseExpiration(refreshTokenTTL);
 
     // Save refresh token in the database and associate it with the user
     const storedToken = await this.authRepository.createRefreshToken(
@@ -48,7 +50,7 @@ export class GenerateTokensOperation {
       rawRefreshToken,
       userAgent,
       ipAddress,
-      refreshTokenTTL,
+      refreshTokenExpiresIn,
     );
 
     // Build JWT payload
@@ -69,7 +71,7 @@ export class GenerateTokensOperation {
       sameSite: "strict",
       domain: cookieDomain,
       path: "/",
-      maxAge: refreshTokenTTL * 1000, // Convert seconds to milliseconds
+      maxAge: refreshTokenExpiresIn * 1000, // Convert seconds to milliseconds
     });
 
     // Calculate access token expiration time in seconds

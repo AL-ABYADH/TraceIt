@@ -76,8 +76,8 @@ export class RelationshipManager {
       throwIfNotFound?: boolean;
       session?: any;
       // Special additions for relations
-      include?: string[];
-      exclude?: string[];
+      include?: any[];
+      exclude?: any[];
       limits?: Record<string, number>;
     } = {},
   ): Promise<any> {
@@ -109,8 +109,8 @@ export class RelationshipManager {
       throwIfNoneFound?: boolean;
       session?: any;
       // Special additions for relations
-      include?: string[];
-      exclude?: string[];
+      include?: any[];
+      exclude?: any[];
       limits?: Record<string, number>;
     } = {},
   ): Promise<any[]> {
@@ -131,99 +131,114 @@ export class RelationshipManager {
   }
 
   /**
-   * Search for related nodes within relationships matching criteria
+   * Find entities based on their relationship with another entity.
+   * This method works through the existing relationship definitions in the current model.
+   *
+   * @example
+   * // Get all projects owned by a specific user (through 'owner' relationship)
+   * const projects = await ProjectModel.findByRelatedEntity({
+   *   whereRelated: { id: 'user-123' },
+   *   relationshipAlias: 'owner'
+   * });
    */
-  async searchInRelations(
-    where: WhereParamsI,
-    relationAlias: string,
-    searchOptions: any = {},
-  ): Promise<any[]> {
-    const entities = await this.model.findMany({
-      where,
-      session: searchOptions.session,
+  async findByRelatedEntity(params: {
+    whereRelated: WhereParamsI;
+    relationshipAlias: keyof any;
+    where?: WhereParamsI;
+    limit?: number;
+    skip?: number;
+    order?: Array<[string, "ASC" | "DESC"]>;
+    session?: any;
+    plain?: boolean;
+    throwIfNoneFound?: boolean;
+    include?: any[];
+    exclude?: any[];
+    limits?: Record<string, number>;
+  }): Promise<any[]> {
+    // Check if the relationship alias exists in current model
+    const relationships = this.model.relationships || {};
+    const relationship = relationships[params.relationshipAlias as string];
+
+    if (!relationship) {
+      throw new Error(
+        `Relationship alias "${String(params.relationshipAlias)}" not found in model`,
+      );
+    }
+
+    console.log(params);
+    // Use the existing findRelationships method to find connections
+    // This will find all entities of current model that are connected to entities matching whereRelated
+    const results = await this.model.findRelationships({
+      alias: params.relationshipAlias,
+      where: {
+        target: params.whereRelated, // The related entity conditions
+        source: params.where, // Additional filters on current model entities
+      },
+      limit: params.limit,
+      session: params.session,
     });
-    if (!entities.length) return [];
 
-    const allResults: any[] = [];
-
-    for (const entity of entities) {
-      try {
-        const relationships = await entity.findRelationships({
-          alias: relationAlias,
-          where: searchOptions.where,
-          limit: searchOptions.limit,
-          session: searchOptions.session,
-        });
-
-        const results = relationships.map((rel: any) => {
-          const targetData = rel.target.getDataValues ? rel.target.getDataValues() : rel.target;
-          if (rel.relationship && Object.keys(rel.relationship).length > 0) {
-            targetData._relationshipProperties = rel.relationship;
-          }
-          return targetData;
-        });
-
-        allResults.push(...results);
-      } catch {
-        // Skip errors silently
+    if (!results.length) {
+      if (params.throwIfNoneFound) {
+        throw new Error(`No entities found with the given criteria`);
       }
+      return [];
     }
 
-    return allResults;
-  }
+    // Extract source entities (the entities from current model)
+    let foundEntities = results.map((rel: any) => rel.source);
 
-  /**
-   * Create multiple relationships from source entities to target entities
-   */
-  async createMultipleRelations(
-    sourceWhere: WhereParamsI,
-    relations: any[],
-    options: any = {},
-  ): Promise<{ success: boolean; created: number; errors: string[] }> {
-    const entities = await this.model.findMany({
-      where: sourceWhere,
-      session: options.session,
-    });
+    // Remove duplicates
+    foundEntities = this.removeDuplicateEntities(foundEntities);
 
-    if (!entities.length) {
-      return {
-        success: false,
-        created: 0,
-        errors: ["No source entities found"],
-      };
-    }
+    // Apply ordering if specified
+    if (params.order) {
+      foundEntities.sort((a: any, b: any) => {
+        const dataA = a.getDataValues ? a.getDataValues() : a;
+        const dataB = b.getDataValues ? b.getDataValues() : b;
 
-    let created = 0;
-    const errors: string[] = [];
+        for (const [field, direction] of params.order!) {
+          const valueA = dataA[field];
+          const valueB = dataB[field];
 
-    for (const entity of entities) {
-      for (const relation of relations) {
-        const targetWheres = Array.isArray(relation.targetWhere)
-          ? relation.targetWhere
-          : [relation.targetWhere];
-
-        for (const targetWhere of targetWheres) {
-          try {
-            await entity.relateTo({
-              alias: relation.alias,
-              where: targetWhere,
-              properties: relation.properties,
-              session: options.session,
-            });
-            created++;
-          } catch (error: any) {
-            errors.push(`Failed to create relation ${relation.alias}: ${error.message}`);
-          }
+          if (valueA < valueB) return direction === "ASC" ? -1 : 1;
+          if (valueA > valueB) return direction === "ASC" ? 1 : -1;
         }
-      }
+        return 0;
+      });
     }
 
-    if (options.assertCreatedRelationships && created !== options.assertCreatedRelationships) {
-      errors.push(`Expected ${options.assertCreatedRelationships} relations, created ${created}`);
-      return { success: false, created, errors };
+    // Apply skip and limit
+    if (params.skip) {
+      foundEntities = foundEntities.slice(params.skip);
+    }
+    if (params.limit) {
+      foundEntities = foundEntities.slice(0, params.limit);
     }
 
-    return { success: errors.length === 0, created, errors };
+    // Load additional relationships if requested
+    if (params.include || params.exclude || params.limits) {
+      const entitiesWithRelations = await Promise.all(
+        foundEntities.map((entity: any) =>
+          this.loadRelations(entity, {
+            include: params.include,
+            exclude: params.exclude,
+            limits: params.limits,
+            session: params.session,
+          }),
+        ),
+      );
+      return entitiesWithRelations;
+    }
+
+    // Return plain data if requested
+    if (params.plain) {
+      return foundEntities.map((entity: any) =>
+        entity.getDataValues ? entity.getDataValues() : entity,
+      );
+    }
+
+    return foundEntities;
   }
 
   /**
@@ -238,5 +253,21 @@ export class RelationshipManager {
 
     // Default to array if not specified
     return { isArray: true };
+  }
+
+  /**
+   * Remove duplicate entities based on their ID
+   */
+  private removeDuplicateEntities(entities: any[]): any[] {
+    const seen = new Set();
+    return entities.filter((entity: any) => {
+      const data = entity.getDataValues ? entity.getDataValues() : entity;
+      const id = data.id;
+      if (seen.has(id)) {
+        return false;
+      }
+      seen.add(id);
+      return true;
+    });
   }
 }

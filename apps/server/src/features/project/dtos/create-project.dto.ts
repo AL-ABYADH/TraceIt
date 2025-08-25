@@ -2,6 +2,6 @@ import { CreateProjectParamsInterface } from "../interfaces/create-project-param
 
 export class CreateProjectDto implements CreateProjectParamsInterface {
   name: string;
-  description: string | null;
+  description?: string;
   userId: string;
 }

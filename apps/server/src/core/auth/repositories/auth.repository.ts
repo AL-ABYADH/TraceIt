@@ -1,8 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { RefreshTokenModel, RefreshTokenModelType } from "../models/refresh-token.model";
 import { Neo4jService } from "../../neo4j/neo4j.service";
 import { Op } from "@repo/custom-neogma";
-import { UserService } from "../../../features/user/services/user/user.service";
 import { RefreshToken } from "../entities/refresh-token.entity";
 import { User } from "../../../features/user/entities/user.entity";
 
@@ -10,10 +9,7 @@ import { User } from "../../../features/user/entities/user.entity";
 export class AuthRepository {
   private readonly refreshTokenModel: RefreshTokenModelType;
 
-  constructor(
-    private readonly neo4jService: Neo4jService,
-    private readonly userService: UserService,
-  ) {
+  constructor(private readonly neo4jService: Neo4jService) {
     this.refreshTokenModel = RefreshTokenModel(this.neo4jService.getNeogma());
   }
 
@@ -47,9 +43,22 @@ export class AuthRepository {
   /**
    * Retrieves all refresh tokens linked to a user.
    */
-  async getAllRefreshTokensByUserId(userId: string): Promise<any> {
+  async getAllRefreshTokensByUserId(userId: string): Promise<RefreshToken[]> {
     try {
-      return await this.userService.findUserWithActiveRefreshTokens(userId);
+      const refreshTokens = await this.refreshTokenModel.findByRelatedEntity({
+        whereRelated: { id: userId },
+        relationshipAlias: "user",
+        where: { revoked: false },
+      });
+
+      const now = Date.now();
+
+      const validRefreshTokens: any = (refreshTokens ?? []).filter(({ revoked, expiresAt }) => {
+        if (revoked) return false;
+        const expTime = new Date(expiresAt).getTime();
+        return expTime > now;
+      });
+      return this.mapListToRefreshTokenEntity(validRefreshTokens);
     } catch (error) {
       console.error("Error retrieving user refresh tokens:", error);
       throw error;
@@ -79,11 +88,7 @@ export class AuthRepository {
    */
   async findUserIdByRefreshToken(token: string): Promise<string | null> {
     const user = await this.findUserByRefreshToken(token);
-    if (!user) {
-      throw new NotFoundException("User not found for this token.");
-    }
-
-    return user.id || null;
+    return user?.id ?? null;
   }
 
   /**
@@ -97,11 +102,11 @@ export class AuthRepository {
    * Revokes all refresh tokens for a user.
    */
   async revokeAllUserRefreshTokens(userId: string): Promise<void> {
-    const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
-
-    if (userWithTokens?.refreshTokens) {
-      for (const token of userWithTokens.refreshTokens) {
-        await this.revokeRefreshToken(token);
+    const tokens = await this.getAllRefreshTokensByUserId(userId);
+    if (tokens.length > 0) {
+      for (const t of tokens) {
+        const raw = typeof t === "string" ? t : t.token;
+        await this.revokeRefreshToken(raw);
       }
     }
   }
@@ -110,13 +115,11 @@ export class AuthRepository {
    * Revokes all refresh tokens except the provided one for a user.
    */
   async revokeAllUserRefreshTokensExceptOne(userId: string, exceptToken: string): Promise<void> {
-    const userWithTokens = await this.getAllRefreshTokensByUserId(userId);
-
-    if (userWithTokens?.refreshTokens) {
-      for (const token of userWithTokens.refreshTokens) {
-        if (token !== exceptToken) {
-          await this.revokeRefreshToken(token);
-        }
+    const tokens = await this.getAllRefreshTokensByUserId(userId);
+    if (tokens.length > 0) {
+      for (const t of tokens) {
+        const raw = t.token;
+        if (raw !== exceptToken) await this.revokeRefreshToken(raw);
       }
     }
   }
@@ -152,8 +155,10 @@ export class AuthRepository {
    * Checks if a valid, non-revoked refresh token exists and returns its details.
    */
   async checkIfExists(token: string): Promise<RefreshToken | null> {
+    const nowIso = new Date().toISOString();
     const tokenData = await this.refreshTokenModel.findOneWithRelations({
-      where: { token, revoked: false },
+      where: { token, revoked: false, expiresAt: { [Op.gte]: nowIso } },
+      include: ["user"],
     });
     return this.mapToRefreshTokenEntity(tokenData);
   }
@@ -162,9 +167,28 @@ export class AuthRepository {
    * Transforms raw data into a RefreshToken entity instance.
    */
   private mapToRefreshTokenEntity(data: any): RefreshToken {
-    return {
+    const entity = {
       ...data,
       expiresAt: new Date(data?.expiresAt),
+      createdAt: new Date(data?.createdAt),
     } as RefreshToken;
+    if (data) {
+      if ("updatedAt" in Object.keys(data)) {
+        entity.updatedAt = new Date(data.updatedAt);
+      }
+    }
+
+    return entity;
+  }
+
+  /**
+   * Transforms raw data into a RefreshToken entity instance.
+   */
+  private mapListToRefreshTokenEntity(data: any): RefreshToken[] {
+    const Items: RefreshToken[] = [];
+    for (const item of data) {
+      Items.push(this.mapToRefreshTokenEntity(item));
+    }
+    return Items;
   }
 }

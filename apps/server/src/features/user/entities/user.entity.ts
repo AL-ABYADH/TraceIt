@@ -7,6 +7,7 @@ export class User {
   email: string;
   emailVerified: boolean;
   createdAt: Date;
+  updatedAt?: Date;
 
   @Exclude({ toPlainOnly: true })
   password: string;

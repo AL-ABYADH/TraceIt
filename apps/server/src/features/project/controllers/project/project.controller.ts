@@ -3,64 +3,94 @@ import {
   Controller,
   Delete,
   Get,
-  NotImplementedException,
   Param,
+  ParseEnumPipe,
   Patch,
   Post,
   Put,
   Query,
-  UsePipes,
 } from "@nestjs/common";
 import { ProjectService } from "../../services/project/project.service";
 import { Project } from "../../entities/project.entity";
-import { CreateProjectDto } from "../../dtos/create-project-params.dto";
-import { UpdateProjectDto } from "../../dtos/update-project.dto";
-import { InjectUserIdPipe } from "../../../../common/pipes/inject-user-id.pipe";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectCollaboration } from "../../entities/project-collaboration.entity";
+import { ProjectCollaborationService } from "../../services/project-collaboration/project-collaboration.service";
+import { zodBody, zodParam } from "src/common/pipes/zod";
+import {
+  type CreateProjectDto,
+  createProjectSchema,
+  type UpdateProjectDto,
+  updateProjectSchema,
+  type UuidParamsDto,
+  uuidParamsSchema,
+} from "@repo/shared-schemas";
+import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
 @Controller("projects")
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+    private readonly projectCollaborationService: ProjectCollaborationService,
+  ) {}
 
   @Get()
-  async listUserProjects(@Query("status") status: ProjectStatus): Promise<Project[]> {
-    throw new NotImplementedException();
+  async listUserProjects(
+    @CurrentUserId() userId: string,
+    @Query("status", new ParseEnumPipe(ProjectStatus, { optional: true }))
+    status?: ProjectStatus,
+  ) {
+    return this.projectService.listUserProjects(userId, status);
   }
 
   @Get(":id")
-  async find(@Param("id") id: string): Promise<Project> {
-    throw new NotImplementedException();
+  async find(@Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto): Promise<Project> {
+    return this.projectService.find(projectId.id);
   }
 
   @Post()
-  @UsePipes(InjectUserIdPipe)
-  async create(@Body() dto: CreateProjectDto): Promise<Project> {
-    throw new NotImplementedException();
+  async create(
+    @CurrentUserId() userId: string,
+    @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
+  ): Promise<Project> {
+    return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
   @Put(":id")
-  async update(@Param("id") id: string, @Body() dto: UpdateProjectDto): Promise<Project> {
-    throw new NotImplementedException();
+  async update(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
+  ): Promise<Project> {
+    return this.projectService.update(projectId.id, dto);
   }
 
   @Delete(":id")
-  async delete(@Param("id") id: string): Promise<{ success: boolean }> {
-    throw new NotImplementedException();
+  async delete(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+  ): Promise<{ success: boolean }> {
+    const success = await this.projectService.delete(projectId.id);
+    return { success };
   }
 
   @Patch(":id/activate")
-  async activate(@Param("id") id: string): Promise<{ success: boolean }> {
-    throw new NotImplementedException();
+  async activate(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+  ): Promise<{ success: boolean }> {
+    const success = await this.projectService.activate(projectId.id);
+    return { success };
   }
 
   @Patch(":id/archive")
-  async archive(@Param("id") id: string): Promise<{ success: boolean }> {
-    throw new NotImplementedException();
+  async archive(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+  ): Promise<{ success: boolean }> {
+    const success = await this.projectService.archive(projectId.id);
+    return { success };
   }
 
   @Get(":id/project-collaborations")
-  async listProjectCollaborations(@Param("id") id: string): Promise<ProjectCollaboration[]> {
-    throw new NotImplementedException();
+  async listProjectCollaborations(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+  ): Promise<ProjectCollaboration[]> {
+    return this.projectCollaborationService.listProjectCollaborations(projectId.id);
   }
 }

@@ -8,12 +8,13 @@ import { ProjectCollaboration } from "./project-collaboration.entity";
 export class Project {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   status: ProjectStatus;
   createdAt: Date;
+  updatedAt?: Date;
   owner: User;
-  collaborations: ProjectCollaboration[] | null;
-  actors: Actor[] | null;
-  useCases: UseCase[] | null;
-  classes: Class[] | null;
+  collaborations?: ProjectCollaboration[];
+  actors?: Actor[];
+  useCases?: UseCase[];
+  classes?: Class[];
 }

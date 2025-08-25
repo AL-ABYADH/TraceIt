@@ -3,8 +3,10 @@ import { Project } from "./project.entity";
 import { ProjectRole } from "./project-role.entity";
 
 export class ProjectCollaboration {
+  id: string;
   user: User;
   project: Project;
-  projectRoles: ProjectRole[] | null;
+  projectRoles?: ProjectRole[];
   createdAt: Date;
+  updatedAt?: Date;
 }

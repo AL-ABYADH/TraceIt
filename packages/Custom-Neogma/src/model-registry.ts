@@ -11,7 +11,10 @@ export class ModelRegistry {
   private static instance: ModelRegistry;
 
   // Map of model names to NeogmaModel instances
-  private models = new Map<string, NeogmaModel<any, any, any, any>>();
+  models: Map<string, NeogmaModel<any, any, any, any>> = new Map<
+    string,
+    NeogmaModel<any, any, any, any>
+  >();
 
   // Map of model names to deferred resolver functions for circular relationships
   private pendingRelationships = new Map<string, () => void>();
@@ -60,7 +63,7 @@ export class ModelRegistry {
    * Try to resolve all pending relationships.
    * Removes successfully resolved relationships from the pending map.
    */
-  private processPendingRelationships(): void {
+  processPendingRelationships(): void {
     const resolved: string[] = [];
 
     for (const [modelName, resolver] of this.pendingRelationships) {
@@ -74,5 +77,36 @@ export class ModelRegistry {
 
     // Remove resolved entries from pending relationships
     resolved.forEach((name) => this.pendingRelationships.delete(name));
+  }
+
+  /**
+   * Print a final summary of pending relationships (useful for debugging).
+   * Call this after all models are expected to be registered.
+   */
+  printFinalSummary(): void {
+    const unresolvedModels = Array.from(this.pendingRelationships.keys());
+    const errors: string[] = [];
+
+    if (unresolvedModels.length > 0) {
+      for (const [modelName, resolveRelationship] of this.pendingRelationships) {
+        try {
+          resolveRelationship();
+        } catch (error: any) {
+          const errorMsg = `❌ Failed to process relationship for "${modelName}": ${error.message || "Model not found"}`;
+          errors.push(errorMsg);
+          console.error(`\x1b[31m${errorMsg}\x1b[0m`);
+        }
+      }
+
+      if (errors.length > 0) {
+        const formattedError = [
+          "\n🚨 Relationship errors detected:\n",
+          ...errors.map((e) => `   - ${e}`),
+          "\nPlease fix these errors before launching the server.\n",
+        ].join("\n");
+      }
+    } else {
+      console.log(`🎉 All relationships resolved successfully!`);
+    }
   }
 }

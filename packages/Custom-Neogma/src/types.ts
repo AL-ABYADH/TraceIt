@@ -1,5 +1,6 @@
 import { Neo4jSupportedProperties, Neogma, RelationshipsI, WhereParamsI } from "neogma";
-import { NeogmaModel } from "./Neogma/types";
+import { NeogmaModel } from "./Neogma/normal-model-types";
+import { NeogmaModel as AbstractNeogmaModel } from "./Neogma/abstract-model-types";
 // =============================================================================
 // TYPES & INTERFACES
 // =============================================================================
@@ -31,6 +32,16 @@ export interface ModelFactoryDefinition<
   Statics extends AnyObject = AnyObject,
 > {
   (neogma: Neogma): NeogmaModel<Properties, RelatedNodes, Methods, Statics>;
+  parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
+}
+
+export interface AbstractModelFactoryDefinition<
+  Properties extends Neo4jSupportedProperties,
+  RelatedNodes extends AnyObject = AnyObject,
+  Methods extends AnyObject = AnyObject,
+  Statics extends AnyObject = AnyObject,
+> {
+  (neogma: Neogma): AbstractNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
 }
 

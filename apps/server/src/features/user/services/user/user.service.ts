@@ -81,18 +81,4 @@ export class UserService {
     }
     return user;
   }
-
-  /**
-   * Finds a user and returns only their non-revoked refresh tokens.
-   *
-   * @param userId - The ID of the user to look up.
-   * @returns The user entity with active refresh tokens, or null if not found.
-   */
-  async findUserWithActiveRefreshTokens(userId: string): Promise<User> {
-    const user = await this.userRepository.getUserWithActiveRefreshTokens(userId);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-    return user;
-  }
 }

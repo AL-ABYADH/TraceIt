@@ -1,6 +1,5 @@
 export interface CreateProjectInterface {
   name: string;
-  description: string | null;
+  description?: string;
   ownerId: string;
-  createdAt: Date;
 }
