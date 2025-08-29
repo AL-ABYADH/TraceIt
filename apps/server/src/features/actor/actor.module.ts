@@ -8,8 +8,10 @@ import { EventActorRepository } from "./repositories/event-actor/event-actor.rep
 import { ActorRepository } from "./repositories/actor/actor.repository";
 import { ActorService } from "./services/actor/actor.service";
 import { ActorRepositoryFactory } from "./repositories/factory/actor-repository.factory";
+import { ProjectModule } from "../project/project.module";
 
 @Module({
+  imports: [ProjectModule],
   controllers: [ActorController],
   providers: [
     ActorService,
