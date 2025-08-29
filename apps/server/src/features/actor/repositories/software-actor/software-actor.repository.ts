@@ -1,36 +1,118 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConcreteActorRepositoryInterface } from "../interfaces/concrete-actor-repository.interface";
 import { SoftwareActor } from "../../entities/software-actor.entity";
 import { CreateActorInterface } from "../../interfaces/create-actor.interface";
 import { UpdateActorInterface } from "../../interfaces/update-actor.interface";
 import { SoftwareActorModel, SoftwareActorModelType } from "../../models/software-actor.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
+import { ActorType } from "../../enums/actor-type.enum";
+import { ActorSubtype } from "../../enums/actor-subtype.enum";
 
 @Injectable()
 export class SoftwareActorRepository implements ConcreteActorRepositoryInterface<SoftwareActor> {
   private softwareActorModel: SoftwareActorModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {
-    this.softwareActorModel = SoftwareActorModel(neo4jService.getNeogma());
+    this.softwareActorModel = SoftwareActorModel(this.neo4jService.getNeogma());
   }
 
-  create(createActorInterface: CreateActorInterface): Promise<SoftwareActor> {
-    throw new NotImplementedException();
+  async create(createActorInterface: CreateActorInterface): Promise<SoftwareActor> {
+    try {
+      const actor = await this.softwareActorModel.createOne({
+        name: createActorInterface.name,
+        type: ActorType.VIRTUAL,
+        subtype: ActorSubtype.SOFTWARE,
+        project: {
+          where: [{ params: { id: createActorInterface.projectId } }],
+        },
+      });
+
+      return this.mapToSoftwareActorEntity(actor);
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new Error(`Failed to create software actor: ${error.message}`);
+    }
   }
 
-  update(updateActorInterface: UpdateActorInterface): Promise<SoftwareActor> {
-    throw new NotImplementedException();
+  async update(
+    actorId: string,
+    updateActorInterface: UpdateActorInterface,
+  ): Promise<SoftwareActor> {
+    try {
+      const updated = await this.softwareActorModel.update(
+        { name: updateActorInterface.name },
+        {
+          where: { id: actorId },
+        },
+      );
+
+      if (!updated || !updated.length || !updated[0].length) {
+        throw new NotFoundException(`Software actor with ID ${actorId} not found`);
+      }
+
+      return this.mapToSoftwareActorEntity(updated[0][0]);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new Error(`Failed to update software actor: ${error.message}`);
+    }
   }
 
-  delete(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+  async delete(id: string): Promise<boolean> {
+    try {
+      const deletedCount = await this.softwareActorModel.delete({
+        where: { id },
+        detach: true,
+      });
+
+      return deletedCount > 0;
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new Error(`Failed to delete software actor: ${error.message}`);
+    }
   }
 
-  getById(id: string): Promise<SoftwareActor | null> {
-    throw new NotImplementedException();
+  async getById(id: string): Promise<SoftwareActor | null> {
+    try {
+      const actor = await this.softwareActorModel.findOne({
+        where: { id },
+      });
+
+      return actor ? this.mapToSoftwareActorEntity(actor) : null;
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new Error(`Failed to retrieve software actor: ${error.message}`);
+    }
   }
 
-  getAll(): Promise<SoftwareActor[]> {
-    throw new NotImplementedException();
+  async getAll(): Promise<SoftwareActor[]> {
+    try {
+      const actors = await this.softwareActorModel.findMany({});
+      return actors.map((actor) => this.mapToSoftwareActorEntity(actor));
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new Error(`Failed to retrieve all software actors: ${error.message}`);
+    }
+  }
+
+  private mapToSoftwareActorEntity(data: any): SoftwareActor {
+    const actor = new SoftwareActor();
+
+    // Map base properties
+    actor.id = data.id;
+    actor.name = data.name;
+    actor.type = data.type || ActorType.VIRTUAL;
+    actor.subtype = data.subtype || ActorSubtype.SOFTWARE;
+    actor.project = data.project;
+    actor.createdAt = new Date(data.createdAt);
+
+    // Only add updatedAt if it exists in the data
+    if (data.updatedAt) {
+      actor.updatedAt = new Date(data.updatedAt);
+    }
+
+    return actor;
   }
 }
