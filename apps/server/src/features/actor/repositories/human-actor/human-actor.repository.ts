@@ -43,11 +43,11 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
         },
       );
 
-      if (!updated || !updated.length || !updated[0].length) {
+      if (!updated) {
         throw new NotFoundException(`Human actor with ID ${actorId} not found`);
       }
 
-      return this.mapToHumanActorEntity(updated[0][0]);
+      return this.mapToHumanActorEntity(updated[0]);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

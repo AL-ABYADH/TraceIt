@@ -43,11 +43,11 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
         },
       );
 
-      if (!updated || !updated.length || !updated[0].length) {
+      if (!updated) {
         throw new NotFoundException(`Event actor with ID ${actorId} not found`);
       }
 
-      return this.mapToEventActorEntity(updated[0][0]);
+      return this.mapToEventActorEntity(updated[0]);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

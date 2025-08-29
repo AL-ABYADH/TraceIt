@@ -43,11 +43,11 @@ export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<
         },
       );
 
-      if (!updated || !updated.length || !updated[0].length) {
+      if (!updated) {
         throw new NotFoundException(`AI agent actor with ID ${actorId} not found`);
       }
 
-      return this.mapToAiAgentActorEntity(updated[0][0]);
+      return this.mapToAiAgentActorEntity(updated[0]);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

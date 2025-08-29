@@ -46,11 +46,11 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
         },
       );
 
-      if (!updated || !updated.length || !updated[0].length) {
+      if (!updated) {
         throw new NotFoundException(`Hardware actor with ID ${actorId} not found`);
       }
 
-      return this.mapToHardwareActorEntity(updated[0][0]);
+      return this.mapToHardwareActorEntity(updated[0]);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

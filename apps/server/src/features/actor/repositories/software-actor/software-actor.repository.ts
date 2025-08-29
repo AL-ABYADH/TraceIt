@@ -46,11 +46,11 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
         },
       );
 
-      if (!updated || !updated.length || !updated[0].length) {
+      if (!updated) {
         throw new NotFoundException(`Software actor with ID ${actorId} not found`);
       }
 
-      return this.mapToSoftwareActorEntity(updated[0][0]);
+      return this.mapToSoftwareActorEntity(updated[0]);
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
