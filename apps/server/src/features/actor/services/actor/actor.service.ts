@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ActorRepositoryFactory } from "../../repositories/factory/actor-repository.factory";
 import { Actor } from "../../entities/actor.entity";
 import { UpdateActorInterface } from "../../interfaces/update-actor.interface";
@@ -51,6 +51,10 @@ export class ActorService {
     const actor = await this.findById(actorId);
     if (!actor) {
       throw new NotFoundException(`Actor with ID ${actorId} not found`);
+    }
+
+    if (actor.name === actorData.name) {
+      throw new BadRequestException("Cannot update actor: the name is already in use.");
     }
 
     // Get the appropriate repository

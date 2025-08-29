@@ -80,8 +80,7 @@ export class ActorController {
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
   ): Promise<Actor> {
-    const newDto = { ...dto, id: params.id };
-    return this.actorService.update(params.id, newDto);
+    return this.actorService.update(params.id, dto);
   }
 
   /**
