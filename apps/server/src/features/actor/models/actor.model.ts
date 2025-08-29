@@ -1,16 +1,19 @@
 import {
-  NeogmaModel,
-  ModelFactoryDefinition,
   defineAbstractModelFactory,
   AbstractNeogmaModel,
   AbstractModelFactoryDefinition,
 } from "@repo/custom-neogma";
+import { ActorType } from "../enums/actor-type.enum";
+import { ActorSubtype } from "../enums/actor-subtype.enum";
 
-export interface ActorAttributes {
-  [key: string]: any;
+export type ActorAttributes = {
   id: string;
   name: string;
-}
+  type: string;
+  subtype: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export interface ActorRelationships {
   project: any;
@@ -32,8 +35,19 @@ export const ActorModel: AbstractModelFactoryDefinition<ActorAttributes, ActorRe
         message:
           "is not a valid name. It can only contain letters, numbers, spaces, underscores, hyphens, and no leading or trailing spaces.",
       },
+      type: {
+        type: "string",
+        required: true,
+        enum: Object.values(ActorType),
+        message: "must be a valid actor type.",
+      },
+      subtype: {
+        type: "string",
+        required: true,
+        enum: Object.values(ActorSubtype),
+        message: "must be a valid actor subtype.",
+      },
     },
-    primaryKeyField: "id",
     relationships: {
       project: {
         model: "Project",

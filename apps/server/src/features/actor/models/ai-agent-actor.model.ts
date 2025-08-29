@@ -1,7 +1,7 @@
 import { NeogmaModel, ModelFactoryDefinition, defineModelFactory } from "@repo/custom-neogma";
 import { ActorAttributes, ActorModel, ActorRelationships } from "./actor.model";
 
-export interface AiAgentActorAttributes extends ActorAttributes {}
+export type AiAgentActorAttributes = ActorAttributes & {};
 
 interface AiAgentActorRelationships extends ActorRelationships {}
 
@@ -16,6 +16,5 @@ export const AiAgentActorModel: ModelFactoryDefinition<
   schema: {
     ...ActorModel.parameters.schema,
   },
-  primaryKeyField: ActorModel.parameters.primaryKeyField,
   relationships: { ...ActorModel.parameters.relationships },
 });
