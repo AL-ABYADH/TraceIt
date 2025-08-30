@@ -2,6 +2,6 @@ import "axios";
 
 declare module "axios" {
   export interface AxiosRequestConfig {
-    public?: boolean; // if true, do not attach authentication header
+    isPublic?: boolean; // if true, do not attach authentication header
   }
 }

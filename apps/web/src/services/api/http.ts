@@ -5,13 +5,13 @@ import { ApiError } from "./api-errors";
 
 export type HttpOptions = {
   raw?: boolean; // if true, return the full AxiosResponse
-  public?: boolean; // if true, do not attach authentication headers
+  isPublic?: boolean; // if true, do not attach authentication headers
   signal?: AbortSignal;
 };
 
 export const httpOptionsDefaults: HttpOptions = {
   raw: false,
-  public: false,
+  isPublic: false,
 };
 
 function mapAxiosError(err: unknown): never {
