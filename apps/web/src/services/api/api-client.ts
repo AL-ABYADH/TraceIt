@@ -1,4 +1,3 @@
-// REST API client setup
 import axios from "axios";
 
 if (typeof window === "undefined") {
