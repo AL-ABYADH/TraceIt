@@ -1,23 +1,36 @@
-import { z } from "zod";
+import { createEnumField, createField } from "../common/field-factory";
 
-// Fields for adding a use case
 export const addUseCaseFields = {
-  name: z.string().min(1).max(100).describe("Use case name"),
-  projectId: z
-    .string()
-    .uuid()
-    .describe("The ID of the project to which the use case belongs"),
-  subType: z
-    .enum(["primary", "secondary", "actor", "diagram", "relationship"])
-    .describe("Type of the use case"),
+  name: createField("string", {
+    min: 1,
+    max: 100,
+    description: "Use case name",
+  }),
+
+  projectId: createField("uuid", {
+    description: "The ID of the project to which the use case belongs",
+  }),
+
+  subType: createEnumField(
+    ["primary", "secondary", "actor", "diagram", "relationship"],
+    {
+      description: "Type of the use case",
+    },
+  ),
 };
 
 // Fields for updating a use case
 export const updateUseCaseFields = {
-  name: z.string().min(1).max(100).optional().describe("Use case name"),
-  briefDescription: z
-    .string()
-    .max(200)
-    .optional()
-    .describe("Brief description of the use case"),
+  name: createField("string", {
+    min: 1,
+    max: 100,
+    optional: true,
+    description: "Use case name",
+  }),
+
+  briefDescription: createField("string", {
+    max: 200,
+    optional: true,
+    description: "Brief description of the use case",
+  }),
 };
