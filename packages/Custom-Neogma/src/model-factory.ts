@@ -211,8 +211,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNotFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     } = {},
   ) => manager.findOneWithRelations(params);
@@ -226,8 +226,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNoneFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     } = {},
   ) => manager.findManyWithRelations(params);
@@ -243,8 +243,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNoneFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     },
   ) => manager.findByRelatedEntity(params);
