@@ -1,7 +1,6 @@
-// apps/web/src/lib/http.ts
-import apiClient from "./api-client";
 import { AxiosRequestConfig } from "axios";
 import { ApiError } from "./api-errors";
+import { apiClient } from "./api-client";
 
 export type HttpOptions = {
   raw?: boolean; // if true, return the full AxiosResponse
