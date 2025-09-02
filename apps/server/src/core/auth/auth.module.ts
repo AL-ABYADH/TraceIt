@@ -18,6 +18,7 @@ import { LogoutUserOperation } from "./operations/logout-user.operation";
 import { LogoutAllDevicesOperation } from "./operations/logout-all-devices.operation";
 import { CleanupExpiredTokensOperation } from "./operations/cleanup-expired-tokens.operation";
 import { GenerateTokensOperation } from "./operations/generate-tokens.operation";
+import { TokenBlacklistService } from "./services/token-blacklist.service";
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { GenerateTokensOperation } from "./operations/generate-tokens.operation"
   providers: [
     // Service & Repository
     AuthService,
+    TokenBlacklistService,
     AuthRepository,
 
     // Strategies

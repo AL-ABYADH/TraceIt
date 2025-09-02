@@ -2,15 +2,26 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthRepository } from "../repositories/auth.repository";
 import { Response, Request } from "express";
 import jwt from "jsonwebtoken";
+import { TokenBlacklistService } from "../services/token-blacklist.service";
 
 @Injectable()
 export class LogoutAllDevicesOperation {
-  constructor(private authRepository: AuthRepository) {}
+  constructor(
+    private authRepository: AuthRepository,
+    private blacklistService: TokenBlacklistService, // Add blacklist service
+  ) {}
 
   async execute(req: Request, res: Response): Promise<boolean> {
     const refreshToken = req.cookies["refreshToken"] as string | undefined;
+    const accessToken = this.extractAccessToken(req);
+
     if (!refreshToken) {
       throw new UnauthorizedException("Refresh token is missing");
+    }
+
+    // Add access token to the blacklist if it exists
+    if (accessToken) {
+      await this.blacklistService.addToBlacklist(accessToken);
     }
 
     try {
@@ -38,5 +49,9 @@ export class LogoutAllDevicesOperation {
 
       throw new UnauthorizedException("Invalid refresh token");
     }
+  }
+  private extractAccessToken(request: Request): string | undefined {
+    const authHeader = request.headers.authorization;
+    return authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : undefined;
   }
 }

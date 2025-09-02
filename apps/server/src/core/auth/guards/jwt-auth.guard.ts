@@ -8,6 +8,7 @@ import { createHash } from "crypto";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 import { AuthService } from "../services/auth.service";
+import { TokenBlacklistService } from "../services/token-blacklist.service";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -16,6 +17,7 @@ export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly authService: AuthService,
+    private readonly blacklistService: TokenBlacklistService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -36,6 +38,10 @@ export class JwtAuthGuard implements CanActivate {
 
     if (!accessToken || !refreshToken) {
       throw new UnauthorizedException("Both access and refresh tokens are required");
+    }
+
+    if (await this.blacklistService.isBlacklisted(accessToken)) {
+      throw new UnauthorizedException("Access token has been revoked");
     }
 
     try {

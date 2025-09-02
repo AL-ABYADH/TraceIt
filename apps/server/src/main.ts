@@ -6,7 +6,8 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { AuthService } from "./core/auth/services/auth.service";
 import { setupSwagger } from "./swagger";
-import { ModelRegistry, NeogmaModel } from "@repo/custom-neogma";
+import { ModelRegistry } from "@repo/custom-neogma";
+import { TokenBlacklistService } from "./core/auth/services/token-blacklist.service";
 
 async function bootstrap() {
   ModelRegistry.getInstance().processPendingRelationships();
@@ -30,7 +31,8 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
   const authService = app.get(AuthService);
-  app.useGlobalGuards(new JwtAuthGuard(reflector, authService));
+  const blacklistService = app.get(TokenBlacklistService);
+  app.useGlobalGuards(new JwtAuthGuard(reflector, authService, blacklistService));
 
   app.enableCors({
     origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
