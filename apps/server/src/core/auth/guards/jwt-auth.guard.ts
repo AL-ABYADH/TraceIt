@@ -3,6 +3,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { Reflector } from "@nestjs/core";
 import { Request, Response } from "express";
 import jwt, { TokenExpiredError } from "jsonwebtoken";
+import { createHash } from "crypto";
 
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
@@ -10,7 +11,6 @@ import { AuthService } from "../services/auth.service";
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  // Reuse Passport's JWT guard under the hood
   private readonly jwtStrategyGuard = new (AuthGuard("jwt"))();
 
   constructor(
@@ -35,59 +35,77 @@ export class JwtAuthGuard implements CanActivate {
     const realIp = this.extractRealIp(request);
 
     if (!accessToken || !refreshToken) {
-      throw new UnauthorizedException("Access and refresh tokens are required.");
+      throw new UnauthorizedException("Both access and refresh tokens are required");
     }
 
-    // Verify AT signature (ignoring expiration) before using its payload for any DB checks
-    const payload = this.verifyAccessTokenSignatureIgnoreExpiration(accessToken);
-
-    // Ensure the RT exists, is not revoked/expired, and belongs to the same user/payload
-    await this.validateRefreshToken(refreshToken, payload);
-
-    // Let Passport perform the normal validation (will reject expired AT)
     try {
-      const ok = await this.jwtStrategyGuard.canActivate(context);
-      if (!ok) throw new UnauthorizedException();
-      return true;
-    } catch (err) {
-      // If failing due to AT expiry, try automatic refresh using the RT
-      if (err instanceof UnauthorizedException) {
-        try {
-          // Full verification (will throw TokenExpiredError when AT is expired)
-          jwt.verify(accessToken, this.getJwtSecret());
-          // If verify passes, the error came from something else -> rethrow
-          throw err;
-        } catch (verifyErr) {
-          if (verifyErr instanceof TokenExpiredError) {
-            // Attempt automatic refresh
-            const data = await this.authService.refreshTokens(
-              refreshToken,
-              userAgent,
-              realIp,
-              response,
-            );
-            if (!data?.accessToken) {
-              throw new UnauthorizedException("Failed to refresh access token.");
-            }
+      // 1. Validate refresh token signature and expiration
+      const refreshPayload = this.verifyRefreshToken(refreshToken);
 
-            // Expose new AT and re-run the JWT guard to populate req.user
-            response.setHeader("Authorization", `Bearer ${data.accessToken}`);
-            request.headers.authorization = `Bearer ${data.accessToken}`;
+      // 2. Validate access token signature (temporarily ignoring expiration)
+      const accessPayload = this.verifyAccessTokenSignatureIgnoreExpiration(accessToken);
 
-            const okAfterRefresh = await this.jwtStrategyGuard.canActivate(context);
-            if (!okAfterRefresh) {
-              throw new UnauthorizedException();
-            }
-            return true;
-          }
-
-          // AT failed verification for a reason other than expiration
-          throw new UnauthorizedException("Access token verification failed.");
-        }
+      // 3. Ensure linkage between access and refresh tokens
+      const accessTokenFingerprint = this.createFingerprint(accessToken);
+      if (refreshPayload.fingerprint !== accessTokenFingerprint) {
+        throw new UnauthorizedException(
+          "Token mismatch - access and refresh tokens are not linked",
+        );
       }
 
-      // Non-auth related error
-      throw err;
+      // 4. Ensure user ID matches in both tokens
+      if (refreshPayload.sub !== accessPayload.sub) {
+        throw new UnauthorizedException("User mismatch between tokens");
+      }
+
+      // 5. Finally, validate access token including expiration
+      try {
+        jwt.verify(accessToken, this.getJwtSecret());
+
+        // Access token is valid, continue authentication
+        const ok = await this.jwtStrategyGuard.canActivate(context);
+        if (!ok) throw new UnauthorizedException();
+        return true;
+      } catch (accessError) {
+        // If the only issue is expiration, attempt refresh
+        if (accessError instanceof TokenExpiredError) {
+          // Check DB to ensure refresh token has not been revoked
+          const isValid = await this.authService.checkIfExists(refreshPayload.jti);
+          if (!isValid) {
+            throw new UnauthorizedException("Refresh token has been revoked");
+          }
+
+          // Refresh tokens
+          const data = await this.authService.refreshTokens(
+            refreshToken,
+            userAgent,
+            realIp,
+            response,
+          );
+
+          if (!data?.accessToken) {
+            throw new UnauthorizedException("Failed to refresh access token");
+          }
+
+          // Expose new AT and re-run the JWT guard to populate req.user
+          response.setHeader("Authorization", `Bearer ${data.accessToken}`);
+          request.headers.authorization = `Bearer ${data.accessToken}`;
+
+          const okAfterRefresh = await this.jwtStrategyGuard.canActivate(context);
+          if (!okAfterRefresh) {
+            throw new UnauthorizedException();
+          }
+          return true;
+        }
+
+        // Any other issue with access token
+        throw new UnauthorizedException("Access token verification failed");
+      }
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException("Authentication failed");
     }
   }
 
@@ -119,36 +137,70 @@ export class JwtAuthGuard implements CanActivate {
     ip = ip || request.ip || request.socket?.remoteAddress || undefined;
 
     if (!ip) {
-      throw new UnauthorizedException("Failed to extract real IP address.");
+      throw new UnauthorizedException("Failed to extract real IP address");
     }
     return ip;
   }
 
-  /** Verify AT signature while ignoring expiration and return a trusted payload */
+  // Create a fingerprint of the access token to bind it with the refresh token
+  private createFingerprint(token: string): string {
+    // Use the first 8 characters of a SHA-256 hash as fingerprint
+    return createHash("sha256")
+      .update(token.split(".")[2] || "")
+      .digest("hex")
+      .substring(0, 8);
+  }
+
+  // Validate refresh token signature and expiration
+  private verifyRefreshToken(token: string): {
+    jti: string;
+    sub: string;
+    fingerprint: string;
+    iat: number;
+    exp: number;
+  } {
+    const refreshSecret = process.env.JWT_REFRESH_SECRET;
+    if (!refreshSecret) {
+      throw new UnauthorizedException("JWT refresh secret is not configured");
+    }
+
+    try {
+      const payload = jwt.verify(token, refreshSecret) as {
+        jti: string;
+        sub: string;
+        fingerprint: string;
+        iat: number;
+        exp: number;
+      };
+      if (!payload || !payload.jti || !payload.sub || !payload.fingerprint) {
+        throw new UnauthorizedException("Invalid refresh token payload");
+      }
+      return payload;
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        throw new UnauthorizedException("Refresh token has expired");
+      }
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+  }
+
+  // Validate access token signature while ignoring expiration
   private verifyAccessTokenSignatureIgnoreExpiration(token: string): JwtPayload {
     const secret = this.getJwtSecret();
     try {
       const payload = jwt.verify(token, secret, { ignoreExpiration: true }) as JwtPayload | null;
       if (!payload || !payload.sub || !payload.data) {
-        throw new UnauthorizedException("Invalid access token payload.");
+        throw new UnauthorizedException("Invalid access token payload");
       }
       return payload;
     } catch {
-      throw new UnauthorizedException("Invalid access token.");
+      throw new UnauthorizedException("Invalid access token");
     }
   }
 
   private getJwtSecret(): string {
     const secret = process.env.JWT_SECRET;
-    if (!secret) throw new UnauthorizedException("JWT secret is not configured.");
+    if (!secret) throw new UnauthorizedException("JWT secret is not configured");
     return secret;
-  }
-
-  private async validateRefreshToken(refreshToken: string, payload: JwtPayload) {
-    const stored = await this.authService.checkIfExists(refreshToken);
-    // Must exist, not revoked, not expired; and must match AT payload (user and RT id)
-    if (!stored || payload.data !== stored.id || payload.sub !== stored.user?.id) {
-      throw new UnauthorizedException("Invalid refresh token or token details mismatch.");
-    }
   }
 }

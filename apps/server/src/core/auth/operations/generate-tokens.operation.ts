@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { v4 as uuidv4 } from "uuid";
 import { Response } from "express";
+import { createHash } from "crypto";
 
 import { AuthRepository } from "../repositories/auth.repository";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
@@ -20,12 +21,6 @@ export class GenerateTokensOperation {
   /**
    * Generates access and refresh tokens for a given user.
    * Sets refresh token as an HTTP-only cookie in the response.
-   *
-   * @param user - The authenticated user entity
-   * @param userAgent - The client's User-Agent string
-   * @param ipAddress - The client's IP address
-   * @param res - Express Response object (used for setting cookie)
-   * @returns TokensInterface - Access token metadata
    */
   async execute(
     user: User,
@@ -35,28 +30,27 @@ export class GenerateTokensOperation {
   ): Promise<TokensInterface> {
     // Load config values
     const accessTokenTTL = this.configService.get<string>("JWT_EXPIRATION", "15m");
-    const refreshTokenTTL = this.configService.get<string>("JWT_REFRESH_EXPIRATION", "7d"); // default: 7 days
+    const refreshTokenTTL = this.configService.get<string>("JWT_REFRESH_EXPIRATION", "7d");
     const isSecureCookie = this.configService.get<boolean>("COOKIE_SECURE", false);
     const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN", "localhost");
+    const refreshSecret = this.configService.get<string>("JWT_REFRESH_SECRET");
 
-    // Generate a new UUID-based refresh token
-    const rawRefreshToken = uuidv4();
+    if (!refreshSecret) {
+      throw new Error("JWT_REFRESH_SECRET is not defined in the environment variables");
+    }
 
+    // Generate a token ID
+    const tokenId = uuidv4();
+
+    // Calculate expirations
     const refreshTokenExpiresIn = this.parseExpiration(refreshTokenTTL);
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + refreshTokenExpiresIn);
 
-    // Save refresh token in the database and associate it with the user
-    const storedToken = await this.authRepository.createRefreshToken(
-      user.id,
-      rawRefreshToken,
-      userAgent,
-      ipAddress,
-      refreshTokenExpiresIn,
-    );
-
-    // Build JWT payload
+    // Build access token payload
     const jwtPayload: JwtPayload = {
       sub: user.id,
-      data: storedToken.id, // Reference to refresh token record in DB
+      data: tokenId, // Reference to refresh token ID
       username: user.username,
       email: user.email,
     };
@@ -64,8 +58,34 @@ export class GenerateTokensOperation {
     // Generate access token
     const accessToken = this.jwtService.sign(jwtPayload);
 
+    // Create a fingerprint of the access token (for linking without DB check)
+    const accessTokenFingerprint = this.createFingerprint(accessToken);
+
+    // Create JWT refresh token payload
+    const refreshTokenPayload = {
+      jti: tokenId, // JWT ID - unique identifier for this token
+      sub: user.id, // Subject - user ID
+      fingerprint: accessTokenFingerprint, // Link to access token
+      iat: Math.floor(Date.now() / 1000), // Issued at time
+    };
+
+    // Sign the refresh token with dedicated secret
+    const refreshToken = this.jwtService.sign(refreshTokenPayload, {
+      secret: refreshSecret,
+      expiresIn: refreshTokenTTL,
+    });
+
+    // Save refresh token reference in the database
+    await this.authRepository.createRefreshToken(
+      user.id,
+      tokenId, // Store token ID, not the full JWT
+      userAgent,
+      ipAddress,
+      expiresAt.getTime() / 1000,
+    );
+
     // Set refresh token as a secure HTTP-only cookie
-    res.cookie("refreshToken", rawRefreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isSecureCookie,
       sameSite: "strict",
@@ -74,15 +94,23 @@ export class GenerateTokensOperation {
       maxAge: refreshTokenExpiresIn * 1000, // Convert seconds to milliseconds
     });
 
-    // Calculate access token expiration time in seconds
-    const expiresIn = this.parseExpiration(accessTokenTTL);
-
     // Return the access token and its metadata
     return {
       accessToken,
       tokenType: "Bearer",
-      expiresIn,
+      expiresIn: this.parseExpiration(accessTokenTTL),
     };
+  }
+
+  /**
+   * Creates a fingerprint of a token for linking tokens without DB checks
+   */
+  private createFingerprint(token: string): string {
+    // Use first 8 characters of SHA-256 hash as fingerprint
+    return createHash("sha256")
+      .update(token.split(".")[2] || "")
+      .digest("hex")
+      .substring(0, 8);
   }
 
   /**
