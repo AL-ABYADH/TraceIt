@@ -50,7 +50,7 @@ export class GenerateTokensOperation {
     // Build access token payload
     const jwtPayload: JwtPayload = {
       sub: user.id,
-      data: tokenId, // Reference to refresh token ID
+      data: tokenId,
       username: user.username,
       email: user.email,
     };

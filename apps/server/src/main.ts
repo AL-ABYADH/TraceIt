@@ -8,6 +8,7 @@ import { AuthService } from "./core/auth/services/auth.service";
 import { setupSwagger } from "./swagger";
 import { ModelRegistry } from "@repo/custom-neogma";
 import { TokenBlacklistService } from "./core/auth/services/token-blacklist.service";
+import { WebSocketJwtAdapter } from "./core/auth/adapters/websocket-jwt.adapter";
 
 async function bootstrap() {
   ModelRegistry.getInstance().processPendingRelationships();
@@ -34,8 +35,11 @@ async function bootstrap() {
   const blacklistService = app.get(TokenBlacklistService);
   app.useGlobalGuards(new JwtAuthGuard(reflector, authService, blacklistService));
 
+  const origin = ["http://localhost:3000", "http://127.0.0.1:3000"];
+  app.useWebSocketAdapter(new WebSocketJwtAdapter(app, origin));
+
   app.enableCors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: origin,
     credentials: true,
   });
 
