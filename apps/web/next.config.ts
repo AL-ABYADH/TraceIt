@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import nextRoutes from "nextjs-routes/config";
+
+const withRoutes = nextRoutes();
 
 const nextConfig: NextConfig = {
   async rewrites() {
@@ -15,4 +18,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withRoutes(nextConfig);

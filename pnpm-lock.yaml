@@ -252,6 +252,9 @@ importers:
       next:
         specifier: 15.1.8
         version: 15.1.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      nextjs-routes:
+        specifier: ^2.2.5
+        version: 2.2.5(next@15.1.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       react:
         specifier: ^19.0.0
         version: 19.1.0
@@ -4190,6 +4193,12 @@ packages:
         optional: true
       sass:
         optional: true
+
+  nextjs-routes@2.2.5:
+    resolution: {integrity: sha512-F8IwFj6JRm00lz0iIo7U7B1aOEClI8flcJVZFQIvwwxIL0eQtaroTi1IAKhxJVvETNfT5pYxVnF3pF0pn16npQ==}
+    hasBin: true
+    peerDependencies:
+      next: '*'
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
@@ -9855,6 +9864,11 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
+
+  nextjs-routes@2.2.5(next@15.1.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)):
+    dependencies:
+      chokidar: 4.0.3
+      next: 15.1.8(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   node-abort-controller@3.1.1: {}
 
