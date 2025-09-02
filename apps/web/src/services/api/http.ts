@@ -1,16 +1,11 @@
 import { AxiosRequestConfig } from "axios";
 import { ApiError } from "./api-errors";
+import { Endpoint } from "@/types/endpoint-type";
 import { apiClient } from "./api-client";
 
 export type HttpOptions = {
   raw?: boolean; // if true, return the full AxiosResponse
-  isPublic?: boolean; // if true, do not attach authentication headers
   signal?: AbortSignal;
-};
-
-export const httpOptionsDefaults: HttpOptions = {
-  raw: false,
-  isPublic: false,
 };
 
 function mapAxiosError(err: unknown): never {
@@ -26,7 +21,7 @@ function mapAxiosError(err: unknown): never {
 
 export async function request<T = any>(config: AxiosRequestConfig, opts?: HttpOptions) {
   try {
-    const res = await apiClient.request<T>({ ...config, ...httpOptionsDefaults });
+    const res = await apiClient.request<T>({ ...config });
     return opts?.raw ? res : (res.data as T);
   } catch (err) {
     mapAxiosError(err);
@@ -34,14 +29,23 @@ export async function request<T = any>(config: AxiosRequestConfig, opts?: HttpOp
 }
 
 export const http = {
-  get: <T>(url: string, { params, opts }: { params?: any; opts?: HttpOptions } = {}) =>
-    request<T>({ method: "get", url, params }, { ...httpOptionsDefaults, ...opts }),
-  post: <T, B = any>(url: string, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>({ method: "post", url, data: body }, { ...httpOptionsDefaults, ...opts }),
-  put: <T, B = any>(url: string, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>({ method: "put", url, data: body }, { ...httpOptionsDefaults, ...opts }),
-  patch: <T, B = any>(url: string, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>({ method: "patch", url, data: body }, { ...httpOptionsDefaults, ...opts }),
-  del: <T>(url: string, { opts }: { opts?: HttpOptions } = {}) =>
-    request<T>({ method: "delete", url }, { ...httpOptionsDefaults, ...opts }),
+  get: <T>(endpoint: Endpoint, { params, opts }: { params?: any; opts?: HttpOptions } = {}) =>
+    request<T>({ method: "get", url: endpoint.path, params, isPublic: endpoint.isPublic }, opts),
+  post: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
+    request<T>(
+      { method: "post", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+      opts,
+    ),
+  put: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
+    request<T>(
+      { method: "put", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+      opts,
+    ),
+  patch: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
+    request<T>(
+      { method: "patch", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+      opts,
+    ),
+  del: <T>(endpoint: Endpoint, { opts }: { opts?: HttpOptions } = {}) =>
+    request<T>({ method: "delete", url: endpoint.path, isPublic: endpoint.isPublic }, opts),
 };
