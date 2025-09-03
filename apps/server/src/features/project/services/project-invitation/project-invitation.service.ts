@@ -3,10 +3,14 @@ import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { ProjectInvitationRepository } from "../../repositories/project-invitation/project-invitation.repository";
 import { ProjectInvitationStatus } from "../../enums/project-invitation-status.enum";
 import { CreateProjectInvitationInterface } from "../../interfaces/create-project-invitation.interface";
+import { ProjectCollaborationService } from "../project-collaboration/project-collaboration.service";
 
 @Injectable()
 export class ProjectInvitationService {
-  constructor(private readonly projectInvitationRepository: ProjectInvitationRepository) {}
+  constructor(
+    private readonly projectInvitationRepository: ProjectInvitationRepository,
+    private readonly projectCollaborationService: ProjectCollaborationService,
+  ) {}
 
   async getProjectInvitations(
     userID: string,
@@ -28,6 +32,14 @@ export class ProjectInvitationService {
     return this.projectInvitationRepository.create(userID, params);
   }
   async accept(id: string): Promise<boolean> {
+    const invitation = await this.projectInvitationRepository.getById(id);
+    if (!invitation) {
+      throw new NotFoundException(`Invitation with ID ${id} not found`);
+    }
+    const now = new Date();
+    if (invitation.expirationDate < now) {
+      throw new NotFoundException(`Invitation with ID ${id} has expired`);
+    }
     const updated = await this.projectInvitationRepository.setStatus(
       id,
       ProjectInvitationStatus.ACCEPTED,
@@ -35,6 +47,12 @@ export class ProjectInvitationService {
     if (!updated) {
       throw new NotFoundException(`Invitation with ID ${id} not found`);
     }
+    await this.projectCollaborationService.create({
+      userId: invitation.receiver.id,
+      projectId: invitation.project.id,
+      roleIds: invitation.projectRoles ? invitation.projectRoles.map((role) => role.id) : [],
+    });
+
     return true;
   }
 
