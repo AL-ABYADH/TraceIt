@@ -11,7 +11,7 @@ export class ProjectRoleRepository {
   private projectRoleModel: ProjectRoleModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {
-    this.projectRoleModel = ProjectRoleModel(neo4jService.getNeogma());
+    this.projectRoleModel = ProjectRoleModel(this.neo4jService.getNeogma());
   }
 
   async create(role: CreateProjectRoleInterface): Promise<ProjectRole> {
