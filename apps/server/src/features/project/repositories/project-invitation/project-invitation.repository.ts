@@ -100,6 +100,14 @@ export class ProjectInvitationRepository {
     return updated.length > 0;
   }
 
+  async getById(id: string): Promise<ProjectInvitation | null> {
+    const invitation = await this.projectInvitationModel.findOneWithRelations({
+      where: { id: id },
+    });
+    if (!invitation) return null;
+    return this.mapOneToProjectInvitationEntity(invitation);
+  }
+
   private mapToProjectInvitationEntities(data: any): ProjectInvitation[] {
     if (!data) return [];
     if (Array.isArray(data)) {
@@ -109,14 +117,13 @@ export class ProjectInvitationRepository {
   }
 
   private mapOneToProjectInvitationEntity(item: any): ProjectInvitation {
-    const { createdAt, updatedAt, ...rest } = item ?? {};
-    const result: any = { ...rest };
+    const { createdAt, updatedAt, expirationDate, ...rest } = item ?? {};
 
-    if (createdAt != null)
-      result.createdAt = createdAt instanceof Date ? createdAt : new Date(createdAt);
-    if (updatedAt != null)
-      result.updatedAt = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
-
-    return result as ProjectInvitation;
+    return {
+      ...rest,
+      expirationDate: new Date(expirationDate),
+      createdAt: new Date(createdAt),
+      ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
+    };
   }
 }
