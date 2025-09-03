@@ -18,6 +18,11 @@ import { LogoutUserOperation } from "./operations/logout-user.operation";
 import { LogoutAllDevicesOperation } from "./operations/logout-all-devices.operation";
 import { CleanupExpiredTokensOperation } from "./operations/cleanup-expired-tokens.operation";
 import { GenerateTokensOperation } from "./operations/generate-tokens.operation";
+import { TokenBlacklistService } from "./services/token-blacklist.service";
+
+// New WebSocket authentication components
+import { WebSocketAuthGuard } from "./guards/websocket-auth.guard";
+import { WebSocketConnectionService } from "./services/websocket-connection.service";
 
 @Module({
   imports: [
@@ -46,6 +51,7 @@ import { GenerateTokensOperation } from "./operations/generate-tokens.operation"
   providers: [
     // Service & Repository
     AuthService,
+    TokenBlacklistService,
     AuthRepository,
 
     // Strategies
@@ -61,7 +67,16 @@ import { GenerateTokensOperation } from "./operations/generate-tokens.operation"
     LogoutAllDevicesOperation,
     CleanupExpiredTokensOperation,
     GenerateTokensOperation,
+
+    // WebSocket Authentication
+    WebSocketAuthGuard,
+    WebSocketConnectionService,
   ],
-  exports: [AuthService],
+  exports: [
+    AuthService,
+    // Export WebSocket components for use in other modules
+    WebSocketAuthGuard,
+    WebSocketConnectionService,
+  ],
 })
 export class AuthModule {}

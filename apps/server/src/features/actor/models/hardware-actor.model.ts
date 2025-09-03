@@ -1,7 +1,7 @@
 import { NeogmaModel, ModelFactoryDefinition, defineModelFactory } from "@repo/custom-neogma";
 import { ActorAttributes, ActorModel, ActorRelationships } from "./actor.model";
 
-export interface HardwareActorAttributes extends ActorAttributes {}
+export type HardwareActorAttributes = ActorAttributes & {};
 
 interface HardwareActorRelationships extends ActorRelationships {}
 
@@ -19,6 +19,5 @@ export const HardwareActorModel: ModelFactoryDefinition<
   schema: {
     ...ActorModel.parameters.schema,
   },
-  primaryKeyField: ActorModel.parameters.primaryKeyField,
   relationships: { ...ActorModel.parameters.relationships },
 });

@@ -1,7 +1,6 @@
-import { z } from "../zod-openapi-init";
+import { createEnumField, createField } from "../common/field-factory";
 
-// Subtype enum (raw version)
-export const subTypeEnum = z.enum([
+export const subTypeEnum = createEnumField([
   "human",
   "software",
   "hardware",
@@ -9,10 +8,10 @@ export const subTypeEnum = z.enum([
   "ai-agent",
 ]);
 
-// Regex pattern & validation message for names
-export const actorNameRegex = /^(?! )[A-Za-z0-9 _-]*(?<! )$/;
-
-export const actorNameField = z.string().min(1).max(50).regex(actorNameRegex, {
+export const actorNameField = createField("string", {
+  min: 1,
+  max: 50,
+  regex: /^(?! )[A-Za-z0-9 _-]*(?<! )$/,
   message:
     "is not a valid name. It can only contain letters, numbers, spaces, underscores, hyphens, and no leading or trailing spaces.",
 });

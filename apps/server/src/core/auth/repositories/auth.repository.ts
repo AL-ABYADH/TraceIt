@@ -152,14 +152,14 @@ export class AuthRepository {
   }
 
   /**
-   * Checks if a valid, non-revoked refresh token exists and returns its details.
+   * Checks if a valid, refresh token exists and returns its details.
    */
   async checkIfExists(token: string): Promise<RefreshToken | null> {
-    const nowIso = new Date().toISOString();
     const tokenData = await this.refreshTokenModel.findOneWithRelations({
-      where: { token, revoked: false, expiresAt: { [Op.gte]: nowIso } },
+      where: { token },
       include: ["user"],
     });
+    if (!tokenData) return null;
     return this.mapToRefreshTokenEntity(tokenData);
   }
 

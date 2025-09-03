@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { Response, Request } from "express";
 
 import { ValidateUserOperation } from "../operations/validate-user.operation";
@@ -99,6 +99,18 @@ export class AuthService {
   }
 
   async checkIfExists(refreshToken: string): Promise<RefreshToken | null> {
-    return this.authRepository.checkIfExists(refreshToken);
+    const token = await this.authRepository.checkIfExists(refreshToken);
+
+    if (token) {
+      if (token.expiresAt < new Date()) {
+        throw new UnauthorizedException("Refresh token has expired.");
+      }
+
+      if (token.revoked) {
+        throw new UnauthorizedException("Refresh token has been stopped.");
+      }
+    }
+
+    return token;
   }
 }

@@ -211,8 +211,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNotFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     } = {},
   ) => manager.findOneWithRelations(params);
@@ -226,8 +226,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNoneFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     } = {},
   ) => manager.findManyWithRelations(params);
@@ -243,8 +243,8 @@ export function ModelFactory<
       order?: Array<[string, "ASC" | "DESC"]>;
       plain?: Plain;
       throwIfNoneFound?: boolean;
-      include?: [keyof RelatedNodes];
-      exclude?: [keyof RelatedNodes];
+      include?: Array<keyof RelatedNodes>;
+      exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
     },
   ) => manager.findByRelatedEntity(params);
@@ -294,13 +294,16 @@ export function ModelFactory<
       }
       // Always update updatedAt and return plain array for update
       if (prop === "update") {
-        return async (data: any, params: any) => {
+        return async function (data: any, params: any) {
           if (data) {
             data = removeUndefined(data);
             data.updatedAt = new Date().toISOString();
           }
-          const [instances, result] = await target.update.call(target, data, params);
-          return instances.map((i: any) => i.getDataValues());
+          if (params) {
+            params.return = params.return || true;
+          }
+          const result = await (target[prop] as Function).apply(target, [data, params]);
+          return result[0].map((i: any) => i.getDataValues());
         };
       }
       // Set plain: true by default for findMany

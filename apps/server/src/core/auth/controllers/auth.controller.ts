@@ -1,4 +1,14 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Put,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthService } from "../services/auth.service";
 import { GetUserAgent } from "../decorators/http-info.decorator";
 import { RealIP } from "nestjs-real-ip";
@@ -59,7 +69,7 @@ export class AuthController {
   /**
    * Logs out the user and revokes the active refresh token.
    */
-  @Post("logout")
+  @Put("logout")
   @HttpCode(HttpStatus.OK)
   async logout(
     @Req() request: Request,
@@ -72,7 +82,7 @@ export class AuthController {
   /**
    * Logs the user out from all sessions by revoking all active refresh tokens.
    */
-  @Post("logout-all")
+  @Put("logout-all")
   @HttpCode(HttpStatus.OK)
   async logoutAll(
     @Req() request: Request,

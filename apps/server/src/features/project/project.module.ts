@@ -35,5 +35,6 @@ import { ProjectCollaborationController } from "./controllers/project-collaborat
     ProjectInvitationController,
     ProjectPermissionController,
   ],
+  exports: [ProjectService],
 })
 export class ProjectModule {}

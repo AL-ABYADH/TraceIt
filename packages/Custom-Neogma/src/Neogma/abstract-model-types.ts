@@ -226,8 +226,8 @@ interface NeogmaModelStaticsI<
       /** throws an error if the node is not found */
       throwIfNotFound?: boolean;
       // Special additions for relations
-      include?: [keyof RelatedNodesToAssociateI];
-      exclude?: [keyof RelatedNodesToAssociateI];
+      include?: Array<keyof RelatedNodesToAssociateI>;
+      exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
   ) => Promise<
@@ -246,8 +246,8 @@ interface NeogmaModelStaticsI<
       /** throws an error if no nodes are found (results length 0) */
       throwIfNoneFound?: boolean;
       // Special additions for relations
-      include?: [keyof RelatedNodesToAssociateI];
-      exclude?: [keyof RelatedNodesToAssociateI];
+      include?: Array<keyof RelatedNodesToAssociateI>;
+      exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
   ) => Promise<
@@ -270,8 +270,8 @@ interface NeogmaModelStaticsI<
       /** throws an error if no nodes are found (results length 0) */
       throwIfNoneFound?: boolean;
       // Special additions for relations
-      include?: [keyof RelatedNodesToAssociateI];
-      exclude?: [keyof RelatedNodesToAssociateI];
+      include?: Array<keyof RelatedNodesToAssociateI>;
+      exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
   ) => Promise<

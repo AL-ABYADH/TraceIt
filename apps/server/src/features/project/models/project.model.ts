@@ -1,6 +1,11 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { ProjectStatus } from "../enums/project-status.enum";
 import { UserAttributes } from "../../user/models/user.model";
+import { UseCaseAttributes } from "../../use-case/models/use-case.model";
+import { ActorAttributes } from "../../actor/models/actor.model";
+import { ProjectCollaborationAttributes } from "./project-collaboration.model";
+import { UseCaseActorAttributes } from "../../use-case/models/use-case-actor.model";
+import { UseCaseDiagramAttributes } from "../../use-case/models/use-case-diagram.model";
 
 export type ProjectAttributes = {
   id: string;
@@ -13,10 +18,12 @@ export type ProjectAttributes = {
 
 export interface ProjectRelationships {
   owner: UserAttributes;
-  collaborations: any[]; // Replace with actual type if available
-  actors: any[]; // Replace with actual type if available
-  // useCases: any[]; // Replace with actual type if available
-  // classes: any[]; // Replace with actual type if available
+  collaborations: ProjectCollaborationAttributes[];
+  actors: ActorAttributes[];
+  useCases: UseCaseAttributes[];
+  actorUseCases: UseCaseActorAttributes[];
+  useCaseDiagram: UseCaseDiagramAttributes[];
+  // classes: any[];
 }
 
 export type ProjectModelType = NeogmaModel<ProjectAttributes, ProjectRelationships>;
@@ -69,12 +76,24 @@ export const ProjectModel: ModelFactoryDefinition<ProjectAttributes, ProjectRela
         name: "BELONGS_TO",
         cardinality: "many",
       },
-      // useCases: {
-      //   model: "UseCase",
-      //   direction: "in",
-      //   name: "BELONGS_TO",
-      //   cardinality: "many",
-      // },
+      useCases: {
+        model: "UseCase",
+        direction: "in",
+        name: "BELONGS_TO",
+        cardinality: "many",
+      },
+      actorUseCases: {
+        model: "UseCaseActor",
+        direction: "in",
+        name: "BELONGS_TO_PROJECT",
+        cardinality: "many",
+      },
+      useCaseDiagram: {
+        model: "UseCaseDiagram",
+        direction: "in",
+        name: "BELONGS_TO_PROJECT",
+        cardinality: "many",
+      },
       // classes: {
       //   model: "Class",
       //   direction: "in",
