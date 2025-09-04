@@ -20,10 +20,6 @@ import { CleanupExpiredTokensOperation } from "./operations/cleanup-expired-toke
 import { GenerateTokensOperation } from "./operations/generate-tokens.operation";
 import { TokenBlacklistService } from "./services/token-blacklist.service";
 
-// New WebSocket authentication components
-import { WebSocketAuthGuard } from "./guards/websocket-auth.guard";
-import { WebSocketConnectionService } from "./services/websocket-connection.service";
-
 @Module({
   imports: [
     PassportModule,
@@ -67,16 +63,7 @@ import { WebSocketConnectionService } from "./services/websocket-connection.serv
     LogoutAllDevicesOperation,
     CleanupExpiredTokensOperation,
     GenerateTokensOperation,
-
-    // WebSocket Authentication
-    WebSocketAuthGuard,
-    WebSocketConnectionService,
   ],
-  exports: [
-    AuthService,
-    // Export WebSocket components for use in other modules
-    WebSocketAuthGuard,
-    WebSocketConnectionService,
-  ],
+  exports: [AuthService],
 })
 export class AuthModule {}
