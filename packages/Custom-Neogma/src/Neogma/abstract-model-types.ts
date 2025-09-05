@@ -131,7 +131,7 @@ interface NeogmaModelStaticsI<
       /** defaults to false. Whether to return the properties of the nodes after the update. If it's false, the first entry of the return value of this function will be an empty array */
       return?: boolean;
     },
-  ) => Promise<[Instance[], QueryResult]>;
+  ) => Promise<Properties[]>;
   updateRelationship: (
     data: AnyObject,
     params: {
@@ -162,7 +162,7 @@ interface NeogmaModelStaticsI<
       /** throws an error if no nodes are found (results length 0) */
       throwIfNoneFound?: boolean;
     },
-  ) => Promise<Plain extends true ? Properties[] : Instance[]>;
+  ) => Promise<Properties[]>;
   findOne: <Plain extends boolean = false>(
     params?: GenericConfiguration & {
       /** where params for the nodes of this Model */
@@ -173,7 +173,7 @@ interface NeogmaModelStaticsI<
       /** throws an error if the node is not found */
       throwIfNotFound?: boolean;
     },
-  ) => Promise<(Plain extends true ? Properties : Instance) | null>;
+  ) => Promise<Properties | null>;
   getLabelFromRelationshipModel: (
     relationshipModel: NeogmaModel<any, any, object, object> | "self",
   ) => string;
@@ -230,9 +230,7 @@ interface NeogmaModelStaticsI<
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
-  ) => Promise<
-    (Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations) | null
-  >;
+  ) => Promise<(Properties & RelatedNodesToAssociateI) | null>;
 
   findManyWithRelations: <Plain extends boolean = false>(
     params?: GenericConfiguration & {
@@ -250,9 +248,7 @@ interface NeogmaModelStaticsI<
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
-  ) => Promise<
-    Array<Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations>
-  >;
+  ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
 
   findByRelatedEntity: <Plain extends boolean = false>(
     params: GenericConfiguration & {
@@ -274,57 +270,9 @@ interface NeogmaModelStaticsI<
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
     },
-  ) => Promise<
-    Array<Plain extends true ? Properties & RelatedNodesToAssociateI : InstanceWithRelations>
-  >;
+  ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
 }
-/** the methods of a Neogma Instance */
-interface NeogmaInstanceMethodsI<
-  Properties extends Neo4jSupportedProperties,
-  RelatedNodesToAssociateI extends AnyObject,
-  MethodsI extends AnyObject,
-  Instance = NeogmaInstance<Properties, RelatedNodesToAssociateI, MethodsI>,
-> {
-  __existsInDatabase: boolean;
-  dataValues: Properties;
-  changed: Record<keyof Properties, boolean>;
-  labels: string[];
-  getDataValues: () => Properties;
-  save: (configuration?: CreateDataParamsI) => Promise<Instance>;
-  validate: () => Promise<void>;
-  updateRelationship: (
-    data: AnyObject,
-    params: {
-      alias: keyof RelatedNodesToAssociateI;
-      where?: {
-        target?: WhereParamsI;
-        relationship?: WhereParamsI;
-      };
-      session?: GenericConfiguration["session"];
-    },
-  ) => Promise<QueryResult>;
-  delete: (
-    configuration?: GenericConfiguration & {
-      detach?: boolean;
-    },
-  ) => Promise<number>;
-  findRelationships: <Alias extends keyof RelatedNodesToAssociateI>(params: {
-    alias: Alias;
-    where?: {
-      relationship: WhereParamsI;
-      target: WhereParamsI;
-    };
-    /** a limit to apply to the fetched relationships */
-    limit?: number;
-    session?: GenericConfiguration["session"];
-  }) => Promise<
-    Array<{
-      source: Instance;
-      target: RelatedNodesToAssociateI[Alias]["Instance"];
-      relationship: RelatedNodesToAssociateI[Alias]["RelationshipProperties"];
-    }>
-  >;
-}
+
 /** the type of instance of the Model */
 export type NeogmaInstance<
   /** the properties used in the Model */
@@ -332,11 +280,11 @@ export type NeogmaInstance<
   RelatedNodesToAssociateI extends AnyObject,
   /** the Methods used in the Model */
   MethodsI extends AnyObject = object,
-> = Properties & NeogmaInstanceMethodsI<Properties, RelatedNodesToAssociateI, MethodsI> & MethodsI;
+> = Properties & RelatedNodesToAssociateI;
 /** the type of a Neogma Model */
 export type NeogmaModel<
   Properties extends Neo4jSupportedProperties,
   RelatedNodesToAssociateI extends AnyObject,
   MethodsI extends AnyObject = object,
   StaticsI extends AnyObject = object,
-> = NeogmaModelStaticsI<Properties, RelatedNodesToAssociateI, MethodsI> & StaticsI;
+> = NeogmaModelStaticsI<Properties, RelatedNodesToAssociateI>;
