@@ -1,6 +1,6 @@
-import { PrimaryUseCase } from "./primary-use-case.entity";
-import { UseCase } from "./use-case.entity";
+import {
+  SecondaryUseCaseAttributes,
+  SecondaryUseCaseRelationships,
+} from "../models/secondary-use-case.model";
 
-export class SecondaryUseCase extends UseCase {
-  primaryUseCase: PrimaryUseCase;
-}
+export type SecondaryUseCase = SecondaryUseCaseAttributes & Partial<SecondaryUseCaseRelationships>;

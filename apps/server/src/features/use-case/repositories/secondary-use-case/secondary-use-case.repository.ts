@@ -1,41 +1,111 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
-import { ConcreteUseCaseRepositoryInterface } from "../interfaces/concrete-use-case-repository.interface";
-import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import {
   SecondaryUseCaseModel,
   SecondaryUseCaseModelType,
 } from "../../models/secondary-use-case.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interface";
-import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interface";
+import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
+import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 
 @Injectable()
-export class SecondaryUseCaseRepository
-  implements ConcreteUseCaseRepositoryInterface<SecondaryUseCase>
-{
+export class SecondaryUseCaseRepository {
   private secondaryUseCaseModel: SecondaryUseCaseModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {
-    this.secondaryUseCaseModel = SecondaryUseCaseModel(neo4jService.getNeogma());
+    this.secondaryUseCaseModel = SecondaryUseCaseModel(this.neo4jService.getNeogma());
   }
 
-  create(createDto: CreateUseCaseInterface): Promise<SecondaryUseCase> {
-    throw new NotImplementedException();
+  async create(createDto: any): Promise<SecondaryUseCase> {
+    const useCase = await this.secondaryUseCaseModel.createOne({
+      name: createDto.name,
+      project: {
+        where: [{ params: { id: createDto.projectId } }],
+      },
+      primaryUseCase: {
+        where: [{ params: { id: createDto.primaryUseCaseId } }],
+      },
+    });
+    return useCase;
   }
 
-  update(updateDto: UpdateUseCaseInterface): Promise<SecondaryUseCase> {
-    throw new NotImplementedException();
+  async update(id: string, updateDto: UpdateSecondaryUseCaseInterface): Promise<SecondaryUseCase> {
+    const secondaryUpdateDto = updateDto;
+    const attributes = {};
+
+    if (secondaryUpdateDto.name) {
+      attributes["name"] = secondaryUpdateDto.name;
+    }
+
+    const updated = await this.secondaryUseCaseModel.update(attributes, {
+      where: { id },
+      return: true,
+    });
+
+    if (!updated || updated.length === 0) {
+      throw new NotFoundException(`Secondary use case with ID ${id} not found`);
+    }
+
+    if (secondaryUpdateDto.primaryUseCaseId) {
+      await this.secondaryUseCaseModel.deleteRelationships({
+        alias: "primaryUseCase",
+        where: {
+          source: { id },
+        },
+      });
+
+      await this.secondaryUseCaseModel.relateTo({
+        alias: "primaryUseCase",
+        where: {
+          source: { id },
+          target: { id: secondaryUpdateDto.primaryUseCaseId },
+        },
+      });
+    }
+
+    const result = await this.secondaryUseCaseModel.findOneWithRelations({
+      where: { id },
+      include: ["primaryUseCase", "project"],
+    });
+
+    if (!result) {
+      throw new NotFoundException();
+    }
+
+    return result;
   }
 
-  delete(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+  async delete(id: string): Promise<boolean> {
+    const deleteResult = await this.secondaryUseCaseModel.delete({
+      where: { id },
+      detach: true,
+    });
+
+    return deleteResult > 0;
   }
 
-  getById(id: string): Promise<SecondaryUseCase | null> {
-    throw new NotImplementedException();
+  async getById(id: string): Promise<SecondaryUseCase | null> {
+    const useCase = await this.secondaryUseCaseModel.findOneWithRelations({
+      where: { id },
+      include: ["primaryUseCase", "project"],
+    });
+
+    return useCase ? useCase : null;
   }
 
-  getAll(): Promise<SecondaryUseCase[]> {
-    throw new NotImplementedException();
+  async getAll(): Promise<SecondaryUseCase[]> {
+    const useCases = await this.secondaryUseCaseModel.findManyWithRelations({
+      include: ["primaryUseCase", "project"],
+    });
+
+    return useCases;
+  }
+
+  async getByProject(projectId: string): Promise<SecondaryUseCase[]> {
+    const useCases = await this.secondaryUseCaseModel.findByRelatedEntity({
+      whereRelated: { id: projectId },
+      relationshipAlias: "project",
+    });
+
+    return useCases;
   }
 }

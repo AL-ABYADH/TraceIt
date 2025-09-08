@@ -1,8 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseModel, UseCaseAttributes, UseCaseRelationships } from "./use-case.model";
-import { UseCaseActor } from "../entities/use-case-actor.entity";
-import { SecondaryUseCase } from "../entities/secondary-use-case.entity";
-import { Class } from "src/features/class/entities/class.entity";
+import { ActorAttributes } from "../../actor/models/actor.model";
+import { SecondaryUseCaseAttributes } from "./secondary-use-case.model";
 
 /**
  * Attributes for the PrimaryUseCase entity, extending the base UseCase attributes.
@@ -15,9 +14,11 @@ export type PrimaryUseCaseAttributes = UseCaseAttributes & {
  * Relationship definitions for the PrimaryUseCase entity.
  */
 export interface PrimaryUseCaseRelationships extends UseCaseRelationships {
-  secondaryUseCases: SecondaryUseCase[];
-  actors: UseCaseActor[];
-  classes: Class[];
+  primaryActors: ActorAttributes[];
+  secondaryActors: ActorAttributes[];
+  secondaryUseCases: SecondaryUseCaseAttributes[];
+  // classes: Class[];
+  classes: any;
 }
 
 /**
@@ -43,23 +44,29 @@ export const PrimaryUseCaseModel: ModelFactoryDefinition<
   },
   relationships: {
     ...UseCaseModel.parameters.relationships,
+    primaryActors: {
+      model: "Actor",
+      direction: "out",
+      name: "HAS_PRIMARY_ACTOR",
+      cardinality: "many",
+    },
+    secondaryActors: {
+      model: "Actor",
+      direction: "out",
+      name: "HAS_SECONDARY_ACTOR",
+      cardinality: "many",
+    },
     secondaryUseCases: {
       model: "SecondaryUseCase",
       direction: "in",
       name: "BELONGS_TO",
       cardinality: "one",
     },
-    actors: {
-      model: "UseCaseActor",
-      direction: "out",
-      name: "HAS_ACTOR",
-      cardinality: "many",
-    },
-    classes: {
-      model: "Class",
-      direction: "out",
-      name: "HAS_CLASS",
-      cardinality: "many",
-    },
+    // classes: {
+    //   model: "Class",
+    //   direction: "out",
+    //   name: "HAS_CLASS",
+    //   cardinality: "many",
+    // },
   },
 });

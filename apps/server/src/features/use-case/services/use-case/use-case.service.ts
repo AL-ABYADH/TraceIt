@@ -1,26 +1,31 @@
-import { Injectable, NotImplementedException } from "@nestjs/common";
-import { UseCaseRepositoryFactory } from "../../repositories/factory/use-case-repository.factory";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { UseCaseRepository } from "../../repositories/use-case/use-case.repository";
 import { UseCase } from "../../entities/use-case.entity";
-import { AddUseCaseParamsInterface } from "../../interfaces/add-use-case.interface";
-import { UpdateUseCaseInterface } from "../../interfaces/update-use-case.interface";
 
 @Injectable()
 export class UseCaseService {
-  constructor(private readonly repositoryFactory: UseCaseRepositoryFactory) {}
+  constructor(private readonly useCaseRepository: UseCaseRepository) {}
 
-  async add(params: AddUseCaseParamsInterface): Promise<UseCase> {
-    throw new NotImplementedException();
-  }
-
+  /**
+   * Retrieves all use cases for a specific project
+   * @param projectId - ID of the project
+   * @returns Promise resolving to an array of use cases
+   */
   async listByProject(projectId: string): Promise<UseCase[]> {
-    throw new NotImplementedException();
+    return await this.useCaseRepository.getByProject(projectId);
   }
 
-  async update(id: string, params: UpdateUseCaseInterface): Promise<UseCase> {
-    throw new NotImplementedException();
-  }
-
-  async remove(id: string): Promise<boolean> {
-    throw new NotImplementedException();
+  /**
+   * Finds a use case by its ID, throwing an exception if not found
+   * @param id - ID of the use case to find
+   * @returns Promise resolving to the use case
+   * @throws NotFoundException if the use case doesn't exist
+   */
+  async findById(id: string): Promise<UseCase> {
+    const useCase = await this.useCaseRepository.getById(id);
+    if (!useCase) {
+      throw new NotFoundException(`Use case with ID ${id} not found`);
+    }
+    return useCase;
   }
 }

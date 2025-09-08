@@ -1,15 +1,6 @@
-import { UseCase } from "./use-case.entity";
-import { UseCaseActor } from "./use-case-actor.entity";
-import { Class } from "src/features/class/entities/class.entity";
+import {
+  PrimaryUseCaseAttributes,
+  PrimaryUseCaseRelationships,
+} from "../models/primary-use-case.model";
 
-/**
- * Represents a primary use case, extending the base UseCase entity.
- * Includes additional properties specific to primary use cases.
- */
-export class PrimaryUseCase extends UseCase {
-  actors: UseCaseActor[];
-  description?: string;
-  classes: Class[];
-  // sequenceDiagrams: any[];
-  // activityDiagram: any;
-}
+export type PrimaryUseCase = PrimaryUseCaseAttributes & Partial<PrimaryUseCaseRelationships>;
