@@ -10,9 +10,6 @@ import { ModelRegistry } from "@repo/custom-neogma";
 import { TokenBlacklistService } from "./core/auth/services/token-blacklist.service";
 
 async function bootstrap() {
-  ModelRegistry.getInstance().processPendingRelationships();
-  ModelRegistry.getInstance().printFinalSummary();
-
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan("combined"));
@@ -48,6 +45,8 @@ async function bootstrap() {
   const url = await app.getUrl();
   console.log(`Application is running on: ${url}`);
   console.log(`📚 Swagger docs available at: ${url}/api`);
+  ModelRegistry.getInstance().processPendingRelationships();
+  ModelRegistry.getInstance().printFinalSummary();
 }
 
 bootstrap();
