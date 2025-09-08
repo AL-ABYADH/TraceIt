@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { RefreshTokenModel, RefreshTokenModelType } from "../models/refresh-token.model";
 import { Neo4jService } from "../../neo4j/neo4j.service";
 import { Op } from "@repo/custom-neogma";
-import { User } from "../../../features/user/models/user.model";
 import { RefreshToken } from "../entities/refresh-token.entity";
+import { User } from "../../../features/user/entities/user.entity";
 
 @Injectable()
 export class AuthRepository {
