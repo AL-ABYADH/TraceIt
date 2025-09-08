@@ -5,7 +5,6 @@ import { UpdateProjectInterface } from "../../interfaces/update-project.interfac
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { ProjectModel, ProjectModelType } from "../../models/project.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { Op } from "@repo/custom-neogma";
 
 @Injectable()
 export class ProjectRepository {
@@ -29,6 +28,9 @@ export class ProjectRepository {
 
   async getById(id: string): Promise<Project | null> {
     const project = await this.projectModel.findOneWithRelations({ where: { id: id } });
+    if (!project) {
+      return null;
+    }
 
     return this.mapToProjectEntity(project);
   }
@@ -66,7 +68,7 @@ export class ProjectRepository {
     const projects = await this.projectModel.findByRelatedEntity({
       whereRelated: { id: userId },
       relationshipAlias: "owner",
-      where: status ? { status } : { status: { [Op.in]: Object.values(ProjectStatus) } },
+      where: status ? (status as unknown as { status: ProjectStatus }) : {},
     });
     return this.mapListToProjectEntity(projects);
   }

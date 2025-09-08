@@ -19,7 +19,7 @@ export class ProjectService {
     return this.projectRepository.create(newProject);
   }
 
-  async find(id: string): Promise<Project> {
+  async findById(id: string): Promise<Project> {
     const project = await this.projectRepository.getById(id);
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} was not found`);
@@ -32,25 +32,25 @@ export class ProjectService {
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<Project> {
-    await this.find(id);
+    await this.findById(id);
 
     return this.projectRepository.update(id, project);
   }
 
   async delete(id: string): Promise<boolean> {
-    await this.find(id);
+    await this.findById(id);
 
     return this.projectRepository.delete(id);
   }
 
   async activate(id: string): Promise<boolean> {
-    await this.find(id);
+    await this.findById(id);
 
     return this.projectRepository.setStatus(id, ProjectStatus.ACTIVE);
   }
 
   async archive(id: string): Promise<boolean> {
-    await this.find(id);
+    await this.findById(id);
 
     return this.projectRepository.setStatus(id, ProjectStatus.ARCHIVED);
   }
