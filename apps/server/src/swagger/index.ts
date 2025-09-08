@@ -1,3 +1,4 @@
+import "./use-case/index";
 import "./auth/index";
 import "./actor/index";
 import "./user/index";
@@ -7,5 +8,8 @@ import { SwaggerModule } from "@nestjs/swagger";
 import { generateOpenApiDocument } from "./generator";
 export function setupSwagger(app: INestApplication) {
   const document = generateOpenApiDocument();
-  SwaggerModule.setup("api", app, document as any);
+  SwaggerModule.setup("api", app, document as any, {
+    jsonDocumentUrl: "api/openapi.json",
+    customSiteTitle: "API Documentation",
+  });
 }

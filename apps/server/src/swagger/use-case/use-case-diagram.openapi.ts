@@ -1,28 +1,30 @@
 import { registerMultiple, registry } from "../registry";
 import {
-  createProjectPermissionSchema,
-  updateProjectPermissionSchema,
+  createDiagramSchema,
+  projectIdSchema,
+  updateDiagramSchema,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
-  CreateProjectPermissionDto: createProjectPermissionSchema,
-  UpdateProjectPermissionDto: updateProjectPermissionSchema,
+  CreateDiagramDto: createDiagramSchema,
+  ProjectIdDto: projectIdSchema,
+  UpdateDiagramDto: updateDiagramSchema,
   UuidParamsDto: uuidParamsSchema,
 });
 
 registry.registerPath({
   method: "post",
-  path: "/project-permissions",
-  tags: ["ProjectPermission"],
+  path: "/use-case-diagrams",
+  tags: ["UseCaseDiagram"],
   request: {
     body: {
-      description: "CreateProjectPermissionDto request body",
+      description: "CreateDiagramDto request body",
       required: true,
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/CreateProjectPermissionDto",
+            $ref: "#/components/schemas/CreateDiagramDto",
           },
         },
       },
@@ -43,8 +45,28 @@ registry.registerPath({
 
 registry.registerPath({
   method: "get",
-  path: "/project-permissions/{id}",
-  tags: ["ProjectPermission"],
+  path: "/use-case-diagrams",
+  tags: ["UseCaseDiagram"],
+  request: {
+    query: projectIdSchema,
+  },
+  responses: {
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/use-case-diagrams/{id}",
+  tags: ["UseCaseDiagram"],
   request: {
     params: uuidParamsSchema,
   },
@@ -65,34 +87,17 @@ registry.registerPath({
 });
 
 registry.registerPath({
-  method: "get",
-  path: "/project-permissions",
-  tags: ["ProjectPermission"],
-  responses: {
-    200: {
-      description: "Successful response",
-    },
-    400: {
-      description: "Bad request",
-    },
-    500: {
-      description: "Internal Server Error",
-    },
-  },
-});
-
-registry.registerPath({
   method: "put",
-  path: "/project-permissions/{id}",
-  tags: ["ProjectPermission"],
+  path: "/use-case-diagrams/{id}",
+  tags: ["UseCaseDiagram"],
   request: {
     body: {
-      description: "UpdateProjectPermissionDto request body",
+      description: "UpdateDiagramDto request body",
       required: true,
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/UpdateProjectPermissionDto",
+            $ref: "#/components/schemas/UpdateDiagramDto",
           },
         },
       },
@@ -117,8 +122,54 @@ registry.registerPath({
 
 registry.registerPath({
   method: "delete",
-  path: "/project-permissions/{id}",
-  tags: ["ProjectPermission"],
+  path: "/use-case-diagrams/{id}",
+  tags: ["UseCaseDiagram"],
+  request: {
+    params: uuidParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/use-case-diagrams/{id}/use-cases/{id}",
+  tags: ["UseCaseDiagram"],
+  request: {
+    params: uuidParamsSchema,
+  },
+  responses: {
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/use-case-diagrams/{id}/use-cases/{id}",
+  tags: ["UseCaseDiagram"],
   request: {
     params: uuidParamsSchema,
   },

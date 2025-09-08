@@ -10,14 +10,34 @@ registry.registerPath({
   method: "get",
   path: "/project-invitations",
   tags: ["ProjectInvitation"],
-  responses: { 200: { description: "Successful response" } },
+  responses: {
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
 });
 
 registry.registerPath({
   method: "get",
   path: "/project-invitations/sent",
   tags: ["ProjectInvitation"],
-  responses: { 200: { description: "Successful response" } },
+  responses: {
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
 });
 
 registry.registerPath({
@@ -29,47 +49,92 @@ registry.registerPath({
       description: "CreateProjectInvitationDto request body",
       required: true,
       content: {
-        "application/json": { schema: { $ref: "#/components/schemas/CreateProjectInvitationDto" } },
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/CreateProjectInvitationDto",
+          },
+        },
       },
     },
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "patch",
-  path: "/project-invitations/:id/accept",
+  path: "/project-invitations/{id}/accept",
   tags: ["ProjectInvitation"],
   request: {
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "patch",
-  path: "/project-invitations/:id/deny",
+  path: "/project-invitations/{id}/deny",
   tags: ["ProjectInvitation"],
   request: {
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "patch",
-  path: "/project-invitations/:id/cancel",
+  path: "/project-invitations/{id}/cancel",
   tags: ["ProjectInvitation"],
   request: {
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
