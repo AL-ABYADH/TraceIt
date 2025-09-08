@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UserModel, UserModelType } from "../../models/user.model";
-import { User } from "../../entities/user.entity";
 import { CreateUserInterface } from "../../interfaces/create-user.interface";
 import { UpdateUserInterface } from "../../interfaces/update-user.interface";
+import { User } from "../../entities/user.entity";
 
 @Injectable()
 export class UserRepository {
@@ -15,59 +15,42 @@ export class UserRepository {
 
   async create(userData: CreateUserInterface): Promise<User> {
     const user = await this.userModel.createOne({ ...userData, emailVerified: false });
-    return this.mapUserToEntity(user);
+    return user;
   }
 
   async getById(id: string): Promise<User | null> {
     const user = await this.userModel.findOne({ where: { id } });
-    return this.mapUserToEntityWithNull(user);
+    return user;
   }
 
   async getByEmail(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ where: { email } });
-    return this.mapUserToEntityWithNull(user);
+    return user;
   }
 
   async getByUsername(username: string): Promise<User | null> {
     const user = await this.userModel.findOne({ where: { username } });
-    return this.mapUserToEntityWithNull(user);
+    return user;
   }
 
-  async update(id: string, userData: UpdateUserInterface): Promise<User | null> {
-    const user = (await this.userModel.update(userData, { where: { id }, return: true }))[0][0];
-    return this.mapUserToEntityWithNull(user);
+  async update(id: string, userData: UpdateUserInterface): Promise<User[]> {
+    const user = await this.userModel.update(userData, { where: { id }, return: true });
+    return user;
   }
 
-  async updatePassword(id: string, password: string): Promise<User | null> {
-    const user = (await this.userModel.update({ password }, { where: { id }, return: true }))[0][0];
-    return this.mapUserToEntityWithNull(user);
+  async updatePassword(id: string, password: string): Promise<User[]> {
+    const user = await this.userModel.update(
+      { password: password },
+      { where: { id }, return: true },
+    );
+    return user;
   }
 
-  async setEmailVerified(id: string, verified = true): Promise<User | null> {
-    const user = (
-      await this.userModel.update({ emailVerified: verified }, { where: { id }, return: true })
-    )[0][0];
-    return this.mapUserToEntityWithNull(user);
-  }
-
-  async getProjectsCreatedByUser(userId: string): Promise<any> {
-    const user = await this.userModel.findOneWithRelations({
-      where: { id: userId },
-      include: ["projects"],
-    });
-
-    return user?.projects;
-  }
-
-  private mapUserToEntity(user: any): User {
-    return {
-      ...user,
-      createdAt: new Date(user.createdAt),
-    } as User;
-  }
-
-  private mapUserToEntityWithNull(user: any): User | null {
-    if (!user) return null;
-    return this.mapUserToEntity(user);
+  async setEmailVerified(id: string, verified: boolean = true): Promise<User[]> {
+    const user = await this.userModel.update(
+      { emailVerified: verified },
+      { where: { id }, return: true },
+    );
+    return user;
   }
 }
