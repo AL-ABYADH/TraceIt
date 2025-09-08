@@ -27,7 +27,7 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
         },
       });
 
-      return this.mapToSoftwareActorEntity(actor);
+      return actor;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to create software actor: ${error.message}`);
@@ -37,7 +37,7 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
   async update(
     actorId: string,
     updateActorInterface: UpdateActorInterface,
-  ): Promise<SoftwareActor> {
+  ): Promise<SoftwareActor[]> {
     try {
       const updated = await this.softwareActorModel.update(
         { name: updateActorInterface.name },
@@ -50,7 +50,7 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
         throw new NotFoundException(`Software actor with ID ${actorId} not found`);
       }
 
-      return this.mapToSoftwareActorEntity(updated[0]);
+      return updated;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -80,7 +80,7 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
         where: { id },
       });
 
-      return actor ? this.mapToSoftwareActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve software actor: ${error.message}`);
@@ -90,29 +90,10 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
   async getAll(): Promise<SoftwareActor[]> {
     try {
       const actors = await this.softwareActorModel.findMany({});
-      return actors.map((actor) => this.mapToSoftwareActorEntity(actor));
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve all software actors: ${error.message}`);
     }
-  }
-
-  private mapToSoftwareActorEntity(data: any): SoftwareActor {
-    const actor = new SoftwareActor();
-
-    // Map base properties
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type || ActorType.VIRTUAL;
-    actor.subtype = data.subtype || ActorSubtype.SOFTWARE;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    // Only add updatedAt if it exists in the data
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }

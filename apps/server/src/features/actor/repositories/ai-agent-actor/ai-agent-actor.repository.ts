@@ -27,27 +27,30 @@ export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<
         },
       });
 
-      return this.mapToAiAgentActorEntity(actor);
+      return actor;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to create AI agent actor: ${error.message}`);
     }
   }
 
-  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<AiAgentActor> {
+  async update(
+    actorId: string,
+    updateActorInterface: UpdateActorInterface,
+  ): Promise<AiAgentActor[]> {
     try {
-      const updated = await this.aiAgentActorModel.update(
+      const updated = (await this.aiAgentActorModel.update(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
-      );
+      )) as AiAgentActor[];
 
       if (!updated) {
         throw new NotFoundException(`AI agent actor with ID ${actorId} not found`);
       }
 
-      return this.mapToAiAgentActorEntity(updated[0]);
+      return updated;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -77,7 +80,7 @@ export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<
         where: { id },
       });
 
-      return actor ? this.mapToAiAgentActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve AI agent actor: ${error.message}`);
@@ -87,29 +90,10 @@ export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<
   async getAll(): Promise<AiAgentActor[]> {
     try {
       const actors = await this.aiAgentActorModel.findMany({});
-      return actors.map((actor) => this.mapToAiAgentActorEntity(actor));
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve all AI agent actors: ${error.message}`);
     }
-  }
-
-  private mapToAiAgentActorEntity(data: any): AiAgentActor {
-    const actor = new AiAgentActor();
-
-    // Map base properties
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type || ActorType.VIRTUAL;
-    actor.subtype = data.subtype || ActorSubtype.AI_AGENT;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    // Only add updatedAt if it exists in the data
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }
