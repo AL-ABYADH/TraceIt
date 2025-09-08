@@ -104,6 +104,7 @@ export class ModelRegistry {
           ...errors.map((e) => `   - ${e}`),
           "\nPlease fix these errors before launching the server.\n",
         ].join("\n");
+        throw new Error(formattedError);
       }
     } else {
       console.log(`🎉 All relationships resolved successfully!`);
