@@ -1,40 +1,41 @@
-import { z } from "zod";
+import { z } from "../zod-openapi-init";
 import {
-  addUseCaseSchema,
-  updateUseCaseSchema,
-  useCaseParamsSchema,
+  createUseCaseSchema,
+  projectIdSchema,
+  updatePrimaryUseCaseSchema,
+  createSecondaryUseCaseSchema,
+  updateSecondaryUseCaseSchema,
+  createDiagramSchema,
+  updateDiagramSchema,
+  actorsSchema,
 } from "./schemas";
 
-// Type for adding a use case
-export type AddUseCaseDto = z.infer<typeof addUseCaseSchema>;
+/**
+ * Primary and project-related types
+ */
+export type CreateUseCaseDto = z.infer<typeof createUseCaseSchema>;
+export type ProjectIdDto = z.infer<typeof projectIdSchema>;
+export type UpdatePrimaryUseCaseDto = z.infer<
+  typeof updatePrimaryUseCaseSchema
+>;
 
-// Type for updating a use case
-export type UpdateUseCaseDto = z.infer<typeof updateUseCaseSchema>;
+/**
+ * Secondary use case types
+ */
+export type CreateSecondaryUseCaseDto = z.infer<
+  typeof createSecondaryUseCaseSchema
+>;
+export type UpdateSecondaryUseCaseDto = z.infer<
+  typeof updateSecondaryUseCaseSchema
+>;
 
-// Type for ID parameters
-export type UseCaseParamsDto = z.infer<typeof useCaseParamsSchema>;
+/**
+ * Diagram types
+ */
+export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
+export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 
-// Enum definitions
-export enum UseCaseSubtype {
-  PRIMARY = "primary",
-  SECONDARY = "secondary",
-  ACTOR = "actor",
-  DIAGRAM = "diagram",
-  RELATIONSHIP = "relationship",
-}
-
-export enum UseCaseActorType {
-  PRIMARY = "PRIMARY",
-  SECONDARY = "SECONDARY",
-}
-
-export enum UseCaseRelationshipType {
-  INCLUDES = "INCLUDES",
-  EXTENDS = "EXTENDS",
-}
-
-export enum UseCaseImportanceLevel {
-  HIGH = "HIGH",
-  MEDIUM = "MEDIUM",
-  LOW = "LOW",
-}
+/**
+ * Actor management types
+ */
+export type ActorsDto = z.infer<typeof actorsSchema>;
