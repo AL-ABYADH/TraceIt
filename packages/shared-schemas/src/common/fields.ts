@@ -22,7 +22,10 @@ export const urlField = z.string().url({ message: "Invalid URL format" });
 export const integerField = z
   .number()
   .int({ message: "Value must be an integer" });
-export const arrayField = z.array(z.any());
+
+export const arrayField = <T extends z.ZodTypeAny>(
+  elementType: T,
+): z.ZodArray<T> => z.array(elementType);
 
 // Common fields with validation
 export const nameField = stringField.min(1).max(100);
