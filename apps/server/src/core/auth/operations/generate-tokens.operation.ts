@@ -8,7 +8,7 @@ import { createHash } from "crypto";
 import { AuthRepository } from "../repositories/auth.repository";
 import { JwtPayload } from "../interfaces/jwt-payload.interface";
 import { TokensInterface } from "../interfaces/tokens.interface";
-import { User } from "../../../features/user/models/user.model";
+import { User } from "../../../features/user/entities/user.entity";
 
 @Injectable()
 export class GenerateTokensOperation {

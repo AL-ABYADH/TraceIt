@@ -29,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(payload: JwtPayload) {
     try {
-      const user = await this.userService.find(payload.sub);
+      const user = await this.userService.findById(payload.sub);
 
       if (!user) {
         throw new UnauthorizedException("User no longer exists");

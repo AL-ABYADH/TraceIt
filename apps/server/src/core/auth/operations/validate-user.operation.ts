@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { UserService } from "../../../features/user/services/user/user.service";
 import * as argon2 from "argon2";
-import { User } from "../../../features/user/models/user.model";
 import { LoginInterface } from "../interfaces/login.interface";
+import { User } from "../../../features/user/entities/user.entity";
 
 @Injectable()
 export class ValidateUserOperation {
