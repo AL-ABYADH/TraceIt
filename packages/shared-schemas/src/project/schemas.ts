@@ -11,7 +11,10 @@ import {
   roleIdsField,
   projectRoleIdsField,
   expirationDateField,
+  projectStatusFieldDoc,
+  projectActionFieldDoc,
 } from "./openapi-fields";
+import { projectActionField } from "./fields";
 
 export const createProjectCollaborationSchema = z
   .object({
@@ -78,3 +81,11 @@ export const createProjectInvitationSchema = z
     expirationDate: expirationDateField,
   })
   .openapi({ title: "CreateProjectInvitationDto" });
+
+export const projectActionSchema = z.object({
+  status: projectActionFieldDoc,
+});
+
+export const projectStatusSchema = z.object({
+  status: projectStatusFieldDoc,
+});
