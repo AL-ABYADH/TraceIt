@@ -1,7 +1,5 @@
 import { Body, Controller, Get, Param, Put } from "@nestjs/common";
 import { UserService } from "../../services/user/user.service";
-// import { UpdateUserDto } from "../../dtos/update-user.dto";
-import { User } from "../../entities/user.entity";
 import { Public } from "src/core/auth/decorators/public.decorator";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
@@ -10,6 +8,7 @@ import {
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
+import { User } from "../../entities/user.entity";
 
 @Controller("users")
 export class UserController {
@@ -19,17 +18,17 @@ export class UserController {
   updateProfile(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<User[]> {
     return this.userService.updateProfile(userId.id, dto);
   }
 
   @Get(":id")
   find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
-    return this.userService.find(userId.id);
+    return this.userService.findById(userId.id);
   }
 
   @Put(":id/verify-email")
-  verifyEmail(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
+  verifyEmail(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User[]> {
     return this.userService.verifyEmail(userId.id);
   }
 }

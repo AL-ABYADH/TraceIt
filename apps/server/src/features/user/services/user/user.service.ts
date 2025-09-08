@@ -24,7 +24,7 @@ export class UserService {
     return this.userRepository.create(userData);
   }
 
-  async find(id: string): Promise<User> {
+  async findById(id: string): Promise<User> {
     const user = await this.userRepository.getById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -40,11 +40,8 @@ export class UserService {
     return (await this.userRepository.getByUsername(username)) ?? null;
   }
 
-  async updateProfile(id: string, userData: UpdateUserInterface): Promise<User> {
-    const user = await this.find(id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
+  async updateProfile(id: string, userData: UpdateUserInterface): Promise<User[]> {
+    await this.findById(id);
 
     if (userData.username) {
       const existingUser = await this.userRepository.getByUsername(userData.username);
@@ -53,12 +50,7 @@ export class UserService {
       }
     }
 
-    // Filter out undefined fields from userData
-    const filteredData = Object.fromEntries(
-      Object.entries(userData).filter(([_, value]) => value !== undefined),
-    );
-
-    const updatedUser = await this.userRepository.update(id, filteredData);
+    const updatedUser = await this.userRepository.update(id, userData);
     if (!updatedUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -66,7 +58,8 @@ export class UserService {
     return updatedUser;
   }
 
-  async resetPassword(id: string, password: string): Promise<User> {
+  async resetPassword(id: string, password: string): Promise<User[]> {
+    await this.findById(id);
     const user = await this.userRepository.updatePassword(id, password);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -74,11 +67,9 @@ export class UserService {
     return user;
   }
 
-  async verifyEmail(id: string): Promise<User> {
+  async verifyEmail(id: string): Promise<User[]> {
+    await this.findById(id);
     const user = await this.userRepository.setEmailVerified(id, true);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
     return user;
   }
 }
