@@ -1,7 +1,7 @@
-import { User } from "src/features/user/entities/user.entity";
 import { Project } from "./project.entity";
 import { ProjectRole } from "./project-role.entity";
 import { ProjectInvitationStatus } from "../enums/project-invitation-status.enum";
+import { User } from "../../user/models/user.model";
 
 export class ProjectInvitation {
   id: string;
