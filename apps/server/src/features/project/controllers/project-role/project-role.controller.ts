@@ -1,8 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from "@nestjs/common";
 import { ProjectRoleService } from "../../services/project-role/project-role.service";
 import { ProjectRole } from "../../entities/project-role.entity";
-// import { UpdateProjectRoleDto } from "../../dtos/update-project-role.dto";
-// import { CreateProjectRoleDto } from "../../dtos/create-project-role.dto";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type CreateProjectRoleDto,
