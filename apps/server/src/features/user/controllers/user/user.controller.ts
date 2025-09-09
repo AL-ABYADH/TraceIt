@@ -9,6 +9,7 @@ import {
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { User } from "../../entities/user.entity";
+import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
 @Controller("users")
 export class UserController {
@@ -22,13 +23,18 @@ export class UserController {
     return this.userService.updateProfile(userId.id, dto);
   }
 
-  @Get(":id")
-  find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
-    return this.userService.findById(userId.id);
-  }
+  // @Get(":id")
+  // find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
+  //   return this.userService.findById(userId.id);
+  // }
 
   @Put(":id/verify-email")
   verifyEmail(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User[]> {
     return this.userService.verifyEmail(userId.id);
+  }
+
+  @Get("me")
+  getProfile(@CurrentUserId() userId: string): Promise<User> {
+    return this.userService.findById(userId);
   }
 }
