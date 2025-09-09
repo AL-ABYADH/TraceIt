@@ -17,11 +17,16 @@ import { Public } from "../decorators/public.decorator";
 
 // Import types only
 import type { Request, Response } from "express";
-import { TokensDto } from "../dtos/tokens.dto";
 
 // Zod
 import { zodBody } from "src/common/pipes/zod";
-import { type LoginDto, loginSchema, type RegisterDto, registerSchema } from "@repo/shared-schemas";
+import {
+  type LoginDto,
+  loginSchema,
+  type RegisterDto,
+  registerSchema,
+  TokensDto,
+} from "@repo/shared-schemas";
 
 @Controller("auth")
 export class AuthController {
