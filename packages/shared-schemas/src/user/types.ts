@@ -1,5 +1,7 @@
 // @repo/shared/schemas/user/update-user-type.ts
 import { z } from "../zod-openapi-init";
-import { updateUserSchema } from "./schemas";
+import { userResponseSchema, updateUserSchema, userSchema } from "./schemas";
 
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;
+export type UserDto = z.infer<typeof userSchema>;
+export type UserRespnseDto = z.infer<typeof userResponseSchema>;

@@ -13,7 +13,7 @@ import {
  * =========================
  */
 
-export const actorSubtypeActorSchema = z
+export const actorSubtypeSchema = z
   .object({
     subtype: actorSubTypeEnumDoc,
   })
