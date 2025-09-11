@@ -4,4 +4,4 @@ import { userResponseSchema, updateUserSchema, userSchema } from "./schemas";
 
 export type UpdateUserDto = z.infer<typeof updateUserSchema>;
 export type UserDto = z.infer<typeof userSchema>;
-export type UserRespnseDto = z.infer<typeof userResponseSchema>;
+export type UserResponseDto = z.infer<typeof userResponseSchema>;
