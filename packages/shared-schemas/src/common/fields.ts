@@ -7,7 +7,7 @@ import { z } from "../zod-openapi-init";
 export const stringField = z.string();
 export const numberField = z.number();
 export const booleanField = z.boolean();
-export const dateField = z.date();
+export const dateField = z.string();
 export const dateISOField = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
@@ -58,3 +58,5 @@ export const loginUsernameField = z
   .string()
   .optional()
   .transform((val) => val?.trim() || undefined);
+
+export const emailVerifiedField = z.boolean();

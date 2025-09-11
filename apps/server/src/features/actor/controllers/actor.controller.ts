@@ -7,7 +7,7 @@ import {
   type AddActorDto,
   addActorSchema,
   type SubTypeActorDto,
-  actorSubtypeActorSchema,
+  actorSubtypeSchema,
   type UpdateActorDto,
   updateActorSchema,
   type UuidParamsDto,
@@ -39,7 +39,7 @@ export class ActorController {
   @Get("subtype/:subtype")
   async listProjectActorsBySubtype(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
-    @Param(zodParam(actorSubtypeActorSchema)) subtype: SubTypeActorDto,
+    @Param(zodParam(actorSubtypeSchema)) subtype: SubTypeActorDto,
   ): Promise<Actor[]> {
     return this.actorService.listProjectActorsBySubtype(
       params.id,

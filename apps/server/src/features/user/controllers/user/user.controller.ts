@@ -1,25 +1,30 @@
-import { Body, Controller, Get, Param, Put } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, UseInterceptors } from "@nestjs/common";
 import { UserService } from "../../services/user/user.service";
 import { Public } from "src/core/auth/decorators/public.decorator";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type UpdateUserDto,
   updateUserSchema,
+  UserResponseDto,
+  userResponseSchema,
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
-import { User } from "../../entities/user.entity";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
+import { ZodResponseInterceptor } from "src/common/interceptors/zodResponseInterceptor";
+import { ResponseSchema } from "src/common/decorators/response-schema.decorator";
 
+@UseInterceptors(ZodResponseInterceptor)
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Public()
   @Put(":id")
+  @ResponseSchema(userResponseSchema)
   updateProfile(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
-  ): Promise<User[]> {
+  ): Promise<UserResponseDto[]> {
     return this.userService.updateProfile(userId.id, dto);
   }
 
@@ -29,12 +34,16 @@ export class UserController {
   // }
 
   @Put(":id/verify-email")
-  verifyEmail(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User[]> {
+  @ResponseSchema(userResponseSchema)
+  verifyEmail(
+    @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
+  ): Promise<UserResponseDto[]> {
     return this.userService.verifyEmail(userId.id);
   }
 
   @Get("me")
-  getProfile(@CurrentUserId() userId: string): Promise<User> {
+  @ResponseSchema(userResponseSchema)
+  getProfile(@CurrentUserId() userId: string): Promise<UserResponseDto> {
     return this.userService.findById(userId);
   }
 }

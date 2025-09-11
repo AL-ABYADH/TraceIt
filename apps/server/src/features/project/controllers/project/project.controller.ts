@@ -8,6 +8,7 @@ import {
   createProjectSchema,
   type projectActionDto,
   projectActionSchema,
+  ProjectResponseDto,
   type projectStatusDto,
   projectStatusSchema,
   type UpdateProjectDto,
@@ -31,7 +32,9 @@ export class ProjectController {
   }
 
   @Get(":id")
-  async find(@Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto): Promise<Project> {
+  async find(
+    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+  ): Promise<ProjectResponseDto> {
     return this.projectService.findById(projectId.id);
   }
 
@@ -47,7 +50,7 @@ export class ProjectController {
   async update(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
     @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
-  ): Promise<Project> {
+  ): Promise<ProjectResponseDto> {
     return this.projectService.update(projectId.id, dto);
   }
 

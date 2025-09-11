@@ -236,7 +236,7 @@ export function ModelFactory<
   model.findByRelatedEntity = <Plain extends boolean = false>(
     params: GenericConfiguration & {
       whereRelated: WhereParamsI;
-      relationshipAlias: keyof RelatedNodes; // تغيير من string
+      relationshipAlias: keyof RelatedNodes;
       where?: WhereParamsI;
       limit?: number;
       skip?: number;

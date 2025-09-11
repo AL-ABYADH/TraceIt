@@ -15,10 +15,7 @@ import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
 
 @Module({
-  imports: [
-    ProjectModule, // استيراد وحدة المشروع للوصول إلى خدماته
-    ActorModule, // استيراد وحدة الممثلين للوصول إلى خدماتها
-  ],
+  imports: [ProjectModule, ActorModule],
   controllers: [
     PrimaryUseCaseController,
     UseCaseController,
