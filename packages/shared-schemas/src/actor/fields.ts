@@ -1,12 +1,14 @@
 import { createEnumField, createField } from "../common/field-factory";
 
-export const subTypeEnum = createEnumField([
+export const actorSubTypeEnum = createEnumField([
   "human",
   "software",
   "hardware",
   "event",
   "ai-agent",
 ]);
+
+export const actorTypeEnum = createEnumField(["actual", "virtual"]);
 
 export const actorNameField = createField("string", {
   min: 1,

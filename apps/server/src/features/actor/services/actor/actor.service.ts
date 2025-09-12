@@ -18,7 +18,7 @@ export class ActorService {
 
   async add(actor: AddActorParamsInterface): Promise<Actor> {
     // Verify project exists
-    await this.projectService.find(actor.projectId);
+    await this.projectService.findById(actor.projectId);
 
     // Get appropriate repository based on actor type
     const repository = this.repositoryFactory.getConcreteRepository(actor.subType);
@@ -35,23 +35,20 @@ export class ActorService {
   }
 
   async listProjectActorsBySubtype(projectId: string, subtype: ActorSubtype): Promise<Actor[]> {
-    await this.projectService.find(projectId);
+    await this.projectService.findById(projectId);
 
     return this.actorRepo.getByProjectAndSubtype(projectId, subtype);
   }
 
   async listProjectActorsByType(projectId: string, type: ActorType): Promise<Actor[]> {
-    await this.projectService.find(projectId);
+    await this.projectService.findById(projectId);
 
     return this.actorRepo.getByProjectAndType(projectId, type);
   }
 
-  async update(actorId: string, actorData: UpdateActorInterface): Promise<Actor> {
+  async update(actorId: string, actorData: UpdateActorInterface): Promise<Actor[]> {
     // Find the actor to determine its type
     const actor = await this.findById(actorId);
-    if (!actor) {
-      throw new NotFoundException(`Actor with ID ${actorId} not found`);
-    }
 
     if (actor.name === actorData.name) {
       throw new BadRequestException("Cannot update actor: the name is already in use.");
@@ -65,20 +62,16 @@ export class ActorService {
   }
 
   async remove(id: string): Promise<boolean> {
-    // Find the actor to determine its type
     const actor = await this.findById(id);
-    if (!actor) {
-      throw new NotFoundException(`Actor with ID ${id} not found`);
-    }
-
-    // Get the appropriate repository
     const repository = this.repositoryFactory.getConcreteRepository(actor.subtype);
-
-    // Delete the actor
     return repository.delete(id);
   }
 
-  private async findById(id: string): Promise<Actor | null> {
-    return this.actorRepo.getById(id);
+  public async findById(id: string): Promise<Actor> {
+    const actor = await this.actorRepo.getById(id);
+    if (!actor) {
+      throw new NotFoundException(`Actor with ID ${id} not found`);
+    }
+    return actor;
   }
 }

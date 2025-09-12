@@ -27,14 +27,14 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
         },
       });
 
-      return this.mapToHumanActorEntity(actor);
+      return actor;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to create human actor: ${error.message}`);
     }
   }
 
-  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<HumanActor> {
+  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<HumanActor[]> {
     try {
       const updated = await this.humanActorModel.update(
         { name: updateActorInterface.name },
@@ -47,7 +47,7 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
         throw new NotFoundException(`Human actor with ID ${actorId} not found`);
       }
 
-      return this.mapToHumanActorEntity(updated[0]);
+      return updated;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -77,7 +77,7 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
         where: { id },
       });
 
-      return actor ? this.mapToHumanActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve human actor: ${error.message}`);
@@ -87,29 +87,10 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
   async getAll(): Promise<HumanActor[]> {
     try {
       const actors = await this.humanActorModel.findMany({});
-      return actors.map((actor) => this.mapToHumanActorEntity(actor));
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve all human actors: ${error.message}`);
     }
-  }
-
-  private mapToHumanActorEntity(data: any): HumanActor {
-    const actor = new HumanActor();
-
-    // Map base properties
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type || ActorType.ACTUAL;
-    actor.subtype = data.subtype || ActorSubtype.HUMAN;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    // Only add updatedAt if it exists in the data
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }

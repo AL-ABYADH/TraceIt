@@ -1,20 +1,13 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseEnumPipe,
-  Post,
-  Put,
-  Query,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { ActorService } from "../services/actor/actor.service";
 import { Actor } from "../entities/actor.entity";
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
+  actorTypeSchema,
   type AddActorDto,
   addActorSchema,
+  type SubTypeActorDto,
+  actorSubtypeSchema,
   type UpdateActorDto,
   updateActorSchema,
   type UuidParamsDto,
@@ -46,9 +39,12 @@ export class ActorController {
   @Get("subtype/:subtype")
   async listProjectActorsBySubtype(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("subtype", new ParseEnumPipe(ActorSubtype)) subtype: ActorSubtype,
+    @Param(zodParam(actorSubtypeSchema)) subtype: SubTypeActorDto,
   ): Promise<Actor[]> {
-    return this.actorService.listProjectActorsBySubtype(params.id, subtype);
+    return this.actorService.listProjectActorsBySubtype(
+      params.id,
+      subtype as unknown as ActorSubtype,
+    );
   }
 
   /**
@@ -57,9 +53,9 @@ export class ActorController {
   @Get("type/:type")
   async listProjectActorsByType(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("type", new ParseEnumPipe(ActorType)) type: ActorType,
+    @Param(zodParam(actorTypeSchema)) type: ActorType,
   ): Promise<Actor[]> {
-    return this.actorService.listProjectActorsByType(params.id, type);
+    return this.actorService.listProjectActorsByType(params.id, type as unknown as ActorType);
   }
 
   /**
@@ -79,7 +75,7 @@ export class ActorController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
-  ): Promise<Actor> {
+  ): Promise<Actor[]> {
     return this.actorService.update(params.id, dto);
   }
 

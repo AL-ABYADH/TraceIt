@@ -27,14 +27,14 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
         },
       });
 
-      return this.mapToEventActorEntity(actor);
+      return actor;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to create event actor: ${error.message}`);
     }
   }
 
-  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<EventActor> {
+  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<EventActor[]> {
     try {
       const updated = await this.eventActorModel.update(
         { name: updateActorInterface.name },
@@ -47,7 +47,7 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
         throw new NotFoundException(`Event actor with ID ${actorId} not found`);
       }
 
-      return this.mapToEventActorEntity(updated[0]);
+      return updated;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -77,7 +77,7 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
         where: { id },
       });
 
-      return actor ? this.mapToEventActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve event actor: ${error.message}`);
@@ -87,29 +87,10 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
   async getAll(): Promise<EventActor[]> {
     try {
       const actors = await this.eventActorModel.findMany({});
-      return actors.map((actor) => this.mapToEventActorEntity(actor));
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve all event actors: ${error.message}`);
     }
-  }
-
-  private mapToEventActorEntity(data: any): EventActor {
-    const actor = new EventActor();
-
-    // Map base properties
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type || ActorType.VIRTUAL;
-    actor.subtype = data.subtype || ActorSubtype.EVENT;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    // Only add updatedAt if it exists in the data
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }

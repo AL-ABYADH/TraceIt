@@ -102,7 +102,7 @@ export class AuthService {
     const token = await this.authRepository.checkIfExists(refreshToken);
 
     if (token) {
-      if (token.expiresAt < new Date()) {
+      if (token.expiresAt < new Date().toISOString()) {
         throw new UnauthorizedException("Refresh token has expired.");
       }
 

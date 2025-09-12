@@ -1,14 +1,3 @@
-import { Exclude } from "class-transformer";
+import { UserAttributes, UserRelationships } from "../models/user.model";
 
-export class User {
-  id: string;
-  username: string;
-  displayName: string;
-  email: string;
-  emailVerified: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
-
-  @Exclude({ toPlainOnly: true })
-  password: string;
-}
+export type User = UserAttributes & Partial<UserRelationships>;

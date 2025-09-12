@@ -27,7 +27,7 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
         },
       });
 
-      return this.mapToHardwareActorEntity(actor);
+      return actor;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to create hardware actor: ${error.message}`);
@@ -37,7 +37,7 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
   async update(
     actorId: string,
     updateActorInterface: UpdateActorInterface,
-  ): Promise<HardwareActor> {
+  ): Promise<HardwareActor[]> {
     try {
       const updated = await this.hardwareActorModel.update(
         { name: updateActorInterface.name },
@@ -50,7 +50,7 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
         throw new NotFoundException(`Hardware actor with ID ${actorId} not found`);
       }
 
-      return this.mapToHardwareActorEntity(updated[0]);
+      return updated;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -80,7 +80,7 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
         where: { id },
       });
 
-      return actor ? this.mapToHardwareActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve hardware actor: ${error.message}`);
@@ -90,29 +90,10 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
   async getAll(): Promise<HardwareActor[]> {
     try {
       const actors = await this.hardwareActorModel.findMany({});
-      return actors.map((actor) => this.mapToHardwareActorEntity(actor));
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve all hardware actors: ${error.message}`);
     }
-  }
-
-  private mapToHardwareActorEntity(data: any): HardwareActor {
-    const actor = new HardwareActor();
-
-    // Map base properties
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type || ActorType.ACTUAL;
-    actor.subtype = data.subtype || ActorSubtype.HARDWARE;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    // Only add updatedAt if it exists in the data
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }

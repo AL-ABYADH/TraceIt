@@ -1,11 +1,16 @@
 import { uuidField } from "../common";
-import { subTypeEnum, actorNameField } from "./fields";
+import { actorSubTypeEnum, actorNameField, actorTypeEnum } from "./fields";
 
 // Apply .openapi descriptions and examples
 
-export const subTypeEnumDoc = subTypeEnum.openapi({
+export const actorSubTypeEnumDoc = actorSubTypeEnum.openapi({
   description: "The subtype of the actor",
   example: "software",
+});
+
+export const actorTypeEnumDoc = actorTypeEnum.openapi({
+  description: "The type of the actor",
+  example: "virtual",
 });
 
 export const actorNameFieldDoc = actorNameField.openapi({

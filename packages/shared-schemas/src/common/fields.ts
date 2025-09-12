@@ -7,7 +7,7 @@ import { z } from "../zod-openapi-init";
 export const stringField = z.string();
 export const numberField = z.number();
 export const booleanField = z.boolean();
-export const dateField = z.date();
+export const dateField = z.string();
 export const dateISOField = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
@@ -22,7 +22,10 @@ export const urlField = z.string().url({ message: "Invalid URL format" });
 export const integerField = z
   .number()
   .int({ message: "Value must be an integer" });
-export const arrayField = z.array(z.any());
+
+export const arrayField = <T extends z.ZodTypeAny>(
+  elementType: T,
+): z.ZodArray<T> => z.array(elementType);
 
 // Common fields with validation
 export const nameField = stringField.min(1).max(100);
@@ -55,3 +58,5 @@ export const loginUsernameField = z
   .string()
   .optional()
   .transform((val) => val?.trim() || undefined);
+
+export const emailVerifiedField = z.boolean();

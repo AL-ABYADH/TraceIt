@@ -43,7 +43,7 @@ export class RelationshipManager {
         const data = relationships.map((rel: any) => {
           const targetData = rel.target.getDataValues ? rel.target.getDataValues() : rel.target;
           if (rel.relationship && Object.keys(rel.relationship).length > 0) {
-            targetData._relationshipProperties = rel.relationship;
+            targetData.relationshipProperties = rel.relationship;
           }
           return targetData;
         });

@@ -1,24 +1,23 @@
 import {
-  defineAbstractModelFactory,
-  AbstractNeogmaModel,
   AbstractModelFactoryDefinition,
+  AbstractNeogmaModel,
+  defineAbstractModelFactory,
 } from "@repo/custom-neogma";
 import { Project } from "../../project/entities/project.entity";
-import { Requirement } from "src/features/requirement/entities/requirement.entity";
-import { UseCaseRelationship } from "../entities/use-case-relationship.entity";
 
 export type UseCaseAttributes = {
   id: string;
   name: string;
-  useCaseId: string;
-
-  [key: string]: any;
+  createdAt: string;
+  updatedAt?: string;
 };
 
 export interface UseCaseRelationships {
   project: Project;
-  requirements: Requirement[];
-  relationships: UseCaseRelationship[];
+  // requirements: Requirement[];
+  requirements: any;
+  includedUseCases: UseCaseAttributes[];
+  extendedUseCases: UseCaseAttributes[];
 }
 
 export type UseCaseModelType = AbstractNeogmaModel<UseCaseAttributes, UseCaseRelationships>;
@@ -36,13 +35,6 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         pattern: "^(?! )[A-Za-z0-9 _-]*(?<! )$",
         message: "is not a valid use case name.",
       },
-      useCaseId: {
-        type: "string",
-        required: true,
-        minLength: 3,
-        pattern: "^UC[1-9][0-9]*$",
-        message: "is not a valid use case id.",
-      },
     },
     relationships: {
       project: {
@@ -51,16 +43,22 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         name: "BELONGS_TO",
         cardinality: "one",
       },
-      requirements: {
-        model: "Requirement",
+      // requirements: {
+      //   model: "Requirement",
+      //   direction: "out",
+      //   name: "HAS_REQUIREMENT",
+      //   cardinality: "many",
+      // },
+      includedUseCases: {
+        model: "self",
         direction: "out",
-        name: "HAS_REQUIREMENT",
+        name: "INCLUDES",
         cardinality: "many",
       },
-      relationships: {
-        model: "UseCaseRelationship",
+      extendedUseCases: {
+        model: "self",
         direction: "out",
-        name: "HAS_RELATIONSHIP",
+        name: "EXTENDS",
         cardinality: "many",
       },
     },

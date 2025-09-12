@@ -1,10 +1,10 @@
-import { User } from "src/features/user/entities/user.entity";
 import { Project } from "./project.entity";
 import { ProjectRole } from "./project-role.entity";
+import { UserAttributes } from "../../user/models/user.model";
 
 export class ProjectCollaboration {
   id: string;
-  user: User;
+  user: UserAttributes;
   project: Project;
   projectRoles?: ProjectRole[];
   createdAt: Date;

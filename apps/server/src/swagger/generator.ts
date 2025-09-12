@@ -10,5 +10,10 @@ export const generateOpenApiDocument = (): OpenAPIObject => {
       title: "TraceIt API",
       version: "1.0.0",
     },
+    security: [
+      {
+        bearerAuth: [], // Apply globally to all routes
+      },
+    ],
   });
 };

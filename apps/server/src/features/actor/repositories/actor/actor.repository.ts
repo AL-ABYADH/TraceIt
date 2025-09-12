@@ -21,7 +21,7 @@ export class ActorRepository {
         relationshipAlias: "project",
       });
 
-      return this.mapToActorEntities(actors);
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve actors for the project: ${error.message}`);
@@ -34,10 +34,10 @@ export class ActorRepository {
       const actors = await this.actorModel.findByRelatedEntity({
         whereRelated: { id: projectId },
         relationshipAlias: "project",
-        where: { subtype },
+        where: subtype as unknown as { subtype: ActorSubtype },
       });
 
-      return this.mapToActorEntities(actors);
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve actors for the project and subtype: ${error.message}`);
@@ -50,10 +50,10 @@ export class ActorRepository {
       const actors = await this.actorModel.findByRelatedEntity({
         whereRelated: { id: projectId },
         relationshipAlias: "project",
-        where: { type },
+        where: type as unknown as { type: ActorType },
       });
 
-      return this.mapToActorEntities(actors);
+      return actors;
     } catch (error) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve actors for the project and type: ${error.message}`);
@@ -67,35 +67,10 @@ export class ActorRepository {
         where: { id },
       });
 
-      return actor ? this.mapToActorEntity(actor) : null;
+      return actor ?? null;
     } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       throw new Error(`Failed to retrieve actor: ${error.message}`);
     }
-  }
-
-  // Map database results to Actor entities
-  private mapToActorEntities(data: any[]): Actor[] {
-    if (!data || !Array.isArray(data)) return [];
-    return data.map((item) => this.mapToActorEntity(item));
-  }
-
-  private mapToActorEntity(data: any): Actor {
-    if (!data) {
-      throw new Error("Invalid actor data");
-    }
-
-    const actor = { ...data } as Actor;
-    actor.id = data.id;
-    actor.name = data.name;
-    actor.type = data.type;
-    actor.subtype = data.subtype;
-    actor.project = data.project;
-    actor.createdAt = new Date(data.createdAt);
-
-    if (data.updatedAt) {
-      actor.updatedAt = new Date(data.updatedAt);
-    }
-
-    return actor;
   }
 }

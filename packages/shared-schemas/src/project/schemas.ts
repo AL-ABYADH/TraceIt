@@ -11,7 +11,10 @@ import {
   roleIdsField,
   projectRoleIdsField,
   expirationDateField,
+  projectStatusFieldDoc,
+  projectActionFieldDoc,
 } from "./openapi-fields";
+import { dateISOField } from "../common";
 
 export const createProjectCollaborationSchema = z
   .object({
@@ -78,3 +81,32 @@ export const createProjectInvitationSchema = z
     expirationDate: expirationDateField,
   })
   .openapi({ title: "CreateProjectInvitationDto" });
+
+export const projectActionSchema = z.object({
+  status: projectActionFieldDoc,
+});
+
+export const projectStatusSchema = z.object({
+  status: projectStatusFieldDoc,
+});
+
+// export const projectResponseSchema = z
+//   .object({
+//     id: projectUserIdField, // UUID of the project
+//     name: projectNameField,
+//     description: projectDescriptionField.optional(),
+//     status: projectStatusFieldDoc,
+//     createdAt: dateISOField,
+//     updatedAt: dateISOField,
+//   })
+//   .openapi({ title: "ProjectResponseDto" });
+export const projectResponseSchema = z
+  .object({
+    id: projectUserIdField,
+    name: projectNameField,
+    description: projectDescriptionField.optional(),
+    status: projectStatusFieldDoc,
+    createdAt: z.union([dateISOField, z.date()]),
+    updatedAt: z.union([dateISOField, z.date()]).optional(),
+  })
+  .openapi({ title: "ProjectResponseDto" });

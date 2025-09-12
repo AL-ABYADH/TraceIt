@@ -1,4 +1,4 @@
-import { createField } from "../common/field-factory";
+import { createEnumField, createField } from "../common/field-factory";
 
 // Permissions
 export const permissionNameField = createField("string", {
@@ -22,4 +22,14 @@ export const roleNameField = createField("string", {
   max: 50,
   regex: /^[a-zA-Z0-9_]+$/,
   message: "Only letters, numbers, and underscores.",
+});
+
+export const projectActionField = createEnumField(["activate", "archive"], {
+  nullable: false,
+  optional: false,
+});
+
+export const projectStatusField = createEnumField(["active", "archived"], {
+  nullable: true,
+  optional: true,
 });

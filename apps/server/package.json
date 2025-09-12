@@ -17,7 +17,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "gen:openapi": "ts-node --project tsconfig.json src/core/commands/gen-openapi-per-controller.ts"
+    "gen:openapi": "ts-node --project tsconfig.json src/core/commands/swagger/gen-openapi-per-controller.ts"
 
   },
   "dependencies": {

@@ -8,12 +8,8 @@ import { AuthService } from "./core/auth/services/auth.service";
 import { setupSwagger } from "./swagger";
 import { ModelRegistry } from "@repo/custom-neogma";
 import { TokenBlacklistService } from "./core/auth/services/token-blacklist.service";
-import { WebSocketJwtAdapter } from "./core/auth/adapters/websocket-jwt.adapter";
 
 async function bootstrap() {
-  ModelRegistry.getInstance().processPendingRelationships();
-  ModelRegistry.getInstance().printFinalSummary();
-
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan("combined"));
@@ -36,7 +32,6 @@ async function bootstrap() {
   app.useGlobalGuards(new JwtAuthGuard(reflector, authService, blacklistService));
 
   const origin = ["http://localhost:3000", "http://127.0.0.1:3000"];
-  app.useWebSocketAdapter(new WebSocketJwtAdapter(app, origin));
 
   app.enableCors({
     origin: origin,
@@ -50,6 +45,8 @@ async function bootstrap() {
   const url = await app.getUrl();
   console.log(`Application is running on: ${url}`);
   console.log(`📚 Swagger docs available at: ${url}/api`);
+  ModelRegistry.getInstance().processPendingRelationships();
+  ModelRegistry.getInstance().printFinalSummary();
 }
 
 bootstrap();

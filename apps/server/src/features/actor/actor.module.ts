@@ -23,5 +23,6 @@ import { ProjectModule } from "../project/project.module";
     EventActorRepository,
     ActorRepositoryFactory,
   ],
+  exports: [ActorService],
 })
 export class ActorModule {}

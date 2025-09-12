@@ -1,35 +1,49 @@
-import { Body, Controller, Get, Param, Put } from "@nestjs/common";
+import { Body, Controller, Get, Param, Put, UseInterceptors } from "@nestjs/common";
 import { UserService } from "../../services/user/user.service";
-// import { UpdateUserDto } from "../../dtos/update-user.dto";
-import { User } from "../../entities/user.entity";
 import { Public } from "src/core/auth/decorators/public.decorator";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type UpdateUserDto,
   updateUserSchema,
+  UserResponseDto,
+  userResponseSchema,
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
+import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
+import { ZodResponseInterceptor } from "src/common/interceptors/zodResponseInterceptor";
+import { ResponseSchema } from "src/common/decorators/response-schema.decorator";
 
+@UseInterceptors(ZodResponseInterceptor)
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
   @Public()
   @Put(":id")
+  @ResponseSchema(userResponseSchema)
   updateProfile(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<UserResponseDto[]> {
     return this.userService.updateProfile(userId.id, dto);
   }
 
-  @Get(":id")
-  find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
-    return this.userService.find(userId.id);
-  }
+  // @Get(":id")
+  // find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
+  //   return this.userService.findById(userId.id);
+  // }
 
   @Put(":id/verify-email")
-  verifyEmail(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
+  @ResponseSchema(userResponseSchema)
+  verifyEmail(
+    @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
+  ): Promise<UserResponseDto[]> {
     return this.userService.verifyEmail(userId.id);
+  }
+
+  @Get("me")
+  @ResponseSchema(userResponseSchema)
+  getProfile(@CurrentUserId() userId: string): Promise<UserResponseDto> {
+    return this.userService.findById(userId);
   }
 }

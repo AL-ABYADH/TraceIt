@@ -43,7 +43,7 @@ export class RefreshTokensOperation {
       }
 
       // Fetch the user directly using the ID without validating the token
-      const user = await this.userService.find(userId);
+      const user = await this.userService.findById(userId);
       if (!user) {
         throw new UnauthorizedException("User not found");
       }

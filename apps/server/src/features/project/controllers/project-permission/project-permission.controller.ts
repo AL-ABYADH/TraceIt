@@ -10,8 +10,6 @@ import {
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
-// import { UpdateProjectPermissionDto } from "../../dtos/update-project-permission.dto";
-// import { CreateProjectPermissionDto } from "../../dtos/create-project-permission.dto";
 
 @Controller("project-permissions")
 export class ProjectPermissionController {

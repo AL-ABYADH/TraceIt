@@ -25,40 +25,43 @@ type FieldType =
   | "integer"
   | "array";
 // Enhanced options interface with more validation capabilities
-interface FieldOptions {
+interface FieldOptions<T extends ZodTypeAny = ZodTypeAny> {
   min?: number;
   max?: number;
   regex?: RegExp;
   message?: string;
-  // Additional options
   nullable?: boolean;
   optional?: boolean;
   default?: unknown;
   enum?: readonly [string, ...string[]];
   description?: string;
+  elementType?: T; // Now typed
 }
 
 /* -------------------------
    Type-level mapping
    ------------------------- */
-type BaseSchemaFor<T extends FieldType> = T extends "string"
-  ? typeof stringField
-  : T extends "number"
-    ? typeof numberField
-    : T extends "boolean"
-      ? typeof booleanField
-      : T extends "date"
-        ? typeof dateField
-        : T extends "uuid"
-          ? typeof uuidField
-          : T extends "email"
-            ? typeof emailField
-            : T extends "url"
-              ? typeof urlField
-              : T extends "integer"
-                ? typeof integerField
-                : T extends "array"
-                  ? typeof arrayField
+type BaseSchemaFor<
+  T extends FieldType,
+  E extends ZodTypeAny = ZodTypeAny,
+> = T extends "array"
+  ? z.ZodArray<E>
+  : T extends "string"
+    ? typeof stringField
+    : T extends "number"
+      ? typeof numberField
+      : T extends "boolean"
+        ? typeof booleanField
+        : T extends "date"
+          ? typeof dateField
+          : T extends "uuid"
+            ? typeof uuidField
+            : T extends "email"
+              ? typeof emailField
+              : T extends "url"
+                ? typeof urlField
+                : T extends "integer"
+                  ? typeof integerField
                   : z.ZodTypeAny;
 
 // Helper to determine if a field type supports min/max validation
@@ -72,10 +75,10 @@ const isStringType = (type: FieldType): boolean =>
 /**
  * Creates a strongly-typed Zod schema field based on type and options
  */
-export function createField<T extends FieldType>(
-  type: T,
-  options: FieldOptions = {},
-): BaseSchemaFor<T> {
+export function createField<
+  T extends FieldType,
+  E extends ZodTypeAny = ZodTypeAny,
+>(type: T, options: FieldOptions<E> = {}): BaseSchemaFor<T, E> {
   let field: ZodTypeAny;
 
   // Start with base field type
@@ -105,7 +108,10 @@ export function createField<T extends FieldType>(
       field = integerField;
       break;
     case "array":
-      field = arrayField;
+      if (!options.elementType) {
+        throw new Error("Element type must be provided for array fields");
+      }
+      field = arrayField(options.elementType);
       break;
 
     default:
@@ -162,7 +168,7 @@ export function createField<T extends FieldType>(
     field = field.describe(options.description);
   }
 
-  return field as BaseSchemaFor<T>;
+  return field as BaseSchemaFor<T, E>;
 }
 
 // Interface for enum field options

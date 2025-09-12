@@ -1,6 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseModelType } from "./use-case.model"; // Adjust path if needed
-import { UseCaseActorModelType } from "./use-case-actor.model"; // Adjust path if needed
+import { UseCaseAttributes } from "./use-case.model"; // Adjust path if needed
+import { ActorAttributes } from "../../actor/models/actor.model";
+import { ProjectAttributes } from "../../project/models/project.model"; // Adjust path if needed
 
 /**
  * Defines the model for a use case diagram in the database.
@@ -10,6 +11,8 @@ export type UseCaseDiagramAttributes = {
   id: string;
   initial: string;
   final?: string;
+  createdAt: string;
+  updatedAt?: string;
 };
 
 /**
@@ -17,8 +20,9 @@ export type UseCaseDiagramAttributes = {
  * Includes a collection of use cases and associated actors.
  */
 export interface UseCaseDiagramRelationships {
-  useCases: UseCaseModelType;
-  actors: UseCaseActorModelType;
+  useCases: UseCaseAttributes;
+  project: ProjectAttributes;
+  actors: ActorAttributes;
 }
 
 /**
@@ -43,6 +47,12 @@ export const UseCaseDiagramModel: ModelFactoryDefinition<
     final: { type: "string", required: false },
   },
   relationships: {
+    project: {
+      model: "Project",
+      direction: "out",
+      name: "BELONGS_TO_PROJECT",
+      cardinality: "one",
+    },
     useCases: {
       model: "UseCase",
       direction: "out",
@@ -50,7 +60,7 @@ export const UseCaseDiagramModel: ModelFactoryDefinition<
       cardinality: "many",
     },
     actors: {
-      model: "UseCaseActor",
+      model: "Actor",
       direction: "out",
       name: "INCLUDES_ACTOR",
       cardinality: "many",

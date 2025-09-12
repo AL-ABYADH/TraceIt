@@ -236,7 +236,7 @@ export function ModelFactory<
   model.findByRelatedEntity = <Plain extends boolean = false>(
     params: GenericConfiguration & {
       whereRelated: WhereParamsI;
-      relationshipAlias: keyof RelatedNodes; // تغيير من string
+      relationshipAlias: keyof RelatedNodes;
       where?: WhereParamsI;
       limit?: number;
       skip?: number;
@@ -282,7 +282,7 @@ export function ModelFactory<
       if (prop === "createOne") {
         return async (data: any, params?: any) => {
           const instance = await target.createOne.call(target, data, params);
-          return instance.getDataValues();
+          return (instance as any).getDataValues();
         };
       }
       // Always return array of plain objects for createMany

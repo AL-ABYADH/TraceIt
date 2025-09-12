@@ -20,24 +20,47 @@ registry.registerPath({
       description: "CreateProjectRoleDto request body",
       required: true,
       content: {
-        "application/json": { schema: { $ref: "#/components/schemas/CreateProjectRoleDto" } },
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/CreateProjectRoleDto",
+          },
+        },
       },
     },
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "get",
-  path: "/project-roles/:id",
+  path: "/project-roles/{id}",
   tags: ["ProjectRole"],
   request: {
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
@@ -45,39 +68,72 @@ registry.registerPath({
   method: "get",
   path: "/project-roles",
   tags: ["ProjectRole"],
-
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "put",
-  path: "/project-roles/:id",
+  path: "/project-roles/{id}",
   tags: ["ProjectRole"],
   request: {
     body: {
       description: "UpdateProjectRoleDto request body",
       required: true,
       content: {
-        "application/json": { schema: { $ref: "#/components/schemas/UpdateProjectRoleDto" } },
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/UpdateProjectRoleDto",
+          },
+        },
       },
     },
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });
 
 registry.registerPath({
   method: "delete",
-  path: "/project-roles/:id",
+  path: "/project-roles/{id}",
   tags: ["ProjectRole"],
   request: {
     params: uuidParamsSchema,
   },
   responses: {
-    200: { description: "Successful response" },
+    200: {
+      description: "Successful response",
+    },
+    400: {
+      description: "Bad request",
+    },
+    404: {
+      description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
   },
 });

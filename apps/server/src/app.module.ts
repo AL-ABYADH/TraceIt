@@ -5,6 +5,7 @@ import { UserModule } from "./features/user/user.module";
 import { ProjectModule } from "./features/project/project.module";
 import { AuthModule } from "./core/auth/auth.module";
 import { ActorModule } from "./features/actor/actor.module";
+import { UseCaseModule } from "./features/use-case/use-case.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ActorModule } from "./features/actor/actor.module";
     ProjectModule,
     AuthModule,
     ActorModule,
+    UseCaseModule,
   ],
   controllers: [],
   providers: [],

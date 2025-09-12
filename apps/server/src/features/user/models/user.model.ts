@@ -1,4 +1,5 @@
 import { NeogmaModel, defineModelFactory, ModelFactoryDefinition } from "@repo/custom-neogma";
+import { ProjectAttributes } from "../../project/models/project.model";
 
 export type UserAttributes = {
   id: string;
@@ -11,7 +12,7 @@ export type UserAttributes = {
 };
 
 export interface UserRelationships {
-  projects: any;
+  projects: ProjectAttributes;
   collaborations: any;
   refreshTokens: any;
 }

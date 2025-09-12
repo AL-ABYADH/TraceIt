@@ -7,7 +7,7 @@ import { User } from "../../../features/user/entities/user.entity";
 
 @Injectable()
 export class AuthRepository {
-  private readonly refreshTokenModel: RefreshTokenModelType;
+  private refreshTokenModel: RefreshTokenModelType;
 
   constructor(private readonly neo4jService: Neo4jService) {
     this.refreshTokenModel = RefreshTokenModel(this.neo4jService.getNeogma());
@@ -37,7 +37,7 @@ export class AuthRepository {
       },
     });
 
-    return this.mapToRefreshTokenEntity(newToken);
+    return newToken;
   }
 
   /**
@@ -53,12 +53,12 @@ export class AuthRepository {
 
       const now = Date.now();
 
-      const validRefreshTokens: any = (refreshTokens ?? []).filter(({ revoked, expiresAt }) => {
+      const validRefreshTokens = (refreshTokens ?? []).filter(({ revoked, expiresAt }) => {
         if (revoked) return false;
         const expTime = new Date(expiresAt).getTime();
         return expTime > now;
       });
-      return this.mapListToRefreshTokenEntity(validRefreshTokens);
+      return validRefreshTokens;
     } catch (error) {
       console.error("Error retrieving user refresh tokens:", error);
       throw error;
@@ -105,8 +105,7 @@ export class AuthRepository {
     const tokens = await this.getAllRefreshTokensByUserId(userId);
     if (tokens.length > 0) {
       for (const t of tokens) {
-        const raw = typeof t === "string" ? t : t.token;
-        await this.revokeRefreshToken(raw);
+        await this.revokeRefreshToken(t.token);
       }
     }
   }
@@ -160,35 +159,6 @@ export class AuthRepository {
       include: ["user"],
     });
     if (!tokenData) return null;
-    return this.mapToRefreshTokenEntity(tokenData);
-  }
-
-  /**
-   * Transforms raw data into a RefreshToken entity instance.
-   */
-  private mapToRefreshTokenEntity(data: any): RefreshToken {
-    const entity = {
-      ...data,
-      expiresAt: new Date(data?.expiresAt),
-      createdAt: new Date(data?.createdAt),
-    } as RefreshToken;
-    if (data) {
-      if ("updatedAt" in Object.keys(data)) {
-        entity.updatedAt = new Date(data.updatedAt);
-      }
-    }
-
-    return entity;
-  }
-
-  /**
-   * Transforms raw data into a RefreshToken entity instance.
-   */
-  private mapListToRefreshTokenEntity(data: any): RefreshToken[] {
-    const Items: RefreshToken[] = [];
-    for (const item of data) {
-      Items.push(this.mapToRefreshTokenEntity(item));
-    }
-    return Items;
+    return tokenData;
   }
 }
