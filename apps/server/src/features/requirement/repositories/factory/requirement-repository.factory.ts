@@ -13,7 +13,7 @@ import { SimultaneousRequirementRepository } from "../composite/simultaneous-req
 import { ExceptionalRequirementRepository } from "../composite/exceptional-requirement.repository";
 import { RequirementType } from "../../enums/requirement-type.enum";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";
-import { Requirement } from "../../entities/requirement.entity";
+import { Requirement } from "../../entities";
 
 @Injectable()
 export class RequirementRepositoryFactory {

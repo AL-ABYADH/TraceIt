@@ -1,11 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  CompositeRequirementModel,
-  CompositeRequirementModelType,
-} from "../../models/composite-requirement.model";
-import { CompositeRequirement } from "../../entities/composite-requirement.entity";
-import { Requirement } from "../../entities/requirement.entity";
+import { CompositeRequirementModel, CompositeRequirementModelType } from "../../models";
+import { Requirement, CompositeRequirement } from "../../entities";
 
 @Injectable()
 export class CompositeRequirementRepository {

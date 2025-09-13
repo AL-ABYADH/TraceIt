@@ -130,6 +130,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -145,7 +158,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: "post",
-  path: "/use-case-diagrams/{id}/use-cases/{id}",
+  path: "/use-case-diagrams/{id}/use-cases/{useCaseId}",
   tags: ["UseCaseDiagram"],
   request: {
     params: uuidParamsSchema,
@@ -153,6 +166,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -168,7 +194,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: "delete",
-  path: "/use-case-diagrams/{id}/use-cases/{id}",
+  path: "/use-case-diagrams/{id}/use-cases/{useCaseId}",
   tags: ["UseCaseDiagram"],
   request: {
     params: uuidParamsSchema,
@@ -176,6 +202,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

@@ -1,11 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { Op } from "@repo/custom-neogma";
-import {
-  ActorRequirementModel,
-  ActorRequirementModelType,
-} from "../../models/simple/actor-requirement.model";
-import { ActorRequirement } from "../../entities/simple/actor-requirement.entity";
+import { ActorRequirementModel, ActorRequirementModelType } from "../../models";
+import { ActorRequirement } from "../../entities";
 import { CreateActorRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateActorRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

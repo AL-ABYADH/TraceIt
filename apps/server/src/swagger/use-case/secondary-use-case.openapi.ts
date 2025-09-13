@@ -130,6 +130,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -145,7 +158,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: "put",
-  path: "/secondary-use-cases/{id}/primary-use-case/{id}",
+  path: "/secondary-use-cases/{id}/primary-use-case/{primaryUseCaseId}",
   tags: ["SecondaryUseCase"],
   request: {
     params: uuidParamsSchema,

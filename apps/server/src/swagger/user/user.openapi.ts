@@ -1,8 +1,9 @@
 import { registerMultiple, registry } from "../registry";
-import { updateUserSchema, uuidParamsSchema } from "@repo/shared-schemas";
+import { updateUserSchema, userResponseSchema, uuidParamsSchema } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
   UpdateUserDto: updateUserSchema,
+  UserResponseDto: userResponseSchema,
   UuidParamsDto: uuidParamsSchema,
 });
 
@@ -27,29 +28,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
-    },
-    400: {
-      description: "Bad request",
-    },
-    404: {
-      description: "Not Found",
-    },
-    500: {
-      description: "Internal Server Error",
-    },
-  },
-});
-
-registry.registerPath({
-  method: "get",
-  path: "/users/{id}",
-  tags: ["User"],
-  request: {
-    params: uuidParamsSchema,
-  },
-  responses: {
-    200: {
-      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/UserResponseDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -73,12 +61,46 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/UserResponseDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
     },
     404: {
       description: "Not Found",
+    },
+    500: {
+      description: "Internal Server Error",
+    },
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/users/me",
+  tags: ["User"],
+  responses: {
+    200: {
+      description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/UserResponseDto",
+          },
+        },
+      },
+    },
+    400: {
+      description: "Bad request",
     },
     500: {
       description: "Internal Server Error",

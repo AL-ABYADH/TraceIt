@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { Op } from "@repo/custom-neogma";
-import {
-  LogicalGroupRequirementModel,
-  LogicalGroupRequirementModelType,
-} from "../../models/composite/logical-group-requirement.model";
-import { LogicalGroupRequirement } from "../../entities/composite/logical-group-requirement.entity";
+import { LogicalGroupRequirementModel, LogicalGroupRequirementModelType } from "../../models";
+import { LogicalGroupRequirement } from "../../entities";
 import { CreateLogicalGroupRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateLogicalGroupRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

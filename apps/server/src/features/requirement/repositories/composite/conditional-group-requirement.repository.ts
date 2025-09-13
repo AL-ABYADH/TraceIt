@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { Op } from "@repo/custom-neogma";
 import {
   ConditionalGroupRequirementModel,
   ConditionalGroupRequirementModelType,
-} from "../../models/composite/conditional-group-requirement.model";
-import { ConditionalGroupRequirement } from "../../entities/composite/conditional-group-requirement.entity";
+} from "../../models";
+import { ConditionalGroupRequirement } from "../../entities";
 import { CreateConditionalGroupRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateConditionalGroupRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

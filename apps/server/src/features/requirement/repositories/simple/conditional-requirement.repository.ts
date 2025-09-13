@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  ConditionalRequirementModel,
-  ConditionalRequirementModelType,
-} from "../../models/simple/conditional-requirement.model";
-import { ConditionalRequirement } from "../../entities/simple/conditional-requirement.entity";
+import { ConditionalRequirementModel, ConditionalRequirementModelType } from "../../models";
+import { ConditionalRequirement } from "../../entities";
 import { CreateConditionalRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateConditionalRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

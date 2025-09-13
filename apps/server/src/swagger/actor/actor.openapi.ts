@@ -1,6 +1,6 @@
 import { registerMultiple, registry } from "../registry";
 import {
-  actorSubtypeActorSchema,
+  actorSubtypeSchema,
   actorTypeSchema,
   addActorSchema,
   updateActorSchema,
@@ -8,7 +8,7 @@ import {
 } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
-  ActorSubtypeActorDto: actorSubtypeActorSchema,
+  ActorSubtypeDto: actorSubtypeSchema,
   ActorTypeDto: actorTypeSchema,
   AddActorDto: addActorSchema,
   UpdateActorDto: updateActorSchema,
@@ -47,10 +47,10 @@ registry.registerPath({
 
 registry.registerPath({
   method: "get",
-  path: "/actors/subtype/{id}",
+  path: "/actors/subtype/{subtype}",
   tags: ["Actor"],
   request: {
-    params: actorSubtypeActorSchema,
+    params: actorSubtypeSchema,
     query: uuidParamsSchema,
   },
   responses: {
@@ -71,7 +71,7 @@ registry.registerPath({
 
 registry.registerPath({
   method: "get",
-  path: "/actors/type/{id}",
+  path: "/actors/type/{type}",
   tags: ["Actor"],
   request: {
     params: actorTypeSchema,
@@ -157,6 +157,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

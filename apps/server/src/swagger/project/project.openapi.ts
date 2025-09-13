@@ -2,6 +2,7 @@ import { registerMultiple, registry } from "../registry";
 import {
   createProjectSchema,
   projectActionSchema,
+  projectResponseSchema,
   projectStatusSchema,
   updateProjectSchema,
   uuidParamsSchema,
@@ -10,6 +11,7 @@ import {
 registerMultiple(registry, {
   CreateProjectDto: createProjectSchema,
   ProjectActionDto: projectActionSchema,
+  ProjectResponseDto: projectResponseSchema,
   ProjectStatusDto: projectStatusSchema,
   UpdateProjectDto: updateProjectSchema,
   UuidParamsDto: uuidParamsSchema,
@@ -45,6 +47,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectResponseDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -109,6 +118,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectResponseDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -132,6 +148,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -156,6 +185,19 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+            },
+            required: ["success"],
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

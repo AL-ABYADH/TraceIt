@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  SimpleRequirementModel,
-  SimpleRequirementModelType,
-} from "../../models/simple-requirement.model";
-import { SimpleRequirement } from "../../entities/simple-requirement.entity";
+import { SimpleRequirementModel, SimpleRequirementModelType } from "../../models";
+import { SimpleRequirement } from "../../entities";
 
 @Injectable()
 export class SimpleRequirementRepository {

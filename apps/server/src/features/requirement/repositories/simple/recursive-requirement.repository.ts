@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  RecursiveRequirementModel,
-  RecursiveRequirementModelType,
-} from "../../models/simple/recursive-requirement.model";
-import { RecursiveRequirement } from "../../entities/simple/recursive-requirement.entity";
+import { RecursiveRequirementModel, RecursiveRequirementModelType } from "../../models";
+import { RecursiveRequirement } from "../../entities";
 import { CreateRecursiveRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateRecursiveRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  SystemRequirementModel,
-  SystemRequirementModelType,
-} from "../../models/simple/system-requirement.model";
-import { SystemRequirement } from "../../entities/simple/system-requirement.entity";
+import { SystemRequirementModel, SystemRequirementModelType } from "../../models";
+import { SystemRequirement } from "../../entities";
 import { CreateSystemRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateSystemRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

@@ -4,8 +4,8 @@ import { Op } from "@repo/custom-neogma";
 import {
   SystemActorCommunicationRequirementModel,
   SystemActorCommunicationRequirementModelType,
-} from "../../models/simple/system-actor-communication-requirement.model";
-import { SystemActorCommunicationRequirement } from "../../entities/simple/system-actor-communication-requirement.entity";
+} from "../../models";
+import { SystemActorCommunicationRequirement } from "../../entities";
 import { CreateSystemActorCommunicationRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateSystemActorCommunicationRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";
