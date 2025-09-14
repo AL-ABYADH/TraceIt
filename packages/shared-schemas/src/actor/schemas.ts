@@ -5,6 +5,9 @@ import {
   actorSubTypeEnumDoc,
   actorProjectIdField,
   actorTypeEnumDoc,
+  actorIdFieldDoc,
+  actorUpdatedAtFieldDoc,
+  actorCreatedAtFieldDoc,
 } from "./openapi-fields";
 
 /**
@@ -43,3 +46,14 @@ export const updateActorSchema = z
     name: updatedActorNameFieldDoc,
   })
   .openapi({ title: "UpdateActorDto" });
+
+  export const actorSchema = z
+  .object({
+    id: actorIdFieldDoc,
+    name: actorNameFieldDoc,
+    type: actorTypeEnumDoc,
+    subtype: actorSubTypeEnumDoc, 
+    createdAt: actorCreatedAtFieldDoc,
+    updatedAt: actorUpdatedAtFieldDoc,
+  })
+  .openapi({ title: "ActorResponse" });

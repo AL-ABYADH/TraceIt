@@ -2,6 +2,8 @@ import { registerMultiple, registry } from "../registry";
 import {
   createSecondaryUseCaseSchema,
   projectIdSchema,
+  secondaryUseCaseDetailSchema,
+  secondaryUseCaseListSchema,
   updateSecondaryUseCaseSchema,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
@@ -9,6 +11,8 @@ import {
 registerMultiple(registry, {
   CreateSecondaryUseCaseDto: createSecondaryUseCaseSchema,
   ProjectIdDto: projectIdSchema,
+  SecondaryUseCaseDetailDto: secondaryUseCaseDetailSchema,
+  SecondaryUseCaseListDto: secondaryUseCaseListSchema,
   UpdateSecondaryUseCaseDto: updateSecondaryUseCaseSchema,
   UuidParamsDto: uuidParamsSchema,
 });
@@ -33,6 +37,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/SecondaryUseCaseListDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -53,6 +64,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/SecondaryUseCaseDetailDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -73,6 +94,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/SecondaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -107,6 +135,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/SecondaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -166,6 +201,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/SecondaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

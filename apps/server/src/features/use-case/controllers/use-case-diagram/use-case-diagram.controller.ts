@@ -9,9 +9,9 @@ import {
   type UpdateDiagramDto,
   uuidParamsSchema,
   type UuidParamsDto,
+  UseCaseDiagramDetailDto,
 } from "@repo/shared-schemas";
 import { UseCaseDiagramService } from "../../services/use-case-diagram/use-case-diagram.service";
-import { UseCaseDiagram } from "../../entities/use-case-diagram.entity";
 
 @Controller("use-case-diagrams")
 export class UseCaseDiagramController {
@@ -20,19 +20,21 @@ export class UseCaseDiagramController {
   @Post()
   async create(
     @Body(zodBody(createDiagramSchema)) createDto: CreateDiagramDto,
-  ): Promise<UseCaseDiagram> {
+  ): Promise<UseCaseDiagramDetailDto> {
     return await this.useCaseDiagramService.create(createDto);
   }
 
   @Get()
   async listByProject(
     @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
-  ): Promise<UseCaseDiagram[]> {
+  ): Promise<UseCaseDiagramDetailDto[]> {
     return await this.useCaseDiagramService.listByProject(params.projectId);
   }
 
   @Get(":id")
-  async getById(@Param(zodParam(uuidParamsSchema)) params: UuidParamsDto): Promise<UseCaseDiagram> {
+  async getById(
+    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+  ): Promise<UseCaseDiagramDetailDto> {
     return await this.useCaseDiagramService.findById(params.id);
   }
 
@@ -40,7 +42,7 @@ export class UseCaseDiagramController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateDiagramSchema)) updateDto: UpdateDiagramDto,
-  ): Promise<UseCaseDiagram[]> {
+  ): Promise<UseCaseDiagramDetailDto[]> {
     return await this.useCaseDiagramService.update(params.id, updateDto);
   }
 

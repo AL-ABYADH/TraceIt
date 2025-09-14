@@ -2,6 +2,8 @@ import { registerMultiple, registry } from "../registry";
 import {
   actorsSchema,
   createUseCaseSchema,
+  primaryUseCaseDetailSchema,
+  primaryUseCaseListSchema,
   projectIdSchema,
   updatePrimaryUseCaseSchema,
   uuidParamsSchema,
@@ -10,6 +12,8 @@ import {
 registerMultiple(registry, {
   ActorsDto: actorsSchema,
   CreateUseCaseDto: createUseCaseSchema,
+  PrimaryUseCaseDetailDto: primaryUseCaseDetailSchema,
+  PrimaryUseCaseListDto: primaryUseCaseListSchema,
   ProjectIdDto: projectIdSchema,
   UpdatePrimaryUseCaseDto: updatePrimaryUseCaseSchema,
   UuidParamsDto: uuidParamsSchema,
@@ -35,6 +39,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -55,6 +66,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/PrimaryUseCaseListDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -109,6 +130,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -179,6 +207,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -213,6 +248,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -247,6 +289,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -281,6 +330,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/PrimaryUseCaseDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

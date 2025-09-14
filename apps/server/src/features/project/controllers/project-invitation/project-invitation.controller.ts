@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, ParseEnumPipe, Patch, Post, Query } from "@nestjs/common";
-import { ProjectInvitation } from "../../entities/project-invitation.entity";
 import { ProjectInvitationService } from "../../services/project-invitation/project-invitation.service";
 import {
   type CreateProjectInvitationDto,
   createProjectInvitationSchema,
+  ProjectInvitationDto,
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
@@ -20,7 +20,7 @@ export class ProjectInvitationController {
     @CurrentUserId() userID: string,
     @Query("status", new ParseEnumPipe(ProjectInvitationStatus, { optional: true }))
     status?: ProjectInvitationStatus,
-  ): Promise<ProjectInvitation[]> {
+  ): Promise<ProjectInvitationDto[]> {
     return this.projectInvitationService.getProjectInvitations(userID, status);
   }
 
@@ -29,7 +29,7 @@ export class ProjectInvitationController {
     @CurrentUserId() userID: string,
     @Query("status", new ParseEnumPipe(ProjectInvitationStatus, { optional: true }))
     status?: ProjectInvitationStatus,
-  ): Promise<ProjectInvitation[]> {
+  ): Promise<ProjectInvitationDto[]> {
     return this.projectInvitationService.getSentInvitations(userID, status);
   }
 
@@ -37,7 +37,7 @@ export class ProjectInvitationController {
   async invite(
     @CurrentUserId() userID: string,
     @Body(zodBody(createProjectInvitationSchema)) dto: CreateProjectInvitationDto,
-  ): Promise<ProjectInvitation> {
+  ): Promise<ProjectInvitationDto> {
     return this.projectInvitationService.invite(userID, {
       ...dto,
       expirationDate: new Date(dto.expirationDate),

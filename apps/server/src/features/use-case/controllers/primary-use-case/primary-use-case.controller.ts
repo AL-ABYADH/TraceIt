@@ -11,6 +11,8 @@ import {
   uuidParamsSchema,
   actorsSchema,
   type ActorsDto,
+  PrimaryUseCaseDetailDto,
+  PrimaryUseCaseListDto,
 } from "@repo/shared-schemas";
 import { PrimaryUseCaseService } from "../../services/primary-use-case/primary-use-case.service";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
@@ -20,14 +22,16 @@ export class PrimaryUseCaseController {
   constructor(private readonly primaryUseCaseService: PrimaryUseCaseService) {}
 
   @Post()
-  async add(@Body(zodBody(createUseCaseSchema)) dto: CreateUseCaseDto): Promise<PrimaryUseCase> {
+  async add(
+    @Body(zodBody(createUseCaseSchema)) dto: CreateUseCaseDto,
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.create(dto);
   }
 
   @Get()
   async listByProject(
     @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
-  ): Promise<PrimaryUseCase[]> {
+  ): Promise<PrimaryUseCaseListDto[]> {
     return await this.primaryUseCaseService.listByProject(params.projectId);
   }
 
@@ -40,7 +44,7 @@ export class PrimaryUseCaseController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updatePrimaryUseCaseSchema)) dto: UpdatePrimaryUseCaseDto,
-  ): Promise<PrimaryUseCase> {
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.update(params.id, dto);
   }
 
@@ -55,7 +59,7 @@ export class PrimaryUseCaseController {
   async addPrimaryActors(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
-  ): Promise<PrimaryUseCase> {
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.addPrimaryActors(params.id, dto.actorIds);
   }
 
@@ -63,7 +67,7 @@ export class PrimaryUseCaseController {
   async removePrimaryActors(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
-  ): Promise<PrimaryUseCase> {
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.removePrimaryActors(params.id, dto.actorIds);
   }
 
@@ -71,7 +75,7 @@ export class PrimaryUseCaseController {
   async addSecondaryActors(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
-  ): Promise<PrimaryUseCase> {
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.addSecondaryActors(params.id, dto.actorIds);
   }
 
@@ -79,7 +83,7 @@ export class PrimaryUseCaseController {
   async removeSecondaryActors(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
-  ): Promise<PrimaryUseCase> {
+  ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.removeSecondaryActors(params.id, dto.actorIds);
   }
 }

@@ -1,12 +1,14 @@
 import { registerMultiple, registry } from "../registry";
 import {
   createProjectCollaborationSchema,
+  projectCollaborationSchema,
   updateProjectCollaborationSchema,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
   CreateProjectCollaborationDto: createProjectCollaborationSchema,
+  ProjectCollaborationDto: projectCollaborationSchema,
   UpdateProjectCollaborationDto: updateProjectCollaborationSchema,
   UuidParamsDto: uuidParamsSchema,
 });
@@ -31,6 +33,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectCollaborationDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -51,6 +60,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ProjectCollaborationDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -85,6 +104,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectCollaborationDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

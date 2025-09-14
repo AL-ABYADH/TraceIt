@@ -5,8 +5,8 @@ import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type UpdateUserDto,
   updateUserSchema,
-  UserResponseDto,
-  userResponseSchema,
+  SafeUserDetailDto,
+  safeUserDetailSchema,
   type UuidParamsDto,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
@@ -20,11 +20,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
   @Public()
   @Put(":id")
-  @ResponseSchema(userResponseSchema)
+  @ResponseSchema(safeUserDetailSchema)
   updateProfile(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
-  ): Promise<UserResponseDto[]> {
+  ): Promise<SafeUserDetailDto[]> {
     return this.userService.updateProfile(userId.id, dto);
   }
 
@@ -34,16 +34,16 @@ export class UserController {
   // }
 
   @Put(":id/verify-email")
-  @ResponseSchema(userResponseSchema)
+  @ResponseSchema(safeUserDetailSchema)
   verifyEmail(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
-  ): Promise<UserResponseDto[]> {
+  ): Promise<SafeUserDetailDto[]> {
     return this.userService.verifyEmail(userId.id);
   }
 
   @Get("me")
-  @ResponseSchema(userResponseSchema)
-  getProfile(@CurrentUserId() userId: string): Promise<UserResponseDto> {
+  @ResponseSchema(safeUserDetailSchema)
+  getProfile(@CurrentUserId() userId: string): Promise<SafeUserDetailDto> {
     return this.userService.findById(userId);
   }
 }

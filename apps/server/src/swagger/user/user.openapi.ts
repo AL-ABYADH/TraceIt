@@ -1,9 +1,9 @@
 import { registerMultiple, registry } from "../registry";
-import { updateUserSchema, userResponseSchema, uuidParamsSchema } from "@repo/shared-schemas";
+import { safeUserDetailSchema, updateUserSchema, uuidParamsSchema } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
+  SafeUserDetailDto: safeUserDetailSchema,
   UpdateUserDto: updateUserSchema,
-  UserResponseDto: userResponseSchema,
   UuidParamsDto: uuidParamsSchema,
 });
 
@@ -33,7 +33,7 @@ registry.registerPath({
           schema: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/UserResponseDto",
+              $ref: "#/components/schemas/SafeUserDetailDto",
             },
           },
         },
@@ -66,7 +66,7 @@ registry.registerPath({
           schema: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/UserResponseDto",
+              $ref: "#/components/schemas/SafeUserDetailDto",
             },
           },
         },
@@ -94,7 +94,7 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/UserResponseDto",
+            $ref: "#/components/schemas/SafeUserDetailDto",
           },
         },
       },

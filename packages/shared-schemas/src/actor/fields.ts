@@ -1,4 +1,4 @@
-import { createEnumField, createField } from "../common/field-factory";
+import { createEnumField, createField } from "../common";
 
 export const actorSubTypeEnum = createEnumField([
   "human",

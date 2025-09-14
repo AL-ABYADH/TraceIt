@@ -9,9 +9,10 @@ import {
   type UpdateSecondaryUseCaseDto,
   uuidParamsSchema,
   type UuidParamsDto,
+  SecondaryUseCaseDetailDto,
+  SecondaryUseCaseListDto,
 } from "@repo/shared-schemas";
 import { SecondaryUseCaseService } from "../../services/secondary-use-case/secondary-use-case.service";
-import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 
 @Controller("secondary-use-cases")
 export class SecondaryUseCaseController {
@@ -20,21 +21,21 @@ export class SecondaryUseCaseController {
   @Post()
   async add(
     @Body(zodBody(createSecondaryUseCaseSchema)) dto: CreateSecondaryUseCaseDto,
-  ): Promise<SecondaryUseCase> {
+  ): Promise<SecondaryUseCaseListDto> {
     return await this.secondaryUseCaseService.create(dto);
   }
 
   @Get()
   async listByProject(
     @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
-  ): Promise<SecondaryUseCase[]> {
+  ): Promise<SecondaryUseCaseDetailDto[]> {
     return await this.secondaryUseCaseService.listByProject(params.projectId);
   }
 
   @Get(":id")
   async getById(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<SecondaryUseCase> {
+  ): Promise<SecondaryUseCaseDetailDto> {
     return await this.secondaryUseCaseService.findById(params.id);
   }
 
@@ -42,7 +43,7 @@ export class SecondaryUseCaseController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateSecondaryUseCaseSchema)) dto: UpdateSecondaryUseCaseDto,
-  ): Promise<SecondaryUseCase> {
+  ): Promise<SecondaryUseCaseDetailDto> {
     return await this.secondaryUseCaseService.update(params.id, dto);
   }
 
@@ -57,7 +58,7 @@ export class SecondaryUseCaseController {
   async changePrimaryUseCase(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Param("primaryUseCaseId") primaryUseCaseId: string,
-  ): Promise<SecondaryUseCase> {
+  ): Promise<SecondaryUseCaseDetailDto> {
     return await this.secondaryUseCaseService.changePrimaryUseCase(params.id, primaryUseCaseId);
   }
 }

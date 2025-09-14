@@ -1,20 +1,20 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from "@nestjs/common";
 import { ProjectService } from "../../services/project/project.service";
-import { Project } from "../../entities/project.entity";
 import { ProjectStatus } from "../../enums/project-status.enum";
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
   type CreateProjectDto,
   createProjectSchema,
-  type projectActionDto,
+  type ProjectActionDto,
   projectActionSchema,
-  ProjectResponseDto,
-  type projectStatusDto,
+  type ProjectDetailDto,
+  type ProjectStatusDto,
   projectStatusSchema,
   type UpdateProjectDto,
   updateProjectSchema,
   type UuidParamsDto,
   uuidParamsSchema,
+  ProjectListDto,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -26,15 +26,16 @@ export class ProjectController {
   async listUserProjects(
     @CurrentUserId() userId: string,
     @Query(zodQuery(projectStatusSchema))
-    status: projectStatusDto,
-  ) {
+    status: ProjectStatusDto,
+  ): Promise<ProjectListDto[]> {
+    // return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
     return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
   }
 
   @Get(":id")
   async find(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-  ): Promise<ProjectResponseDto> {
+  ): Promise<ProjectDetailDto> {
     return this.projectService.findById(projectId.id);
   }
 
@@ -42,7 +43,7 @@ export class ProjectController {
   async create(
     @CurrentUserId() userId: string,
     @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
-  ): Promise<Project> {
+  ): Promise<ProjectDetailDto> {
     return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
@@ -50,7 +51,7 @@ export class ProjectController {
   async update(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
     @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
-  ): Promise<ProjectResponseDto> {
+  ): Promise<ProjectDetailDto> {
     return this.projectService.update(projectId.id, dto);
   }
 
@@ -65,7 +66,7 @@ export class ProjectController {
   @Patch(":id")
   async activate(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-    @Query(zodQuery(projectActionSchema)) projectStatus: projectActionDto,
+    @Query(zodQuery(projectActionSchema)) projectStatus: ProjectActionDto,
   ): Promise<{ success: boolean }> {
     if (projectStatus.status === "activate") {
       const success = await this.projectService.activate(projectId.id);

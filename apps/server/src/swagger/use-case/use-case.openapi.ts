@@ -1,8 +1,9 @@
 import { registerMultiple, registry } from "../registry";
-import { projectIdSchema } from "@repo/shared-schemas";
+import { projectIdSchema, useCaseDetailSchema } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
   ProjectIdDto: projectIdSchema,
+  UseCaseDetailDto: useCaseDetailSchema,
 });
 
 registry.registerPath({
@@ -15,6 +16,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/UseCaseDetailDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

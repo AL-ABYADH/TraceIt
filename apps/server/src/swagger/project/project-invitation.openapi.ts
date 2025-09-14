@@ -1,8 +1,13 @@
 import { registerMultiple, registry } from "../registry";
-import { createProjectInvitationSchema, uuidParamsSchema } from "@repo/shared-schemas";
+import {
+  createProjectInvitationSchema,
+  projectInvitationSchema,
+  uuidParamsSchema,
+} from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
   CreateProjectInvitationDto: createProjectInvitationSchema,
+  ProjectInvitationDto: projectInvitationSchema,
   UuidParamsDto: uuidParamsSchema,
 });
 
@@ -13,6 +18,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ProjectInvitationDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -30,6 +45,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ProjectInvitationDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -60,6 +85,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectInvitationDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

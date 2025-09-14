@@ -2,7 +2,8 @@ import { registerMultiple, registry } from "../registry";
 import {
   createProjectSchema,
   projectActionSchema,
-  projectResponseSchema,
+  projectDetailSchema,
+  projectListSchema,
   projectStatusSchema,
   updateProjectSchema,
   uuidParamsSchema,
@@ -11,7 +12,8 @@ import {
 registerMultiple(registry, {
   CreateProjectDto: createProjectSchema,
   ProjectActionDto: projectActionSchema,
-  ProjectResponseDto: projectResponseSchema,
+  ProjectDetailDto: projectDetailSchema,
+  ProjectListDto: projectListSchema,
   ProjectStatusDto: projectStatusSchema,
   UpdateProjectDto: updateProjectSchema,
   UuidParamsDto: uuidParamsSchema,
@@ -27,6 +29,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ProjectListDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -50,7 +62,7 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/ProjectResponseDto",
+            $ref: "#/components/schemas/ProjectDetailDto",
           },
         },
       },
@@ -87,6 +99,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -121,7 +140,7 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: {
-            $ref: "#/components/schemas/ProjectResponseDto",
+            $ref: "#/components/schemas/ProjectDetailDto",
           },
         },
       },

@@ -3,6 +3,7 @@ import {
   createDiagramSchema,
   projectIdSchema,
   updateDiagramSchema,
+  useCaseDiagramDetailSchema,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 // Register DTOs
@@ -10,6 +11,7 @@ registerMultiple(registry, {
   CreateDiagramDto: createDiagramSchema,
   ProjectIdDto: projectIdSchema,
   UpdateDiagramDto: updateDiagramSchema,
+  UseCaseDiagramDetailDto: useCaseDiagramDetailSchema,
   UuidParamsDto: uuidParamsSchema,
 });
 
@@ -33,6 +35,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/UseCaseDiagramDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -53,6 +62,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/UseCaseDiagramDetailDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -73,6 +92,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/UseCaseDiagramDetailDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -107,6 +133,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/UseCaseDiagramDetailDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

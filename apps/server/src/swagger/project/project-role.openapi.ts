@@ -1,12 +1,14 @@
 import { registerMultiple, registry } from "../registry";
 import {
   createProjectRoleSchema,
+  projectRoleSchema,
   updateProjectRoleSchema,
   uuidParamsSchema,
 } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
   CreateProjectRoleDto: createProjectRoleSchema,
+  ProjectRoleDto: projectRoleSchema,
   UpdateProjectRoleDto: updateProjectRoleSchema,
   UuidParamsDto: uuidParamsSchema,
 });
@@ -31,6 +33,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectRoleDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -51,6 +60,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectRoleDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -71,6 +87,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ProjectRoleDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -102,6 +128,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ProjectRoleDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",

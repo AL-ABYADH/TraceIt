@@ -1,4 +1,3 @@
-// schemas/project/schemas.ts
 import { z } from "../zod-openapi-init";
 import {
   projectNameField,
@@ -13,8 +12,40 @@ import {
   expirationDateField,
   projectStatusFieldDoc,
   projectActionFieldDoc,
+  projectInvitationStatusFieldDoc,
 } from "./openapi-fields";
-import { dateISOField } from "../common";
+import { dateFieldDoc, dateISOField, projectListSchema, uuidFieldDoc } from "../common";
+import { safeUserListSchema } from "../user";
+import { actorSchema } from "../actor";
+import { useCaseDetailSchema } from "../use-case";
+
+export const projectPermissionSchema = z
+  .object({
+    id: uuidFieldDoc,
+    permission: permissionNameFieldDoc,
+    code: permissionCodeFieldDoc,
+    createdAt: z.union([dateISOField, z.date()]),
+    updatedAt: z.union([dateISOField, z.date()]),
+  })
+  .openapi({ title: "ProjectPermissionDto" });
+
+export const projectRoleSchema = z.object({
+  id: uuidFieldDoc,
+  name: z.string(),
+  projectPermissions: z.array(projectPermissionSchema).nullable(),
+  // createdAt: z.union([dateISOField, z.date()]),
+  // updatedAt: z.union([dateISOField, z.date()]),
+ 
+}).openapi({ title: "ProjectRoleDto" });
+
+export const projectCollaborationSchema = z.object({
+  id: uuidFieldDoc,
+  user: safeUserListSchema,
+  project: projectListSchema, // Use reference schema to avoid circular dependency
+  projectRoles: z.array(projectRoleSchema).optional(),
+  createdAt: z.union([dateISOField, z.date()]),
+  updatedAt: z.union([dateISOField, z.date()]).optional(),
+}).openapi({ title: "ProjectCollaborationDto" });
 
 export const createProjectCollaborationSchema = z
   .object({
@@ -90,23 +121,29 @@ export const projectStatusSchema = z.object({
   status: projectStatusFieldDoc,
 });
 
-// export const projectResponseSchema = z
-//   .object({
-//     id: projectUserIdField, // UUID of the project
-//     name: projectNameField,
-//     description: projectDescriptionField.optional(),
-//     status: projectStatusFieldDoc,
-//     createdAt: dateISOField,
-//     updatedAt: dateISOField,
-//   })
-//   .openapi({ title: "ProjectResponseDto" });
-export const projectResponseSchema = z
-  .object({
-    id: projectUserIdField,
-    name: projectNameField,
-    description: projectDescriptionField.optional(),
-    status: projectStatusFieldDoc,
-    createdAt: z.union([dateISOField, z.date()]),
-    updatedAt: z.union([dateISOField, z.date()]).optional(),
-  })
-  .openapi({ title: "ProjectResponseDto" });
+
+export const projectRelationshipsSchema = z.object({
+  owner: safeUserListSchema,
+  collaborations: z.array(projectCollaborationSchema).optional(),
+  actors: z.array(actorSchema).optional(),
+  useCases: z.array(useCaseDetailSchema).optional(),
+  classes: z.array(z.any()).optional(),
+}).openapi({ title: "ProjectRelationships" });
+
+export const projectDetailSchema = projectListSchema
+  .merge(projectRelationshipsSchema)
+  .openapi({ title: "ProjectDetailDto" });
+
+
+  export const projectInvitationSchema = z.object({
+  id: uuidFieldDoc,
+  sender: safeUserListSchema,
+  receiver: safeUserListSchema,
+  project: projectListSchema,
+  projectRoles: z.array(projectRoleSchema).nullable(),
+  // expirationDate: dateFieldDoc,
+  expirationDate: z.union([dateISOField, z.date()]),
+  status: projectInvitationStatusFieldDoc,
+  createdAt: z.union([dateISOField, z.date()]),
+  updatedAt: z.union([dateISOField, z.date()]).optional(),
+}).openapi({ title: "ProjectInvitationDto" });

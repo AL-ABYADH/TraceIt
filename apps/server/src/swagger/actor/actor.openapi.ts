@@ -1,5 +1,6 @@
 import { registerMultiple, registry } from "../registry";
 import {
+  actorSchema,
   actorSubtypeSchema,
   actorTypeSchema,
   addActorSchema,
@@ -8,6 +9,7 @@ import {
 } from "@repo/shared-schemas";
 // Register DTOs
 registerMultiple(registry, {
+  ActorDto: actorSchema,
   ActorSubtypeDto: actorSubtypeSchema,
   ActorTypeDto: actorTypeSchema,
   AddActorDto: addActorSchema,
@@ -35,6 +37,13 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            $ref: "#/components/schemas/ActorDto",
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -56,6 +65,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ActorDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -80,6 +99,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ActorDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -103,6 +132,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ActorDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
@@ -134,6 +173,16 @@ registry.registerPath({
   responses: {
     200: {
       description: "Successful response",
+      content: {
+        "application/json": {
+          schema: {
+            type: "array",
+            items: {
+              $ref: "#/components/schemas/ActorDto",
+            },
+          },
+        },
+      },
     },
     400: {
       description: "Bad request",
