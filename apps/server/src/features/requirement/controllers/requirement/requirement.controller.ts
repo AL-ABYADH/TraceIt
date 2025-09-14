@@ -56,6 +56,30 @@ import {
   type RequirementTypeDto,
   requirementTypeSchema,
   projectIdSchema,
+  RequirementDetailDto,
+  RequirementListDto,
+  SystemRequirementDetailDto,
+  SystemRequirementListDto,
+  EventSystemRequirementDetailDto,
+  EventSystemRequirementListDto,
+  ActorRequirementDetailDto,
+  ActorRequirementListDto,
+  SystemActorCommunicationRequirementListDto,
+  SystemActorCommunicationRequirementDetailDto,
+  ConditionalRequirementListDto,
+  ConditionalRequirementDetailDto,
+  RecursiveRequirementListDto,
+  RecursiveRequirementDetailDto,
+  UseCaseReferenceRequirementDetailDto,
+  UseCaseReferenceRequirementListDto,
+  LogicalGroupRequirementDetailDto,
+  LogicalGroupRequirementListDto,
+  ConditionalGroupRequirementDetailDto,
+  ConditionalGroupRequirementListDto,
+  SimultaneousRequirementListDto,
+  SimultaneousRequirementDetailDto,
+  ExceptionalRequirementListDto,
+  ExceptionalRequirementDetailDto,
 } from "@repo/shared-schemas";
 
 // Import all requirement entities
@@ -84,7 +108,9 @@ export class RequirementController {
    * Get a requirement by ID
    */
   @Get(":id")
-  async findById(@Param(zodParam(uuidParamsSchema)) params: UuidParamsDto): Promise<Requirement> {
+  async findById(
+    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+  ): Promise<RequirementDetailDto> {
     return this.requirementService.findById(params.id);
   }
 
@@ -94,7 +120,7 @@ export class RequirementController {
   @Get()
   async getByUseCase(
     @Query(zodQuery(useCaseIdSchema)) query: UseCaseIdDto,
-  ): Promise<Requirement[]> {
+  ): Promise<RequirementListDto[]> {
     return this.requirementService.getByUseCase(query.useCaseId);
   }
 
@@ -104,7 +130,7 @@ export class RequirementController {
   @Get("project/:projectId")
   async getByProject(
     @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
-  ): Promise<Requirement[]> {
+  ): Promise<RequirementListDto[]> {
     return this.requirementService.getByProject(params.projectId);
   }
 
@@ -139,7 +165,7 @@ export class RequirementController {
   @Post("system")
   async createSystemRequirement(
     @Body(zodBody(createSystemRequirementSchema)) dto: CreateSystemRequirementDto,
-  ): Promise<SystemRequirement> {
+  ): Promise<SystemRequirementDetailDto> {
     return this.requirementService.createSystemRequirement(dto);
   }
 
@@ -147,7 +173,7 @@ export class RequirementController {
   async updateSystemRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateSystemRequirementSchema)) dto: UpdateSystemRequirementDto,
-  ): Promise<SystemRequirement[]> {
+  ): Promise<SystemRequirementListDto[]> {
     return this.requirementService.updateSystemRequirement(params.id, dto);
   }
 
@@ -156,7 +182,7 @@ export class RequirementController {
   @Post("event-system")
   async createEventSystemRequirement(
     @Body(zodBody(createEventSystemRequirementSchema)) dto: CreateEventSystemRequirementDto,
-  ): Promise<EventSystemRequirement> {
+  ): Promise<EventSystemRequirementDetailDto> {
     return this.requirementService.createEventSystemRequirement(dto);
   }
 
@@ -164,7 +190,7 @@ export class RequirementController {
   async updateEventSystemRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateEventSystemRequirementSchema)) dto: UpdateEventSystemRequirementDto,
-  ): Promise<EventSystemRequirement[]> {
+  ): Promise<EventSystemRequirementListDto[]> {
     return this.requirementService.updateEventSystemRequirement(params.id, dto);
   }
 
@@ -173,7 +199,7 @@ export class RequirementController {
   @Post("actor")
   async createActorRequirement(
     @Body(zodBody(createActorRequirementSchema)) dto: CreateActorRequirementDto,
-  ): Promise<ActorRequirement> {
+  ): Promise<ActorRequirementDetailDto> {
     return this.requirementService.createActorRequirement(dto);
   }
 
@@ -181,7 +207,7 @@ export class RequirementController {
   async updateActorRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateActorRequirementSchema)) dto: UpdateActorRequirementDto,
-  ): Promise<ActorRequirement[]> {
+  ): Promise<ActorRequirementListDto[]> {
     return this.requirementService.updateActorRequirement(params.id, dto);
   }
 
@@ -191,7 +217,7 @@ export class RequirementController {
   async createSystemActorCommunicationRequirement(
     @Body(zodBody(createSystemActorCommunicationRequirementSchema))
     dto: CreateSystemActorCommunicationRequirementDto,
-  ): Promise<SystemActorCommunicationRequirement> {
+  ): Promise<SystemActorCommunicationRequirementDetailDto> {
     return this.requirementService.createSystemActorCommunicationRequirement(dto);
   }
 
@@ -200,7 +226,7 @@ export class RequirementController {
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateSystemActorCommunicationRequirementSchema))
     dto: UpdateSystemActorCommunicationRequirementDto,
-  ): Promise<SystemActorCommunicationRequirement[]> {
+  ): Promise<SystemActorCommunicationRequirementListDto[]> {
     return this.requirementService.updateSystemActorCommunicationRequirement(params.id, dto);
   }
 
@@ -209,7 +235,7 @@ export class RequirementController {
   @Post("conditional")
   async createConditionalRequirement(
     @Body(zodBody(createConditionalRequirementSchema)) dto: CreateConditionalRequirementDto,
-  ): Promise<ConditionalRequirement> {
+  ): Promise<ConditionalRequirementDetailDto> {
     return this.requirementService.createConditionalRequirement(dto);
   }
 
@@ -217,7 +243,7 @@ export class RequirementController {
   async updateConditionalRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateConditionalRequirementSchema)) dto: UpdateConditionalRequirementDto,
-  ): Promise<ConditionalRequirement[]> {
+  ): Promise<ConditionalRequirementListDto[]> {
     return this.requirementService.updateConditionalRequirement(params.id, dto);
   }
 
@@ -226,7 +252,7 @@ export class RequirementController {
   @Post("recursive")
   async createRecursiveRequirement(
     @Body(zodBody(createRecursiveRequirementSchema)) dto: CreateRecursiveRequirementDto,
-  ): Promise<RecursiveRequirement> {
+  ): Promise<RecursiveRequirementDetailDto> {
     return this.requirementService.createRecursiveRequirement(dto);
   }
 
@@ -234,7 +260,7 @@ export class RequirementController {
   async updateRecursiveRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateRecursiveRequirementSchema)) dto: UpdateRecursiveRequirementDto,
-  ): Promise<RecursiveRequirement[]> {
+  ): Promise<RecursiveRequirementListDto[]> {
     return this.requirementService.updateRecursiveRequirement(params.id, dto);
   }
 
@@ -244,7 +270,7 @@ export class RequirementController {
   async createUseCaseReferenceRequirement(
     @Body(zodBody(createUseCaseReferenceRequirementSchema))
     dto: CreateUseCaseReferenceRequirementDto,
-  ): Promise<UseCaseReferenceRequirement> {
+  ): Promise<UseCaseReferenceRequirementDetailDto> {
     return this.requirementService.createUseCaseReferenceRequirement(dto);
   }
 
@@ -253,7 +279,7 @@ export class RequirementController {
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateUseCaseReferenceRequirementSchema))
     dto: UpdateUseCaseReferenceRequirementDto,
-  ): Promise<UseCaseReferenceRequirement[]> {
+  ): Promise<UseCaseReferenceRequirementListDto[]> {
     return this.requirementService.updateUseCaseReferenceRequirement(params.id, dto);
   }
 
@@ -262,7 +288,7 @@ export class RequirementController {
   @Post("logical-group")
   async createLogicalGroupRequirement(
     @Body(zodBody(createLogicalGroupRequirementSchema)) dto: CreateLogicalGroupRequirementDto,
-  ): Promise<LogicalGroupRequirement> {
+  ): Promise<LogicalGroupRequirementDetailDto> {
     return this.requirementService.createLogicalGroupRequirement(dto);
   }
 
@@ -270,7 +296,7 @@ export class RequirementController {
   async updateLogicalGroupRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateLogicalGroupRequirementSchema)) dto: UpdateLogicalGroupRequirementDto,
-  ): Promise<LogicalGroupRequirement[]> {
+  ): Promise<LogicalGroupRequirementListDto[]> {
     return this.requirementService.updateLogicalGroupRequirement(params.id, dto);
   }
 
@@ -280,7 +306,7 @@ export class RequirementController {
   async createConditionalGroupRequirement(
     @Body(zodBody(createConditionalGroupRequirementSchema))
     dto: CreateConditionalGroupRequirementDto,
-  ): Promise<ConditionalGroupRequirement> {
+  ): Promise<ConditionalGroupRequirementDetailDto> {
     return this.requirementService.createConditionalGroupRequirement(dto);
   }
 
@@ -289,7 +315,7 @@ export class RequirementController {
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateConditionalGroupRequirementSchema))
     dto: UpdateConditionalGroupRequirementDto,
-  ): Promise<ConditionalGroupRequirement[]> {
+  ): Promise<ConditionalGroupRequirementListDto[]> {
     return this.requirementService.updateConditionalGroupRequirement(params.id, dto);
   }
 
@@ -298,7 +324,7 @@ export class RequirementController {
   @Post("simultaneous")
   async createSimultaneousRequirement(
     @Body(zodBody(createSimultaneousRequirementSchema)) dto: CreateSimultaneousRequirementDto,
-  ): Promise<SimultaneousRequirement> {
+  ): Promise<SimultaneousRequirementDetailDto> {
     return this.requirementService.createSimultaneousRequirement(dto);
   }
 
@@ -306,7 +332,7 @@ export class RequirementController {
   async updateSimultaneousRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateSimultaneousRequirementSchema)) dto: UpdateSimultaneousRequirementDto,
-  ): Promise<SimultaneousRequirement[]> {
+  ): Promise<SimultaneousRequirementListDto[]> {
     return this.requirementService.updateSimultaneousRequirement(params.id, dto);
   }
 
@@ -315,7 +341,7 @@ export class RequirementController {
   @Post("exceptional")
   async createExceptionalRequirement(
     @Body(zodBody(createExceptionalRequirementSchema)) dto: CreateExceptionalRequirementDto,
-  ): Promise<ExceptionalRequirement> {
+  ): Promise<ExceptionalRequirementDetailDto> {
     return this.requirementService.createExceptionalRequirement(dto);
   }
 
@@ -323,7 +349,7 @@ export class RequirementController {
   async updateExceptionalRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateExceptionalRequirementSchema)) dto: UpdateExceptionalRequirementDto,
-  ): Promise<ExceptionalRequirement[]> {
+  ): Promise<ExceptionalRequirementListDto[]> {
     return this.requirementService.updateExceptionalRequirement(params.id, dto);
   }
 }
