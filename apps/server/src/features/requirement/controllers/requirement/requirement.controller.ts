@@ -82,22 +82,6 @@ import {
   ExceptionalRequirementDetailDto,
 } from "@repo/shared-schemas";
 
-// Import all requirement entities
-import {
-  Requirement,
-  SystemRequirement,
-  EventSystemRequirement,
-  ActorRequirement,
-  SystemActorCommunicationRequirement,
-  ConditionalRequirement,
-  RecursiveRequirement,
-  UseCaseReferenceRequirement,
-  LogicalGroupRequirement,
-  ConditionalGroupRequirement,
-  SimultaneousRequirement,
-  ExceptionalRequirement,
-} from "../../entities";
-
 @Controller("requirements")
 export class RequirementController {
   constructor(private readonly requirementService: RequirementService) {}
