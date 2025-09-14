@@ -1,5 +1,21 @@
-import { actorCreatedAtFieldDoc, actorIdFieldDoc, actorNameFieldDoc, actorSchema, actorSubTypeEnumDoc, actorTypeEnumDoc, actorUpdatedAtFieldDoc } from "../actor";
-import { dateFieldDoc, dateISOField, descriptionFieldDoc, projectIdFieldDoc, projectListSchema, uuidFieldDoc } from "../common";
+import {
+  actorCreatedAtFieldDoc,
+  actorIdFieldDoc,
+  actorNameFieldDoc,
+  actorSchema,
+  actorSubTypeEnumDoc,
+  actorTypeEnumDoc,
+  actorUpdatedAtFieldDoc,
+} from "../actor";
+import {
+  dateFieldDoc,
+  dateISOField,
+  descriptionFieldDoc,
+  projectIdFieldDoc,
+  projectListSchema,
+  uuidFieldDoc,
+} from "../common";
+import { requirementListSchema } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
@@ -25,10 +41,6 @@ export const projectIdSchema = z
     projectId: projectIdFieldDoc,
   })
   .openapi({ title: "ProjectIdDto" });
-
-
-
-
 
 /**
  * =========================
@@ -116,15 +128,32 @@ export const useCaseDiagramAttributesSchema = z
   })
   .openapi({ title: "UseCaseDiagramAttributes" });
 
+export const useCaseListSchema = z
+  .object({
+    id: uuidFieldDoc,
+    name: useCaseNameFieldDoc,
+    createdAt: dateFieldDoc,
+    updatedAt: dateFieldDoc.optional(),
+  })
+  .openapi({ title: "UseCaseAttributes" });
 
-const useCaseListSchema = z.object({
-  id: uuidFieldDoc,
-  name: useCaseNameFieldDoc,
-  createdAt: dateFieldDoc,
-  updatedAt: dateFieldDoc.optional(),
-}).openapi({ title: "UseCaseAttributes" });
-
-
+// export const useCaseRelationshipsSchema = z
+//   .object({
+//     project: projectListSchema.optional().describe("Project this use case belongs to"),
+//     requirements: z.array(requirementListSchema).optional().describe(
+//       "Array of requirements associated with this use case"
+//     ),
+//     includedUseCases: z.array(useCaseListSchema).optional().describe(
+//       "Array of included use cases"
+//     ),
+//     extendedUseCases: z.array(useCaseListSchema).optional().describe(
+//       "Array of extended use cases"
+//     ),
+//   })
+//   .openapi({
+//     title: "UseCaseRelationships",
+//     description: "Relationships of a use case with project, requirements, and other use cases",
+//   });
 
 // export const primaryUseCaseAttributesSchema = useCaseAttributesSchema.extend({
 //   description: z.string().optional().openapi({
@@ -136,10 +165,6 @@ const useCaseListSchema = z.object({
 //   description: "Represents attributes of a primary use case, including optional description",
 // });
 
-
-
-
-
 export const primaryUseCaseListSchema = useCaseListSchema
   .omit({})
   .extend({
@@ -150,7 +175,8 @@ export const primaryUseCaseListSchema = useCaseListSchema
   })
   .openapi({
     title: "PrimaryUseCaseAttributes",
-    description: "Represents attributes of a primary use case, including optional description",
+    description:
+      "Represents attributes of a primary use case, including optional description",
   });
 
 export const secondaryUseCaseListSchema = useCaseListSchema.openapi({
@@ -158,47 +184,54 @@ export const secondaryUseCaseListSchema = useCaseListSchema.openapi({
   description: "Represents attributes of a secondary use case",
 });
 
-export const primaryUseCaseRelationshipsSchema = z.object({
-  primaryActors: z.array(actorSchema).optional(),
-  secondaryActors: z.array(actorSchema).optional(),
-  secondaryUseCases: z.array(secondaryUseCaseListSchema).optional(),
-  classes: z.any().optional(),
-}).openapi({
-  title: "PrimaryUseCaseRelationships",
-  description: "Relationships of the primary use case with actors and other use cases",
-});
+export const primaryUseCaseRelationshipsSchema = z
+  .object({
+    primaryActors: z.array(actorSchema).optional(),
+    secondaryActors: z.array(actorSchema).optional(),
+    secondaryUseCases: z.array(secondaryUseCaseListSchema).optional(),
+    classes: z.any().optional(),
+  })
+  .openapi({
+    title: "PrimaryUseCaseRelationships",
+    description:
+      "Relationships of the primary use case with actors and other use cases",
+  });
 
 export const primaryUseCaseDetailSchema = primaryUseCaseListSchema
   .merge(primaryUseCaseRelationshipsSchema)
   .openapi({ title: "PrimaryUseCaseDetailDto" });
 
+export const useCaseRelationshipsSchema = z
+  .object({
+    project: projectListSchema.optional(),
+    requirements: z.array(z.any()).optional(),
+    includedUseCases: z.array(useCaseListSchema).optional(),
+    extendedUseCases: z.array(useCaseListSchema).optional(),
+  })
+  .openapi({ title: "UseCaseRelationships" });
 
-const useCaseRelationshipsSchema = z.object({
-  project: projectListSchema.optional(),
-  requirements: z.array(z.any()).optional(),
-  includedUseCases: z.array(useCaseListSchema).optional(),
-  extendedUseCases: z.array(useCaseListSchema).optional(),
-}).openapi({ title: "UseCaseRelationships" });
+export const useCaseDetailSchema = useCaseListSchema
+  .merge(useCaseRelationshipsSchema)
+  .openapi({ title: "UseCaseDetailDto" });
 
+export const secondaryUseCaseRelationshipSchema = useCaseRelationshipsSchema
+  .omit({})
+  .extend({
+    primaryUseCase: primaryUseCaseDetailSchema.optional(),
+  })
+  .openapi({
+    title: "SecondaryUseCaseRelationships",
+    description:
+      "Relationships of a secondary use case, including its primary use case and other dependencies",
+  });
 
-export const useCaseDetailSchema = useCaseListSchema.merge(
-  useCaseRelationshipsSchema
-).openapi({ title: "UseCaseDetailDto" });
-
-
-export const secondaryUseCaseRelationshipSchema = useCaseRelationshipsSchema.omit({}).extend({
-  primaryUseCase: primaryUseCaseDetailSchema.optional(),
-}).openapi({
-  title: "SecondaryUseCaseRelationships",
-  description: "Relationships of a secondary use case, including its primary use case and other dependencies",
-});
-
-export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema.merge(
-  secondaryUseCaseRelationshipSchema
-).openapi({
-  title: "SecondaryUseCaseDetailDto",
-  description: "Detailed view of a secondary use case including its attributes and relationships",
-});
+export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
+  .merge(secondaryUseCaseRelationshipSchema)
+  .openapi({
+    title: "SecondaryUseCaseDetailDto",
+    description:
+      "Detailed view of a secondary use case including its attributes and relationships",
+  });
 
 // export const useCaseDiagramRelationshipsSchema = z
 //   .object({
@@ -216,9 +249,6 @@ export const useCaseDiagramRelationshipsSchema = z
   })
   .openapi({ title: "UseCaseDiagramRelationships" });
 
-export const useCaseDiagramDetailSchema = useCaseDiagramAttributesSchema.merge(
-  useCaseDiagramRelationshipsSchema
-).openapi({ title: "UseCaseDiagramResponseDto" });
-
-
-
+export const useCaseDiagramDetailSchema = useCaseDiagramAttributesSchema
+  .merge(useCaseDiagramRelationshipsSchema)
+  .openapi({ title: "UseCaseDiagramResponseDto" });
