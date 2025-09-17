@@ -257,6 +257,12 @@ export function ModelFactory<
     return manager.loadRelations(this, options);
   };
 
+  model.findByRelationshipProperties = (
+    relationshipAlias: keyof RelatedNodes,
+    whereRelationship: WhereParamsI,
+    options: any,
+  ) => manager.findByRelationshipProperties(relationshipAlias, whereRelationship, options);
+
   // Updated: Always generate UUID and timestamps during model creation
   /**
    * Automatically populates `id` and `createdAt` fields during entity creation,

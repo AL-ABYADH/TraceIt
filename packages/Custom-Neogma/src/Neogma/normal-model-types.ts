@@ -310,6 +310,30 @@ interface NeogmaModelStaticsI<
       limits?: Record<string, number>;
     },
   ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
+
+  findByRelationshipProperties: <Plain extends boolean = false>(
+    relationshipAlias: keyof RelatedNodesToAssociateI,
+    whereRelationship: WhereParamsI,
+    options?: GenericConfiguration & {
+      where?: WhereParamsI; // Optional filters for the source entity
+      whereTarget?: WhereParamsI; // Optional filters for the target entity
+      limit?: number; // Limit the number of results
+      skip?: number; // Skip results (for pagination)
+      order?: Array<[string, "ASC" | "DESC"]>; // Ordering
+      plain?: Plain; // Return plain objects instead of instances
+      include?: Array<keyof RelatedNodesToAssociateI>; // Additional relationships to include for target
+      exclude?: Array<keyof RelatedNodesToAssociateI>; // Relationships to exclude for target
+      limits?: Record<string, number>; // Limits for included relationships
+    },
+  ) => Promise<
+    Array<{
+      source: Plain extends true ? Properties : Instance;
+      relationship: RelatedNodesToAssociateI[typeof relationshipAlias]["RelationshipProperties"];
+      target: Plain extends true
+        ? RelatedNodesToAssociateI[typeof relationshipAlias]["Instance"] & RelatedNodesToAssociateI
+        : RelatedNodesToAssociateI[typeof relationshipAlias]["Instance"];
+    }>
+  >;
 }
 
 /** the type of instance of the Model */
