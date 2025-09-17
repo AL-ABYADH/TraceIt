@@ -11,6 +11,7 @@ export const updateUserOpenApiFields = {
     example: "Saleh Saeed",
   }),
 };
+
 export const userOpenApiFields = {
   id: userFields.id.openapi({
     description: "Unique identifier for the user",

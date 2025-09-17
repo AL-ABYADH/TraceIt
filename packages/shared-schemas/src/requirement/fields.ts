@@ -1,5 +1,6 @@
 import { createEnumField, createField } from "../common/field-factory";
 import { uuidField } from "../common";
+import { actorSchema, actorSubTypeEnum, actorSubTypeEnumDoc } from "../actor";
 
 // Requirement enums
 export const requirementTypeEnum = createEnumField([
@@ -74,3 +75,17 @@ export const requirementIdsField = createField("array", {
 });
 
 export const useCaseIdField = uuidField;
+
+/**
+ * Event Actor specialization (only subtype = "event")
+ */
+// export const eventActorSchema = actorSchema
+//   .extend({
+//     subtype: actorSubTypeEnumDoc.openapi({
+//       example: "event",
+//       description: "Subtype must always be 'event' for event actors",
+//     }),
+//   })
+//   .refine((data) => data.subtype === "event", {
+//     message: "Actor subtype must be 'event'",
+//   });

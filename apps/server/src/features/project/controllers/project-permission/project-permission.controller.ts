@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from "@nestjs/common";
 import { ProjectPermissionService } from "../../services/project-permission/project-permission.service";
-import { ProjectPermission } from "../../entities/project-permission.entity";
 import {
   type CreateProjectPermissionDto,
   createProjectPermissionSchema,
+  ProjectPermissionDto,
   type UpdateProjectPermissionDto,
   updateProjectPermissionSchema,
   type UuidParamsDto,
@@ -18,19 +18,19 @@ export class ProjectPermissionController {
   @Post()
   async create(
     @Body(zodBody(createProjectPermissionSchema)) dto: CreateProjectPermissionDto,
-  ): Promise<ProjectPermission> {
+  ): Promise<ProjectPermissionDto> {
     return this.projectPermissionService.create(dto);
   }
 
   @Get(":id")
   async find(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-  ): Promise<ProjectPermission> {
+  ): Promise<ProjectPermissionDto> {
     return this.projectPermissionService.find(projectId.id);
   }
 
   @Get()
-  async list(): Promise<ProjectPermission[]> {
+  async list(): Promise<ProjectPermissionDto[]> {
     return this.projectPermissionService.list();
   }
 
@@ -38,7 +38,7 @@ export class ProjectPermissionController {
   async update(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
     @Body(zodBody(updateProjectPermissionSchema)) dto: UpdateProjectPermissionDto,
-  ): Promise<ProjectPermission[]> {
+  ): Promise<ProjectPermissionDto[]> {
     return this.projectPermissionService.update(projectId.id, dto);
   }
 

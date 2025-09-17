@@ -2,12 +2,37 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@repo/shared-schemas";
+import { loginSchema, projectDetailSchema, ProjectStatus } from "@repo/shared-schemas";
 import type { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 
 type LoginFormType = z.infer<typeof loginSchema>;
-
+// type projectschemType = z.infer<typeof projectDetailSchema>
+// const project: projectschemType = {
+//   id: "123",
+//   name: "My Project",
+//   status: ProjectStatus.ACTIVE,
+//   createdAt: new Date().toISOString(),
+//   owner: {
+//     id: "user-1",
+//     username: "john",
+//     displayName: "John",
+//     email: "john@example.com",
+//     emailVerified: true,
+//     createdAt: new Date().toISOString(),
+//     // etc...
+//   },
+//   useCases: [
+//     {
+//       id: "uc1",
+//       name: "Login Use Case",
+//       createdAt: new Date().toISOString(),
+//       // etc...
+//     },
+//   ],
+//   // etc...,
+// };
+// project.useCases[0].
 export default function LoginForm({
   onSuccess,
   onToggleMode,

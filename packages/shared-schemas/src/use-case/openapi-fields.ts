@@ -12,11 +12,6 @@ import {
 import { uuidField } from "../common";
 
 // Primary identifiers
-export const projectIdFieldDoc = uuidField.openapi({
-  description:
-    "The unique identifier of the project that contains this use case",
-  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-});
 
 export const primaryUseCaseIdFieldDoc = uuidField.openapi({
   description:
