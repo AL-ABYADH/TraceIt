@@ -42,7 +42,7 @@ export class UseCaseDiagramController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateDiagramSchema)) updateDto: UpdateDiagramDto,
-  ): Promise<UseCaseDiagramDetailDto[]> {
+  ): Promise<UseCaseDiagramDetailDto> {
     return await this.useCaseDiagramService.update(params.id, updateDto);
   }
 

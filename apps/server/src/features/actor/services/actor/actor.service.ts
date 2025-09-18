@@ -46,7 +46,7 @@ export class ActorService {
     return this.actorRepo.getByProjectAndType(projectId, type);
   }
 
-  async update(actorId: string, actorData: UpdateActorInterface): Promise<Actor[]> {
+  async update(actorId: string, actorData: UpdateActorInterface): Promise<Actor> {
     // Find the actor to determine its type
     const actor = await this.findById(actorId);
 

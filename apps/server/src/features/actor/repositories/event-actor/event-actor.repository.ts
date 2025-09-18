@@ -34,18 +34,14 @@ export class EventActorRepository implements ConcreteActorRepositoryInterface<Ev
     }
   }
 
-  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<EventActor[]> {
+  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<EventActor> {
     try {
-      const updated = await this.eventActorModel.update(
+      const updated = await this.eventActorModel.updateOneOrThrow(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
       );
-
-      if (!updated) {
-        throw new NotFoundException(`Event actor with ID ${actorId} not found`);
-      }
 
       return updated;
     } catch (error) {

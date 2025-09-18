@@ -34,21 +34,14 @@ export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<
     }
   }
 
-  async update(
-    actorId: string,
-    updateActorInterface: UpdateActorInterface,
-  ): Promise<AiAgentActor[]> {
+  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<AiAgentActor> {
     try {
-      const updated = (await this.aiAgentActorModel.update(
+      const updated = (await this.aiAgentActorModel.updateOneOrThrow(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
-      )) as AiAgentActor[];
-
-      if (!updated) {
-        throw new NotFoundException(`AI agent actor with ID ${actorId} not found`);
-      }
+      )) as AiAgentActor;
 
       return updated;
     } catch (error) {

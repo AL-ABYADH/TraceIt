@@ -34,18 +34,14 @@ export class HumanActorRepository implements ConcreteActorRepositoryInterface<Hu
     }
   }
 
-  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<HumanActor[]> {
+  async update(actorId: string, updateActorInterface: UpdateActorInterface): Promise<HumanActor> {
     try {
-      const updated = await this.humanActorModel.update(
+      const updated = await this.humanActorModel.updateOneOrThrow(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
       );
-
-      if (!updated) {
-        throw new NotFoundException(`Human actor with ID ${actorId} not found`);
-      }
 
       return updated;
     } catch (error) {

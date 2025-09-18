@@ -33,21 +33,21 @@ export class UserRepository {
     return user;
   }
 
-  async update(id: string, userData: UpdateUserInterface): Promise<User[]> {
-    const user = await this.userModel.update(userData, { where: { id }, return: true });
+  async update(id: string, userData: UpdateUserInterface): Promise<User> {
+    const user = await this.userModel.updateOneOrThrow(userData, { where: { id }, return: true });
     return user;
   }
 
-  async updatePassword(id: string, password: string): Promise<User[]> {
-    const user = await this.userModel.update(
+  async updatePassword(id: string, password: string): Promise<User> {
+    const user = await this.userModel.updateOneOrThrow(
       { password: password },
       { where: { id }, return: true },
     );
     return user;
   }
 
-  async setEmailVerified(id: string, verified: boolean = true): Promise<User[]> {
-    const user = await this.userModel.update(
+  async setEmailVerified(id: string, verified: boolean = true): Promise<User> {
+    const user = await this.userModel.updateOneOrThrow(
       { emailVerified: verified },
       { where: { id }, return: true },
     );
