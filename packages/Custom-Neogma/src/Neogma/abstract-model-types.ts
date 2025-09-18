@@ -295,6 +295,25 @@ interface NeogmaModelStaticsI<
         : RelatedNodesToAssociateI[typeof relationshipAlias]["Instance"];
     }>
   >;
+
+  /**
+   * Updates a single entity and returns it, or throws an exception if no entity was found.
+   * This is a convenience method that combines update with error handling.
+   *
+   * @param data - The properties to update
+   * @param params - Optional parameters including where conditions
+   * @returns The updated entity
+   * @throws Error if no entity matches the where conditions
+   */
+  updateOneOrThrow: (
+    data: UpdateData,
+    params?: GenericConfiguration & {
+      where?: WhereParamsI;
+      /** Always true for this method */
+      return?: boolean;
+      session?: GenericConfiguration["session"];
+    },
+  ) => Promise<Properties>;
 }
 
 /** the type of instance of the Model */
