@@ -12,7 +12,9 @@ export interface ModelParams<
   Statics extends AnyObject,
 > {
   name: string;
-  schema: NeogmaSchema<Omit<Properties, "id" | "createdAt" | "updatedAt">>;
+  schema: NeogmaSchema<
+    Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">
+  >;
   /** the label of the nodes */
   label: string[];
   /** statics of the Model */
@@ -72,6 +74,7 @@ export interface FetchRelationsOptions {
   exclude?: string[];
   limits?: Record<string, number>;
   session?: any;
+  direction?: "out" | "in" | "none"; // Añadir parámetro de dirección
 }
 
 /**

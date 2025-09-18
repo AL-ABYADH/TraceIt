@@ -98,7 +98,7 @@ interface NeogmaModelStaticsI<
   RelatedNodesToAssociateI extends AnyObject = object,
   MethodsI extends AnyObject = object,
   CreateData = CreateDataI<
-    Omit<Properties, "id" | "createdAt" | "updatedAt">,
+    Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">,
     RelatedNodesToAssociateI
   >,
   UpdateData = UpdateDataI<Properties>,
@@ -268,6 +268,7 @@ interface NeogmaModelStaticsI<
       include?: Array<keyof RelatedNodesToAssociateI>;
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     },
   ) => Promise<(Properties & RelatedNodesToAssociateI) | null>;
 
@@ -286,6 +287,7 @@ interface NeogmaModelStaticsI<
       include?: Array<keyof RelatedNodesToAssociateI>;
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     },
   ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
 
@@ -308,6 +310,7 @@ interface NeogmaModelStaticsI<
       include?: Array<keyof RelatedNodesToAssociateI>;
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     },
   ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
 
@@ -324,6 +327,7 @@ interface NeogmaModelStaticsI<
       include?: Array<keyof RelatedNodesToAssociateI>; // Additional relationships to include for target
       exclude?: Array<keyof RelatedNodesToAssociateI>; // Relationships to exclude for target
       limits?: Record<string, number>; // Limits for included relationships
+      direction?: "out" | "in" | "none";
     },
   ) => Promise<
     Array<{

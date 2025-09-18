@@ -13,11 +13,14 @@ export class RelationshipManager {
   /**
    * Load specified relationships for an entity with optional filters and limits
    */
+  /**
+   * Carga las relaciones para una entidad con soporte para dirección personalizada
+   */
   async loadRelations(entity: any, options: FetchRelationsOptions = {}): Promise<any> {
     const relationships = this.model.relationships || {};
     let relationAliases = Object.keys(relationships);
 
-    // Filter relation aliases by include/exclude options
+    // Filtrar aliases por opciones include/exclude
     if (options.include?.length) {
       relationAliases = relationAliases.filter((alias) => options.include!.includes(alias));
     }
@@ -25,20 +28,29 @@ export class RelationshipManager {
       relationAliases = relationAliases.filter((alias) => !options.exclude!.includes(alias));
     }
 
-    // Get base data of entity
+    // Obtener datos base de la entidad
     const result = entity.getDataValues ? entity.getDataValues() : { ...entity };
 
-    // Load all relationships concurrently
+    // Cargar todas las relaciones concurrentemente
     const loadPromises = relationAliases.map(async (alias) => {
       try {
         const { isArray } = this.getRelationInfo(alias);
-        const relationOptions: any = { alias, session: options.session };
 
-        if (options.limits?.[alias]) {
-          relationOptions.limit = options.limits[alias];
+        // Cargar relaciones con soporte para dirección
+        const relationships = await this.loadRelationshipWithDirection(
+          entity,
+          alias,
+          options.direction,
+          options.limits?.[alias],
+          options.session,
+        );
+
+        // Validar la cardinalidad para relaciones "one"
+        if (!isArray && relationships.length > 1) {
+          console.warn(
+            `Violación de restricción de cardinalidad: La relación '${alias}' está definida como 'one' pero se encontraron ${relationships.length} relaciones.`,
+          );
         }
-
-        const relationships = await entity.findRelationships(relationOptions);
 
         const data = relationships.map((rel: any) => {
           const targetData = rel.target.getDataValues ? rel.target.getDataValues() : rel.target;
@@ -49,19 +61,129 @@ export class RelationshipManager {
         });
 
         return { alias, data: isArray ? data : data[0] || null };
-      } catch {
+      } catch (error) {
+        console.error(`Error cargando relación ${alias}:`, error);
         const { isArray } = this.getRelationInfo(alias);
         return { alias, data: isArray ? [] : null };
       }
     });
 
-    // Await all relationship data and attach to result
+    // Esperar todas las relaciones y adjuntarlas al resultado
     const results = await Promise.all(loadPromises);
     results.forEach(({ alias, data }) => {
       result[alias] = data;
     });
 
     return result;
+  }
+
+  /**
+   * Carga relaciones con soporte para dirección personalizada
+   * Permite sobrescribir la dirección definida en el modelo
+   */
+  async loadRelationshipWithDirection(
+    entity: any,
+    alias: string,
+    direction?: "out" | "in" | "none",
+    limit?: number,
+    session?: any,
+  ): Promise<any[]> {
+    // Si no se especifica dirección, usar el método estándar
+    if (!direction) {
+      return entity.findRelationships({
+        alias,
+        limit,
+        session,
+      });
+    }
+
+    // Obtener la configuración de la relación
+    const relationships = this.model.relationships || {};
+    const relationshipConfig = relationships[alias];
+
+    if (!relationshipConfig) {
+      console.warn(`Relación '${alias}' no encontrada en el modelo`);
+      return [];
+    }
+
+    // Obtener el campo de clave primaria e ID de la entidad
+    const primaryKeyField = this.model.getPrimaryKeyField();
+
+    if (!primaryKeyField) {
+      console.warn(`El modelo no tiene definido un primaryKeyField`);
+      return [];
+    }
+
+    const entityData = entity.getDataValues ? entity.getDataValues() : entity;
+    const entityId = entityData[primaryKeyField];
+
+    if (!entityId) {
+      console.warn(`La entidad no tiene un valor para el campo primario '${primaryKeyField}'`);
+      return [];
+    }
+
+    // Obtener el modelo relacionado
+    let relatedModel;
+    if (relationshipConfig.model === "self") {
+      relatedModel = this.model;
+    } else if (typeof relationshipConfig.model === "string") {
+      // Buscar el modelo por nombre en el registro
+      const registry = require("./model-registry").ModelRegistry.getInstance();
+      relatedModel = registry.get(relationshipConfig.model);
+      if (!relatedModel) {
+        console.error(`Modelo relacionado '${relationshipConfig.model}' no encontrado`);
+        return [];
+      }
+    } else {
+      relatedModel = relationshipConfig.model;
+    }
+
+    // Configurar consulta según la dirección especificada
+    if (direction === "out") {
+      // Dirección saliente (de la entidad actual hacia otras)
+      return entity.findRelationships({
+        alias,
+        limit,
+        session,
+      });
+    } else if (direction === "in") {
+      // Dirección entrante (de otras entidades hacia la actual)
+      // Para esto, necesitamos invertir la consulta
+
+      // Primero, obtener la relación invertida
+      const relationshipName = relationshipConfig.name;
+      const invertedDirection =
+        relationshipConfig.direction === "out"
+          ? "in"
+          : relationshipConfig.direction === "in"
+            ? "out"
+            : "none";
+
+      // Buscar relaciones desde el modelo relacionado hacia la entidad actual
+      const results = await this.model.findRelationships({
+        alias,
+        where: {
+          target: { [primaryKeyField]: entityId },
+        },
+        limit,
+        session,
+      });
+
+      // Invertir source y target en los resultados para mantener consistencia
+      return results.map((rel: { target: any; source: any; relationship: any }) => ({
+        source: rel.target,
+        target: rel.source,
+        relationship: rel.relationship,
+      }));
+    } else {
+      // 'none' - relación bidireccional
+      // Para relaciones bidireccionales, podemos usar la consulta estándar
+      return entity.findRelationships({
+        alias,
+        limit,
+        session,
+      });
+    }
   }
 
   /**
@@ -79,6 +201,7 @@ export class RelationshipManager {
       include?: any[];
       exclude?: any[];
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     } = {},
   ): Promise<any> {
     const entity = await this.model.findOne({
@@ -112,6 +235,7 @@ export class RelationshipManager {
       include?: any[];
       exclude?: any[];
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     } = {},
   ): Promise<any[]> {
     const entities = await this.model.findMany({
@@ -154,6 +278,7 @@ export class RelationshipManager {
     include?: any[];
     exclude?: any[];
     limits?: Record<string, number>;
+    direction?: "out" | "in" | "none";
   }): Promise<any[]> {
     // Check if the relationship alias exists in current model
     const relationships = this.model.relationships || {};
@@ -311,6 +436,33 @@ export class RelationshipManager {
 
     // Apply ordering, skip and limit
     return this.applyOrderingAndPagination(results, options);
+  }
+
+  async validateCardinality(
+    entityId: string,
+    relationshipAlias: string,
+    session?: any,
+  ): Promise<void> {
+    const definition = this.relationshipDefinitions[relationshipAlias];
+
+    if (!definition?.cardinality || definition.cardinality === "many") {
+      return;
+    }
+
+    const existingRelationships = await this.model.findRelationships({
+      alias: relationshipAlias,
+      where: {
+        source: { id: entityId },
+      },
+      session,
+    });
+
+    if (existingRelationships.length > 0) {
+      throw new Error(
+        `Violación de restricción de cardinalidad: No se puede crear otra relación '${relationshipAlias}'. ` +
+          `La entidad con ID '${entityId}' ya tiene una relación de este tipo y la cardinalidad está definida como 'one'.`,
+      );
+    }
   }
 
   /**

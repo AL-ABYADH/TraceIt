@@ -113,6 +113,22 @@ export function ModelFactory<
     };
   }
 
+  // Add needsUpdate field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("needsUpdate")) {
+    enhancedSchema["needsUpdate"] = {
+      type: "boolean",
+      default: false,
+    };
+  }
+
+  // Add needsDelete field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("needsDelete")) {
+    enhancedSchema["needsDelete"] = {
+      type: "boolean",
+      default: false,
+    };
+  }
+
   const enhancedSchemaWithDataType: NeogmaSchema<Properties> = enhancedSchema;
 
   // Create updated parameters with enhanced schema
@@ -354,7 +370,29 @@ export function ModelFactory<
           return target.findByRelatedEntity.call(target, params);
         };
       }
-      // Default to standard property/method
+      if (prop === "relateTo") {
+        return async function (this: any, params: any) {
+          const primaryKeyField = model.getPrimaryKeyField();
+
+          const currentEntity = this as unknown as Record<string, any>;
+
+          if (
+            primaryKeyField &&
+            currentEntity &&
+            typeof currentEntity === "object" &&
+            primaryKeyField in currentEntity &&
+            params?.alias
+          ) {
+            const entityId = currentEntity[primaryKeyField];
+
+            if (entityId) {
+              await manager.validateCardinality(entityId, params.alias, params.session);
+            }
+          }
+
+          return target.relateTo.call(this, params);
+        };
+      } // Default to standard property/method
       return Reflect.get(target, prop, receiver);
     },
   });
