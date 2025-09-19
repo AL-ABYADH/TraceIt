@@ -109,6 +109,8 @@ interface NeogmaModelStaticsI<
     MethodsI
   >,
 > {
+  skipNeedUpdateOrSkipNeedDelete: (project_Id: string) => Promise<void>;
+  checkIsTraceability: () => boolean;
   prototype: MethodsI;
   relationships: Partial<RelationshipsI<RelatedNodesToAssociateI>>;
   addRelationships: (relationships: Partial<RelationshipsI<RelatedNodesToAssociateI>>) => void;

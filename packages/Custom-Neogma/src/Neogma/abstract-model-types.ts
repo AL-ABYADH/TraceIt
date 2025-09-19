@@ -117,6 +117,8 @@ interface NeogmaModelStaticsI<
   getPrimaryKeyField: () => string | null;
   getModelName: () => string;
   beforeDelete: (instance: Instance) => void;
+  checkIsTraceability: () => boolean;
+  skipNeedUpdateOrSkipNeedDelete: (project_Id: string) => Promise<void>;
 
   getRelationshipByAlias: <Alias extends keyof RelatedNodesToAssociateI>(
     alias: Alias,
