@@ -55,7 +55,5 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # ignore all folders under src/swagger
-/apps/server/src/swagger/*/
-
-# explicitly do not ignore .ts files in src/swagger
-!/apps/server/src/swagger/*.ts
+src/swagger/*/
+!src/swagger/*.ts
