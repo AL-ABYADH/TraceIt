@@ -8,7 +8,7 @@ import {
 import { Reflector } from "@nestjs/core";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import type { ZodSchema, ZodError } from "zod";
+import type { ZodSchema } from "zod";
 import { RESPONSE_SCHEMA_KEY } from "../decorators/response-schema.decorator";
 import { formatZodErrors } from "../utils/zod";
 
