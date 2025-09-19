@@ -37,18 +37,14 @@ export class HardwareActorRepository implements ConcreteActorRepositoryInterface
   async update(
     actorId: string,
     updateActorInterface: UpdateActorInterface,
-  ): Promise<HardwareActor[]> {
+  ): Promise<HardwareActor> {
     try {
-      const updated = await this.hardwareActorModel.update(
+      const updated = await this.hardwareActorModel.updateOneOrThrow(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
       );
-
-      if (!updated) {
-        throw new NotFoundException(`Hardware actor with ID ${actorId} not found`);
-      }
 
       return updated;
     } catch (error) {

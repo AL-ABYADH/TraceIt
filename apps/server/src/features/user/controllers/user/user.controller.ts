@@ -24,7 +24,7 @@ export class UserController {
   updateProfile(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
-  ): Promise<SafeUserDetailDto[]> {
+  ): Promise<SafeUserDetailDto> {
     return this.userService.updateProfile(userId.id, dto);
   }
 
@@ -37,7 +37,7 @@ export class UserController {
   @ResponseSchema(safeUserDetailSchema)
   verifyEmail(
     @Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto,
-  ): Promise<SafeUserDetailDto[]> {
+  ): Promise<SafeUserDetailDto> {
     return this.userService.verifyEmail(userId.id);
   }
 

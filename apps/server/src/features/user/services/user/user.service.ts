@@ -40,7 +40,7 @@ export class UserService {
     return (await this.userRepository.getByUsername(username)) ?? null;
   }
 
-  async updateProfile(id: string, userData: UpdateUserInterface): Promise<User[]> {
+  async updateProfile(id: string, userData: UpdateUserInterface): Promise<User> {
     await this.findById(id);
 
     if (userData.username) {
@@ -58,7 +58,7 @@ export class UserService {
     return updatedUser;
   }
 
-  async resetPassword(id: string, password: string): Promise<User[]> {
+  async resetPassword(id: string, password: string): Promise<User> {
     await this.findById(id);
     const user = await this.userRepository.updatePassword(id, password);
     if (!user) {
@@ -67,7 +67,7 @@ export class UserService {
     return user;
   }
 
-  async verifyEmail(id: string): Promise<User[]> {
+  async verifyEmail(id: string): Promise<User> {
     await this.findById(id);
     const user = await this.userRepository.setEmailVerified(id, true);
     return user;

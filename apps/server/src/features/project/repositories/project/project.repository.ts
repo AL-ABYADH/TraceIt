@@ -36,11 +36,10 @@ export class ProjectRepository {
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<any> {
-    const updatedProject = await this.projectModel.update(project, {
+    const updatedProject = await this.projectModel.updateOneOrThrow(project, {
       where: { id },
       return: true,
     });
-    console.log(updatedProject);
     return updatedProject;
   }
 

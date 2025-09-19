@@ -78,13 +78,9 @@ export class PrimaryUseCaseRepository {
         updateRelation.secondaryActorIds = [];
       }
 
-      const updated = (await this.primaryUseCaseModel.update(updateData, {
+      await this.primaryUseCaseModel.updateOneOrThrow(updateData, {
         where: { id },
-      })) as unknown as Array<PrimaryUseCaseAttributes>;
-
-      if (!updated || updated.length === 0) {
-        throw new NotFoundException(`Primary use case with ID ${id} not found`);
-      }
+      });
 
       // Handle actor relationships if provided
       if (

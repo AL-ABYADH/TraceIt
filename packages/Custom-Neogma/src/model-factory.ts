@@ -17,6 +17,7 @@ import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
 import { v4 as uuidv4 } from "uuid";
 import { GenericConfiguration, NeogmaModel } from "./Neogma/normal-model-types";
+import { NotFoundException } from "@nestjs/common";
 
 // =============================================================================
 // ENHANCED MODEL FACTORY
@@ -255,6 +256,30 @@ export function ModelFactory<
    */
   (model as any).prototype.loadRelations = function (options?: FindWithRelationsOptions) {
     return manager.loadRelations(this, options);
+  };
+
+  model.findByRelationshipProperties = (
+    relationshipAlias: keyof RelatedNodes,
+    whereRelationship: WhereParamsI,
+    options: any,
+  ) => manager.findByRelationshipProperties(relationshipAlias, whereRelationship, options);
+
+  model.updateOneOrThrow = async (data: any, params: any = {}): Promise<Properties> => {
+    // Explicitly type the return value
+
+    const modelName: string = parameters.name || "Entity";
+    const result: Properties[] = await model.update(data, params);
+
+    // Check if any entity was updated
+    const updatedEntity = result.at(0);
+    if (!updatedEntity) {
+      // Get ID from where clause if available
+      const id = params.where?.id || "unknown";
+      throw new NotFoundException(`${modelName} with ID ${id} was not found`);
+    }
+
+    // Return the first (and should be only) updated entity
+    return updatedEntity; // TypeScript now knows this is defined
   };
 
   // Updated: Always generate UUID and timestamps during model creation

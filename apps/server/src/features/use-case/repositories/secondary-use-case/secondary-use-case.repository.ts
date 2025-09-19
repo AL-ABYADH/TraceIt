@@ -36,14 +36,9 @@ export class SecondaryUseCaseRepository {
       attributes["name"] = secondaryUpdateDto.name;
     }
 
-    const updated = await this.secondaryUseCaseModel.update(attributes, {
+    await this.secondaryUseCaseModel.updateOneOrThrow(attributes, {
       where: { id },
-      return: true,
     });
-
-    if (!updated || updated.length === 0) {
-      throw new NotFoundException(`Secondary use case with ID ${id} not found`);
-    }
 
     if (secondaryUpdateDto.primaryUseCaseId) {
       await this.secondaryUseCaseModel.deleteRelationships({

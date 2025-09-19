@@ -75,7 +75,7 @@ export class ActorController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
-  ): Promise<ActorDto[]> {
+  ): Promise<ActorDto> {
     return this.actorService.update(params.id, dto);
   }
 

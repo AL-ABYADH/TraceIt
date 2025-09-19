@@ -242,6 +242,121 @@ export class RelationshipManager {
   }
 
   /**
+   * Find relationships based on their properties and return both relationship data
+   * and connected nodes with their relationships
+   *
+   * @param relationshipAlias The alias of the relationship to search
+   * @param whereRelationship Conditions to filter relationships by their properties
+   * @param options Additional options for the query
+   */
+  async findByRelationshipProperties(
+    relationshipAlias: keyof any,
+    whereRelationship: WhereParamsI,
+    options: any = {},
+  ): Promise<
+    Array<{
+      source: any;
+      relationship: any;
+      target: any;
+    }>
+  > {
+    // Check if the relationship alias exists
+    const relationships = this.model.relationships || {};
+    const relationship = relationships[relationshipAlias];
+
+    if (!relationship) {
+      throw new Error(`Relationship alias "${relationshipAlias as string}" not found in model`);
+    }
+
+    // Find relationships matching the criteria
+    const results = await this.model.findRelationships({
+      alias: relationshipAlias,
+      where: {
+        source: options.where,
+        target: options.whereTarget,
+        relationship: whereRelationship,
+      },
+      limit: options.limit,
+      session: options.session,
+    });
+
+    if (!results.length) {
+      return [];
+    }
+
+    // If we need to load additional relationships for target nodes
+    if (options.include?.length || options.exclude?.length || options.limits) {
+      // Process each result to load additional relationships for target nodes
+      const processedResults = await Promise.all(
+        results.map(async (result: any) => {
+          // Load additional relationships for the target node
+          const targetWithRelations = await this.loadRelations(result.target, {
+            include: options.include,
+            exclude: options.exclude,
+            limits: options.limits,
+            session: options.session,
+          });
+
+          return {
+            source: result.source,
+            relationship: result.relationship,
+            target: targetWithRelations,
+          };
+        }),
+      );
+
+      // Apply ordering, skip and limit after processing
+      return this.applyOrderingAndPagination(processedResults, options);
+    }
+
+    // Apply ordering, skip and limit
+    return this.applyOrderingAndPagination(results, options);
+  }
+
+  /**
+   * Helper method to apply ordering and pagination to results
+   */
+  private applyOrderingAndPagination(
+    results: any[],
+    options: {
+      order?: Array<[string, "ASC" | "DESC"]>;
+      skip?: number;
+      limit?: number;
+    },
+  ): any[] {
+    let processedResults = [...results];
+
+    // Apply ordering if specified
+    if (options.order?.length) {
+      processedResults.sort((a: any, b: any) => {
+        for (const [field, direction] of options.order!) {
+          // Try to get the value from the relationship properties
+          const valueA = a.relationship[field];
+          const valueB = b.relationship[field];
+
+          if (valueA !== undefined && valueB !== undefined) {
+            if (valueA < valueB) return direction === "ASC" ? -1 : 1;
+            if (valueA > valueB) return direction === "ASC" ? 1 : -1;
+          }
+        }
+        return 0;
+      });
+    }
+
+    // Apply skip for pagination
+    if (options.skip) {
+      processedResults = processedResults.slice(options.skip);
+    }
+
+    // Apply limit
+    if (options.limit) {
+      processedResults = processedResults.slice(0, options.limit);
+    }
+
+    return processedResults;
+  }
+
+  /**
    * Get relationship cardinality info
    */
   private getRelationInfo(alias: string): { isArray: boolean } {
