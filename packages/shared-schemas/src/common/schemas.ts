@@ -1,6 +1,10 @@
 import { z } from "../zod-openapi-init";
 import { dateISOField } from "./fields";
-import { descriptionFieldDoc, projectIdFieldDoc, uuidFieldDoc } from "./openapi-fields";
+import {
+  descriptionFieldDoc,
+  projectIdFieldDoc,
+  uuidFieldDoc,
+} from "./openapi-fields";
 
 // ----------------------
 // Custom Validators
@@ -23,12 +27,12 @@ export const atLeastOneOfSchema = <T extends Record<string, z.ZodTypeAny>>(
     );
 };
 
-
 export const uuidParamsSchema = z.object({
   id: uuidFieldDoc,
 });
-  
-  export const projectListSchema = z.object({
+
+export const projectListSchema = z
+  .object({
     id: projectIdFieldDoc,
     name: z.string(),
     description: descriptionFieldDoc.optional(),
@@ -36,5 +40,5 @@ export const uuidParamsSchema = z.object({
     status: z.string(),
     createdAt: z.union([dateISOField, z.date()]),
     updatedAt: z.union([dateISOField, z.date()]).optional(),
-  }).openapi({ title: "ProjectListDto" });
-  
+  })
+  .openapi({ title: "ProjectListDto" });

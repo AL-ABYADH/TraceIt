@@ -17,7 +17,7 @@ import {
   projectDetailSchema,
   projectRoleSchema,
   projectPermissionSchema,
-  projectInvitationSchema
+  projectInvitationSchema,
 } from "./schemas";
 
 export type CreateProjectDto = z.infer<typeof createProjectSchema>;
@@ -46,6 +46,7 @@ export type ProjectPermissionDto = z.infer<typeof projectPermissionSchema>;
 export type ProjectActionDto = z.infer<typeof projectActionSchema>;
 export type ProjectDetailDto = z.infer<typeof projectDetailSchema>;
 export type ProjectListDto = z.infer<typeof projectListSchema>;
-export type ProjectCollaborationDto = z.infer<typeof projectCollaborationSchema>;
+export type ProjectCollaborationDto = z.infer<
+  typeof projectCollaborationSchema
+>;
 export type ProjectInvitationDto = z.infer<typeof projectInvitationSchema>;
-

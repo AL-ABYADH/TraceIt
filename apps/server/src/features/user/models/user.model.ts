@@ -12,7 +12,7 @@ export type UserAttributes = {
 };
 
 export interface UserRelationships {
-  projects: ProjectAttributes[]; // made it an array or objects made it optional 
+  projects: ProjectAttributes[]; // made it an array or objects made it optional
   collaborations: any;
   refreshTokens: any;
 }

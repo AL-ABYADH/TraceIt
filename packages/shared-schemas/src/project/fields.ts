@@ -44,7 +44,6 @@ export const projectStatusField = createEnumField(ProjectStatus, {
   // optional: true,
 });
 
-
 export enum ProjectInvitationStatus {
   PENDING = "pending",
   ACCEPTED = "accepted",
@@ -54,7 +53,10 @@ export enum ProjectInvitationStatus {
 }
 
 // Base field (no OpenAPI yet)
-export const projectInvitationStatusField = createEnumField(ProjectInvitationStatus, {
-  // nullable: false,
-  // optional: false,
-});
+export const projectInvitationStatusField = createEnumField(
+  ProjectInvitationStatus,
+  {
+    // nullable: false,
+    // optional: false,
+  },
+);

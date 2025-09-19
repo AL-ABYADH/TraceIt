@@ -1,4 +1,4 @@
-import { uuidField,createField } from "../common";
+import { uuidField, createField } from "../common";
 import { actorSubTypeEnum, actorNameField, actorTypeEnum } from "./fields";
 
 // Apply .openapi descriptions and examples

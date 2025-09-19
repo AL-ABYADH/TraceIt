@@ -210,8 +210,9 @@ export function createField<
 //   return field;
 // }
 
-
-type MutableTuple<T extends readonly any[]> = { -readonly [P in keyof T]: T[P] };
+type MutableTuple<T extends readonly any[]> = {
+  -readonly [P in keyof T]: T[P];
+};
 
 interface EnumFieldOptions<T extends string = string> {
   message?: string;
@@ -224,19 +225,19 @@ interface EnumFieldOptions<T extends string = string> {
 // Overload: readonly tuple input -> ZodEnum of mutable tuple
 export function createEnumField<T extends readonly [string, ...string[]]>(
   values: T,
-  options?: EnumFieldOptions<T[number]>
+  options?: EnumFieldOptions<T[number]>,
 ): ZodEnum<MutableTuple<T>>;
 
 // Overload: object-style enum -> ZodNativeEnum
 export function createEnumField<T extends { [key: string]: string }>(
   values: T,
-  options?: EnumFieldOptions<T[keyof T]>
+  options?: EnumFieldOptions<T[keyof T]>,
 ): ZodNativeEnum<T>;
 
 // Implementation signature must be the union of the overload input types so TS can narrow:
 export function createEnumField(
   values: readonly string[] | { [key: string]: string },
-  options: EnumFieldOptions = {}
+  options: EnumFieldOptions = {},
 ): ZodTypeAny {
   let field: ZodTypeAny;
 
@@ -254,7 +255,7 @@ export function createEnumField(
     field = z.nativeEnum(values as any);
   } else {
     throw new Error(
-      "Enum must be a non-empty array of strings or a string-valued object."
+      "Enum must be a non-empty array of strings or a string-valued object.",
     );
   }
 

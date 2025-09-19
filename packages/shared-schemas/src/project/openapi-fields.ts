@@ -83,7 +83,8 @@ export const projectStatusFieldDoc = projectStatusField.openapi({
   description: "The status of the project",
 });
 
-export const projectInvitationStatusFieldDoc = projectInvitationStatusField.openapi({
-  description: "The current status of the project invitation",
-  example: ProjectInvitationStatus.ACCEPTED,
-});
+export const projectInvitationStatusFieldDoc =
+  projectInvitationStatusField.openapi({
+    description: "The current status of the project invitation",
+    example: ProjectInvitationStatus.ACCEPTED,
+  });

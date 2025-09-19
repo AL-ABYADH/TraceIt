@@ -1,7 +1,5 @@
 import { z } from "../zod-openapi-init";
-import {
-  uuidParamsSchema,
-} from "./schemas";
+import { uuidParamsSchema } from "./schemas";
 
 // ----------------------
 // Type Exports

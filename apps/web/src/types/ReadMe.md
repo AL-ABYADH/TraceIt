@@ -1,0 +1,2 @@
+- For type declaration only
+- Create d.ts files for packages that don't have it

@@ -17,7 +17,6 @@ export const userListSchema = z.object(userOpenApiFields).openapi({
   description: "Represents a user object returned by the API",
 });
 
-
 export const userRelationshipsSchema = z
   .object({
     projects: z.array(projectListSchema).optional(),
@@ -29,8 +28,8 @@ export const userRelationshipsSchema = z
 export const userNoPasswordSchema = userListSchema.omit({ password: true });
 export const safeUserDetailSchema = userNoPasswordSchema
   .merge(userRelationshipsSchema)
-  .openapi({ title: "SafeUserDetailDto" })
+  .openapi({ title: "SafeUserDetailDto" });
 
-export const safeUserListSchema = userNoPasswordSchema
-  .openapi({ title: "SafeUserListDto" })
-
+export const safeUserListSchema = userNoPasswordSchema.openapi({
+  title: "SafeUserListDto",
+});
