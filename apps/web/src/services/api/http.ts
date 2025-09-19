@@ -4,7 +4,6 @@ import { Endpoint } from "@/types/endpoint-type";
 import { apiClient } from "./api-client";
 
 export type HttpOptions = {
-  raw?: boolean; // if true, return the full AxiosResponse
   signal?: AbortSignal;
 };
 
@@ -19,33 +18,72 @@ function mapAxiosError(err: unknown): never {
   throw err as Error;
 }
 
-export async function request<T = any>(config: AxiosRequestConfig, opts?: HttpOptions) {
+export async function request<T = any>(config: AxiosRequestConfig, opts?: HttpOptions): Promise<T> {
   try {
     const res = await apiClient.request<T>({ ...config });
-    return opts?.raw ? res : (res.data as T);
+    return res.data as T;
   } catch (err) {
     mapAxiosError(err);
   }
 }
 
+const mapPathParams = (path: string, pathParams: Record<string, string> = {}): string => {
+  return Object.entries(pathParams).reduce(
+    (acc, [key, value]) => acc.replace(`:${key}`, value),
+    path,
+  );
+};
+
 export const http = {
-  get: <T>(endpoint: Endpoint, { params, opts }: { params?: any; opts?: HttpOptions } = {}) =>
-    request<T>({ method: "get", url: endpoint.path, params, isPublic: endpoint.isPublic }, opts),
-  post: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>(
-      { method: "post", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+  get: <T>(
+    endpoint: Endpoint,
+    {
+      params,
+      pathParams,
       opts,
-    ),
-  put: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>(
-      { method: "put", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+    }: { params?: any; pathParams?: Record<string, string>; opts?: HttpOptions } = {},
+  ): Promise<T> => {
+    const url = pathParams ? mapPathParams(endpoint.path, pathParams) : endpoint.path;
+    return request<T>({ method: "get", url, params, isPublic: endpoint.isPublic }, opts);
+  },
+  post: <T, B = any>(
+    endpoint: Endpoint,
+    {
+      body,
+      pathParams,
       opts,
-    ),
-  patch: <T, B = any>(endpoint: Endpoint, { body, opts }: { body?: B; opts?: HttpOptions } = {}) =>
-    request<T>(
-      { method: "patch", url: endpoint.path, data: body, isPublic: endpoint.isPublic },
+    }: { body?: B; pathParams?: Record<string, string>; opts?: HttpOptions } = {},
+  ): Promise<T> => {
+    const url = pathParams ? mapPathParams(endpoint.path, pathParams) : endpoint.path;
+    return request<T>({ method: "post", url, data: body, isPublic: endpoint.isPublic }, opts);
+  },
+  put: <T, B = any>(
+    endpoint: Endpoint,
+    {
+      body,
+      pathParams,
       opts,
-    ),
-  del: <T>(endpoint: Endpoint, { opts }: { opts?: HttpOptions } = {}) =>
-    request<T>({ method: "delete", url: endpoint.path, isPublic: endpoint.isPublic }, opts),
+    }: { body?: B; pathParams?: Record<string, string>; opts?: HttpOptions } = {},
+  ): Promise<T> => {
+    const url = pathParams ? mapPathParams(endpoint.path, pathParams) : endpoint.path;
+    return request<T>({ method: "put", url, data: body, isPublic: endpoint.isPublic }, opts);
+  },
+  patch: <T, B = any>(
+    endpoint: Endpoint,
+    {
+      body,
+      pathParams,
+      opts,
+    }: { body?: B; pathParams?: Record<string, string>; opts?: HttpOptions } = {},
+  ): Promise<T> => {
+    const url = pathParams ? mapPathParams(endpoint.path, pathParams) : endpoint.path;
+    return request<T>({ method: "patch", url, data: body, isPublic: endpoint.isPublic }, opts);
+  },
+  del: <T>(
+    endpoint: Endpoint,
+    { pathParams, opts }: { pathParams?: Record<string, string>; opts?: HttpOptions } = {},
+  ): Promise<T> => {
+    const url = pathParams ? mapPathParams(endpoint.path, pathParams) : endpoint.path;
+    return request<T>({ method: "delete", url, isPublic: endpoint.isPublic }, opts);
+  },
 };
