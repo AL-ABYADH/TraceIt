@@ -39,7 +39,7 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
     relationships: {
       project: {
         model: "Project",
-        direction: "out",
+        direction: "in",
         name: "BELONGS_TO",
         cardinality: "one",
       },
