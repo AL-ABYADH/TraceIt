@@ -6,7 +6,7 @@ import { RequirementType } from "../../enums/requirement-type.enum";
 import { UseCaseService } from "../../../use-case/services/use-case/use-case.service";
 import { ProjectService } from "../../../project/services/project/project.service";
 
-// Import all entities
+// Entities (only used as return types for strong typing)
 import {
   Requirement,
   SystemRequirement,
@@ -22,7 +22,7 @@ import {
   ExceptionalRequirement,
 } from "../../entities";
 
-// Import all interfaces
+// Create DTOs
 import {
   CreateSystemRequirementInterface,
   CreateEventSystemRequirementInterface,
@@ -37,6 +37,7 @@ import {
   CreateExceptionalRequirementInterface,
 } from "../../interfaces/create-requirement.interface";
 
+// Update DTOs
 import {
   UpdateSystemRequirementInterface,
   UpdateEventSystemRequirementInterface,
@@ -78,7 +79,6 @@ export class RequirementService {
   async getByUseCase(useCaseId: string): Promise<Requirement[]> {
     // Verify use case exists
     await this.useCaseService.findById(useCaseId);
-
     return this.requirementRepository.getByUseCase(useCaseId);
   }
 
@@ -88,16 +88,20 @@ export class RequirementService {
   async getByProject(projectId: string): Promise<Requirement[]> {
     // Verify project exists
     await this.projectService.findById(projectId);
-
     return this.requirementRepository.getByProject(projectId);
   }
 
   /**
-   * Determine requirement type from entity
+   * Determine requirement type from entity via its most-specific label
    */
-  private getRequirementTypeFromEntity(requirement: Requirement): RequirementType {
-    const constructorName = requirement.constructor.name;
-    switch (constructorName) {
+  private async getRequirementTypeFromEntity(requirement: Requirement): Promise<RequirementType> {
+    const labels = await this.requirementRepository.getLabelsById(requirement.id);
+    if (!labels || labels.length === 0) {
+      throw new NotFoundException(`Requirement with ID ${requirement.id} has no labels`);
+    }
+
+    const lastLabel = labels.at(-1);
+    switch (lastLabel) {
       case "SystemRequirement":
         return RequirementType.SYSTEM_REQUIREMENT;
       case "EventSystemRequirement":
@@ -121,19 +125,19 @@ export class RequirementService {
       case "ExceptionalRequirement":
         return RequirementType.EXCEPTIONAL_REQUIREMENT;
       default:
-        throw new BadRequestException(`Unknown requirement type: ${constructorName}`);
+        throw new BadRequestException(`Unknown requirement type: ${lastLabel}`);
     }
   }
 
   /**
-   * Update a requirement by ID
+   * Update a requirement by ID (type-dispatched)
    */
   async update(id: string, updateDto: any): Promise<Requirement[]> {
     // Find requirement to determine its type
     const requirement = await this.findById(id);
 
     // Get the appropriate repository based on type
-    const type = this.getRequirementTypeFromEntity(requirement);
+    const type = await this.getRequirementTypeFromEntity(requirement);
     const repository = this.repositoryFactory.getConcreteRepository(type);
 
     // Update the requirement
@@ -146,107 +150,96 @@ export class RequirementService {
   }
 
   /**
-   * Delete a requirement by ID
+   * Delete a requirement by ID (type-dispatched)
    */
   async remove(id: string): Promise<boolean> {
     // Find requirement to determine its type
     const requirement = await this.findById(id);
 
     // Get the appropriate repository based on type
-    const type = this.getRequirementTypeFromEntity(requirement);
+    const type = await this.getRequirementTypeFromEntity(requirement);
     const repository = this.repositoryFactory.getConcreteRepository(type);
 
     // Delete the requirement
     return repository.delete(id);
   }
 
-  // Create methods for different requirement types
-
   async createSystemRequirement(
     createDto: CreateSystemRequirementInterface,
   ): Promise<SystemRequirement> {
-    return this.requirementFactory.createSystemRequirement(createDto) as Promise<SystemRequirement>;
+    const data = await this.requirementFactory.createSystemRequirement(createDto);
+    return data as SystemRequirement;
   }
 
   async createEventSystemRequirement(
     createDto: CreateEventSystemRequirementInterface,
   ): Promise<EventSystemRequirement> {
-    return this.requirementFactory.createEventSystemRequirement(
-      createDto,
-    ) as Promise<EventSystemRequirement>;
+    const data = await this.requirementFactory.createEventSystemRequirement(createDto);
+    return data as EventSystemRequirement;
   }
 
   async createActorRequirement(
     createDto: CreateActorRequirementInterface,
   ): Promise<ActorRequirement> {
-    return this.requirementFactory.createActorRequirement(createDto) as Promise<ActorRequirement>;
+    const data = await this.requirementFactory.createActorRequirement(createDto);
+    return data as ActorRequirement;
   }
 
   async createSystemActorCommunicationRequirement(
     createDto: CreateSystemActorCommunicationRequirementInterface,
   ): Promise<SystemActorCommunicationRequirement> {
-    return this.requirementFactory.createSystemActorCommunicationRequirement(
-      createDto,
-    ) as Promise<SystemActorCommunicationRequirement>;
+    const data = await this.requirementFactory.createSystemActorCommunicationRequirement(createDto);
+    return data as SystemActorCommunicationRequirement;
   }
 
   async createConditionalRequirement(
     createDto: CreateConditionalRequirementInterface,
   ): Promise<ConditionalRequirement> {
-    return this.requirementFactory.createConditionalRequirement(
-      createDto,
-    ) as Promise<ConditionalRequirement>;
+    const data = await this.requirementFactory.createConditionalRequirement(createDto);
+    return data as ConditionalRequirement;
   }
 
   async createRecursiveRequirement(
     createDto: CreateRecursiveRequirementInterface,
   ): Promise<RecursiveRequirement> {
-    return this.requirementFactory.createRecursiveRequirement(
-      createDto,
-    ) as Promise<RecursiveRequirement>;
+    const data = await this.requirementFactory.createRecursiveRequirement(createDto);
+    return data as RecursiveRequirement;
   }
 
   async createUseCaseReferenceRequirement(
     createDto: CreateUseCaseReferenceRequirementInterface,
   ): Promise<UseCaseReferenceRequirement> {
-    return this.requirementFactory.createUseCaseReferenceRequirement(
-      createDto,
-    ) as Promise<UseCaseReferenceRequirement>;
+    const data = await this.requirementFactory.createUseCaseReferenceRequirement(createDto);
+    return data as UseCaseReferenceRequirement;
   }
 
   async createLogicalGroupRequirement(
     createDto: CreateLogicalGroupRequirementInterface,
   ): Promise<LogicalGroupRequirement> {
-    return this.requirementFactory.createLogicalGroupRequirement(
-      createDto,
-    ) as Promise<LogicalGroupRequirement>;
+    const data = await this.requirementFactory.createLogicalGroupRequirement(createDto);
+    return data as LogicalGroupRequirement;
   }
 
   async createConditionalGroupRequirement(
     createDto: CreateConditionalGroupRequirementInterface,
   ): Promise<ConditionalGroupRequirement> {
-    return this.requirementFactory.createConditionalGroupRequirement(
-      createDto,
-    ) as Promise<ConditionalGroupRequirement>;
+    const data = await this.requirementFactory.createConditionalGroupRequirement(createDto);
+    return data as ConditionalGroupRequirement;
   }
 
   async createSimultaneousRequirement(
     createDto: CreateSimultaneousRequirementInterface,
   ): Promise<SimultaneousRequirement> {
-    return this.requirementFactory.createSimultaneousRequirement(
-      createDto,
-    ) as Promise<SimultaneousRequirement>;
+    const data = await this.requirementFactory.createSimultaneousRequirement(createDto);
+    return data as SimultaneousRequirement;
   }
 
   async createExceptionalRequirement(
     createDto: CreateExceptionalRequirementInterface,
   ): Promise<ExceptionalRequirement> {
-    return this.requirementFactory.createExceptionalRequirement(
-      createDto,
-    ) as Promise<ExceptionalRequirement>;
+    const data = await this.requirementFactory.createExceptionalRequirement(createDto);
+    return data as ExceptionalRequirement;
   }
-
-  // Update methods for different requirement types
 
   async updateSystemRequirement(
     id: string,
@@ -340,63 +333,5 @@ export class RequirementService {
 
     // Get requirements
     return repository.getByUseCase(useCaseId);
-  }
-
-  /**
-   * Get all requirements of a specific type for a project
-   */
-  async getRequirementsByTypeAndProject(
-    type: RequirementType,
-    projectId: string,
-  ): Promise<Requirement[]> {
-    // Verify project exists
-    await this.projectService.findById(projectId);
-
-    // Get the appropriate repository
-    const repository = this.repositoryFactory.getConcreteRepository(type);
-
-    // Get requirements
-    return repository.getByProject(projectId);
-  }
-
-  /**
-   * Checks if a requirement can be used as a dependency for another requirement
-   * based on the rules specified in the requirements
-   */
-  async validateRequirementDependency(
-    sourceRequirementType: RequirementType,
-    targetRequirementId: string,
-  ): Promise<boolean> {
-    const targetRequirement = await this.findById(targetRequirementId);
-    const targetType = this.getRequirementTypeFromEntity(targetRequirement);
-
-    // Implement validation logic based on requirement rules
-    switch (sourceRequirementType) {
-      case RequirementType.CONDITIONAL_REQUIREMENT:
-        // Conditional requirements cannot reference exceptional, conditional group, or another conditional requirement
-        return ![
-          RequirementType.EXCEPTIONAL_REQUIREMENT,
-          RequirementType.CONDITIONAL_GROUP_REQUIREMENT,
-          RequirementType.CONDITIONAL_REQUIREMENT,
-        ].includes(targetType);
-
-      case RequirementType.LOGICAL_GROUP_REQUIREMENT:
-        // Main requirement cannot be a system-actor communication, recursive, composite, or use case reference requirement
-        return ![
-          RequirementType.SYSTEM_ACTOR_COMMUNICATION_REQUIREMENT,
-          RequirementType.RECURSIVE_REQUIREMENT,
-          RequirementType.LOGICAL_GROUP_REQUIREMENT,
-          RequirementType.CONDITIONAL_GROUP_REQUIREMENT,
-          RequirementType.SIMULTANEOUS_REQUIREMENT,
-          RequirementType.EXCEPTIONAL_REQUIREMENT,
-          RequirementType.USE_CASE_REFERENCE_REQUIREMENT,
-        ].includes(targetType);
-
-      // Add more validation rules for other requirement types as needed
-
-      default:
-        // By default, allow dependencies
-        return true;
-    }
   }
 }

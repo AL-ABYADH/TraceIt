@@ -1,6 +1,6 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseModel, UseCaseAttributes, UseCaseRelationships } from "./use-case.model";
-import { PrimaryUseCaseModelType } from "./primary-use-case.model"; // Use model type, not entity
+import { PrimaryUseCase } from "../entities/primary-use-case.entity";
 
 /**
  * SecondaryUseCase shares the same attributes as a base UseCase (id, name).
@@ -12,7 +12,8 @@ export type SecondaryUseCaseAttributes = UseCaseAttributes & {};
  * Each SecondaryUseCase belongs to one PrimaryUseCase.
  */
 export interface SecondaryUseCaseRelationships extends UseCaseRelationships {
-  primaryUseCase: PrimaryUseCaseModelType;
+  // primaryUseCase: PrimaryUseCaseModelType;  I updated this for schema sake!!!
+  primaryUseCase: PrimaryUseCase;
 }
 
 /**

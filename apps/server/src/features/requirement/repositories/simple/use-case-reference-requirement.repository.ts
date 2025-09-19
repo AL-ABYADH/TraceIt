@@ -3,8 +3,8 @@ import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import {
   UseCaseReferenceRequirementModel,
   UseCaseReferenceRequirementModelType,
-} from "../../models/simple/use-case-reference-requirement.model";
-import { UseCaseReferenceRequirement } from "../../entities/simple/use-case-reference-requirement.entity";
+} from "../../models";
+import { UseCaseReferenceRequirement } from "../../entities";
 import { CreateUseCaseReferenceRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateUseCaseReferenceRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

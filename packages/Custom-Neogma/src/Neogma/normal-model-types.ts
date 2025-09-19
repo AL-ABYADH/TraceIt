@@ -310,6 +310,49 @@ interface NeogmaModelStaticsI<
       limits?: Record<string, number>;
     },
   ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
+
+  findByRelationshipProperties: <Plain extends boolean = false>(
+    relationshipAlias: keyof RelatedNodesToAssociateI,
+    whereRelationship: WhereParamsI,
+    options?: GenericConfiguration & {
+      where?: WhereParamsI; // Optional filters for the source entity
+      whereTarget?: WhereParamsI; // Optional filters for the target entity
+      limit?: number; // Limit the number of results
+      skip?: number; // Skip results (for pagination)
+      order?: Array<[string, "ASC" | "DESC"]>; // Ordering
+      plain?: Plain; // Return plain objects instead of instances
+      include?: Array<keyof RelatedNodesToAssociateI>; // Additional relationships to include for target
+      exclude?: Array<keyof RelatedNodesToAssociateI>; // Relationships to exclude for target
+      limits?: Record<string, number>; // Limits for included relationships
+    },
+  ) => Promise<
+    Array<{
+      source: Plain extends true ? Properties : Instance;
+      relationship: RelatedNodesToAssociateI[typeof relationshipAlias]["RelationshipProperties"];
+      target: Plain extends true
+        ? RelatedNodesToAssociateI[typeof relationshipAlias]["Instance"] & RelatedNodesToAssociateI
+        : RelatedNodesToAssociateI[typeof relationshipAlias]["Instance"];
+    }>
+  >;
+
+  /**
+   * Updates a single entity and returns it, or throws an exception if no entity was found.
+   * This is a convenience method that combines update with error handling.
+   *
+   * @param data - The properties to update
+   * @param params - Optional parameters including where conditions
+   * @returns The updated entity
+   * @throws Error if no entity matches the where conditions
+   */
+  updateOneOrThrow: (
+    data: UpdateData,
+    params?: GenericConfiguration & {
+      where?: WhereParamsI;
+      /** Always true for this method */
+      return?: boolean;
+      session?: GenericConfiguration["session"];
+    },
+  ) => Promise<Properties>;
 }
 
 /** the type of instance of the Model */

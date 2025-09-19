@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { ActorService } from "../services/actor/actor.service";
-import { Actor } from "../entities/actor.entity";
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
   actorTypeSchema,
@@ -12,6 +11,7 @@ import {
   updateActorSchema,
   type UuidParamsDto,
   uuidParamsSchema,
+  ActorDto,
 } from "@repo/shared-schemas";
 import { ActorSubtype } from "../enums/actor-subtype.enum";
 import { ActorType } from "../enums/actor-type.enum";
@@ -24,7 +24,7 @@ export class ActorController {
    * Add a new actor
    */
   @Post()
-  async add(@Body(zodBody(addActorSchema)) dto: AddActorDto): Promise<Actor> {
+  async add(@Body(zodBody(addActorSchema)) dto: AddActorDto): Promise<ActorDto> {
     const newDto = {
       name: dto.name,
       projectId: dto.projectId,
@@ -40,7 +40,7 @@ export class ActorController {
   async listProjectActorsBySubtype(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
     @Param(zodParam(actorSubtypeSchema)) subtype: SubTypeActorDto,
-  ): Promise<Actor[]> {
+  ): Promise<ActorDto[]> {
     return this.actorService.listProjectActorsBySubtype(
       params.id,
       subtype as unknown as ActorSubtype,
@@ -54,7 +54,7 @@ export class ActorController {
   async listProjectActorsByType(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
     @Param(zodParam(actorTypeSchema)) type: ActorType,
-  ): Promise<Actor[]> {
+  ): Promise<ActorDto[]> {
     return this.actorService.listProjectActorsByType(params.id, type as unknown as ActorType);
   }
 
@@ -64,7 +64,7 @@ export class ActorController {
   @Get()
   async listProjectActors(
     @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<Actor[]> {
+  ): Promise<ActorDto[]> {
     return this.actorService.listProjectActors(params.id);
   }
 
@@ -75,7 +75,7 @@ export class ActorController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
-  ): Promise<Actor[]> {
+  ): Promise<ActorDto> {
     return this.actorService.update(params.id, dto);
   }
 

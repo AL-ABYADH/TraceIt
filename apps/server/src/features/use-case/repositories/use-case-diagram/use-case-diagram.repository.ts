@@ -1,12 +1,7 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { UseCaseDiagram } from "../../entities/use-case-diagram.entity";
-import {
-  UseCaseDiagramAttributes,
-  UseCaseDiagramModel,
-  UseCaseDiagramModelType,
-} from "../../models/use-case-diagram.model";
+import { UseCaseDiagramModel, UseCaseDiagramModelType } from "../../models/use-case-diagram.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { UseCaseRepository } from "../use-case/use-case.repository";
 import { UpdateUseCaseDiagramInterface } from "../../interfaces/update-use-case.interface";
 import { CreateDiagramUseCaseInterface } from "../../interfaces/create-use-case.interface";
 
@@ -14,10 +9,7 @@ import { CreateDiagramUseCaseInterface } from "../../interfaces/create-use-case.
 export class UseCaseDiagramRepository {
   private diagramModel: UseCaseDiagramModelType;
 
-  constructor(
-    private readonly neo4jService: Neo4jService,
-    private readonly useCaseRepo: UseCaseRepository,
-  ) {
+  constructor(private readonly neo4jService: Neo4jService) {
     this.diagramModel = UseCaseDiagramModel(this.neo4jService.getNeogma());
   }
 
@@ -52,15 +44,10 @@ export class UseCaseDiagramRepository {
     }
   }
 
-  async update(id: string, updateDto: UpdateUseCaseDiagramInterface): Promise<UseCaseDiagram[]> {
-    const updated = await this.diagramModel.update(updateDto, {
+  async update(id: string, updateDto: UpdateUseCaseDiagramInterface): Promise<UseCaseDiagram> {
+    const updated = await this.diagramModel.updateOneOrThrow(updateDto, {
       where: { id },
     });
-
-    if (!updated || updated.length === 0) {
-      throw new NotFoundException(`Use case diagram with ID ${id} not found`);
-    }
-
     return updated;
   }
 

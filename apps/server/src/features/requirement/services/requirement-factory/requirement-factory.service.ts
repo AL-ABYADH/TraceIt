@@ -1,7 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { RequirementType } from "../../enums/requirement-type.enum";
 import { RequirementRepositoryFactory } from "../../repositories/factory/requirement-repository.factory";
-import { RequirementFactoryInterface } from "../../interfaces/requirement-factory.interface";
 import { UseCaseService } from "../../../use-case/services/use-case/use-case.service";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { ActorService } from "../../../actor/services/actor/actor.service";
@@ -76,56 +75,110 @@ export class RequirementFactoryService {
       case RequirementType.SYSTEM_REQUIREMENT:
         this.validateSystemRequirementParams(params as CreateSystemRequirementInterface);
         break;
+
       case RequirementType.EVENT_SYSTEM_REQUIREMENT:
         await this.validateEventSystemRequirementParams(
           params as CreateEventSystemRequirementInterface,
         );
         break;
+
       case RequirementType.ACTOR_REQUIREMENT:
         await this.validateActorRequirementParams(params as CreateActorRequirementInterface);
         break;
+
       case RequirementType.SYSTEM_ACTOR_COMMUNICATION_REQUIREMENT:
         await this.validateSystemActorCommunicationRequirementParams(
           params as CreateSystemActorCommunicationRequirementInterface,
         );
         break;
+
       case RequirementType.CONDITIONAL_REQUIREMENT:
         await this.validateConditionalRequirementParams(
           params as CreateConditionalRequirementInterface,
         );
         break;
+
       case RequirementType.RECURSIVE_REQUIREMENT:
         await this.validateRecursiveRequirementParams(
           params as CreateRecursiveRequirementInterface,
         );
         break;
+
       case RequirementType.USE_CASE_REFERENCE_REQUIREMENT:
         await this.validateUseCaseReferenceRequirementParams(
           params as CreateUseCaseReferenceRequirementInterface,
         );
         break;
+
       case RequirementType.LOGICAL_GROUP_REQUIREMENT:
         await this.validateLogicalGroupRequirementParams(
           params as CreateLogicalGroupRequirementInterface,
         );
         break;
+
       case RequirementType.CONDITIONAL_GROUP_REQUIREMENT:
         await this.validateConditionalGroupRequirementParams(
           params as CreateConditionalGroupRequirementInterface,
         );
         break;
+
       case RequirementType.SIMULTANEOUS_REQUIREMENT:
         await this.validateSimultaneousRequirementParams(
           params as CreateSimultaneousRequirementInterface,
         );
         break;
+
       case RequirementType.EXCEPTIONAL_REQUIREMENT:
         await this.validateExceptionalRequirementParams(
           params as CreateExceptionalRequirementInterface,
         );
         break;
+
       default:
         throw new BadRequestException(`Invalid requirement type: ${type}`);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Fetch labels for a requirement or throw if none.
+   */
+  private async getLabelsOrThrow(id: string, notFoundMsg?: string): Promise<string[]> {
+    const labels = await this.repositoryFactory.getAbstractRepository().getLabelsById(id);
+    if (!labels || labels.length === 0) {
+      throw new NotFoundException(notFoundMsg ?? `Requirement with ID ${id} has no labels`);
+    }
+    return labels;
+  }
+
+  /**
+   * Fetch last (most concrete) label for a requirement or throw.
+   */
+  private async getLastLabelOrThrow(id: string, notFoundMsg?: string): Promise<string> {
+    const labels = await this.getLabelsOrThrow(id, notFoundMsg);
+    const lastLabel = labels.at(-1);
+    if (!lastLabel) {
+      throw new NotFoundException(notFoundMsg ?? `Requirement with ID ${id} has no labels`);
+    }
+    return lastLabel;
+  }
+
+  /**
+   * Whether labels set indicates a SimpleRequirement.
+   */
+  private isSimpleRequirement(labels: string[]): boolean {
+    return labels.includes("SimpleRequirement");
+  }
+
+  /**
+   * Assert a string starts with a Unicode letter.
+   */
+  private assertUnicodeLetterStart(value: string, fieldName: string): void {
+    if (!/^\p{L}/u.test(value)) {
+      throw new BadRequestException(`${fieldName} must start with a letter`);
     }
   }
 
@@ -135,7 +188,6 @@ export class RequirementFactoryService {
   async validateActorIds(actorIds: string[], allowedSubtypes?: ActorSubtype[]): Promise<void> {
     for (const actorId of actorIds) {
       const actor = await this.actorService.findById(actorId);
-
       if (allowedSubtypes && !allowedSubtypes.includes(actor.subtype)) {
         throw new BadRequestException(
           `Actor with ID ${actorId} is of type ${actor.subtype}, but must be one of: ${allowedSubtypes.join(", ")}`,
@@ -154,21 +206,19 @@ export class RequirementFactoryService {
     }
   }
 
+  // ---------------------------------------------------------------------------
   // Validation methods for specific requirement types
+  // ---------------------------------------------------------------------------
 
   private validateSystemRequirementParams(params: CreateSystemRequirementInterface): void {
     if (!params.operation) {
       throw new BadRequestException("Operation is required for system requirements");
     }
-
     if (params.operation.length > 100) {
       throw new BadRequestException("Operation must not exceed 100 characters");
     }
-
-    // Check that operation is a verb phrase (simple check - first character is a letter)
-    if (!/^[A-Za-z]/.test(params.operation)) {
-      throw new BadRequestException("Operation must be a verb phrase");
-    }
+    // Unicode-friendly check
+    this.assertUnicodeLetterStart(params.operation, "Operation");
   }
 
   private async validateEventSystemRequirementParams(
@@ -191,15 +241,10 @@ export class RequirementFactoryService {
     if (!params.operation) {
       throw new BadRequestException("Operation is required for actor requirements");
     }
-
     if (params.operation.length > 100) {
       throw new BadRequestException("Operation must not exceed 100 characters");
     }
-
-    // Check that operation is a verb phrase
-    if (!/^[A-Za-z]/.test(params.operation)) {
-      throw new BadRequestException("Operation must be a verb phrase");
-    }
+    this.assertUnicodeLetterStart(params.operation, "Operation");
 
     // Validate that actor IDs exist and are not of type EVENT
     if (!params.actorIds || params.actorIds.length === 0) {
@@ -221,7 +266,6 @@ export class RequirementFactoryService {
     if (!params.communicationInfo) {
       throw new BadRequestException("Communication info is required");
     }
-
     if (params.communicationInfo.length > 200) {
       throw new BadRequestException("Communication info must not exceed 200 characters");
     }
@@ -230,7 +274,6 @@ export class RequirementFactoryService {
     if (!params.communicationFacility) {
       throw new BadRequestException("Communication facility is required");
     }
-
     if (params.communicationFacility.length > 30) {
       throw new BadRequestException("Communication facility must not exceed 30 characters");
     }
@@ -252,7 +295,6 @@ export class RequirementFactoryService {
     if (!params.condition) {
       throw new BadRequestException("Condition is required");
     }
-
     if (params.condition.length > 50) {
       throw new BadRequestException("Condition must not exceed 50 characters");
     }
@@ -260,16 +302,12 @@ export class RequirementFactoryService {
     // Validate that requirement ID exists
     await this.validateRequirementId(params.requirementId);
 
-    // Check that the referenced requirement is not an exceptional, conditional group, or another independent conditional requirement
-    const requirement = await this.repositoryFactory
-      .getAbstractRepository()
-      .getById(params.requirementId);
-
+    // Ensure referenced requirement is not exceptional/conditional-group/conditional
+    const last = await this.getLastLabelOrThrow(params.requirementId);
     if (
-      requirement &&
-      (requirement.constructor.name === "ExceptionalRequirement" ||
-        requirement.constructor.name === "ConditionalGroupRequirement" ||
-        requirement.constructor.name === "ConditionalRequirement")
+      ["ExceptionalRequirement", "ConditionalGroupRequirement", "ConditionalRequirement"].includes(
+        last,
+      )
     ) {
       throw new BadRequestException(
         "Conditional requirement cannot reference an exceptional, conditional group, or another conditional requirement",
@@ -303,17 +341,20 @@ export class RequirementFactoryService {
     // Validate that main requirement exists and is a simple requirement
     await this.validateRequirementId(params.mainRequirementId);
 
-    const mainRequirement = await this.repositoryFactory
-      .getAbstractRepository()
-      .getById(params.mainRequirementId);
+    const mainLabels = await this.getLabelsOrThrow(
+      params.mainRequirementId,
+      `Requirement with ID ${params.mainRequirementId} has no labels`,
+    );
+    const lastMain = mainLabels.at(-1)!;
 
     // Check that main requirement is a simple requirement of the allowed types
     if (
-      mainRequirement &&
-      (mainRequirement.constructor.name === "SystemActorCommunicationRequirement" ||
-        mainRequirement.constructor.name === "RecursiveRequirement" ||
-        !mainRequirement.constructor.name.includes("SimpleRequirement") ||
-        mainRequirement.constructor.name === "UseCaseReferenceRequirement")
+      !this.isSimpleRequirement(mainLabels) ||
+      [
+        "SystemActorCommunicationRequirement",
+        "RecursiveRequirement",
+        "UseCaseReferenceRequirement",
+      ].includes(lastMain)
     ) {
       throw new BadRequestException(
         "Main requirement cannot be a system-actor communication, recursive, composite, or use case reference requirement",
@@ -329,16 +370,14 @@ export class RequirementFactoryService {
     for (const requirementId of params.detailRequirementIds) {
       await this.validateRequirementId(requirementId);
 
-      const requirement = await this.repositoryFactory
-        .getAbstractRepository()
-        .getById(requirementId);
+      const labels = await this.getLabelsOrThrow(
+        requirementId,
+        `Requirement with ID ${requirementId} has no labels`,
+      );
+      const last = labels.at(-1)!;
 
       // Check that detail requirements are not recursive or logical group requirements
-      if (
-        requirement &&
-        (requirement.constructor.name === "RecursiveRequirement" ||
-          requirement.constructor.name === "LogicalGroupRequirement")
-      ) {
+      if (["RecursiveRequirement", "LogicalGroupRequirement"].includes(last)) {
         throw new BadRequestException(
           "Detail requirements cannot be recursive or logical group requirements",
         );
@@ -347,11 +386,9 @@ export class RequirementFactoryService {
 
     // Check that the first detail requirement is not an exceptional requirement
     if (params.detailRequirementIds.length > 0 && params.detailRequirementIds[0]) {
-      const firstRequirement = await this.repositoryFactory
-        .getAbstractRepository()
-        .getById(params.detailRequirementIds[0]);
-
-      if (firstRequirement && firstRequirement.constructor.name === "ExceptionalRequirement") {
+      const firstLabels = await this.getLabelsOrThrow(params.detailRequirementIds[0]);
+      const lastFirst = firstLabels.at(-1)!;
+      if (lastFirst === "ExceptionalRequirement") {
         throw new BadRequestException(
           "First detail requirement cannot be an exceptional requirement",
         );
@@ -366,19 +403,14 @@ export class RequirementFactoryService {
     if (!params.conditionalValue) {
       throw new BadRequestException("Conditional value is required");
     }
-
     if (params.conditionalValue.length > 50) {
       throw new BadRequestException("Conditional value must not exceed 50 characters");
     }
 
     // Validate that primary condition exists and is a conditional requirement
     await this.validateRequirementId(params.primaryConditionId);
-
-    const primaryCondition = await this.repositoryFactory
-      .getAbstractRepository()
-      .getById(params.primaryConditionId);
-
-    if (primaryCondition && primaryCondition.constructor.name !== "ConditionalRequirement") {
+    const primaryLast = await this.getLastLabelOrThrow(params.primaryConditionId);
+    if (primaryLast !== "ConditionalRequirement") {
       throw new BadRequestException("Primary condition must be a conditional requirement");
     }
 
@@ -390,10 +422,8 @@ export class RequirementFactoryService {
     // Validate each alternative condition
     for (const conditionId of params.alternativeConditionIds) {
       await this.validateRequirementId(conditionId);
-
-      const condition = await this.repositoryFactory.getAbstractRepository().getById(conditionId);
-
-      if (condition && condition.constructor.name !== "ConditionalRequirement") {
+      const last = await this.getLastLabelOrThrow(conditionId);
+      if (last !== "ConditionalRequirement") {
         throw new BadRequestException("Alternative conditions must be conditional requirements");
       }
     }
@@ -415,12 +445,8 @@ export class RequirementFactoryService {
     // Validate each simple requirement
     for (const requirementId of params.simpleRequirementIds) {
       await this.validateRequirementId(requirementId);
-
-      const requirement = await this.repositoryFactory
-        .getAbstractRepository()
-        .getById(requirementId);
-
-      if (requirement && !requirement.constructor.name.includes("SimpleRequirement")) {
+      const labels = await this.getLabelsOrThrow(requirementId);
+      if (!this.isSimpleRequirement(labels)) {
         throw new BadRequestException("Requirements must be simple requirements");
       }
     }
@@ -433,7 +459,6 @@ export class RequirementFactoryService {
     if (!params.exception) {
       throw new BadRequestException("Exception is required");
     }
-
     if (params.exception.length > 100) {
       throw new BadRequestException("Exception must not exceed 100 characters");
     }
@@ -446,17 +471,10 @@ export class RequirementFactoryService {
     // Validate each requirement
     for (const requirementId of params.requirementIds) {
       await this.validateRequirementId(requirementId);
-
-      const requirement = await this.repositoryFactory
-        .getAbstractRepository()
-        .getById(requirementId);
+      const last = await this.getLastLabelOrThrow(requirementId);
 
       // Check that requirements are not logical group or exceptional requirements
-      if (
-        requirement &&
-        (requirement.constructor.name === "LogicalGroupRequirement" ||
-          requirement.constructor.name === "ExceptionalRequirement")
-      ) {
+      if (["LogicalGroupRequirement", "ExceptionalRequirement"].includes(last)) {
         throw new BadRequestException(
           "Requirements within an exceptional requirement cannot be logical group or exceptional requirements",
         );
@@ -464,7 +482,9 @@ export class RequirementFactoryService {
     }
   }
 
+  // ---------------------------------------------------------------------------
   // Factory methods for creating specific requirement types
+  // ---------------------------------------------------------------------------
 
   async createSystemRequirement(params: CreateSystemRequirementInterface): Promise<Requirement> {
     return this.create(RequirementType.SYSTEM_REQUIREMENT, params);

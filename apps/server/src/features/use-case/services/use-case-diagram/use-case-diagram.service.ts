@@ -27,9 +27,8 @@ export class UseCaseDiagramService {
    * @param updateDto - Data to update in the use case diagram
    * @returns Promise resolving to the updated use case diagram
    */
-  async update(id: string, updateDto: UpdateUseCaseDiagramInterface): Promise<UseCaseDiagram[]> {
+  async update(id: string, updateDto: UpdateUseCaseDiagramInterface): Promise<UseCaseDiagram> {
     try {
-      await this.findById(id);
       return await this.useCaseDiagramRepository.update(id, updateDto);
     } catch (error) {
       throw new BadRequestException(`Failed to update use case diagram: ${error.message}`);

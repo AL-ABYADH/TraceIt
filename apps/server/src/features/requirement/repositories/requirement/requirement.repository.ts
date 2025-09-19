@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { RequirementModel, RequirementModelType } from "../../models/requirement.model";
-import { Requirement } from "../../entities/requirement.entity";
+import { RequirementModel, RequirementModelType } from "../../models";
+import { Requirement } from "../../entities";
 
 @Injectable()
 export class RequirementRepository {
@@ -47,5 +47,10 @@ export class RequirementRepository {
     } catch (error) {
       throw new Error(`Failed to retrieve requirements for project: ${error.message}`);
     }
+  }
+
+  async getLabelsById(id: string): Promise<string[]> {
+    const data = await this.requirementModel.findOne({ where: { id }, plain: false });
+    return (data as any).labels ?? [];
   }
 }

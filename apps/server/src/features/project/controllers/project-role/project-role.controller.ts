@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from "@nestjs/common";
 import { ProjectRoleService } from "../../services/project-role/project-role.service";
-import { ProjectRole } from "../../entities/project-role.entity";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type CreateProjectRoleDto,
   createProjectRoleSchema,
+  ProjectRoleDto,
   type UpdateProjectRoleDto,
   updateProjectRoleSchema,
   type UuidParamsDto,
@@ -18,17 +18,17 @@ export class ProjectRoleController {
   @Post()
   async create(
     @Body(zodBody(createProjectRoleSchema)) dto: CreateProjectRoleDto,
-  ): Promise<ProjectRole> {
+  ): Promise<ProjectRoleDto> {
     return this.projectRoleService.create(dto);
   }
 
   @Get(":id")
-  async find(@Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto): Promise<ProjectRole> {
+  async find(@Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto): Promise<ProjectRoleDto> {
     return this.projectRoleService.find(projectId.id);
   }
 
   @Get()
-  async list(): Promise<ProjectRole[]> {
+  async list(): Promise<ProjectRoleDto[]> {
     return this.projectRoleService.list();
   }
 
@@ -36,7 +36,7 @@ export class ProjectRoleController {
   async update(
     @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
     @Body(zodBody(updateProjectRoleSchema)) dto: UpdateProjectRoleDto,
-  ): Promise<ProjectRole> {
+  ): Promise<ProjectRoleDto> {
     return this.projectRoleService.update(projectId.id, dto);
   }
 

@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { Op } from "@repo/custom-neogma";
-import {
-  ExceptionalRequirementModel,
-  ExceptionalRequirementModelType,
-} from "../../models/composite/exceptional-requirement.model";
-import { ExceptionalRequirement } from "../../entities/composite/exceptional-requirement.entity";
+import { ExceptionalRequirementModel, ExceptionalRequirementModelType } from "../../models";
+import { ExceptionalRequirement } from "../../entities";
 import { CreateExceptionalRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateExceptionalRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

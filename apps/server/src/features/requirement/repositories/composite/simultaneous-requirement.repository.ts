@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { Op } from "@repo/custom-neogma";
-import {
-  SimultaneousRequirementModel,
-  SimultaneousRequirementModelType,
-} from "../../models/composite/simultaneous-requirement.model";
-import { SimultaneousRequirement } from "../../entities/composite/simultaneous-requirement.entity";
+import { SimultaneousRequirementModel, SimultaneousRequirementModelType } from "../../models";
+import { SimultaneousRequirement } from "../../entities";
 import { CreateSimultaneousRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateSimultaneousRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

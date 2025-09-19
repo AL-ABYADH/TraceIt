@@ -1,3 +1,4 @@
+import "./requirement/index";
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import "./auth/index";
 import "./user/index";

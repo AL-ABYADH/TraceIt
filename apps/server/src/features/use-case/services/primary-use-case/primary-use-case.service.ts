@@ -47,7 +47,6 @@ export class PrimaryUseCaseService {
    * @throws NotFoundException if the primary use case doesn't exist
    */
   async update(id: string, updateDto: UpdatePrimaryUseCaseInterface): Promise<PrimaryUseCase> {
-    await this.findById(id);
     return this.primaryUseCaseRepository.update(id, updateDto);
   }
 

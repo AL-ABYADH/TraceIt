@@ -4,6 +4,9 @@ import {
   permissionCodeField,
   permissionNameField,
   projectActionField,
+  ProjectInvitationStatus,
+  projectInvitationStatusField,
+  ProjectStatus,
   projectStatusField,
   roleNameField,
 } from "./fields";
@@ -11,7 +14,6 @@ import {
   uuidField,
   nameField,
   descriptionField,
-  dateField,
   dateISOField,
 } from "../common";
 
@@ -77,6 +79,12 @@ export const projectActionFieldDoc = projectActionField.openapi({
 });
 
 export const projectStatusFieldDoc = projectStatusField.openapi({
-  example: "archived",
+  example: ProjectStatus.ARCHIVED,
   description: "The status of the project",
 });
+
+export const projectInvitationStatusFieldDoc =
+  projectInvitationStatusField.openapi({
+    description: "The current status of the project invitation",
+    example: ProjectInvitationStatus.ACCEPTED,
+  });

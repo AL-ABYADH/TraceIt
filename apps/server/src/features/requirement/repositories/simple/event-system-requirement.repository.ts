@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import {
-  EventSystemRequirementModel,
-  EventSystemRequirementModelType,
-} from "../../models/simple/event-system-requirement.model";
-import { EventSystemRequirement } from "../../entities/simple/event-system-requirement.entity";
+import { EventSystemRequirementModel, EventSystemRequirementModelType } from "../../models";
+import { EventSystemRequirement } from "../../entities";
 import { CreateEventSystemRequirementInterface } from "../../interfaces/create-requirement.interface";
 import { UpdateEventSystemRequirementInterface } from "../../interfaces/update-requirement.interface";
 import { RequirementRepositoryInterface } from "../../interfaces/requirement-repository.interface";

@@ -37,18 +37,14 @@ export class SoftwareActorRepository implements ConcreteActorRepositoryInterface
   async update(
     actorId: string,
     updateActorInterface: UpdateActorInterface,
-  ): Promise<SoftwareActor[]> {
+  ): Promise<SoftwareActor> {
     try {
-      const updated = await this.softwareActorModel.update(
+      const updated = await this.softwareActorModel.updateOneOrThrow(
         { name: updateActorInterface.name },
         {
           where: { id: actorId },
         },
       );
-
-      if (!updated) {
-        throw new NotFoundException(`Software actor with ID ${actorId} not found`);
-      }
 
       return updated;
     } catch (error) {
