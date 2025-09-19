@@ -1,22 +1,12 @@
-"use client";
-import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import { RootState } from "@/store/store";
+import ClientAuthGate from "@/modules/core/auth/components/ClientAuthGate";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
-  const token = useSelector((s: RootState) => s.auth.token);
-  const router = useRouter();
-
-  useEffect(() => {
-    // If token is missing, send user to login
-    if (!token) {
-      router.replace("/login");
-    }
-  }, [token, router]);
-
-  // While token is null we prevent showing the private UI (or show a loader)
-  if (!token) return null; // or a spinner
-
-  return <>{children}</>;
+  // Hide the content by default via inline style so server HTML is hidden.
+  // ClientAuthGate will reveal it if auth passes.
+  return (
+    <div id="private-root" style={{ display: "none" }}>
+      <ClientAuthGate />
+      {children}
+    </div>
+  );
 }

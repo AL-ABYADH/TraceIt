@@ -1,11 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import Link from "next/link";
-
-export default function Home() {
-  return (
-    <>
-      <h1>Home</h1>
-    </>
-  );
+export default function RootPage() {
+  redirect("/projects");
 }
