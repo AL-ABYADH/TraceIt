@@ -13,14 +13,11 @@ export class RelationshipManager {
   /**
    * Load specified relationships for an entity with optional filters and limits
    */
-  /**
-   * Carga las relaciones para una entidad con soporte para dirección personalizada
-   */
   async loadRelations(entity: any, options: FetchRelationsOptions = {}): Promise<any> {
     const relationships = this.model.relationships || {};
     let relationAliases = Object.keys(relationships);
 
-    // Filtrar aliases por opciones include/exclude
+    // فلترة العلاقات حسب خيارات include/exclude
     if (options.include?.length) {
       relationAliases = relationAliases.filter((alias) => options.include!.includes(alias));
     }
@@ -28,15 +25,16 @@ export class RelationshipManager {
       relationAliases = relationAliases.filter((alias) => !options.exclude!.includes(alias));
     }
 
-    // Obtener datos base de la entidad
+    // الحصول على البيانات الأساسية للكيان
     const result = entity.getDataValues ? entity.getDataValues() : { ...entity };
 
-    // Cargar todas las relaciones concurrentemente
+    // تحميل جميع العلاقات بشكل متوازي
     const loadPromises = relationAliases.map(async (alias) => {
       try {
         const { isArray } = this.getRelationInfo(alias);
+        const relationshipConfig = this.model.relationships[alias];
 
-        // Cargar relaciones con soporte para dirección
+        // تحميل العلاقات مع دعم الاتجاه
         const relationships = await this.loadRelationshipWithDirection(
           entity,
           alias,
@@ -45,30 +43,35 @@ export class RelationshipManager {
           options.session,
         );
 
-        // Validar la cardinalidad para relaciones "one"
+        // التحقق من القيود على العلاقات ذات النوع "one"
         if (!isArray && relationships.length > 1) {
           console.warn(
-            `Violación de restricción de cardinalidad: La relación '${alias}' está definida como 'one' pero se encontraron ${relationships.length} relaciones.`,
+            `تجاوز قيود العلاقة: العلاقة '${alias}' معرّفة كـ 'one' ولكن تم العثور على ${relationships.length} علاقات.`,
           );
         }
 
         const data = relationships.map((rel: any) => {
           const targetData = rel.target.getDataValues ? rel.target.getDataValues() : rel.target;
+          // إضافة خصائص العلاقة
           if (rel.relationship && Object.keys(rel.relationship).length > 0) {
             targetData.relationshipProperties = rel.relationship;
           }
+          // إضافة معلومات الاتجاه للعلاقة
+          targetData.direction = relationshipConfig.direction;
+          // إضافة اسم العلاقة
+          targetData.relationshipName = relationshipConfig.name;
           return targetData;
         });
 
         return { alias, data: isArray ? data : data[0] || null };
       } catch (error) {
-        console.error(`Error cargando relación ${alias}:`, error);
+        console.error(`خطأ في تحميل العلاقة ${alias}:`, error);
         const { isArray } = this.getRelationInfo(alias);
         return { alias, data: isArray ? [] : null };
       }
     });
 
-    // Esperar todas las relaciones y adjuntarlas al resultado
+    // انتظار جميع العلاقات وإضافتها للنتيجة
     const results = await Promise.all(loadPromises);
     results.forEach(({ alias, data }) => {
       result[alias] = data;
@@ -280,24 +283,20 @@ export class RelationshipManager {
     limits?: Record<string, number>;
     direction?: "out" | "in" | "none";
   }): Promise<any[]> {
-    // Check if the relationship alias exists in current model
+    // التحقق من وجود العلاقة في النموذج الحالي
     const relationships = this.model.relationships || {};
     const relationship = relationships[params.relationshipAlias as string];
 
     if (!relationship) {
-      throw new Error(
-        `Relationship alias "${String(params.relationshipAlias)}" not found in model`,
-      );
+      throw new Error(`العلاقة "${String(params.relationshipAlias)}" غير موجودة في النموذج`);
     }
 
-    console.log(params);
-    // Use the existing findRelationships method to find connections
-    // This will find all entities of current model that are connected to entities matching whereRelated
+    // استخدام الدالة الموجودة findRelationships للعثور على الاتصالات
     const results = await this.model.findRelationships({
       alias: params.relationshipAlias,
       where: {
-        target: params.whereRelated, // The related entity conditions
-        source: params.where, // Additional filters on current model entities
+        target: params.whereRelated, // شروط الكيان المرتبط
+        source: params.where, // فلاتر إضافية على كيانات النموذج الحالي
       },
       limit: params.limit,
       session: params.session,
@@ -305,18 +304,43 @@ export class RelationshipManager {
 
     if (!results.length) {
       if (params.throwIfNoneFound) {
-        throw new Error(`No entities found with the given criteria`);
+        throw new Error(`لم يتم العثور على كيانات تطابق المعايير المحددة`);
       }
       return [];
     }
 
-    // Extract source entities (the entities from current model)
-    let foundEntities = results.map((rel: any) => rel.source);
+    // استخراج الكيانات المصدر (كيانات النموذج الحالي)
+    // وإضافة معلومات الاتجاه واسم العلاقة لكل نتيجة
+    let foundEntities = results.map((rel: any) => {
+      const sourceEntity = rel.source;
 
-    // Remove duplicates
+      // إضافة معلومات العلاقة إلى الكيان
+      if (sourceEntity.getDataValues) {
+        const dataValues = sourceEntity.getDataValues();
+        dataValues._relationshipInfo = {
+          direction: relationship.direction,
+          name: relationship.name,
+          properties: rel.relationship,
+        };
+        // أعد تعيين البيانات مع المعلومات الإضافية
+        Object.keys(dataValues).forEach((key) => {
+          sourceEntity[key] = dataValues[key];
+        });
+      } else {
+        sourceEntity._relationshipInfo = {
+          direction: relationship.direction,
+          name: relationship.name,
+          properties: rel.relationship,
+        };
+      }
+
+      return sourceEntity;
+    });
+
+    // إزالة التكرارات
     foundEntities = this.removeDuplicateEntities(foundEntities);
 
-    // Apply ordering if specified
+    // تطبيق الترتيب إذا تم تحديده
     if (params.order) {
       foundEntities.sort((a: any, b: any) => {
         const dataA = a.getDataValues ? a.getDataValues() : a;
@@ -333,7 +357,7 @@ export class RelationshipManager {
       });
     }
 
-    // Apply skip and limit
+    // تطبيق التخطي والحدود
     if (params.skip) {
       foundEntities = foundEntities.slice(params.skip);
     }
@@ -341,7 +365,7 @@ export class RelationshipManager {
       foundEntities = foundEntities.slice(0, params.limit);
     }
 
-    // Load additional relationships if requested
+    // تحميل علاقات إضافية إذا طُلبت
     if (params.include || params.exclude || params.limits) {
       const entitiesWithRelations = await Promise.all(
         foundEntities.map((entity: any) =>
@@ -356,7 +380,7 @@ export class RelationshipManager {
       return entitiesWithRelations;
     }
 
-    // Return plain data if requested
+    // إرجاع البيانات المبسطة إذا طُلبت
     if (params.plain) {
       return foundEntities.map((entity: any) =>
         entity.getDataValues ? entity.getDataValues() : entity,
@@ -383,17 +407,19 @@ export class RelationshipManager {
       source: any;
       relationship: any;
       target: any;
+      direction: "out" | "in" | "none";
+      relationshipName: string;
     }>
   > {
-    // Check if the relationship alias exists
+    // التحقق من وجود العلاقة
     const relationships = this.model.relationships || {};
     const relationship = relationships[relationshipAlias];
 
     if (!relationship) {
-      throw new Error(`Relationship alias "${relationshipAlias as string}" not found in model`);
+      throw new Error(`العلاقة "${relationshipAlias as string}" غير موجودة في النموذج`);
     }
 
-    // Find relationships matching the criteria
+    // البحث عن العلاقات المطابقة للمعايير
     const results = await this.model.findRelationships({
       alias: relationshipAlias,
       where: {
@@ -409,12 +435,19 @@ export class RelationshipManager {
       return [];
     }
 
-    // If we need to load additional relationships for target nodes
+    // إضافة معلومات الاتجاه واسم العلاقة لكل نتيجة
+    const enhancedResults = results.map((result: any) => ({
+      ...result,
+      direction: relationship.direction,
+      relationshipName: relationship.name,
+    }));
+
+    // إذا كنا بحاجة إلى تحميل علاقات إضافية للعقد المستهدفة
     if (options.include?.length || options.exclude?.length || options.limits) {
-      // Process each result to load additional relationships for target nodes
+      // معالجة كل نتيجة لتحميل علاقات إضافية للعقد المستهدفة
       const processedResults = await Promise.all(
-        results.map(async (result: any) => {
-          // Load additional relationships for the target node
+        enhancedResults.map(async (result: any) => {
+          // تحميل علاقات إضافية للعقدة المستهدفة
           const targetWithRelations = await this.loadRelations(result.target, {
             include: options.include,
             exclude: options.exclude,
@@ -426,16 +459,18 @@ export class RelationshipManager {
             source: result.source,
             relationship: result.relationship,
             target: targetWithRelations,
+            direction: result.direction,
+            relationshipName: result.relationshipName,
           };
         }),
       );
 
-      // Apply ordering, skip and limit after processing
+      // تطبيق الترتيب والصفحات بعد المعالجة
       return this.applyOrderingAndPagination(processedResults, options);
     }
 
-    // Apply ordering, skip and limit
-    return this.applyOrderingAndPagination(results, options);
+    // تطبيق الترتيب والصفحات
+    return this.applyOrderingAndPagination(enhancedResults, options);
   }
 
   async validateCardinality(
