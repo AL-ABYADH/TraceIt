@@ -19,7 +19,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "gen:openapi": "ts-node --project tsconfig.json src/core/commands/swagger/gen-openapi-per-controller.ts"
-
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "7.3.2",
@@ -38,6 +37,7 @@
     "class-validator": "^0.14.2",
     "commander": "^14.0.0",
     "cookie-parser": "^1.4.7",
+    "jsonpath-plus": "^10.3.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "nestjs-command": "^3.1.5",
