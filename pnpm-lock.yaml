@@ -262,7 +262,7 @@ importers:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
       react-hook-form:
-        specifier: ^7.61.1
+        specifier: ^7.62.0
         version: 7.62.0(react@19.1.0)
       react-redux:
         specifier: ^9.2.0
@@ -308,7 +308,7 @@ importers:
         specifier: ^5
         version: 5.8.2
       zod:
-        specifier: ^3.22.4
+        specifier: ^3.25.76
         version: 3.25.76
 
   packages/Custom-Neogma:
