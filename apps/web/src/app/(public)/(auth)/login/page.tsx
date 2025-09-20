@@ -62,15 +62,17 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <label className="block mb-3">
-          <div className="text-sm text-gray-700 mb-1">Email</div>
+          <div className="text-sm text-gray-700 mb-1">Username</div>
           <input
-            {...register("email")}
+            {...register("username")}
             className="w-full border rounded-md px-3 py-2 text-gray-900"
-            type="email"
-            autoComplete="email"
+            type="username"
+            autoComplete="username"
             required
           />
-          {errors.email && <p className="mt-1 text-sm text-red-700">{errors.email.message}</p>}
+          {errors.username && (
+            <p className="mt-1 text-sm text-red-700">{errors.username.message}</p>
+          )}
         </label>
 
         <label className="block mb-3">
