@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { ApiError } from "./api-errors";
+import { ApiError, ApiValidationError } from "./api-errors";
 import { Endpoint } from "@/types/endpoint-type";
 import { apiClient } from "./api-client";
 
@@ -10,10 +10,14 @@ export type HttpOptions = {
 function mapAxiosError(err: unknown): never {
   if ((err as any)?.isAxiosError) {
     const a = err as any;
-    const status = a.response?.status;
-    const data = a.response?.data;
-    const message = data?.message ?? a.message ?? "Request failed";
-    throw new ApiError(message, status, data);
+    const error = a.response?.error;
+    const statusCode = a.response?.status;
+    const responseData = a.response?.data;
+    const message = responseData?.message ?? a.message ?? "Request failed";
+    const data = responseData?.data;
+    throw statusCode === 422
+      ? new ApiValidationError(message, statusCode, data)
+      : new ApiError(error, message, statusCode, data);
   }
   throw err as Error;
 }
