@@ -108,7 +108,7 @@ export class ConditionalGroupRequirementRepository
   async update(
     id: string,
     updateDto: UpdateConditionalGroupRequirementInterface,
-  ): Promise<ConditionalGroupRequirement[]> {
+  ): Promise<ConditionalGroupRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -117,11 +117,11 @@ export class ConditionalGroupRequirementRepository
         updateFields.conditionalValue = updateDto.conditionalValue;
 
       // Update the requirement
-      const updated = await this.conditionalGroupRequirementModel.update(updateFields, {
+      const updated = await this.conditionalGroupRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Conditional group requirement with ID ${id} not found`);
       }
 
@@ -236,8 +236,11 @@ export class ConditionalGroupRequirementRepository
         where: { id },
         include: ["primaryCondition", "alternativeConditions", "fallbackCondition"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

@@ -70,18 +70,18 @@ export class LogicalGroupRequirementRepository
   async update(
     id: string,
     updateDto: UpdateLogicalGroupRequirementInterface,
-  ): Promise<LogicalGroupRequirement[]> {
+  ): Promise<LogicalGroupRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
       if (updateDto.depth !== undefined) updateFields.depth = updateDto.depth;
 
       // Update the requirement
-      const updated = await this.logicalGroupRequirementModel.update(updateFields, {
+      const updated = await this.logicalGroupRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Logical group requirement with ID ${id} not found`);
       }
 
@@ -147,8 +147,11 @@ export class LogicalGroupRequirementRepository
         where: { id },
         include: ["mainRequirement", "detailRequirements"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

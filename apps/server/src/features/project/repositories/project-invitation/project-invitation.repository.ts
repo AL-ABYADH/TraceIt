@@ -92,12 +92,12 @@ export class ProjectInvitationRepository {
   }
 
   async setStatus(id: string, status: ProjectInvitationStatus): Promise<boolean> {
-    const updated = await this.projectInvitationModel.update(
+    const updated = await this.projectInvitationModel.updateOneOrThrow(
       { status: status },
       { where: { id: id } },
     );
 
-    return updated.length > 0;
+    return updated ? true : false;
   }
 
   async getById(id: string): Promise<ProjectInvitation | null> {

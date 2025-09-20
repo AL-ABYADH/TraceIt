@@ -1,4 +1,4 @@
-import { NeogmaModel } from "neogma";
+import { NeogmaModel } from "./Neogma/normal-model-types";
 
 /**
  * Singleton registry to manage Neogma models and resolve circular dependencies.
@@ -9,6 +9,7 @@ import { NeogmaModel } from "neogma";
 export class ModelRegistry {
   // Singleton instance
   private static instance: ModelRegistry;
+  public traceabilityRelationshipNames: Array<string> = [];
 
   // Map of model names to NeogmaModel instances
   models: Map<string, NeogmaModel<any, any, any, any>> = new Map<
@@ -37,6 +38,12 @@ export class ModelRegistry {
    */
   register(name: string, model: NeogmaModel<any, any, any, any>): void {
     this.models.set(name, model);
+    if (
+      !this.traceabilityRelationshipNames.includes(name) &&
+      this.get(name)?.checkIsTraceability()
+    ) {
+      this.traceabilityRelationshipNames.push(name);
+    }
     this.processPendingRelationships();
   }
 

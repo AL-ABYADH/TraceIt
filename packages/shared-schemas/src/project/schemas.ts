@@ -14,12 +14,7 @@ import {
   projectActionFieldDoc,
   projectInvitationStatusFieldDoc,
 } from "./openapi-fields";
-import {
-  dateFieldDoc,
-  dateISOField,
-  projectListSchema,
-  uuidFieldDoc,
-} from "../common";
+import { dateISOField, projectListSchema, uuidFieldDoc } from "../common";
 import { safeUserListSchema } from "../user";
 import { actorSchema } from "../actor";
 import { useCaseDetailSchema } from "../use-case";

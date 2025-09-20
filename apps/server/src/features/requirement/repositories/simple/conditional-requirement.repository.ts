@@ -41,7 +41,7 @@ export class ConditionalRequirementRepository
   async update(
     id: string,
     updateDto: UpdateConditionalRequirementInterface,
-  ): Promise<ConditionalRequirement[]> {
+  ): Promise<ConditionalRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -49,11 +49,11 @@ export class ConditionalRequirementRepository
       if (updateDto.condition !== undefined) updateFields.condition = updateDto.condition;
 
       // Update the requirement
-      const updated = await this.conditionalRequirementModel.update(updateFields, {
+      const updated = await this.conditionalRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Conditional requirement with ID ${id} not found`);
       }
 
@@ -80,8 +80,11 @@ export class ConditionalRequirementRepository
         where: { id },
         include: ["requirement"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

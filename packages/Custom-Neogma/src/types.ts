@@ -12,7 +12,10 @@ export interface ModelParams<
   Statics extends AnyObject,
 > {
   name: string;
-  schema: NeogmaSchema<Omit<Properties, "id" | "createdAt" | "updatedAt">>;
+  inTraceability?: boolean;
+  schema: NeogmaSchema<
+    Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">
+  >;
   /** the label of the nodes */
   label: string[];
   /** statics of the Model */
@@ -64,6 +67,13 @@ export type EnhancedRelationshipsI<RelatedNodes extends AnyObject> = {
   };
 };
 
+// إضافة نوع للمعلومات المرتبطة بالعلاقة
+export interface RelationshipInfo {
+  direction: "out" | "in" | "none";
+  name: string;
+  properties?: Record<string, any>;
+}
+
 /**
  * Options for fetching relationships
  */
@@ -72,6 +82,8 @@ export interface FetchRelationsOptions {
   exclude?: string[];
   limits?: Record<string, number>;
   session?: any;
+  direction?: "out" | "in" | "none";
+  includeRelationshipInfo?: boolean; // إضافة خيار لتضمين معلومات العلاقة
 }
 
 /**

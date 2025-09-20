@@ -67,18 +67,18 @@ export class SimultaneousRequirementRepository
   async update(
     id: string,
     updateDto: UpdateSimultaneousRequirementInterface,
-  ): Promise<SimultaneousRequirement[]> {
+  ): Promise<SimultaneousRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
       if (updateDto.depth !== undefined) updateFields.depth = updateDto.depth;
 
       // Update the requirement
-      const updated = await this.simultaneousRequirementModel.update(updateFields, {
+      const updated = await this.simultaneousRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Simultaneous requirement with ID ${id} not found`);
       }
 
@@ -126,8 +126,11 @@ export class SimultaneousRequirementRepository
         where: { id },
         include: ["simpleRequirements"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

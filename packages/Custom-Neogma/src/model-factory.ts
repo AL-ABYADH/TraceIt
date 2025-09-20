@@ -2,6 +2,7 @@ import {
   ModelFactory as OriginalModelFactory,
   Neo4jSupportedProperties,
   Neogma,
+  QueryBuilder,
   RelationshipsI,
   WhereParamsI,
 } from "neogma";
@@ -110,6 +111,22 @@ export function ModelFactory<
     enhancedSchema["updatedAt"] = {
       type: "string",
       format: "date-time",
+    };
+  }
+
+  // Add needsUpdate field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("needsUpdate")) {
+    enhancedSchema["needsUpdate"] = {
+      type: "boolean",
+      default: false,
+    };
+  }
+
+  // Add needsDelete field if it doesn't exist
+  if (!enhancedSchema.hasOwnProperty("needsDelete")) {
+    enhancedSchema["needsDelete"] = {
+      type: "boolean",
+      default: false,
     };
   }
 
@@ -282,6 +299,25 @@ export function ModelFactory<
     return updatedEntity; // TypeScript now knows this is defined
   };
 
+  model.checkIsTraceability = () => {
+    return parameters.inTraceability || !(parameters.inTraceability === undefined);
+  };
+
+  model.getModelName = () => {
+    return parameters.name;
+  };
+
+  model.skipNeedUpdateOrSkipNeedDelete = async (project_Id: string): Promise<void> => {
+    // eslint-disable-next-line no-useless-catch
+    try {
+      await neogma.queryRunner.run(
+        `MATCH (n)-[]->(z) WHERE n.id = "${project_Id}" SET z.needsDelete = False SET z.needsUpdate = False;`,
+      );
+    } catch (error) {
+      throw Error(error.message);
+    }
+  };
+
   // Updated: Always generate UUID and timestamps during model creation
   /**
    * Automatically populates `id` and `createdAt` fields during entity creation,
@@ -294,6 +330,8 @@ export function ModelFactory<
     // Always set createdAt if not provided
     data.createdAt = data.createdAt || new Date().toISOString();
     data.updatedAt = data.updatedAt || new Date().toISOString();
+    data.needsUpdate = data.needsUpdate || false;
+    data.needsDelete = data.needsDelete || false;
   };
 
   // Proxy wrapper to auto-update `updatedAt` field during updates
@@ -318,6 +356,7 @@ export function ModelFactory<
         };
       }
       // Always update updatedAt and return plain array for update
+      // Modificar el proxy para update
       if (prop === "update") {
         return async function (data: any, params: any) {
           if (data) {
@@ -327,8 +366,49 @@ export function ModelFactory<
           if (params) {
             params.return = params.return || true;
           }
+
+          // Llamar a la función original de actualización
           const result = await (target[prop] as Function).apply(target, [data, params]);
-          return result[0].map((i: any) => i.getDataValues());
+          if (!result || !result[0] || !result[0].length) {
+            throw new NotFoundException(`${parameters.name} with this ID was not found`);
+          }
+
+          const final_result = result[0].map((i: any) => i.getDataValues());
+
+          const updatedIds = result[0].map((i: any) => {
+            return i.id;
+          });
+
+          await propagateUpdateFlag(target, updatedIds, params?.session);
+
+          return final_result;
+        };
+      }
+
+      if (prop === "updateOneOrThrow") {
+        return async function (data: any, params: any) {
+          if (data) {
+            data = removeUndefined(data);
+            data.updatedAt = new Date().toISOString();
+          }
+          if (params) {
+            params.return = params.return || true;
+          }
+
+          // Llamar a la función original de actualización
+          const result = await (target[prop] as Function).apply(target, [data, params]);
+          if (!result || !result[0]) {
+            throw new NotFoundException(`${parameters.name} with this ID was not found`);
+          }
+          const final_result = result[0].getDataValues();
+          const updatedIds = [final_result.id];
+
+          const propagationRelationships: any = [];
+          // if (propagationRelationships.length && updatedIds.length) {
+          await propagateUpdateFlag(target, updatedIds, params?.session);
+          // }
+
+          return final_result;
         };
       }
       // Set plain: true by default for findMany
@@ -354,7 +434,29 @@ export function ModelFactory<
           return target.findByRelatedEntity.call(target, params);
         };
       }
-      // Default to standard property/method
+      if (prop === "relateTo") {
+        return async function (this: any, params: any) {
+          const primaryKeyField = model.getPrimaryKeyField();
+
+          const currentEntity = this as unknown as Record<string, any>;
+
+          if (
+            primaryKeyField &&
+            currentEntity &&
+            typeof currentEntity === "object" &&
+            primaryKeyField in currentEntity &&
+            params?.alias
+          ) {
+            const entityId = currentEntity[primaryKeyField];
+
+            if (entityId) {
+              await manager.validateCardinality(entityId, params.alias, params.session);
+            }
+          }
+
+          return target.relateTo.call(this, params);
+        };
+      } // Default to standard property/method
       return Reflect.get(target, prop, receiver);
     },
   });
@@ -384,4 +486,78 @@ export function defineModelFactory<
   ModelFunction.parameters = { ...parameters };
 
   return ModelFunction;
+}
+
+/**
+ * Propaga el flag de actualización a los nodos relacionados
+ * @param model El modelo actual
+ * @param updatedIds IDs de los nodos actualizados
+ * @param relationshipNames Lista de nombres de relaciones que deben propagar la actualización
+ * @param session Sesión de base de datos opcional
+ */
+async function propagateUpdateFlag(model: any, updatedIds: string[], session?: any): Promise<void> {
+  try {
+    const relationships = model.relationships || {};
+    const relationshipAliases = Object.keys(relationships);
+
+    const matchingRelationships = relationshipAliases.filter((alias) => {
+      const rel = relationships[alias];
+      if (rel.model === "self") {
+        rel.model = model;
+      }
+      return (
+        rel &&
+        rel.direction === "out" &&
+        model.checkIsTraceability() &&
+        rel.model.checkIsTraceability()
+      );
+    });
+
+    if (!matchingRelationships.length) return;
+
+    // Para cada relación que coincide, buscar nodos conectados
+    for (const alias of matchingRelationships) {
+      const relatedModel = relationships[alias].model;
+
+      if (!relatedModel) continue;
+
+      // Para cada nodo actualizado, encontrar sus conexiones
+      for (const id of updatedIds) {
+        const connections = await model.findRelationships({
+          alias: alias,
+          where: {
+            source: {
+              id: id,
+            },
+          },
+        });
+
+        if (!connections.length) continue;
+
+        const targetIds = connections
+          .map((conn: { target: any }) => {
+            const target = conn.target;
+            return target.getDataValues ? target.getDataValues().id : target.id;
+          })
+          .filter(Boolean);
+
+        if (!targetIds.length) continue;
+
+        // Actualizar el flag needsUpdate en los nodos conectados
+        await relatedModel.update(
+          { needsUpdate: true },
+          {
+            where: { id: { $in: targetIds } },
+            session,
+          },
+        );
+
+        console.log(
+          `Propagated update flag to ${targetIds.length} related nodes via relationship "${relationships[alias].name}"`,
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error propagating update flag:", error);
+  }
 }

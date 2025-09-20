@@ -38,13 +38,13 @@ export class SystemRequirementRepository
   async update(
     id: string,
     updateDto: UpdateSystemRequirementInterface,
-  ): Promise<SystemRequirement[]> {
+  ): Promise<SystemRequirement> {
     try {
-      const updated = await this.systemRequirementModel.update(updateDto, {
+      const updated = await this.systemRequirementModel.updateOneOrThrow(updateDto, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`System requirement with ID ${id} not found`);
       }
 
