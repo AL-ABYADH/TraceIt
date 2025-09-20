@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { wireTokenServiceToStore } from "@/modules/core/auth/store/auth-slice";
 import { defaultReactQueryOptions } from "@/query/query-options";
 
-const queryClient = new QueryClient();
-
 wireTokenServiceToStore(store);
 
 export function Providers({ children }: { children: React.ReactNode }) {
