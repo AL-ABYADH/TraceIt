@@ -39,10 +39,7 @@ export class ActorRequirementRepository
     }
   }
 
-  async update(
-    id: string,
-    updateDto: UpdateActorRequirementInterface,
-  ): Promise<ActorRequirement[]> {
+  async update(id: string, updateDto: UpdateActorRequirementInterface): Promise<ActorRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -50,11 +47,11 @@ export class ActorRequirementRepository
       if (updateDto.operation !== undefined) updateFields.operation = updateDto.operation;
 
       // Update the requirement
-      const updated = await this.actorRequirementModel.update(updateFields, {
+      const updated = await this.actorRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Actor requirement with ID ${id} not found`);
       }
 
@@ -83,8 +80,11 @@ export class ActorRequirementRepository
         where: { id },
         include: ["actors"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

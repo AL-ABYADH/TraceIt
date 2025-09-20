@@ -41,7 +41,7 @@ export class EventSystemRequirementRepository
   async update(
     id: string,
     updateDto: UpdateEventSystemRequirementInterface,
-  ): Promise<EventSystemRequirement[]> {
+  ): Promise<EventSystemRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -49,11 +49,11 @@ export class EventSystemRequirementRepository
       if (updateDto.operation !== undefined) updateFields.operation = updateDto.operation;
 
       // Update the requirement
-      const updated = await this.eventSystemRequirementModel.update(updateFields, {
+      const updated = await this.eventSystemRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Event system requirement with ID ${id} not found`);
       }
 
@@ -79,8 +79,11 @@ export class EventSystemRequirementRepository
       const updatedRequirement = await this.eventSystemRequirementModel.findOneWithRelations({
         where: { id },
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

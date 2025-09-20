@@ -50,7 +50,7 @@ export class SystemActorCommunicationRequirementRepository
   async update(
     id: string,
     updateDto: UpdateSystemActorCommunicationRequirementInterface,
-  ): Promise<SystemActorCommunicationRequirement[]> {
+  ): Promise<SystemActorCommunicationRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -61,11 +61,14 @@ export class SystemActorCommunicationRequirementRepository
         updateFields.communicationFacility = updateDto.communicationFacility;
 
       // Update the requirement
-      const updated = await this.systemActorCommunicationRequirementModel.update(updateFields, {
-        where: { id },
-      });
+      const updated = await this.systemActorCommunicationRequirementModel.updateOneOrThrow(
+        updateFields,
+        {
+          where: { id },
+        },
+      );
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(
           `System-actor communication requirement with ID ${id} not found`,
         );
@@ -97,8 +100,11 @@ export class SystemActorCommunicationRequirementRepository
           where: { id },
           include: ["actors"],
         });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} Not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

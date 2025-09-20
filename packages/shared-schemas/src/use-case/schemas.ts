@@ -38,7 +38,7 @@ import {
  */
 export const projectIdSchema = z
   .object({
-    projectId: projectIdFieldDoc,
+    projectId: uuidFieldDoc,
   })
   .openapi({ title: "ProjectIdDto" });
 

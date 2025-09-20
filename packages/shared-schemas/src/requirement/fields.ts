@@ -50,8 +50,8 @@ export const communicationInfoField = createField("string", {
 
 export const communicationFacilityField = createField("string", {
   min: 1,
-  max: 30,
-  message: "Communication facility must not exceed 30 characters",
+  max: 200,
+  message: "Communication facility must not exceed 200 characters",
 });
 
 export const conditionalValueField = createField("string", {

@@ -95,7 +95,7 @@ export class AuthRepository {
    * Revokes a specific refresh token.
    */
   async revokeRefreshToken(token: string): Promise<void> {
-    await this.refreshTokenModel.update({ revoked: true }, { where: { token } });
+    await this.refreshTokenModel.updateOneOrThrow({ revoked: true }, { where: { token } });
   }
 
   /**

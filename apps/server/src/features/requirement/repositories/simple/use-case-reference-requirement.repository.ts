@@ -47,18 +47,18 @@ export class UseCaseReferenceRequirementRepository
   async update(
     id: string,
     updateDto: UpdateUseCaseReferenceRequirementInterface,
-  ): Promise<UseCaseReferenceRequirement[]> {
+  ): Promise<UseCaseReferenceRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
       if (updateDto.depth !== undefined) updateFields.depth = updateDto.depth;
 
       // Update the requirement
-      const updated = await this.useCaseReferenceRequirementModel.update(updateFields, {
+      const updated = await this.useCaseReferenceRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Use case reference requirement with ID ${id} not found`);
       }
 
@@ -85,8 +85,11 @@ export class UseCaseReferenceRequirementRepository
         where: { id },
         include: ["referencedUseCase"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Rquirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

@@ -66,7 +66,7 @@ export class ExceptionalRequirementRepository
   async update(
     id: string,
     updateDto: UpdateExceptionalRequirementInterface,
-  ): Promise<ExceptionalRequirement[]> {
+  ): Promise<ExceptionalRequirement> {
     try {
       // Create an object with only the fields to update
       const updateFields: Record<string, any> = {};
@@ -74,11 +74,11 @@ export class ExceptionalRequirementRepository
       if (updateDto.exception !== undefined) updateFields.exception = updateDto.exception;
 
       // Update the requirement
-      const updated = await this.exceptionalRequirementModel.update(updateFields, {
+      const updated = await this.exceptionalRequirementModel.updateOneOrThrow(updateFields, {
         where: { id },
       });
 
-      if (!updated || updated.length === 0) {
+      if (!updated) {
         throw new NotFoundException(`Exceptional requirement with ID ${id} not found`);
       }
 
@@ -126,8 +126,11 @@ export class ExceptionalRequirementRepository
         where: { id },
         include: ["requirements"],
       });
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ${id} not found!`);
+      }
 
-      return updatedRequirement ? [updatedRequirement] : [];
+      return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

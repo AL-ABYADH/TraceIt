@@ -36,7 +36,7 @@ export class ProjectRoleRepository {
   }
 
   async update(id: string, projectRoleInterface: UpdateProjectRoleInterface): Promise<ProjectRole> {
-    const updatedProjectRole = await this.projectRoleModel.update(
+    const updatedProjectRole = await this.projectRoleModel.updateOneOrThrow(
       { name: projectRoleInterface.name },
       {
         where: { id },

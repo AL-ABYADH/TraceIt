@@ -132,7 +132,7 @@ export class RequirementService {
   /**
    * Update a requirement by ID (type-dispatched)
    */
-  async update(id: string, updateDto: any): Promise<Requirement[]> {
+  async update(id: string, updateDto: any): Promise<Requirement> {
     // Find requirement to determine its type
     const requirement = await this.findById(id);
 
@@ -142,7 +142,7 @@ export class RequirementService {
 
     // Update the requirement
     const updatedRequirements = await repository.update(id, updateDto);
-    if (!updatedRequirements || updatedRequirements.length === 0) {
+    if (!updatedRequirements) {
       throw new NotFoundException(`Requirement with ID ${id} not found after update`);
     }
 
@@ -244,78 +244,78 @@ export class RequirementService {
   async updateSystemRequirement(
     id: string,
     updateDto: UpdateSystemRequirementInterface,
-  ): Promise<SystemRequirement[]> {
-    return this.update(id, updateDto) as Promise<SystemRequirement[]>;
+  ): Promise<SystemRequirement> {
+    return this.update(id, updateDto) as Promise<SystemRequirement>;
   }
 
   async updateEventSystemRequirement(
     id: string,
     updateDto: UpdateEventSystemRequirementInterface,
-  ): Promise<EventSystemRequirement[]> {
-    return this.update(id, updateDto) as Promise<EventSystemRequirement[]>;
+  ): Promise<EventSystemRequirement> {
+    return this.update(id, updateDto) as Promise<EventSystemRequirement>;
   }
 
   async updateActorRequirement(
     id: string,
     updateDto: UpdateActorRequirementInterface,
-  ): Promise<ActorRequirement[]> {
-    return this.update(id, updateDto) as Promise<ActorRequirement[]>;
+  ): Promise<ActorRequirement> {
+    return this.update(id, updateDto) as Promise<ActorRequirement>;
   }
 
   async updateSystemActorCommunicationRequirement(
     id: string,
     updateDto: UpdateSystemActorCommunicationRequirementInterface,
-  ): Promise<SystemActorCommunicationRequirement[]> {
-    return this.update(id, updateDto) as Promise<SystemActorCommunicationRequirement[]>;
+  ): Promise<SystemActorCommunicationRequirement> {
+    return this.update(id, updateDto) as Promise<SystemActorCommunicationRequirement>;
   }
 
   async updateConditionalRequirement(
     id: string,
     updateDto: UpdateConditionalRequirementInterface,
-  ): Promise<ConditionalRequirement[]> {
-    return this.update(id, updateDto) as Promise<ConditionalRequirement[]>;
+  ): Promise<ConditionalRequirement> {
+    return this.update(id, updateDto) as Promise<ConditionalRequirement>;
   }
 
   async updateRecursiveRequirement(
     id: string,
     updateDto: UpdateRecursiveRequirementInterface,
-  ): Promise<RecursiveRequirement[]> {
-    return this.update(id, updateDto) as Promise<RecursiveRequirement[]>;
+  ): Promise<RecursiveRequirement> {
+    return this.update(id, updateDto) as Promise<RecursiveRequirement>;
   }
 
   async updateUseCaseReferenceRequirement(
     id: string,
     updateDto: UpdateUseCaseReferenceRequirementInterface,
-  ): Promise<UseCaseReferenceRequirement[]> {
-    return this.update(id, updateDto) as Promise<UseCaseReferenceRequirement[]>;
+  ): Promise<UseCaseReferenceRequirement> {
+    return this.update(id, updateDto) as Promise<UseCaseReferenceRequirement>;
   }
 
   async updateLogicalGroupRequirement(
     id: string,
     updateDto: UpdateLogicalGroupRequirementInterface,
-  ): Promise<LogicalGroupRequirement[]> {
-    return this.update(id, updateDto) as Promise<LogicalGroupRequirement[]>;
+  ): Promise<LogicalGroupRequirement> {
+    return this.update(id, updateDto) as Promise<LogicalGroupRequirement>;
   }
 
   async updateConditionalGroupRequirement(
     id: string,
     updateDto: UpdateConditionalGroupRequirementInterface,
-  ): Promise<ConditionalGroupRequirement[]> {
-    return this.update(id, updateDto) as Promise<ConditionalGroupRequirement[]>;
+  ): Promise<ConditionalGroupRequirement> {
+    return this.update(id, updateDto) as Promise<ConditionalGroupRequirement>;
   }
 
   async updateSimultaneousRequirement(
     id: string,
     updateDto: UpdateSimultaneousRequirementInterface,
-  ): Promise<SimultaneousRequirement[]> {
-    return this.update(id, updateDto) as Promise<SimultaneousRequirement[]>;
+  ): Promise<SimultaneousRequirement> {
+    return this.update(id, updateDto) as Promise<SimultaneousRequirement>;
   }
 
   async updateExceptionalRequirement(
     id: string,
     updateDto: UpdateExceptionalRequirementInterface,
-  ): Promise<ExceptionalRequirement[]> {
-    return this.update(id, updateDto) as Promise<ExceptionalRequirement[]>;
+  ): Promise<ExceptionalRequirement> {
+    return this.update(id, updateDto) as Promise<ExceptionalRequirement>;
   }
 
   /**

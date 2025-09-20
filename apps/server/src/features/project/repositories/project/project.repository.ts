@@ -53,14 +53,14 @@ export class ProjectRepository {
   }
 
   async setStatus(id: string, status: ProjectStatus): Promise<boolean> {
-    const updated = await this.projectModel.update(
+    const updated = await this.projectModel.updateOneOrThrow(
       { status: status },
       {
         where: { id },
       },
     );
 
-    return updated.length > 0;
+    return updated ? true : false;
   }
 
   async getProjects(userId: string, status?: ProjectStatus): Promise<Project[]> {

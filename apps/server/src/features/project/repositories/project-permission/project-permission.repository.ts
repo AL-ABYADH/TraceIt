@@ -40,7 +40,7 @@ export class ProjectPermissionRepository {
     id: string,
     projectPermission: UpdateProjectPermissionInterface,
   ): Promise<ProjectPermission[]> {
-    const updatedProjectPermission: any = await this.projectPermissionModel.update(
+    const updatedProjectPermission: any = await this.projectPermissionModel.updateOneOrThrow(
       projectPermission,
       {
         where: { id: id },

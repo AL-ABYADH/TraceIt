@@ -1,17 +1,17 @@
 import { ModelFactoryDefinition, NeogmaModel, defineModelFactory } from "@repo/custom-neogma";
-import { ActorAttributes } from "../../../actor/models/actor.model";
 import {
   SimpleRequirementAttributes,
   SimpleRequirementModel,
   SimpleRequirementRelationships,
 } from "../simple-requirement.model";
+import { EventActorAttributes } from "src/features/actor/models/event-actor.model";
 
 export type EventSystemRequirementAttributes = SimpleRequirementAttributes & {
   operation: string;
 };
 
 export interface EventSystemRequirementRelationships extends SimpleRequirementRelationships {
-  event: ActorAttributes;
+  event: EventActorAttributes;
 }
 
 export type EventSystemRequirementModelType = NeogmaModel<
