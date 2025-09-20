@@ -1,69 +1,61 @@
 "use client";
 
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+
 import { authClient } from "@/modules/core/auth/api/clients/auth-client";
+import { RegisterDto, registerSchema } from "@repo/shared-schemas";
+import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 
 export default function SignupPage() {
-  const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [serverError, setServerError] = useState<string | null>(null);
-
   const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<RegisterDto>({
+    resolver: zodResolver(registerSchema),
+    mode: "onSubmit",
+  });
 
   const signupMutation = useMutation({
-    mutationFn: (payload: {
-      displayName: string;
-      username: string;
-      email: string;
-      password: string;
-    }) => authClient.register(payload),
+    mutationFn: (payload: RegisterDto) => authClient.register(payload),
     onSuccess: () => {
       setServerError(null);
       router.replace("/");
     },
     onError: (err: any) => {
+      setServerError(null);
+
+      if (isApiValidationError(err)) {
+        const serverErrors = err.data.errors as ApiFieldValidationError[];
+        serverErrors.forEach(({ field, message }) => {
+          setError(field as any, { type: "server", message });
+        });
+        return;
+      }
+
       const msg = err?.response?.data?.message ?? err?.message ?? "Sign up failed";
       setServerError(msg);
     },
   });
 
-  function validateEmail(v: string) {
-    return /\S+@\S+\.\S+/.test(v);
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function onSubmit(values: RegisterDto) {
     setServerError(null);
 
-    if (!displayName) {
-      setServerError("Please provide a display name.");
-      return;
-    }
-    if (!username && !email) {
-      setServerError("Please provide either a username or an email.");
-      return;
-    }
-    if (email && !validateEmail(email)) {
-      setServerError("Please provide a valid email address.");
-      return;
-    }
-    if (!password || password.length < 6) {
-      setServerError("Password must be at least 6 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setServerError("Passwords do not match.");
-      return;
-    }
-
-    const payload: any = { displayName, password };
-    if (username) payload.username = username;
-    if (email) payload.email = email;
+    const payload: RegisterDto = {
+      displayName: values.displayName,
+      password: values.password,
+      ...(values.username ? { username: values.username } : {}),
+      ...(values.email ? { email: values.email } : {}),
+    } as RegisterDto;
 
     signupMutation.mutate(payload);
   }
@@ -76,56 +68,61 @@ export default function SignupPage() {
         <div className="mb-4 text-sm text-red-700 bg-red-50 p-3 rounded">{serverError}</div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <label className="block mb-3">
           <div className="text-sm text-gray-700 mb-1">Display name</div>
           <input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
+            {...register("displayName")}
             className="w-full border rounded-md px-3 py-2 text-gray-900"
           />
+          {errors.displayName && (
+            <p className="mt-1 text-sm text-red-700">{errors.displayName.message}</p>
+          )}
         </label>
 
         <label className="block mb-3">
           <div className="text-sm text-gray-700 mb-1">Username</div>
           <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            {...register("username")}
             className="w-full border rounded-md px-3 py-2 text-gray-900"
           />
+          {errors.username && (
+            <p className="mt-1 text-sm text-red-700">{errors.username.message}</p>
+          )}
         </label>
 
         <label className="block mb-3">
           <div className="text-sm text-gray-700 mb-1">Email</div>
           <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register("email")}
             className="w-full border rounded-md px-3 py-2 text-gray-900"
             type="email"
             autoComplete="email"
           />
+          {errors.email && <p className="mt-1 text-sm text-red-700">{errors.email.message}</p>}
         </label>
 
         <label className="block mb-3">
-          <div className="text-sm text-gray-700 mb-1">Password</div>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded-md px-3 py-2 text-gray-900"
-            type="password"
-            autoComplete="new-password"
-          />
-        </label>
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-sm text-gray-700">Password</div>
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              className="text-sm underline text-green-600"
+            >
+              {showPassword ? "Hide" : "Show"} Password
+            </button>
+          </div>
 
-        <label className="block mb-3">
-          <div className="text-sm text-gray-700 mb-1">Confirm password</div>
           <input
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            {...register("password")}
             className="w-full border rounded-md px-3 py-2 text-gray-900"
-            type="password"
+            type={showPassword ? "text" : "password"}
             autoComplete="new-password"
           />
+          {errors.password && (
+            <p className="mt-1 text-sm text-red-700">{errors.password.message}</p>
+          )}
         </label>
 
         <div className="flex items-center justify-between mt-4">
