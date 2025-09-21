@@ -1,4 +1,5 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
+import { ProjectRoleAttributes } from "./project-role.model";
 
 export type ProjectPermissionAttributes = {
   id: string;
@@ -9,7 +10,7 @@ export type ProjectPermissionAttributes = {
 };
 
 export interface ProjectPermissionRelationships {
-  projectRoles: string[];
+  projectRoles: ProjectRoleAttributes[];
 }
 
 export type ProjectPermissionModelType = NeogmaModel<
