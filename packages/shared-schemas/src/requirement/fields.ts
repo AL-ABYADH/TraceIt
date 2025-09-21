@@ -72,5 +72,3 @@ export const requirementIdsField = createField("array", {
 });
 
 export const useCaseIdField = uuidField;
-
-export const requirementIdField = uuidField;

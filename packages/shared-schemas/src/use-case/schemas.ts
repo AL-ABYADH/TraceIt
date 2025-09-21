@@ -3,9 +3,9 @@ import {
   dateFieldDoc,
   projectIdFieldDoc,
   projectSchema,
+  requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
-import { requirementIdFieldDoc } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
@@ -64,6 +64,15 @@ export const createPrimaryUseCaseSchema = z
     importanceLevel: UseCaseImportanceEnumDoc.optional(),
   })
   .openapi({ title: "CreateUseCaseDto" });
+
+export const useCaseListSchema = z
+  .object({
+    id: uuidFieldDoc,
+    name: useCaseNameFieldDoc,
+    createdAt: dateFieldDoc,
+    updatedAt: dateFieldDoc.optional(),
+  })
+  .openapi({ title: "UseCaseAttributes" });
 
 export const updatePrimaryUseCaseSchema = z
   .object({
@@ -135,15 +144,6 @@ export const useCaseDiagramAttributesSchema = z
     updatedAt: dateFieldDoc.optional(),
   })
   .openapi({ title: "UseCaseDiagramAttributes" });
-
-export const useCaseListSchema = z
-  .object({
-    id: uuidFieldDoc,
-    name: useCaseNameFieldDoc,
-    createdAt: dateFieldDoc,
-    updatedAt: dateFieldDoc.optional(),
-  })
-  .openapi({ title: "UseCaseAttributes" });
 
 export const primaryUseCaseListSchema = useCaseListSchema
   .omit({})

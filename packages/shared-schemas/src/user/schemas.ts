@@ -2,9 +2,6 @@
 import { atLeastOneOfSchema, projectSchema } from "../common";
 import { updateUserFieldsDoc, userFieldsDoc } from "./openapi-fields";
 import { z } from "../zod-openapi-init";
-import { refreshTokenCookieSchema } from "../auth";
-import { projectCollaborationSchema } from "../project";
-
 export const updateUserSchema = atLeastOneOfSchema(updateUserFieldsDoc, [
   "username",
   "displayName",
