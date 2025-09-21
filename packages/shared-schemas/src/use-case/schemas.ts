@@ -1,21 +1,10 @@
-import {
-  actorCreatedAtFieldDoc,
-  actorIdFieldDoc,
-  actorNameFieldDoc,
-  actorSchema,
-  actorSubTypeEnumDoc,
-  actorTypeEnumDoc,
-  actorUpdatedAtFieldDoc,
-} from "../actor";
+import { actorSchema } from "../actor";
 import {
   dateFieldDoc,
-  dateISOField,
-  descriptionFieldDoc,
   projectIdFieldDoc,
   projectListSchema,
   uuidFieldDoc,
 } from "../common";
-import { requirementListSchema } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
@@ -41,6 +30,23 @@ export const projectIdSchema = z
     projectId: uuidFieldDoc,
   })
   .openapi({ title: "ProjectIdDto" });
+
+export const secondaryUseCaseIdSchema = z
+  .object({
+    secondaryUseCaseId: uuidFieldDoc,
+  })
+  .openapi({ title: "SecondaryUseCaseIdDto" });
+
+export const usecaseDiagramIdSchema = z
+  .object({
+    usecaseDiagramId: uuidFieldDoc,
+  })
+  .openapi({ title: "UseCaseDiagramIdDto" });
+export const primaryUsecaseIdSchema = z
+  .object({
+    primaryUsecaseId: uuidFieldDoc,
+  })
+  .openapi({ title: "PrimaryUsecaseIdDto" });
 
 /**
  * =========================

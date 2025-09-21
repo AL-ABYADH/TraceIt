@@ -12,9 +12,9 @@ import {
   projectStatusSchema,
   type UpdateProjectDto,
   updateProjectSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
   ProjectListDto,
+  type ProjectIdDto,
+  projectIdSchema,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -32,11 +32,9 @@ export class ProjectController {
     return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
   }
 
-  @Get(":id")
-  async find(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-  ): Promise<ProjectDetailDto> {
-    return this.projectService.findById(projectId.id);
+  @Get(":projectId")
+  async find(@Param(zodParam(projectIdSchema)) params: ProjectIdDto): Promise<ProjectDetailDto> {
+    return this.projectService.findById(params.projectId);
   }
 
   @Post()
@@ -47,32 +45,32 @@ export class ProjectController {
     return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
-  @Put(":id")
+  @Put(":projectId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
   ): Promise<ProjectDetailDto> {
-    return this.projectService.update(projectId.id, dto);
+    return this.projectService.update(params.projectId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":projectId")
   async delete(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.projectService.delete(projectId.id);
+    const success = await this.projectService.delete(params.projectId);
     return { success };
   }
 
-  @Patch(":id")
+  @Patch(":projectId")
   async activate(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Query(zodQuery(projectActionSchema)) projectStatus: ProjectActionDto,
   ): Promise<{ success: boolean }> {
     if (projectStatus.status === "activate") {
-      const success = await this.projectService.activate(projectId.id);
+      const success = await this.projectService.activate(params.projectId);
       return { success };
     } else if (projectStatus.status === "archive") {
-      const success = await this.projectService.archive(projectId.id);
+      const success = await this.projectService.archive(params.projectId);
       return { success };
     } else {
       return { success: false };

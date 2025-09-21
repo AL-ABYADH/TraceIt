@@ -172,44 +172,6 @@ export function createField<
   return field as BaseSchemaFor<T, E>;
 }
 
-// Interface for enum field options
-// interface EnumFieldOptions<T extends readonly string[]> {
-//   message?: string;
-//   nullable?: boolean;
-//   optional?: boolean;
-//   default?: T[number]; // Type ensures default is one of the enum values
-//   description?: string;
-// }
-
-/**
- * Creates a strongly-typed Zod enum schema based on provided values and options
- */
-// export function createEnumField<T extends readonly [string, ...string[]]>(
-//   values: [...T],
-//   options: EnumFieldOptions<T> = {},
-// ) {
-//   let field = z.enum(values);
-
-//   // Apply optional/nullable transformations
-//   if (options.nullable) {
-//     field = (field as any).nullable();
-//   }
-
-//   if (options.optional) {
-//     field = (field as any).optional();
-//   }
-
-//   if (options.default !== undefined) {
-//     field = (field as any).default(options.default);
-//   }
-
-//   if (options.description) {
-//     field = field.describe(options.description);
-//   }
-
-//   return field;
-// }
-
 type MutableTuple<T extends readonly any[]> = {
   -readonly [P in keyof T]: T[P];
 };

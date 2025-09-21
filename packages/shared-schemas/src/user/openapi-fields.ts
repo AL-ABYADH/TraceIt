@@ -1,7 +1,6 @@
-// @repo/shared/schemas/user/update-user-openapi-fields.ts
 import { updateUserFields, userFields } from "./fields";
 
-export const updateUserOpenApiFields = {
+export const updateUserFieldsDoc = {
   username: updateUserFields.username.openapi({
     description: "Unique username used for login and identification",
     example: "new_user123",
@@ -12,7 +11,7 @@ export const updateUserOpenApiFields = {
   }),
 };
 
-export const userOpenApiFields = {
+export const userFieldsDoc = {
   id: userFields.id.openapi({
     description: "Unique identifier for the user",
     example: "a8d5a4e3-88a9-4a87-bb52-42cfb8b5d0ff",

@@ -66,6 +66,7 @@ export class AuthController {
     @RealIP() ipAddress: string,
     @Res({ passthrough: true }) response: Response,
   ): Promise<{ success: boolean }> {
+    console.log(loginDto);
     const data: TokensDto = await this.authService.login(loginDto, userAgent, ipAddress, response);
     response.setHeader("Authorization", `Bearer ${data.accessToken}`);
     return { success: !!data };

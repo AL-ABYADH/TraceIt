@@ -11,7 +11,6 @@ import {
   updateProjectCollaborationSchema,
   createProjectInvitationSchema,
   createProjectCollaborationSchema,
-  projectStatusSchema,
   projectActionSchema,
   projectCollaborationSchema,
   projectDetailSchema,
@@ -40,7 +39,6 @@ export type CreateProjectCollaborationDto = z.infer<
   typeof createProjectCollaborationSchema
 >;
 
-export type ProjectStatusDto = z.infer<typeof projectStatusSchema>;
 export type ProjectRoleDto = z.infer<typeof projectRoleSchema>;
 export type ProjectPermissionDto = z.infer<typeof projectPermissionSchema>;
 export type ProjectActionDto = z.infer<typeof projectActionSchema>;
