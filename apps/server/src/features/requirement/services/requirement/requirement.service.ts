@@ -94,7 +94,7 @@ export class RequirementService {
   /**
    * Determine requirement type from entity via its most-specific label
    */
-  private async getRequirementTypeFromEntity(requirement: Requirement): Promise<RequirementType> {
+  public async getRequirementTypeFromEntity(requirement: Requirement): Promise<RequirementType> {
     const labels = await this.requirementRepository.getLabelsById(requirement.id);
     if (!labels || labels.length === 0) {
       throw new NotFoundException(`Requirement with ID ${requirement.id} has no labels`);
