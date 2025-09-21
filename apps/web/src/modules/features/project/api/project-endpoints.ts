@@ -1,7 +1,7 @@
 const PREFIX = "/projects";
 
 export const projectEndpoints = {
-  root: {
+  list: {
     path: PREFIX,
     isPublic: false,
   },

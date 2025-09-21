@@ -9,11 +9,11 @@ import {
 } from "@repo/shared-schemas";
 
 async function listActiveProjects(): Promise<ProjectListDto[]> {
-  return http.get(projectEndpoints.root, { params: { status: ProjectStatus.ACTIVE } });
+  return http.get(projectEndpoints.list, { params: { status: ProjectStatus.ACTIVE } });
 }
 
 async function listArchivedProjects(): Promise<ProjectListDto[]> {
-  return http.get(projectEndpoints.root, { params: { status: ProjectStatus.ARCHIVED } });
+  return http.get(projectEndpoints.list, { params: { status: ProjectStatus.ARCHIVED } });
 }
 
 async function getProject(id: string): Promise<ProjectDetailDto> {
@@ -21,7 +21,7 @@ async function getProject(id: string): Promise<ProjectDetailDto> {
 }
 
 async function createProject(project: CreateProjectDto): Promise<ProjectDetailDto> {
-  return http.post(projectEndpoints.root, { body: project });
+  return http.post(projectEndpoints.list, { body: project });
 }
 
 async function deleteProject(id: string) {
