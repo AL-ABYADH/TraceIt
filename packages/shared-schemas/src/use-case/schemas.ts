@@ -16,7 +16,7 @@ import {
   initialStateFieldDoc,
   finalStateFieldDoc,
   useCaseIdsFieldDoc,
-  useCaseImportanceEnumDoc,
+  UseCaseImportanceEnumDoc,
   actorsIdsFieldDoc,
 } from "./openapi-fields";
 
@@ -60,7 +60,7 @@ export const createPrimaryUseCaseSchema = z
     primaryActorIds: primaryActorIdsFieldDoc,
     secondaryActorIds: secondaryActorIdsFieldDoc,
     description: useCaseDescriptionFieldDoc.optional(),
-    importanceLevel: useCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceEnumDoc.optional(),
   })
   .openapi({ title: "CreateUseCaseDto" });
 
@@ -70,7 +70,7 @@ export const updatePrimaryUseCaseSchema = z
     description: useCaseDescriptionFieldDoc.optional(),
     primaryActorIds: primaryActorIdsFieldDoc.optional(),
     secondaryActorIds: secondaryActorIdsFieldDoc.optional(),
-    importanceLevel: useCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceEnumDoc.optional(),
   })
   .openapi({ title: "UpdatePrimaryUseCaseDto" });
 
