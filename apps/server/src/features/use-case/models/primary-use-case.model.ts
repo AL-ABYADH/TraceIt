@@ -1,5 +1,5 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseModel, UseCaseAttributes, UseCaseRelationships } from "./use-case.model";
+import { UseCaseAttributes, UseCaseModel, UseCaseRelationships } from "./use-case.model";
 import { ActorAttributes } from "../../actor/models/actor.model";
 import { SecondaryUseCaseAttributes } from "./secondary-use-case.model";
 
@@ -60,7 +60,7 @@ export const PrimaryUseCaseModel: ModelFactoryDefinition<
       model: "SecondaryUseCase",
       direction: "in",
       name: "BELONGS_TO",
-      cardinality: "one",
+      cardinality: "many",
     },
     // classes: {
     //   model: "Class",
