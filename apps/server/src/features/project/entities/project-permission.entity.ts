@@ -1,7 +1,7 @@
-export class ProjectPermission {
-  id: string;
-  permission: string;
-  code: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import {
+  ProjectPermissionAttributes,
+  ProjectPermissionRelationships,
+} from "../models/project-permission.model";
+
+export type ProjectPermission = ProjectPermissionAttributes &
+  Partial<ProjectPermissionRelationships>;
