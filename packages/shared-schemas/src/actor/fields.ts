@@ -2,18 +2,18 @@ import { createEnumField, createField } from "../common";
 import { z } from "../zod-openapi-init";
 
 export enum ActorSubtype {
-  HUMAN = "human",
-  SOFTWARE = "software",
-  HARDWARE = "hardware",
-  EVENT = "event",
-  AI_AGENT = "ai-agent",
+  HUMAN = "HUMAN",
+  SOFTWARE = "SOFTWARE",
+  HARDWARE = "HARDWARE",
+  EVENT = "EVENT",
+  AI_AGENT = "AI_AGENT",
 }
 
 export const ActorSubtypeField = createEnumField(ActorSubtype);
 
 export enum ActorType {
-  ACTUAL = "actual",
-  VIRTUAL = "virtual",
+  ACTUAL = "ACTUAL",
+  VIRTUAL = "VIRTUAL",
 }
 export const ActorTypeField = createEnumField(ActorType);
 // export const actorTypeEnum = createEnumField(["actual", "virtual"]);

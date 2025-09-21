@@ -16,7 +16,6 @@ import {
   actorIdsFieldDoc,
   communicationInfoFieldDoc,
   communicationFacilityFieldDoc,
-  requirementIdFieldDoc,
   referencedUseCaseIdFieldDoc,
   mainRequirementIdFieldDoc,
   detailRequirementIdsFieldDoc,
@@ -28,6 +27,7 @@ import {
   exceptionalFieldDoc,
   exceptionRequirementIdsFieldDoc,
   requirementTypeEnumDoc,
+  requirementIdFieldDoc,
   // eventActorSubTypeFieldDoc,
 } from "./openapi-fields";
 

@@ -5,7 +5,7 @@ import { EventActorRepository } from "../event-actor/event-actor.repository";
 import { HardwareActorRepository } from "../hardware-actor/hardware-actor.repository";
 import { HumanActorRepository } from "../human-actor/human-actor.repository";
 import { SoftwareActorRepository } from "../software-actor/software-actor.repository";
-import { ActorSubtype } from "../../enums/actor-subtype.enum";
+import ActorSubtype from "../../enums/actor-subtype.enum";
 import { Actor } from "../../entities/actor.entity";
 import { ConcreteActorRepositoryInterface } from "../interfaces/concrete-actor-repository.interface";
 import { InvalidActorSubtypeError } from "../../errors/invalid-actor-subtype.error";

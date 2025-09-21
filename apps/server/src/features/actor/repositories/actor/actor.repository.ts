@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { ActorModel, ActorModelType } from "../../models/actor.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { Actor } from "../../entities/actor.entity";
-import { ActorSubtype } from "../../enums/actor-subtype.enum";
-import { ActorType } from "../../enums/actor-type.enum";
+import ActorSubtype from "../../enums/actor-subtype.enum";
+import ActorType from "../../enums/actor-type.enum";
 
 @Injectable()
 export class ActorRepository {

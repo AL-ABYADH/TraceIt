@@ -5,6 +5,7 @@ import {
   projectSchema,
   uuidFieldDoc,
 } from "../common";
+import { requirementIdFieldDoc } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
@@ -84,6 +85,7 @@ export const createSecondaryUseCaseSchema = z
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,
     primaryUseCaseId: primaryUseCaseIdFieldDoc,
+    requirementId: requirementIdFieldDoc,
   })
   .openapi({ title: "CreateSecondaryUseCaseDto" });
 

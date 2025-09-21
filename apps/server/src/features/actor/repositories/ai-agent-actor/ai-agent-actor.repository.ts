@@ -5,8 +5,8 @@ import { CreateActorInterface } from "../../interfaces/create-actor.interface";
 import { UpdateActorInterface } from "../../interfaces/update-actor.interface";
 import { AiAgentActorModel, AiAgentActorModelType } from "../../models/ai-agent-actor.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { ActorType } from "../../enums/actor-type.enum";
-import { ActorSubtype } from "../../enums/actor-subtype.enum";
+import ActorType from "../../enums/actor-type.enum";
+import ActorSubtype from "../../enums/actor-subtype.enum";
 
 @Injectable()
 export class AiAgentActorRepository implements ConcreteActorRepositoryInterface<AiAgentActor> {
