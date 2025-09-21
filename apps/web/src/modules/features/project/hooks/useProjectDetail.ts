@@ -1,14 +1,14 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
 import { projectQueryKeys } from "../query/project-query-keys";
 import { projectClient } from "../api/clients/project-client";
-import { ProjectDetailDto } from "@repo/shared-schemas";
+import { ProjectDto } from "@repo/shared-schemas";
 
-export function useProjectDetail<T = ProjectDetailDto>(
+export function useProjectDetail<T = ProjectDto>(
   projectId: string,
-  select?: (data: ProjectDetailDto) => T,
-  options?: UseQueryOptions<ProjectDetailDto, Error, T>,
+  select?: (data: ProjectDto) => T,
+  options?: UseQueryOptions<ProjectDto, Error, T>,
 ): UseQueryResult<T, Error> {
-  return useQuery<ProjectDetailDto, Error, T>({
+  return useQuery<ProjectDto, Error, T>({
     queryKey: projectQueryKeys.detail(projectId),
     queryFn: () => projectClient.getProject(projectId),
     select,

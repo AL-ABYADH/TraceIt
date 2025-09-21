@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { route } from "nextjs-routes";
 import { useProjectDetail } from "@/modules/features/project/hooks/useProjectDetail";
-import { ProjectDetailDto } from "@repo/shared-schemas";
+import { ProjectDto } from "@repo/shared-schemas";
 
 const pages = [
   { title: "Actors", href: "/projects/[project-id]/actors" },
@@ -15,7 +15,7 @@ type Page = (typeof pages)[number];
 
 export default function ProjectSidebar({ projectId }: { projectId: string }) {
   const pathname = usePathname() || "/";
-  const { data } = useProjectDetail(projectId!, (data: ProjectDetailDto) => data.name);
+  const { data } = useProjectDetail(projectId!, (data: ProjectDto) => data.name);
 
   return (
     <>

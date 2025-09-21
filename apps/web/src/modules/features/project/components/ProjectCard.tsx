@@ -1,8 +1,8 @@
-import { ProjectListDto } from "@repo/shared-schemas";
+import { ProjectDto } from "@repo/shared-schemas";
 import Link from "next/link";
 import { route } from "nextjs-routes";
 
-export default function ProjectCard({ project }: { project: ProjectListDto }) {
+export default function ProjectCard({ project }: { project: ProjectDto }) {
   return (
     <Link
       href={route({
