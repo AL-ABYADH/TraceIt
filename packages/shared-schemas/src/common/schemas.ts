@@ -32,7 +32,7 @@ export const uuidParamsSchema = z.object({
   id: uuidFieldDoc,
 });
 
-export const projectListSchema = z
+export const projectSchema = z
   .object({
     id: projectIdFieldDoc,
     name: z.string(),

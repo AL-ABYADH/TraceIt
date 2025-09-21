@@ -13,7 +13,7 @@ import {
   projectActionFieldDoc,
   projectInvitationStatusFieldDoc,
 } from "./openapi-fields";
-import { dateISOField, projectListSchema, uuidFieldDoc } from "../common";
+import { dateISOField, projectSchema, uuidFieldDoc } from "../common";
 import { safeUserListSchema } from "../user";
 import { actorSchema } from "../actor";
 import { useCaseDetailSchema } from "../use-case";
@@ -42,7 +42,7 @@ export const projectCollaborationSchema = z
   .object({
     id: uuidFieldDoc,
     user: safeUserListSchema,
-    project: projectListSchema, // Use reference schema to avoid circular dependency
+    project: projectSchema, // Use reference schema to avoid circular dependency
     projectRoles: z.array(projectRoleSchema).optional(),
     createdAt: z.union([dateISOField, z.date()]),
     updatedAt: z.union([dateISOField, z.date()]).optional(),
@@ -129,16 +129,12 @@ export const projectRelationshipsSchema = z
   })
   .openapi({ title: "ProjectRelationships" });
 
-export const projectDetailSchema = projectListSchema
-  .merge(projectRelationshipsSchema)
-  .openapi({ title: "ProjectDetailDto" });
-
 export const projectInvitationSchema = z
   .object({
     id: uuidFieldDoc,
     sender: safeUserListSchema,
     receiver: safeUserListSchema,
-    project: projectListSchema,
+    project: projectSchema,
     projectRoles: z.array(projectRoleSchema).nullable(),
     // expirationDate: dateFieldDoc,
     expirationDate: z.union([dateISOField, z.date()]),

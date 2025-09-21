@@ -2,7 +2,7 @@ import { actorSchema } from "../actor";
 import {
   dateFieldDoc,
   projectIdFieldDoc,
-  projectListSchema,
+  projectSchema,
   uuidFieldDoc,
 } from "../common";
 import { z } from "../zod-openapi-init";
@@ -145,7 +145,7 @@ export const useCaseListSchema = z
 
 // export const useCaseRelationshipsSchema = z
 //   .object({
-//     project: projectListSchema.optional().describe("Project this use case belongs to"),
+//     project: projectSchema.optional().describe("Project this use case belongs to"),
 //     requirements: z.array(requirementListSchema).optional().describe(
 //       "Array of requirements associated with this use case"
 //     ),
@@ -209,7 +209,7 @@ export const primaryUseCaseDetailSchema = primaryUseCaseListSchema
 
 export const useCaseRelationshipsSchema = z
   .object({
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
     requirements: z.array(z.any()).optional(),
     includedUseCases: z.array(useCaseListSchema).optional(),
     extendedUseCases: z.array(useCaseListSchema).optional(),
@@ -242,7 +242,7 @@ export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
 // export const useCaseDiagramRelationshipsSchema = z
 //   .object({
 //     useCases: useCaseAttributesSchema, // single object or maybe array? You defined as single, so single here
-//     project: projectListSchema.optional(),
+//     project: projectSchema.optional(),
 //     actors: actorSchema, // you need to have this schema similar to useCaseAttributesSchema
 //   })
 //   .openapi({ title: "UseCaseDiagramRelationships" });
@@ -250,7 +250,7 @@ export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
 export const useCaseDiagramRelationshipsSchema = z
   .object({
     useCases: useCaseListSchema.optional(), // Keep as single object but make optional
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
     actors: actorSchema.optional(), // Keep as single object but make optional
   })
   .openapi({ title: "UseCaseDiagramRelationships" });

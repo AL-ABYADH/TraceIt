@@ -2,7 +2,7 @@ import { actorSchema, eventActorSchema } from "../actor";
 import {
   dateISOField,
   projectIdFieldDoc,
-  projectListSchema,
+  projectSchema,
   uuidFieldDoc,
 } from "../common";
 import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
@@ -337,7 +337,7 @@ export const simpleRequirementListSchema = requirementListSchema
 export const requirementRelationshipsSchema = z
   .object({
     useCase: useCaseListSchema.optional(),
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
   })
   .openapi({ title: "RequirementRelationships" });
 

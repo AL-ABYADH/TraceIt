@@ -7,14 +7,13 @@ import {
   createProjectSchema,
   type ProjectActionDto,
   projectActionSchema,
-  type ProjectDetailDto,
   type ProjectStatusDto,
   projectStatusSchema,
   type UpdateProjectDto,
   updateProjectSchema,
-  ProjectListDto,
   type ProjectIdDto,
   projectIdSchema,
+  ProjectDto,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -27,13 +26,13 @@ export class ProjectController {
     @CurrentUserId() userId: string,
     @Query(zodQuery(projectStatusSchema))
     status: ProjectStatusDto,
-  ): Promise<ProjectListDto[]> {
+  ): Promise<ProjectDto[]> {
     // return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
     return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
   }
 
   @Get(":projectId")
-  async find(@Param(zodParam(projectIdSchema)) params: ProjectIdDto): Promise<ProjectDetailDto> {
+  async find(@Param(zodParam(projectIdSchema)) params: ProjectIdDto): Promise<ProjectDto> {
     return this.projectService.findById(params.projectId);
   }
 
@@ -41,7 +40,7 @@ export class ProjectController {
   async create(
     @CurrentUserId() userId: string,
     @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
-  ): Promise<ProjectDetailDto> {
+  ): Promise<ProjectDto> {
     return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
@@ -49,7 +48,7 @@ export class ProjectController {
   async update(
     @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
-  ): Promise<ProjectDetailDto> {
+  ): Promise<ProjectDto> {
     return this.projectService.update(params.projectId, dto);
   }
 
