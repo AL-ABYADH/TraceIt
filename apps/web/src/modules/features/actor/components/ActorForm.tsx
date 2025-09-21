@@ -4,7 +4,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addActorSchema, AddActorDto, actorSubTypeEnum } from "@repo/shared-schemas";
+import { addActorSchema, AddActorDto, ActorSubtype } from "@repo/shared-schemas";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { useAddActor } from "../hooks/useAddActor";
 
@@ -27,7 +27,7 @@ export default function ActorForm({ hideForm, projectId }: Props) {
     mode: "onSubmit",
     defaultValues: {
       name: "",
-      subType: actorSubTypeEnum.Values[0],
+      subType: ActorSubtype.HUMAN,
       projectId,
     },
   });
