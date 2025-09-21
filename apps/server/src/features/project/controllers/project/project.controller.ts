@@ -6,7 +6,6 @@ import {
   type CreateProjectDto,
   createProjectSchema,
   type ProjectActionDto,
-  projectActionSchema,
   type ProjectStatusDto,
   projectStatusSchema,
   type UpdateProjectDto,
@@ -14,7 +13,8 @@ import {
   type ProjectIdDto,
   projectIdSchema,
   ProjectDto,
-  projectAction,
+  ProjectActionSchema,
+  ProjectAction,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -64,12 +64,12 @@ export class ProjectController {
   @Patch(":projectId")
   async activate(
     @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
-    @Query(zodQuery(projectActionSchema)) projectStatus: ProjectActionDto,
+    @Query(zodQuery(ProjectActionSchema)) projectStatus: ProjectActionDto,
   ): Promise<{ success: boolean }> {
-    if (projectStatus.status === projectAction.ACTIVATE) {
+    if (projectStatus.status === ProjectAction.ACTIVATE) {
       const success = await this.projectService.activate(params.projectId);
       return { success };
-    } else if (projectStatus.status === projectAction.ARCHIVE) {
+    } else if (projectStatus.status === ProjectAction.ARCHIVE) {
       const success = await this.projectService.archive(params.projectId);
       return { success };
     } else {

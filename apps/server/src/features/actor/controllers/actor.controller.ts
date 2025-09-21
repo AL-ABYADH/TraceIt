@@ -40,11 +40,11 @@ export class ActorController {
    */
   @Get("subtype/:subtype")
   async listProjectActorsBySubtype(
-    @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
+    @Query(zodQuery(actorIdSchema)) params: ActorIdDto,
     @Param(zodParam(actorSubtypeSchema)) subtype: SubTypeActorDto,
   ): Promise<ActorDto[]> {
     return this.actorService.listProjectActorsBySubtype(
-      params.id,
+      params.actorId,
       subtype as unknown as ActorSubtype,
     );
   }
@@ -64,10 +64,8 @@ export class ActorController {
    * Retrieve all actors for a specific project
    */
   @Get()
-  async listProjectActors(
-    @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<ActorDto[]> {
-    return this.actorService.listProjectActors(params.id);
+  async listProjectActors(@Query(zodQuery(actorIdSchema)) params: ActorIdDto): Promise<ActorDto[]> {
+    return this.actorService.listProjectActors(params.actorId);
   }
 
   /**

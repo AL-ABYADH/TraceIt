@@ -77,4 +77,4 @@ export enum ProjectStatus {
   ARCHIVED = "ARCHIVED",
 }
 
-export const projectStatusField = createEnumField(ProjectStatus);
+export const ProjectStatusField = createEnumField(ProjectStatus);

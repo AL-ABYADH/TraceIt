@@ -8,15 +8,15 @@ import { createEnumField, createField, uuidField } from "../common";
 //   },
 // );
 
-export enum useCaseImportanceLevel {
+export enum UseCaseImportanceLevel {
   HIGH = "HIGH",
   MEDIUM = "MEDIUM",
   LOW = "LOW",
 }
 
 // Base field (no OpenAPI yet)
-export const useCaseImportanceLevelField = createEnumField(
-  useCaseImportanceLevel,
+export const UseCaseImportanceLevelField = createEnumField(
+  UseCaseImportanceLevel,
   {
     // nullable: false,
     // optional: false,
