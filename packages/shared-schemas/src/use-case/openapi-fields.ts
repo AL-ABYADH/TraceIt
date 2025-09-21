@@ -6,8 +6,9 @@ import {
   initialStateField,
   finalStateField,
   useCaseIdsField,
-  useCaseImportanceEnum,
   actorsIdsField,
+  useCaseImportanceLevelField,
+  useCaseImportanceLevel,
 } from "./fields";
 import { uuidField } from "../common";
 
@@ -33,10 +34,10 @@ export const useCaseDescriptionFieldDoc = useCaseDescriptionField.openapi({
     "This use case allows registered users to securely authenticate into the system using their email and password credentials. The system validates the credentials and grants access to authorized features upon successful authentication.",
 });
 
-export const useCaseImportanceEnumDoc = useCaseImportanceEnum.openapi({
+export const useCaseImportanceEnumDoc = useCaseImportanceLevelField.openapi({
   description:
     "The importance level of this use case for prioritization purposes",
-  example: "HIGH",
+  example: useCaseImportanceLevel.HIGH,
 });
 
 // Actor relationship fields

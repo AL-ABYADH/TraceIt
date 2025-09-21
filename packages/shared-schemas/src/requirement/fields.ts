@@ -1,20 +1,6 @@
 import { createEnumField, createField } from "../common/field-factory";
 import { uuidField } from "../common";
 
-// Requirement enums
-// export const requirementTypeEnum = createEnumField([
-//   "SYSTEM_REQUIREMENT",
-//   "EVENT_SYSTEM_REQUIREMENT",
-//   "ACTOR_REQUIREMENT",
-//   "SYSTEM_ACTOR_COMMUNICATION_REQUIREMENT",
-//   "CONDITIONAL_REQUIREMENT",
-//   "RECURSIVE_REQUIREMENT",
-//   "USE_CASE_REFERENCE_REQUIREMENT",
-//   "LOGICAL_GROUP_REQUIREMENT",
-//   "CONDITIONAL_GROUP_REQUIREMENT",
-//   "SIMULTANEOUS_REQUIREMENT",
-//   "EXCEPTIONAL_REQUIREMENT",
-// ]);
 export enum RequirementType {
   SYSTEM_REQUIREMENT = "SYSTEM_REQUIREMENT",
   EVENT_SYSTEM_REQUIREMENT = "EVENT_SYSTEM_REQUIREMENT",
@@ -88,17 +74,3 @@ export const requirementIdsField = createField("array", {
 });
 
 export const useCaseIdField = uuidField;
-
-/**
- * Event Actor specialization (only subtype = "event")
- */
-// export const eventActorSchema = actorSchema
-//   .extend({
-//     subtype: actorSubTypeEnumDoc.openapi({
-//       example: "event",
-//       description: "Subtype must always be 'event' for event actors",
-//     }),
-//   })
-//   .refine((data) => data.subtype === "event", {
-//     message: "Actor subtype must be 'event'",
-//   });

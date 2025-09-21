@@ -24,17 +24,26 @@ export const roleNameField = createField("string", {
   message: "Only letters, numbers, and underscores.",
 });
 
-export const projectActionField = createEnumField(["activate", "archive"], {
+// export const projectActionField = createEnumField(["activate", "archive"], {
+//   nullable: false,
+//   optional: false,
+// });
+
+export enum projectAction {
+  ACTIVATE = "ACTIVATE",
+  ARCHIVE = "ARCHIVE",
+}
+
+export const projectActionField = createEnumField(projectAction, {
   nullable: false,
   optional: false,
 });
-
 export enum ProjectInvitationStatus {
-  PENDING = "pending",
-  ACCEPTED = "accepted",
-  DENIED = "denied",
-  CANCELLED = "cancelled",
-  EXPIRED = "expired",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DENIED = "DENIED",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
 }
 
 // Base field (no OpenAPI yet)

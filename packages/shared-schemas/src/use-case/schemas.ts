@@ -143,34 +143,6 @@ export const useCaseListSchema = z
   })
   .openapi({ title: "UseCaseAttributes" });
 
-// export const useCaseRelationshipsSchema = z
-//   .object({
-//     project: projectSchema.optional().describe("Project this use case belongs to"),
-//     requirements: z.array(requirementListSchema).optional().describe(
-//       "Array of requirements associated with this use case"
-//     ),
-//     includedUseCases: z.array(useCaseListSchema).optional().describe(
-//       "Array of included use cases"
-//     ),
-//     extendedUseCases: z.array(useCaseListSchema).optional().describe(
-//       "Array of extended use cases"
-//     ),
-//   })
-//   .openapi({
-//     title: "UseCaseRelationships",
-//     description: "Relationships of a use case with project, requirements, and other use cases",
-//   });
-
-// export const primaryUseCaseAttributesSchema = useCaseAttributesSchema.extend({
-//   description: z.string().optional().openapi({
-//     description: "Optional description of the primary use case",
-//     example: "Allows a user to register for an account"
-//   }),
-// }).openapi({
-//   title: "PrimaryUseCaseAttributes",
-//   description: "Represents attributes of a primary use case, including optional description",
-// });
-
 export const primaryUseCaseListSchema = useCaseListSchema
   .omit({})
   .extend({
@@ -238,14 +210,6 @@ export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
     description:
       "Detailed view of a secondary use case including its attributes and relationships",
   });
-
-// export const useCaseDiagramRelationshipsSchema = z
-//   .object({
-//     useCases: useCaseAttributesSchema, // single object or maybe array? You defined as single, so single here
-//     project: projectSchema.optional(),
-//     actors: actorSchema, // you need to have this schema similar to useCaseAttributesSchema
-//   })
-//   .openapi({ title: "UseCaseDiagramRelationships" });
 
 export const useCaseDiagramRelationshipsSchema = z
   .object({

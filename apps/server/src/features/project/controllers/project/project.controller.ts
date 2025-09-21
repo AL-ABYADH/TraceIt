@@ -14,6 +14,7 @@ import {
   type ProjectIdDto,
   projectIdSchema,
   ProjectDto,
+  projectAction,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -65,10 +66,10 @@ export class ProjectController {
     @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Query(zodQuery(projectActionSchema)) projectStatus: ProjectActionDto,
   ): Promise<{ success: boolean }> {
-    if (projectStatus.status === "activate") {
+    if (projectStatus.status === projectAction.ACTIVATE) {
       const success = await this.projectService.activate(params.projectId);
       return { success };
-    } else if (projectStatus.status === "archive") {
+    } else if (projectStatus.status === projectAction.ARCHIVE) {
       const success = await this.projectService.archive(params.projectId);
       return { success };
     } else {

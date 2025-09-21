@@ -136,7 +136,6 @@ export const projectInvitationSchema = z
     receiver: safeUserListSchema,
     project: projectSchema,
     projectRoles: z.array(projectRoleSchema).nullable(),
-    // expirationDate: dateFieldDoc,
     expirationDate: z.union([dateISOField, z.date()]),
     status: projectInvitationStatusFieldDoc,
     createdAt: z.union([dateISOField, z.date()]),
