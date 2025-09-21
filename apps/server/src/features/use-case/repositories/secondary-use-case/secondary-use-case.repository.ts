@@ -6,6 +6,7 @@ import {
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
+import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 
 @Injectable()
 export class SecondaryUseCaseRepository {
@@ -15,7 +16,7 @@ export class SecondaryUseCaseRepository {
     this.secondaryUseCaseModel = SecondaryUseCaseModel(this.neo4jService.getNeogma());
   }
 
-  async create(createDto: any): Promise<SecondaryUseCase> {
+  async create(createDto: CreateSecondaryUseCaseInterface): Promise<SecondaryUseCase> {
     const useCase = await this.secondaryUseCaseModel.createOne({
       name: createDto.name,
       project: {
@@ -23,6 +24,9 @@ export class SecondaryUseCaseRepository {
       },
       primaryUseCase: {
         where: [{ params: { id: createDto.primaryUseCaseId } }],
+      },
+      requirements: {
+        where: [{ params: { id: createDto.requirementId } }],
       },
     });
     return useCase;

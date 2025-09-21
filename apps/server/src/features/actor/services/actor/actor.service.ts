@@ -5,8 +5,8 @@ import { UpdateActorInterface } from "../../interfaces/update-actor.interface";
 import { AddActorParamsInterface } from "../../interfaces/add-actor-params.interface";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { ActorRepository } from "../../repositories/actor/actor.repository";
-import { ActorSubtype } from "../../enums/actor-subtype.enum";
-import { ActorType } from "../../enums/actor-type.enum";
+import ActorSubtype from "../../enums/actor-subtype.enum";
+import ActorType from "../../enums/actor-type.enum";
 
 @Injectable()
 export class ActorService {

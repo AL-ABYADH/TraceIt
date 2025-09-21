@@ -78,3 +78,4 @@ export enum ProjectStatus {
 }
 
 export const ProjectStatusField = createEnumField(ProjectStatus);
+export const requirementIdField = uuidField;

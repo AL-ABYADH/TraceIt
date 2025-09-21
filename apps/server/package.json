@@ -31,7 +31,6 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.0",
     "@repo/custom-neogma": "workspace:*",
-    "@repo/custom-validators": "workspace:*",
     "@repo/shared-schemas": "workspace:*",
     "argon2": "^0.43.0",
     "class-transformer": "^0.5.1",

@@ -3,9 +3,9 @@ import {
   dateISOField,
   projectIdFieldDoc,
   projectSchema,
+  requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
-import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
 import { z } from "../zod-openapi-init";
 import {
   useCaseIdFieldDoc,
@@ -16,7 +16,6 @@ import {
   actorIdsFieldDoc,
   communicationInfoFieldDoc,
   communicationFacilityFieldDoc,
-  requirementIdFieldDoc,
   referencedUseCaseIdFieldDoc,
   mainRequirementIdFieldDoc,
   detailRequirementIdsFieldDoc,
@@ -30,6 +29,7 @@ import {
   requirementTypeEnumDoc,
   // eventActorSubTypeFieldDoc,
 } from "./openapi-fields";
+import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
 
 /**
  * =========================
