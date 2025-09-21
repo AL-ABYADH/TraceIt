@@ -13,7 +13,6 @@ export function useCreateProject(opts?: UseCreateProjectOptions) {
 
   const mutation = useMutation({
     mutationFn: (project: CreateProjectDto) => projectClient.createProject(project),
-    // keep cache invalidation inside the hook
     onSettled: () => {
       qc.invalidateQueries({ queryKey: projectQueryKeys.list });
     },
@@ -26,7 +25,6 @@ export function useCreateProject(opts?: UseCreateProjectOptions) {
     },
   });
 
-  // expose both mutate and mutateAsync for convenience
   const mutate = (project: CreateProjectDto) => mutation.mutate(project);
   const mutateAsync = (project: CreateProjectDto) => mutation.mutateAsync(project);
 
