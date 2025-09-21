@@ -1,5 +1,3 @@
-import { ActorSubtype } from "../../actor/enums/actor-subtype.enum";
-
 // Base interface for requirement creation
 export interface CreateRequirementInterface {
   useCaseId: string;
