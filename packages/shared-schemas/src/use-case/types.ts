@@ -17,6 +17,7 @@ import {
   secondaryUseCaseIdSchema,
   useCaseDiagramIdSchema,
   primaryUseCaseIdSchema,
+  useCaseListSchema,
 } from "./schemas";
 
 /**
@@ -54,6 +55,7 @@ export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
  */
 export type ActorsDto = z.infer<typeof actorsSchema>;
 export type UseCaseDetailDto = z.infer<typeof useCaseDetailSchema>;
+export type UseCaseListDto = z.infer<typeof useCaseListSchema>;
 export type UseCaseDiagramDetailDto = z.infer<
   typeof useCaseDiagramDetailSchema
 >;
