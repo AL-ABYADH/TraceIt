@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrimaryUseCaseRepository } from "../../repositories/primary-use-case/primary-use-case.repository";
 import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
-import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { ActorService } from "../../../actor/services/actor/actor.service";
@@ -20,7 +20,7 @@ export class PrimaryUseCaseService {
    * @returns Promise resolving to the created primary use case
    * @throws BadRequestException if the project doesn't exist
    */
-  async create(createDto: CreateUseCaseInterface): Promise<PrimaryUseCase> {
+  async create(createDto: CreatePrimaryUseCaseInterface): Promise<PrimaryUseCase> {
     try {
       await this.projectService.findById(createDto.projectId);
       for (const actorId of [
