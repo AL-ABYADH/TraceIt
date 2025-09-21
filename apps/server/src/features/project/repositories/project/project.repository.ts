@@ -23,7 +23,7 @@ export class ProjectRepository {
         where: [{ params: { id: projectData.ownerId } }],
       },
     });
-    return this.mapToProjectEntity(project);
+    return project;
   }
 
   async getById(id: string): Promise<Project | null> {
@@ -32,7 +32,7 @@ export class ProjectRepository {
       return null;
     }
 
-    return this.mapToProjectEntity(project);
+    return project;
   }
 
   async update(id: string, project: UpdateProjectInterface): Promise<any> {
@@ -69,32 +69,6 @@ export class ProjectRepository {
       relationshipAlias: "owner",
       where: status ? (status as unknown as { status: ProjectStatus }) : {},
     });
-    return this.mapListToProjectEntity(projects);
-  }
-
-  /**
-   * Transforms raw data into a Project entity instance.
-   */
-  private mapToProjectEntity(data: any): Project {
-    const entity = {
-      ...data,
-      createdAt: new Date(data.createdAt),
-    } as Project;
-
-    if (data.hasOwnProperty("updatedAt")) {
-      entity.updatedAt = new Date(data.updatedAt);
-    }
-    return entity;
-  }
-
-  /**
-   * Transforms raw data into a Project entity instance.
-   */
-  private mapListToProjectEntity(data: any): Project[] {
-    const items: Project[] = [];
-    for (const item of data) {
-      items.push(this.mapToProjectEntity(item));
-    }
-    return items;
+    return projects;
   }
 }

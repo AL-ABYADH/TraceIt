@@ -28,17 +28,17 @@ export class ProjectInvitationRepository {
     const projectDetails = await this.projectRepository.getById(
       projectInvitationInterface.projectId,
     );
-    if (projectDetails === null) {
+    if (!projectDetails) {
       throw new Error(`Project with ID ${projectInvitationInterface.projectId} not found`);
     }
-    if (projectDetails.owner.id !== projectInvitationInterface.senderId) {
+    if (projectDetails.owner?.id !== projectInvitationInterface.senderId) {
       throw new Error(`User with ID ${userID} is not the owner of the project`);
     }
     if (userID !== projectInvitationInterface.senderId) {
       throw new Error("Don't have permission to create an invitation for another user");
     }
     const invitation = await this.projectInvitationModel.createOne({
-      expirationDate: projectInvitationInterface.expirationDate.toISOString(),
+      expirationDate: projectInvitationInterface.expirationDate,
       status: ProjectInvitationStatus.PENDING,
       sender: {
         where: [{ params: { id: projectInvitationInterface.senderId } }],
@@ -53,7 +53,7 @@ export class ProjectInvitationRepository {
         where: { params: { id: { [Op.in]: projectInvitationInterface.projectRoleIds } } },
       },
     });
-    return this.mapOneToProjectInvitationEntity(invitation);
+    return invitation;
   }
 
   async getBySender(
@@ -71,7 +71,7 @@ export class ProjectInvitationRepository {
         id: senderId,
       },
     });
-    return this.mapToProjectInvitationEntities(invitations);
+    return invitations;
   }
 
   async getByReceiver(
@@ -88,7 +88,7 @@ export class ProjectInvitationRepository {
       whereRelated: { id: receiverId },
     });
 
-    return this.mapToProjectInvitationEntities(invitations);
+    return invitations;
   }
 
   async setStatus(id: string, status: ProjectInvitationStatus): Promise<boolean> {
@@ -97,33 +97,13 @@ export class ProjectInvitationRepository {
       { where: { id: id } },
     );
 
-    return updated ? true : false;
+    return !!updated;
   }
 
   async getById(id: string): Promise<ProjectInvitation | null> {
     const invitation = await this.projectInvitationModel.findOneWithRelations({
       where: { id: id },
     });
-    if (!invitation) return null;
-    return this.mapOneToProjectInvitationEntity(invitation);
-  }
-
-  private mapToProjectInvitationEntities(data: any): ProjectInvitation[] {
-    if (!data) return [];
-    if (Array.isArray(data)) {
-      return data.map((item) => this.mapOneToProjectInvitationEntity(item));
-    }
-    return [this.mapOneToProjectInvitationEntity(data)];
-  }
-
-  private mapOneToProjectInvitationEntity(item: any): ProjectInvitation {
-    const { createdAt, updatedAt, expirationDate, ...rest } = item ?? {};
-
-    return {
-      ...rest,
-      expirationDate: new Date(expirationDate),
-      createdAt: new Date(createdAt),
-      ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
-    };
+    return invitation;
   }
 }
