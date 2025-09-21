@@ -41,7 +41,7 @@ export const projectSchema = z
     createdAt: z.union([dateISOField, z.date()]),
     updatedAt: z.union([dateISOField, z.date()]).optional(),
   })
-  .openapi({ title: "ProjectListDto" });
+  .openapi({ title: "ProjectDto" });
 
 export const projectStatusSchema = z.object({
   status: ProjectStatusFieldDoc,

@@ -24,11 +24,6 @@ export const roleNameField = createField("string", {
   message: "Only letters, numbers, and underscores.",
 });
 
-// export const projectActionField = createEnumField(["activate", "archive"], {
-//   nullable: false,
-//   optional: false,
-// });
-
 export enum ProjectAction {
   ACTIVATE = "ACTIVATE",
   ARCHIVE = "ARCHIVE",
@@ -49,8 +44,4 @@ export enum ProjectInvitationStatus {
 // Base field (no OpenAPI yet)
 export const ProjectInvitationStatusField = createEnumField(
   ProjectInvitationStatus,
-  {
-    // nullable: false,
-    // optional: false,
-  },
 );
