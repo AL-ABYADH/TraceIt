@@ -3,8 +3,8 @@ import "./globals.css";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="h-full bg-background text-foreground font-sans">
+      <body className="h-full m-0 p-0">
         <Providers>{children}</Providers>
       </body>
     </html>

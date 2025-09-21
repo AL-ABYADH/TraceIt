@@ -1,4 +1,4 @@
-import ProjectSidebar from "@/components/ProjectSidebar";
+import ProjectSidebar from "@/modules/features/project/components/ProjectSidebar";
 import ProjectLayoutShell from "@/modules/features/project/components/ProjectLayoutShell";
 
 export default async function ProjectLayout({
