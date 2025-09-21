@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { RequirementController } from "./controllers/requirement/requirement.controller";
 import { RequirementService } from "./services/requirement/requirement.service";
 import { RequirementFactoryService } from "./services/requirement-factory/requirement-factory.service";
@@ -30,7 +30,7 @@ import { ActorModule } from "../actor/actor.module";
 import { UseCaseModule } from "../use-case/use-case.module";
 
 @Module({
-  imports: [ProjectModule, ActorModule, UseCaseModule],
+  imports: [ProjectModule, ActorModule, forwardRef(() => UseCaseModule)],
   controllers: [RequirementController],
   providers: [
     // Services
