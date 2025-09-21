@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
@@ -19,10 +19,7 @@ type Props = {
 };
 
 export default function UseCaseForm({ hideForm, projectId }: Props) {
-  const { data, isLoading: actorsLoading } = useActors(projectId);
-  const actors = data!;
-
-  const [serverError, setServerError] = React.useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const {
     register,
@@ -70,6 +67,19 @@ export default function UseCaseForm({ hideForm, projectId }: Props) {
       setServerError(msg);
     },
   });
+
+  const {
+    data,
+    isLoading: isActorsLoading,
+    isError: isActorsError,
+    error: actorsError,
+  } = useActors(projectId);
+
+  if (isActorsLoading) return <div>Loading...</div>;
+
+  if (isActorsError) return <div>{actorsError.message}</div>;
+
+  const actors = data!;
 
   const onSubmit = (values: CreatePrimaryUseCaseDto) => {
     setServerError(null);
@@ -154,7 +164,7 @@ export default function UseCaseForm({ hideForm, projectId }: Props) {
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">Primary actors</label>
                 <span className="text-xs text-gray-500">
-                  {actorsLoading ? "Loading…" : `${actors.length} available`}
+                  {isActorsLoading ? "Loading…" : `${actors.length} available`}
                 </span>
               </div>
 
@@ -217,7 +227,7 @@ export default function UseCaseForm({ hideForm, projectId }: Props) {
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-gray-700">Secondary actors</label>
                 <span className="text-xs text-gray-500">
-                  {actorsLoading ? "Loading…" : `${actors.length} available`}
+                  {isActorsLoading ? "Loading…" : `${actors.length} available`}
                 </span>
               </div>
 
