@@ -8,6 +8,8 @@ import {
   nameField,
   descriptionField,
   dateField,
+  projectStatusField,
+  ProjectStatus,
 } from "./fields";
 
 export const loginUsernameFieldDoc = loginUsernameField;
@@ -51,4 +53,9 @@ export const descriptionFieldDoc = descriptionField.openapi({
 
 export const dateFieldDoc = dateField.openapi({
   example: new Date().toISOString(),
+});
+
+export const projectStatusFieldDoc = projectStatusField.openapi({
+  example: ProjectStatus.ARCHIVED,
+  description: "The status of the project",
 });

@@ -12,6 +12,8 @@ import {
   type UuidParamsDto,
   uuidParamsSchema,
   ActorDto,
+  type ActorIdDto,
+  actorIdSchema,
 } from "@repo/shared-schemas";
 import { ActorSubtype } from "../enums/actor-subtype.enum";
 import { ActorType } from "../enums/actor-type.enum";
@@ -28,7 +30,7 @@ export class ActorController {
     const newDto = {
       name: dto.name,
       projectId: dto.projectId,
-      subType: dto.subType as ActorSubtype,
+      subType: dto.subType,
     };
     return this.actorService.add(newDto);
   }
@@ -71,22 +73,20 @@ export class ActorController {
   /**
    * Update an existing actor
    */
-  @Put(":id")
+  @Put(":actorId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(uuidParamsSchema)) params: ActorIdDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
   ): Promise<ActorDto> {
-    return this.actorService.update(params.id, dto);
+    return this.actorService.update(params.actorId, dto);
   }
 
   /**
    * Delete an actor
    */
-  @Delete(":id")
-  async remove(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<{ success: boolean }> {
-    const success = await this.actorService.remove(params.id);
+  @Delete(":actorId")
+  async remove(@Param(zodParam(actorIdSchema)) params: ActorIdDto): Promise<{ success: boolean }> {
+    const success = await this.actorService.remove(params.actorId);
     return { success };
   }
 }

@@ -6,8 +6,6 @@ import {
   projectActionField,
   ProjectInvitationStatus,
   projectInvitationStatusField,
-  ProjectStatus,
-  projectStatusField,
   roleNameField,
 } from "./fields";
 import {
@@ -75,11 +73,6 @@ export const expirationDateField = dateISOField.openapi({
 
 export const projectActionFieldDoc = projectActionField.openapi({
   example: "activate",
-  description: "The status of the project",
-});
-
-export const projectStatusFieldDoc = projectStatusField.openapi({
-  example: ProjectStatus.ARCHIVED,
   description: "The status of the project",
 });
 

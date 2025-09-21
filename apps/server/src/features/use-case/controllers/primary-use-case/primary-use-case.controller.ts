@@ -7,12 +7,12 @@ import {
   projectIdSchema,
   updatePrimaryUseCaseSchema,
   type UpdatePrimaryUseCaseDto,
-  type UuidParamsDto,
-  uuidParamsSchema,
   actorsSchema,
   type ActorsDto,
   PrimaryUseCaseDetailDto,
   PrimaryUseCaseListDto,
+  type PrimaryUseCaseIdDto,
+  primaryUsecaseIdSchema,
 } from "@repo/shared-schemas";
 import { PrimaryUseCaseService } from "../../services/primary-use-case/primary-use-case.service";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
@@ -35,55 +35,66 @@ export class PrimaryUseCaseController {
     return await this.primaryUseCaseService.listByProject(params.projectId);
   }
 
-  @Get(":id")
-  async getById(@Param(zodParam(uuidParamsSchema)) params: UuidParamsDto): Promise<PrimaryUseCase> {
-    return await this.primaryUseCaseService.findById(params.id);
+  @Get(":primaryUsecaseId")
+  async getById(
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+  ): Promise<PrimaryUseCase> {
+    return await this.primaryUseCaseService.findById(params.primaryUsecaseId);
   }
 
-  @Put(":id")
+  @Put(":primaryUsecaseId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(updatePrimaryUseCaseSchema)) dto: UpdatePrimaryUseCaseDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.update(params.id, dto);
+    return await this.primaryUseCaseService.update(params.primaryUsecaseId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":primaryUsecaseId")
   async remove(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
   ): Promise<{ success: boolean }> {
-    return { success: await this.primaryUseCaseService.remove(params.id) };
+    return { success: await this.primaryUseCaseService.remove(params.primaryUsecaseId) };
   }
 
-  @Post(":id/primary-actors")
+  @Post(":primaryUsecaseId/primary-actors")
   async addPrimaryActors(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.addPrimaryActors(params.id, dto.actorIds);
+    return await this.primaryUseCaseService.addPrimaryActors(params.primaryUsecaseId, dto.actorIds);
   }
 
-  @Delete(":id/primary-actors")
+  @Delete(":primaryUsecaseId/primary-actors")
   async removePrimaryActors(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.removePrimaryActors(params.id, dto.actorIds);
+    return await this.primaryUseCaseService.removePrimaryActors(
+      params.primaryUsecaseId,
+      dto.actorIds,
+    );
   }
 
-  @Post(":id/secondary-actors")
+  @Post(":primaryUsecaseId/secondary-actors")
   async addSecondaryActors(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.addSecondaryActors(params.id, dto.actorIds);
+    return await this.primaryUseCaseService.addSecondaryActors(
+      params.primaryUsecaseId,
+      dto.actorIds,
+    );
   }
 
-  @Delete(":id/secondary-actors")
+  @Delete(":primaryUsecaseId/secondary-actors")
   async removeSecondaryActors(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.removeSecondaryActors(params.id, dto.actorIds);
+    return await this.primaryUseCaseService.removeSecondaryActors(
+      params.primaryUsecaseId,
+      dto.actorIds,
+    );
   }
 }

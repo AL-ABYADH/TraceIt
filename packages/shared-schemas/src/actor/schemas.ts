@@ -1,5 +1,11 @@
+import { uuidFieldDoc } from "../common";
 import { z } from "../zod-openapi-init";
-import { actorSubTypeEvent, actorTypeVirtual } from "./fields";
+import {
+  ActorSubtype,
+  ActorSubtypeField,
+  ActorType,
+  ActorTypeField,
+} from "./fields";
 import {
   actorNameFieldDoc,
   updatedActorNameFieldDoc,
@@ -16,6 +22,12 @@ import {
  * CREATE ACTOR SCHEMA
  * =========================
  */
+
+export const actorIdSchema = z
+  .object({
+    actorId: uuidFieldDoc,
+  })
+  .openapi({ title: "ActorIdDto" });
 
 export const actorSubtypeSchema = z
   .object({
@@ -62,8 +74,8 @@ export const actorSchema = z
 export const eventActorSchema = actorSchema
   .omit({ type: true, subtype: true })
   .extend({
-    type: actorTypeVirtual,
-    subtype: actorSubTypeEvent,
+    type: ActorTypeField,
+    subtype: ActorSubtypeField,
   })
   .openapi("EventActor", {
     title: "Event Actor",
@@ -72,8 +84,8 @@ export const eventActorSchema = actorSchema
     example: {
       id: "f9e1c8a4-5a68-4c79-86d9-abc123456789",
       name: "System Maintenance",
-      type: "virtual",
-      subtype: "event",
+      type: ActorType.VIRTUAL,
+      subtype: ActorSubtype.EVENT,
       createdAt: "2025-09-14T10:00:00.000Z",
       updatedAt: "2025-09-14T12:00:00.000Z",
     },

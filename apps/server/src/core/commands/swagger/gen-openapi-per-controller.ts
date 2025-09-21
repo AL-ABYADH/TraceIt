@@ -5,11 +5,11 @@ import * as path from "path";
 const START_GLOBS = [
   "src/features/**/controllers/**/*.controller.ts",
   "src/features/**/controllers/*.controller.ts",
-  "src/features/**/controllers/**/*.ts",
-  "src/features/**/controllers/*.ts",
-  "src/core/**/controllers/**/*.controller.ts",
-  "src/core/**/controllers/*.controller.ts",
-  "src/core/**/controllers/**/*.ts",
+  // "src/features/**/controllers/**/*.ts",
+  // "src/features/**/controllers/*.ts",
+  // "src/core/**/controllers/**/*.controller.ts",
+  // "src/core/**/controllers/*.controller.ts",
+  // "src/core/**/controllers/**/*.ts",
   "src/core/**/controllers/*.ts",
 ];
 
@@ -1552,6 +1552,50 @@ async function main() {
 
         // NEW: if multiple param/query schema sources were collected, create a merged var name
         // Helper to create a reasonable combined identifier
+        // function stripSchemaSuffix(s: string) {
+        //   return s.endsWith("Schema") ? s.slice(0, -"Schema".length) : s;
+        // }
+        // function makeCombinedName(partsArr: string[]) {
+        //   // use raw imported idents (already resolved to ident names)
+        //   const cleaned = partsArr.map((p) => stripSchemaSuffix(p));
+        //   return cleaned.join("And") + "Schema";
+        // }
+
+        // // Determine final paramsVar/queryVar to use in the generated code for this method
+        // if (paramsSchemaSources.length > 1) {
+        //   // deduplicate preserving order
+        //   const uniq = Array.from(new Set(paramsSchemaSources));
+        //   const combinedName = makeCombinedName(uniq);
+        //   // store definition to emit later
+        //   combinedSchemaDefs.set(combinedName, uniq);
+        //   paramsVar = combinedName;
+        //   // ensure knownIdents/imports will consider original idents (they are likely already added above)
+        //   for (const src of uniq) {
+        //     const sharedMod = "@repo/shared-schemas";
+        //     if (!moduleToIdents.has(sharedMod)) moduleToIdents.set(sharedMod, new Set<string>());
+        //     moduleToIdents.get(sharedMod)!.add(src);
+        //   }
+        // } else if (paramsSchemaSources.length === 1) {
+        //   paramsVar = paramsSchemaSources[0];
+        // }
+
+        // if (querySchemaSources.length > 1) {
+        //   const uniq = Array.from(new Set(querySchemaSources));
+        //   const combinedName = makeCombinedName(uniq);
+        //   combinedSchemaDefs.set(combinedName, uniq);
+        //   queryVar = combinedName;
+        //   for (const src of uniq) {
+        //     const sharedMod = "@repo/shared-schemas";
+        //     if (!moduleToIdents.has(sharedMod)) moduleToIdents.set(sharedMod, new Set<string>());
+        //     moduleToIdents.get(sharedMod)!.add(src);
+        //   }
+        // } else if (querySchemaSources.length === 1) {
+        //   queryVar = querySchemaSources[0];
+        // }
+        //re
+
+        // NEW: if multiple param/query schema sources were collected, create a merged var name
+        // Helper to create a reasonable combined identifier
         function stripSchemaSuffix(s: string) {
           return s.endsWith("Schema") ? s.slice(0, -"Schema".length) : s;
         }
@@ -1593,6 +1637,7 @@ async function main() {
           queryVar = querySchemaSources[0];
         }
 
+        //re
         // Analyze response
         const respAnalysis = analyzeResponseFromMethod(method, sf, moduleToIdents);
         let responseDtoName: string | undefined = undefined;
@@ -1704,16 +1749,37 @@ async function main() {
     const regRel = registryImportRelPath(outDir);
     const registryImportLine = `import { registerMultiple, registry } from "${regRel}";`;
 
+    // // Emit combined schema definitions (if any) as const declarations
+    // const combinedDeclLines: string[] = [];
+    // if (combinedSchemaDefs.size > 0) {
+    //   for (const [combinedName, sources] of Array.from(combinedSchemaDefs.entries())) {
+    //     // create merged expression: a.merge(b).merge(c)...
+    //     if (!sources || sources.length === 0) continue;
+    //     const expr = sources.slice(1).reduce((acc, cur) => `${acc}.merge(${cur})`, sources[0]);
+    //     combinedDeclLines.push(`const ${combinedName} = ${expr};`);
+    //   }
+    // }
+
+    // re
+
     // Emit combined schema definitions (if any) as const declarations
     const combinedDeclLines: string[] = [];
     if (combinedSchemaDefs.size > 0) {
       for (const [combinedName, sources] of Array.from(combinedSchemaDefs.entries())) {
-        // create merged expression: a.merge(b).merge(c)...
+        // create merged expression: a.merge(b).merge(c)... for any number of schemas
         if (!sources || sources.length === 0) continue;
-        const expr = sources.slice(1).reduce((acc, cur) => `${acc}.merge(${cur})`, sources[0]);
-        combinedDeclLines.push(`const ${combinedName} = ${expr};`);
+
+        // Build a proper merge chain for any number of schemas
+        let mergeExpression = sources[0];
+        for (let i = 1; i < sources.length; i++) {
+          mergeExpression = `${mergeExpression}.merge(${sources[i]})`;
+        }
+
+        combinedDeclLines.push(`const ${combinedName} = ${mergeExpression};`);
       }
     }
+
+    // re
 
     let authPreamble = "";
     if (hasAuthPaths) {
@@ -1724,6 +1790,7 @@ async function main() {
  * The return value has { name, ref: { $ref: string } } shape.
  * We'll cast it to a typed object so TS/ESLint are happier.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const bearerAuth = registry.registerComponent("securitySchemes", "bearerAuth", {
   type: "http",
   scheme: "bearer",

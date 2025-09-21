@@ -3,11 +3,11 @@ import { ProjectPermissionService } from "../../services/project-permission/proj
 import {
   type CreateProjectPermissionDto,
   createProjectPermissionSchema,
+  type ProjectIdDto,
+  projectIdSchema,
   ProjectPermissionDto,
   type UpdateProjectPermissionDto,
   updateProjectPermissionSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 
@@ -22,11 +22,11 @@ export class ProjectPermissionController {
     return this.projectPermissionService.create(dto);
   }
 
-  @Get(":id")
+  @Get(":projectId")
   async find(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<ProjectPermissionDto> {
-    return this.projectPermissionService.find(projectId.id);
+    return this.projectPermissionService.find(params.projectId);
   }
 
   @Get()
@@ -34,19 +34,19 @@ export class ProjectPermissionController {
     return this.projectPermissionService.list();
   }
 
-  @Put(":id")
+  @Put(":projectId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectPermissionSchema)) dto: UpdateProjectPermissionDto,
   ): Promise<ProjectPermissionDto[]> {
-    return this.projectPermissionService.update(projectId.id, dto);
+    return this.projectPermissionService.update(params.projectId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":projectId")
   async delete(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const result = await this.projectPermissionService.delete(projectId.id);
+    const result = await this.projectPermissionService.delete(params.projectId);
     return { success: result };
   }
 }

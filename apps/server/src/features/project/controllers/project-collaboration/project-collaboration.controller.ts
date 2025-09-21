@@ -4,11 +4,11 @@ import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type UpdateProjectCollaborationDto,
   updateProjectCollaborationSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
   type CreateProjectCollaborationDto,
   createProjectCollaborationSchema,
   ProjectCollaborationDto,
+  type ProjectIdDto,
+  projectIdSchema,
 } from "@repo/shared-schemas";
 
 @Controller("project-collaborations")
@@ -22,25 +22,25 @@ export class ProjectCollaborationController {
     return this.projectCollaborationService.create(dto);
   }
 
-  @Get(":id")
+  @Get(":projectId")
   async listProjectCollaborations(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<ProjectCollaborationDto[]> {
-    return this.projectCollaborationService.listProjectCollaborations(projectId.id);
+    return this.projectCollaborationService.listProjectCollaborations(params.projectId);
   }
 
-  @Put(":id")
+  @Put(":projectId")
   async updateProjectCollaborationRoles(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectCollaborationSchema)) dto: UpdateProjectCollaborationDto,
   ): Promise<ProjectCollaborationDto> {
-    return this.projectCollaborationService.updateProjectCollaborationRoles(projectId.id, dto);
+    return this.projectCollaborationService.updateProjectCollaborationRoles(params.projectId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":projectId")
   async removeProjectCollaboration(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<boolean> {
-    return this.projectCollaborationService.removeProjectCollaboration(projectId.id);
+    return this.projectCollaborationService.removeProjectCollaboration(params.projectId);
   }
 }

@@ -6,7 +6,6 @@ import {
   uuidFieldDoc,
 } from "../common";
 import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
-import { userListSchema } from "../user";
 import { z } from "../zod-openapi-init";
 import {
   useCaseIdFieldDoc,
@@ -404,8 +403,8 @@ export const eventSystemRequirementRelationshipsSchema =
   simpleRequirementRelationshipsSchema
     .omit({})
     .extend({
-      // event: eventActorSchema.optional(),
-      event: actorSchema.optional(),
+      event: eventActorSchema.optional(),
+      // event: actorSchema.optional(),
     })
     .openapi({ title: "EventSystemRequirementRelationships" });
 

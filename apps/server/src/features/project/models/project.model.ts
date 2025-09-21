@@ -10,7 +10,7 @@ export type ProjectAttributes = {
   id: string;
   name: string;
   description?: string;
-  status: string;
+  status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
 };
