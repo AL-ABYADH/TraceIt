@@ -8,10 +8,10 @@ import {
   communicationFacilityField,
   conditionalValueField,
   actorIdsField,
-  requirementIdField,
   requirementIdsField,
   useCaseIdField,
   RequirementType,
+  requirementIdField,
 } from "./fields";
 import { uuidField } from "../common";
 
@@ -69,11 +69,6 @@ export const communicationFacilityFieldDoc = communicationFacilityField.openapi(
   },
 );
 
-export const requirementIdFieldDoc = requirementIdField.openapi({
-  description: "UUID of the referenced requirement",
-  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
-});
-
 // Composite requirement fields
 export const conditionalValueFieldDoc = conditionalValueField.openapi({
   description: "Noun phrase describing the conditional value",
@@ -124,4 +119,9 @@ export const exceptionalFieldDoc = exceptionalField.openapi({
 export const exceptionRequirementIdsFieldDoc = requirementIdsField.openapi({
   description: "UUIDs of requirements to handle the exception",
   example: ["c5d6e7f8-9abc-def0-1234-56789012345"],
+});
+
+export const requirementIdFieldDoc = requirementIdField.openapi({
+  description: "UUID of the referenced requirement",
+  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
 });

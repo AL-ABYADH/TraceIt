@@ -66,11 +66,11 @@ export const actorIdsField = createField("array", {
   description: "Array of actor IDs involved in the requirement",
 });
 
-export const requirementIdField = uuidField;
-
 export const requirementIdsField = createField("array", {
   elementType: uuidField,
   description: "Array of requirement IDs",
 });
 
 export const useCaseIdField = uuidField;
+
+export const requirementIdField = uuidField;

@@ -3,8 +3,8 @@ import {
   AbstractNeogmaModel,
   AbstractModelFactoryDefinition,
 } from "@repo/custom-neogma";
-import { ActorType } from "../enums/actor-type.enum";
-import { ActorSubtype } from "../enums/actor-subtype.enum";
+import ActorType from "../enums/actor-type.enum";
+import ActorSubtype from "../enums/actor-subtype.enum";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { ProjectAttributes } from "../../project/models/project.model";
 

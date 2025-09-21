@@ -4,7 +4,7 @@ import { RequirementRepositoryFactory } from "../../repositories/factory/require
 import { UseCaseService } from "../../../use-case/services/use-case/use-case.service";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { ActorService } from "../../../actor/services/actor/actor.service";
-import { ActorSubtype } from "../../../actor/enums/actor-subtype.enum";
+import ActorSubtype from "../../../actor/enums/actor-subtype.enum";
 
 // Import all create interfaces
 import {

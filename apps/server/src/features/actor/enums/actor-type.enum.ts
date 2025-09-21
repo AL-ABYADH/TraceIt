@@ -1,4 +1,2 @@
-export enum ActorType {
-  ACTUAL = "actual",
-  VIRTUAL = "virtual",
-}
+import { ActorType } from "@repo/shared-schemas";
+export default ActorType;

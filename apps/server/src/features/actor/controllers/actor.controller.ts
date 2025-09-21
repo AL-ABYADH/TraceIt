@@ -15,8 +15,8 @@ import {
   type ActorIdDto,
   actorIdSchema,
 } from "@repo/shared-schemas";
-import { ActorSubtype } from "../enums/actor-subtype.enum";
-import { ActorType } from "../enums/actor-type.enum";
+import ActorSubtype from "../enums/actor-subtype.enum";
+import ActorType from "../enums/actor-type.enum";
 
 @Controller("actors")
 export class ActorController {
@@ -78,7 +78,7 @@ export class ActorController {
    */
   @Put(":actorId")
   async update(
-    @Param(zodParam(projectIdSchema)) params: ActorIdDto,
+    @Param(zodParam(actorIdSchema)) params: ActorIdDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
   ): Promise<ActorDto> {
     return this.actorService.update(params.actorId, dto);
