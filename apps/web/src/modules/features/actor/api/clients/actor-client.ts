@@ -3,7 +3,7 @@ import { ActorDto, AddActorDto, UpdateActorDto } from "@repo/shared-schemas";
 import { actorEndpoints } from "../actor-endpoints";
 
 async function listProjectActors(projectId: string): Promise<ActorDto[]> {
-  return http.get(actorEndpoints.list, { params: { id: projectId } });
+  return http.get(actorEndpoints.list, { params: { projectId } });
 }
 
 async function addActor(actor: AddActorDto): Promise<ActorDto> {
