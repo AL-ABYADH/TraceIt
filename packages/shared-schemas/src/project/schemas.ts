@@ -10,8 +10,8 @@ import {
   roleIdsField,
   projectRoleIdsField,
   expirationDateField,
-  projectActionFieldDoc,
   projectInvitationStatusFieldDoc,
+  ProjectActionFieldDoc,
 } from "./openapi-fields";
 import { dateISOField, projectSchema, uuidFieldDoc } from "../common";
 import { safeUserListSchema } from "../user";
@@ -115,8 +115,8 @@ export const createProjectInvitationSchema = z
   })
   .openapi({ title: "CreateProjectInvitationDto" });
 
-export const projectActionSchema = z.object({
-  status: projectActionFieldDoc,
+export const ProjectActionSchema = z.object({
+  status: ProjectActionFieldDoc,
 });
 
 export const projectRelationshipsSchema = z

@@ -3,7 +3,7 @@ import { dateISOField } from "./fields";
 import {
   descriptionFieldDoc,
   projectIdFieldDoc,
-  projectStatusFieldDoc,
+  ProjectStatusFieldDoc,
   uuidFieldDoc,
 } from "./openapi-fields";
 
@@ -37,12 +37,12 @@ export const projectSchema = z
     id: projectIdFieldDoc,
     name: z.string(),
     description: descriptionFieldDoc.optional(),
-    status: projectStatusFieldDoc,
+    status: ProjectStatusFieldDoc,
     createdAt: z.union([dateISOField, z.date()]),
     updatedAt: z.union([dateISOField, z.date()]).optional(),
   })
   .openapi({ title: "ProjectListDto" });
 
 export const projectStatusSchema = z.object({
-  status: projectStatusFieldDoc,
+  status: ProjectStatusFieldDoc,
 });

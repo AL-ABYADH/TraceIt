@@ -3,10 +3,10 @@ import { z } from "../zod-openapi-init";
 import {
   permissionCodeField,
   permissionNameField,
-  projectAction,
-  projectActionField,
+  ProjectAction,
+  ProjectActionField,
   ProjectInvitationStatus,
-  projectInvitationStatusField,
+  ProjectInvitationStatusField,
   roleNameField,
 } from "./fields";
 import {
@@ -72,13 +72,13 @@ export const expirationDateField = dateISOField.openapi({
   description: "Expiration date for the invitation",
 });
 
-export const projectActionFieldDoc = projectActionField.openapi({
-  example: projectAction.ACTIVATE,
+export const ProjectActionFieldDoc = ProjectActionField.openapi({
+  example: ProjectAction.ACTIVATE,
   description: "The status of the project",
 });
 
 export const projectInvitationStatusFieldDoc =
-  projectInvitationStatusField.openapi({
+  ProjectInvitationStatusField.openapi({
     description: "The current status of the project invitation",
     example: ProjectInvitationStatus.ACCEPTED,
   });
