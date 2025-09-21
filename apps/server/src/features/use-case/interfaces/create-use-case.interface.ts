@@ -10,6 +10,7 @@ export interface CreateSecondaryUseCaseInterface {
   name: string;
   projectId: string;
   primaryUseCaseId: string;
+  requirementId: string;
 }
 
 export interface CreateDiagramUseCaseInterface {
