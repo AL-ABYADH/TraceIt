@@ -53,7 +53,7 @@ export const primaryUseCaseIdSchema = z
  * PRIMARY USE CASE SCHEMAS
  * =========================
  */
-export const createUseCaseSchema = z
+export const createPrimaryUseCaseSchema = z
   .object({
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,

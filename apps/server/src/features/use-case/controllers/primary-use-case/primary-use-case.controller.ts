@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
-  type CreateUseCaseDto,
-  createUseCaseSchema,
+  type CreatePrimaryUseCaseDto,
+  createPrimaryUseCaseSchema,
   type ProjectIdDto,
   projectIdSchema,
   updatePrimaryUseCaseSchema,
@@ -23,7 +23,7 @@ export class PrimaryUseCaseController {
 
   @Post()
   async add(
-    @Body(zodBody(createUseCaseSchema)) dto: CreateUseCaseDto,
+    @Body(zodBody(createPrimaryUseCaseSchema)) dto: CreatePrimaryUseCaseDto,
   ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.create(dto);
   }

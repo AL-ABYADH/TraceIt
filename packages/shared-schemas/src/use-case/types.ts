@@ -1,6 +1,6 @@
 import { z } from "../zod-openapi-init";
 import {
-  createUseCaseSchema,
+  createPrimaryUseCaseSchema,
   projectIdSchema,
   updatePrimaryUseCaseSchema,
   createSecondaryUseCaseSchema,
@@ -22,7 +22,9 @@ import {
 /**
  * Primary and project-related types
  */
-export type CreateUseCaseDto = z.infer<typeof createUseCaseSchema>;
+export type CreatePrimaryUseCaseDto = z.infer<
+  typeof createPrimaryUseCaseSchema
+>;
 export type ProjectIdDto = z.infer<typeof projectIdSchema>;
 export type SecondaryUseCaseIdDto = z.infer<typeof secondaryUseCaseIdSchema>;
 export type UseCaseDiagramIdDto = z.infer<typeof useCaseDiagramIdSchema>;
