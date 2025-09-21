@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { UseCaseRepository } from "./repositories/use-case/use-case.repository";
 import { PrimaryUseCaseRepository } from "./repositories/primary-use-case/primary-use-case.repository";
 import { SecondaryUseCaseRepository } from "./repositories/secondary-use-case/secondary-use-case.repository";
@@ -13,9 +13,10 @@ import { UseCaseDiagramController } from "./controllers/use-case-diagram/use-cas
 import { UseCaseDiagramService } from "./services/use-case-diagram/use-case-diagram.service";
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
+import { RequirementModule } from "../requirement/requirement.module";
 
 @Module({
-  imports: [ProjectModule, ActorModule],
+  imports: [ProjectModule, ActorModule, forwardRef(() => RequirementModule)],
   controllers: [
     PrimaryUseCaseController,
     UseCaseController,
