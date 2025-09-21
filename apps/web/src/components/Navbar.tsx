@@ -18,7 +18,7 @@ export default function Navbar() {
           className="w-10 h-10 rounded-full overflow-hidden border border-border hover:ring-2 hover:ring-ring focus:outline-none focus:ring-2 focus:ring-ring transition"
         >
           <Image
-            src={""}
+            src={"/profile-placeholder.png"}
             alt="Profile"
             width={40}
             height={40}
