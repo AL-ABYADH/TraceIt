@@ -2,26 +2,32 @@ import { ProjectDto } from "@repo/shared-schemas";
 import { FolderIcon } from "lucide-react";
 import Link from "next/link";
 import { route } from "nextjs-routes";
+import { useEffect, useState } from "react";
 
 interface ProjectCardProps {
   project: ProjectDto;
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
-  const getTimeAgo = (date: Date | string) => {
+  const [timeAgo, setTimeAgo] = useState("");
+
+  useEffect(() => {
+    if (!project.createdAt) return;
     const now = new Date();
-    const projectDate = new Date(date);
+    const projectDate = new Date(project.createdAt);
     const diffInHours = Math.floor((now.getTime() - projectDate.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    return `${diffInWeeks} week${diffInWeeks > 1 ? "s" : ""} ago`;
-  };
+    if (diffInHours < 1) setTimeAgo("Just now");
+    else if (diffInHours < 24) setTimeAgo(`${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`);
+    else {
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) setTimeAgo(`${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`);
+      else
+        setTimeAgo(
+          `${Math.floor(diffInDays / 7)} week${Math.floor(diffInDays / 7) > 1 ? "s" : ""} ago`,
+        );
+    }
+  }, [project.createdAt]);
 
   return (
     <Link
@@ -29,15 +35,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         pathname: "/projects/[project-id]/actors",
         query: { "project-id": project.id },
       })}
-      className="flex items-center justify-between p-4 bg-surface rounded-lg border border-border hover:bg-card-hover transition-colors cursor-pointer group"
+      className="flex items-center justify-between px-4 bg-surface rounded-lg border border-border hover:bg-card-hover transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3">
-        <FolderIcon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <span className="text-foreground font-medium">{project.name}</span>
+        <FolderIcon className=" text-muted-foreground group-hover:text-foreground transition-colors" />
+        <span className="p-4 text-foreground font-medium"> {project.name}</span>
       </div>
-      <span className="text-muted-foreground text-sm">
-        {project.createdAt ? getTimeAgo(project.createdAt) : "Recently"}
-      </span>
+      <span className="text-muted-foreground text-sm">{timeAgo || "Recently"}</span>
     </Link>
   );
 }

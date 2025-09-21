@@ -1,5 +1,5 @@
-import ProjectSidebar from "@/modules/features/project/components/ProjectSidebar";
 import ProjectLayoutShell from "@/modules/features/project/components/ProjectLayoutShell";
+import ProjectSidebar from "@/modules/features/project/components/ProjectSidebar";
 
 export default async function ProjectLayout({
   children,
@@ -12,7 +12,7 @@ export default async function ProjectLayout({
 
   return (
     <ProjectLayoutShell projectId={projectId}>
-      <div className="min-h-screen flex bg-black">
+      <div className="min-h-screen flex bg-background text-foreground">
         <ProjectSidebar projectId={projectId} />
 
         <main className="flex-1 p-6">
