@@ -19,11 +19,15 @@ export class ZodValidationPipe implements PipeTransform {
     }
 
     // Flatten the errors into field-message pairs (optional for Nest-style errors)
-    const errorMessages = result.error.errors.map((err) => ({
-      field: err.path.join("."),
-      message: err.message,
-    }));
+    const errorMessages = result.error.issues.map((err) => {
+      const path = err.path.join(".");
+      const invalidValue = (err as any).params?.value;
 
+      return {
+        field: invalidValue !== undefined ? String(invalidValue) : path,
+        message: err.message,
+      };
+    });
     throw new UnprocessableEntityException({
       error: "ValidationFailed",
       statusCode: 422,

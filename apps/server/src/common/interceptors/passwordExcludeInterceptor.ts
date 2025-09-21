@@ -15,30 +15,32 @@ export class PasswordExcludeInterceptor implements NestInterceptor {
   }
 
   private removePasswords(data: any): any {
-    // Handle null/undefined
-    if (!data) return data;
+    try {
+      // Handle null/undefined
+      if (!data) return data;
 
-    // Create a deep clone to avoid modifying the original
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const clonedData = JSON.parse(JSON.stringify(data));
-
-    // Use JSONPath to locate all objects containing a password field
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const objectsWithPassword = JSONPath({
-      path: "$..[?(@.password)]",
+      // Create a deep clone to avoid modifying the original
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      json: clonedData,
-    });
+      const clonedData = JSON.parse(JSON.stringify(data));
 
-    // Remove the password field from each object
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    objectsWithPassword.forEach((obj: any) => {
-      if (obj && typeof obj === "object" && "password" in obj) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        delete obj.password;
-      }
-    });
+      // Use JSONPath to locate all objects containing a password field
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const objectsWithPassword = JSONPath({
+        path: "$..[?(@.password)]",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        json: clonedData,
+      });
 
-    return clonedData;
+      // Remove the password field from each object
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      objectsWithPassword.forEach((obj: any) => {
+        if (obj && typeof obj === "object" && "password" in obj) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          delete obj.password;
+        }
+      });
+
+      return clonedData;
+    } catch (error) {}
   }
 }
