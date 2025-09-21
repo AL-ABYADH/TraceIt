@@ -37,16 +37,16 @@ export const secondaryUseCaseIdSchema = z
   })
   .openapi({ title: "SecondaryUseCaseIdDto" });
 
-export const usecaseDiagramIdSchema = z
+export const useCaseDiagramIdSchema = z
   .object({
-    usecaseDiagramId: uuidFieldDoc,
+    useCaseDiagramId: uuidFieldDoc,
   })
   .openapi({ title: "UseCaseDiagramIdDto" });
-export const primaryUsecaseIdSchema = z
+export const primaryUseCaseIdSchema = z
   .object({
-    primaryUsecaseId: uuidFieldDoc,
+    primaryUseCaseId: uuidFieldDoc,
   })
-  .openapi({ title: "PrimaryUsecaseIdDto" });
+  .openapi({ title: "PrimaryUseCaseIdDto" });
 
 /**
  * =========================

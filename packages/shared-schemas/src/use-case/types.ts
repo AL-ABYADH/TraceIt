@@ -15,8 +15,8 @@ import {
   secondaryUseCaseDetailSchema,
   secondaryUseCaseListSchema,
   secondaryUseCaseIdSchema,
-  usecaseDiagramIdSchema,
-  primaryUsecaseIdSchema,
+  useCaseDiagramIdSchema,
+  primaryUseCaseIdSchema,
 } from "./schemas";
 
 /**
@@ -25,8 +25,8 @@ import {
 export type CreateUseCaseDto = z.infer<typeof createUseCaseSchema>;
 export type ProjectIdDto = z.infer<typeof projectIdSchema>;
 export type SecondaryUseCaseIdDto = z.infer<typeof secondaryUseCaseIdSchema>;
-export type UsecaseDiagramIdDto = z.infer<typeof usecaseDiagramIdSchema>;
-export type PrimaryUseCaseIdDto = z.infer<typeof primaryUsecaseIdSchema>;
+export type UseCaseDiagramIdDto = z.infer<typeof useCaseDiagramIdSchema>;
+export type PrimaryUseCaseIdDto = z.infer<typeof primaryUseCaseIdSchema>;
 export type UpdatePrimaryUseCaseDto = z.infer<
   typeof updatePrimaryUseCaseSchema
 >;

@@ -12,7 +12,7 @@ import {
   PrimaryUseCaseDetailDto,
   PrimaryUseCaseListDto,
   type PrimaryUseCaseIdDto,
-  primaryUsecaseIdSchema,
+  primaryUseCaseIdSchema,
 } from "@repo/shared-schemas";
 import { PrimaryUseCaseService } from "../../services/primary-use-case/primary-use-case.service";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
@@ -35,65 +35,65 @@ export class PrimaryUseCaseController {
     return await this.primaryUseCaseService.listByProject(params.projectId);
   }
 
-  @Get(":primaryUsecaseId")
+  @Get(":primaryUseCaseId")
   async getById(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
   ): Promise<PrimaryUseCase> {
-    return await this.primaryUseCaseService.findById(params.primaryUsecaseId);
+    return await this.primaryUseCaseService.findById(params.primaryUseCaseId);
   }
 
-  @Put(":primaryUsecaseId")
+  @Put(":primaryUseCaseId")
   async update(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(updatePrimaryUseCaseSchema)) dto: UpdatePrimaryUseCaseDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.update(params.primaryUsecaseId, dto);
+    return await this.primaryUseCaseService.update(params.primaryUseCaseId, dto);
   }
 
-  @Delete(":primaryUsecaseId")
+  @Delete(":primaryUseCaseId")
   async remove(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
   ): Promise<{ success: boolean }> {
-    return { success: await this.primaryUseCaseService.remove(params.primaryUsecaseId) };
+    return { success: await this.primaryUseCaseService.remove(params.primaryUseCaseId) };
   }
 
-  @Post(":primaryUsecaseId/primary-actors")
+  @Post(":primaryUseCaseId/primary-actors")
   async addPrimaryActors(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
-    return await this.primaryUseCaseService.addPrimaryActors(params.primaryUsecaseId, dto.actorIds);
+    return await this.primaryUseCaseService.addPrimaryActors(params.primaryUseCaseId, dto.actorIds);
   }
 
-  @Delete(":primaryUsecaseId/primary-actors")
+  @Delete(":primaryUseCaseId/primary-actors")
   async removePrimaryActors(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.removePrimaryActors(
-      params.primaryUsecaseId,
+      params.primaryUseCaseId,
       dto.actorIds,
     );
   }
 
-  @Post(":primaryUsecaseId/secondary-actors")
+  @Post(":primaryUseCaseId/secondary-actors")
   async addSecondaryActors(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.addSecondaryActors(
-      params.primaryUsecaseId,
+      params.primaryUseCaseId,
       dto.actorIds,
     );
   }
 
-  @Delete(":primaryUsecaseId/secondary-actors")
+  @Delete(":primaryUseCaseId/secondary-actors")
   async removeSecondaryActors(
-    @Param(zodParam(primaryUsecaseIdSchema)) params: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) params: PrimaryUseCaseIdDto,
     @Body(zodBody(actorsSchema)) dto: ActorsDto,
   ): Promise<PrimaryUseCaseDetailDto> {
     return await this.primaryUseCaseService.removeSecondaryActors(
-      params.primaryUsecaseId,
+      params.primaryUseCaseId,
       dto.actorIds,
     );
   }
