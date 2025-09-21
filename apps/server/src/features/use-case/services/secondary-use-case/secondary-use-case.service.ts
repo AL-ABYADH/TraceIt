@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
 import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
 import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
 import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { RequirementService } from "../../../requirement/services/requirement/requirement.service";
+import { RequirementType } from "../../../requirement/enums/requirement-type.enum";
 
 @Injectable()
 export class SecondaryUseCaseService {
@@ -12,6 +19,7 @@ export class SecondaryUseCaseService {
     private readonly secondaryUseCaseRepository: SecondaryUseCaseRepository,
     private readonly projectService: ProjectService,
     private readonly primaryUseCaseService: PrimaryUseCaseService,
+    private readonly requirementService: RequirementService,
   ) {}
 
   /**
@@ -28,6 +36,18 @@ export class SecondaryUseCaseService {
       // Verify primary use case exists
       await this.primaryUseCaseService.findById(createDto.primaryUseCaseId);
 
+      const requirement = await this.requirementService.findById(createDto.requirementId);
+      const type = await this.requirementService.getRequirementTypeFromEntity(requirement);
+      if (
+        !(
+          type === RequirementType.LOGICAL_GROUP_REQUIREMENT ||
+          type === RequirementType.EXCEPTIONAL_REQUIREMENT
+        )
+      ) {
+        throw new UnprocessableEntityException(
+          "he requirementId shouild be EXCEPTIONAL_REQUIREMENT or LOGICAL_GROUP_REQUIREMENT",
+        );
+      }
       // Create the secondary use case
       return this.secondaryUseCaseRepository.create(createDto);
     } catch (error) {
