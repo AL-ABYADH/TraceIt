@@ -1,9 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import {
-  PrimaryUseCaseAttributes,
-  PrimaryUseCaseModel,
-  PrimaryUseCaseModelType,
-} from "../../models/primary-use-case.model";
+import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { Op } from "@repo/custom-neogma";
