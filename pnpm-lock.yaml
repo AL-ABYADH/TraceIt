@@ -59,9 +59,6 @@ importers:
       '@repo/custom-neogma':
         specifier: workspace:*
         version: link:../../packages/Custom-Neogma
-      '@repo/custom-validators':
-        specifier: workspace:*
-        version: link:../../packages/Custom-Validators
       '@repo/shared-schemas':
         specifier: workspace:*
         version: link:../../packages/shared-schemas
@@ -325,25 +322,6 @@ importers:
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@repo/prettier-config':
-        specifier: workspace:*
-        version: link:../prettier-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      typescript:
-        specifier: ^5.8.2
-        version: 5.8.2
-
-  packages/Custom-Validators:
-    dependencies:
-      class-validator:
-        specifier: ^0.14.2
-        version: 0.14.2
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
