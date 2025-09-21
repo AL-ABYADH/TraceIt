@@ -12,7 +12,7 @@ import {
   type SecondaryUseCaseIdDto,
   secondaryUseCaseIdSchema,
   type PrimaryUseCaseIdDto,
-  primaryUsecaseIdSchema,
+  primaryUseCaseIdSchema,
 } from "@repo/shared-schemas";
 import { SecondaryUseCaseService } from "../../services/secondary-use-case/secondary-use-case.service";
 
@@ -34,7 +34,7 @@ export class SecondaryUseCaseController {
     return await this.secondaryUseCaseService.listByProject(params.projectId);
   }
 
-  @Get(":secondaryUsecaseId")
+  @Get(":secondaryUseCaseId")
   async getById(
     @Param(zodParam(secondaryUseCaseIdSchema)) params: SecondaryUseCaseIdDto,
   ): Promise<SecondaryUseCaseDetailDto> {
@@ -59,11 +59,11 @@ export class SecondaryUseCaseController {
   @Put(":secondaryUseCaseId/primary-use-case/:primaryUseCaseId")
   async changePrimaryUseCase(
     @Param(zodParam(secondaryUseCaseIdSchema)) param1: SecondaryUseCaseIdDto,
-    @Param(zodParam(primaryUsecaseIdSchema)) param2: PrimaryUseCaseIdDto,
+    @Param(zodParam(primaryUseCaseIdSchema)) param2: PrimaryUseCaseIdDto,
   ): Promise<SecondaryUseCaseDetailDto> {
     return await this.secondaryUseCaseService.changePrimaryUseCase(
       param1.secondaryUseCaseId,
-      param2.primaryUsecaseId,
+      param2.primaryUseCaseId,
     );
   }
 }
