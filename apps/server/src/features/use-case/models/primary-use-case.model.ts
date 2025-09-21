@@ -60,7 +60,7 @@ export const PrimaryUseCaseModel: ModelFactoryDefinition<
       model: "SecondaryUseCase",
       direction: "in",
       name: "BELONGS_TO",
-      cardinality: "one",
+      cardinality: "many",
     },
     // classes: {
     //   model: "Class",

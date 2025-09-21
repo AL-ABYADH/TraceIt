@@ -43,12 +43,12 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         name: "BELONGS_TO",
         cardinality: "one",
       },
-      // requirements: {
-      //   model: "Requirement",
-      //   direction: "out",
-      //   name: "HAS_REQUIREMENT",
-      //   cardinality: "many",
-      // },
+      requirements: {
+        model: "Requirement",
+        direction: "out",
+        name: "HAS_REQUIREMENT",
+        cardinality: "many",
+      },
       includedUseCases: {
         model: "self",
         direction: "out",
