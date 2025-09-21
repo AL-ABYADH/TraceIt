@@ -1,4 +1,4 @@
-export interface CreateUseCaseInterface {
+export interface CreatePrimaryUseCaseInterface {
   name: string;
   projectId: string;
   primaryActorIds: string[];

@@ -44,6 +44,7 @@ export const useCaseDescriptionField = createField("string", {
 // Actor relationship fields
 export const primaryActorIdsField = createField("array", {
   elementType: uuidField,
+  min: 1,
   description:
     "List of UUID identifiers for primary actors who directly interact with the system",
 });
