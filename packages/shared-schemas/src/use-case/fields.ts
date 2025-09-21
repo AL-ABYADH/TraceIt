@@ -1,10 +1,25 @@
 import { createEnumField, createField, uuidField } from "../common";
 
 // Enum for use case importance level
-export const useCaseImportanceEnum = createEnumField(
-  ["HIGH", "MEDIUM", "LOW"] as const,
+// export const useCaseImportanceLevel = createEnumField(
+//   ["HIGH", "MEDIUM", "LOW"] as const,
+//   {
+//     description: "Importance level of the use case for prioritization purposes",
+//   },
+// );
+
+export enum useCaseImportanceLevel {
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
+}
+
+// Base field (no OpenAPI yet)
+export const useCaseImportanceLevelField = createEnumField(
+  useCaseImportanceLevel,
   {
-    description: "Importance level of the use case for prioritization purposes",
+    // nullable: false,
+    // optional: false,
   },
 );
 

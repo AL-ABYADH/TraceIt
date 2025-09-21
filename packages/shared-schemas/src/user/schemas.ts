@@ -1,7 +1,9 @@
 // @repo/shared/schemas/user/update-user-schema.ts
-import { atLeastOneOfSchema, projectListSchema } from "../common";
+import { atLeastOneOfSchema, projectSchema } from "../common";
 import { updateUserFieldsDoc, userFieldsDoc } from "./openapi-fields";
 import { z } from "../zod-openapi-init";
+import { refreshTokenCookieSchema } from "../auth";
+import { projectCollaborationSchema } from "../project";
 
 export const updateUserSchema = atLeastOneOfSchema(updateUserFieldsDoc, [
   "username",
@@ -18,9 +20,11 @@ export const userListSchema = z.object(userFieldsDoc).openapi({
 
 export const userRelationshipsSchema = z
   .object({
-    projects: z.array(projectListSchema).optional(),
+    projects: z.array(projectSchema).optional(),
     collaborations: z.any(),
+    // collaborations: projectCollaborationSchema,
     refreshTokens: z.any(),
+    // refreshTokens: refreshTokenCookieSchema
   })
   .openapi({ title: "UserRelationships" });
 

@@ -3,6 +3,7 @@ import { z } from "../zod-openapi-init";
 import {
   permissionCodeField,
   permissionNameField,
+  projectAction,
   projectActionField,
   ProjectInvitationStatus,
   projectInvitationStatusField,
@@ -72,7 +73,7 @@ export const expirationDateField = dateISOField.openapi({
 });
 
 export const projectActionFieldDoc = projectActionField.openapi({
-  example: "activate",
+  example: projectAction.ACTIVATE,
   description: "The status of the project",
 });
 
