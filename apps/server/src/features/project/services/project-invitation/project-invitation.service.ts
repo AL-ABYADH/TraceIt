@@ -25,6 +25,14 @@ export class ProjectInvitationService {
   ): Promise<ProjectInvitation[]> {
     return this.projectInvitationRepository.getBySender(userID, status);
   }
+
+  async findById(id: string): Promise<ProjectInvitation> {
+    const invitation = await this.projectInvitationRepository.getById(id);
+    if (!invitation) {
+      throw new NotFoundException(`Invitation with ID ${id} not found`);
+    }
+    return invitation;
+  }
   async invite(
     userID: string,
     params: CreateProjectInvitationInterface,
@@ -32,13 +40,22 @@ export class ProjectInvitationService {
     return this.projectInvitationRepository.create(userID, params);
   }
   async accept(id: string): Promise<boolean> {
-    const invitation = await this.projectInvitationRepository.getById(id);
+    const invitation = await this.findById(id);
     if (!invitation) {
       throw new NotFoundException(`Invitation with ID ${id} not found`);
     }
-    const now = new Date();
+    const now = new Date().toISOString();
     if (invitation.expirationDate < now) {
       throw new NotFoundException(`Invitation with ID ${id} has expired`);
+    }
+    if (!invitation.receiver) {
+      throw new NotFoundException(`Invitation with ID ${id} has no receiver`);
+    }
+    if (!invitation.sender) {
+      throw new NotFoundException(`Invitation with ID ${id} has no sender`);
+    }
+    if (!invitation.project) {
+      throw new NotFoundException(`Invitation with ID ${id} has no project`);
     }
     const updated = await this.projectInvitationRepository.setStatus(
       id,

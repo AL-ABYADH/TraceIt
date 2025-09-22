@@ -6,30 +6,29 @@ import {
   requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
+import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
 import { z } from "../zod-openapi-init";
 import {
-  useCaseIdFieldDoc,
-  depthFieldDoc,
-  operationFieldDoc,
-  conditionFieldDoc,
-  eventActorIdFieldDoc,
   actorIdsFieldDoc,
-  communicationInfoFieldDoc,
-  communicationFacilityFieldDoc,
-  referencedUseCaseIdFieldDoc,
-  mainRequirementIdFieldDoc,
-  detailRequirementIdsFieldDoc,
-  conditionalValueFieldDoc,
-  primaryConditionIdFieldDoc,
   alternativeConditionIdsFieldDoc,
-  fallbackConditionIdFieldDoc,
-  simpleRequirementIdsFieldDoc,
+  communicationFacilityFieldDoc,
+  communicationInfoFieldDoc,
+  conditionalValueFieldDoc,
+  conditionFieldDoc,
+  depthFieldDoc,
+  detailRequirementIdsFieldDoc,
+  eventActorIdFieldDoc,
   exceptionalFieldDoc,
   exceptionRequirementIdsFieldDoc,
+  fallbackConditionIdFieldDoc,
+  mainRequirementIdFieldDoc,
+  operationFieldDoc,
+  primaryConditionIdFieldDoc,
+  referencedUseCaseIdFieldDoc,
   requirementTypeEnumDoc,
-  // eventActorSubTypeFieldDoc,
+  simpleRequirementIdsFieldDoc,
+  useCaseIdFieldDoc,
 } from "./openapi-fields";
-import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
 
 /**
  * =========================
@@ -316,8 +315,8 @@ export const requirementListSchema = z
   .object({
     id: uuidFieldDoc,
     depth: depthFieldDoc,
-    createdAt: z.union([dateISOField, z.date()]),
-    updatedAt: z.union([dateISOField, z.date()]).optional(),
+    createdAt: dateISOField,
+    updatedAt: dateISOField.optional(),
   })
   .openapi({ title: "RequirementAttributes" });
 

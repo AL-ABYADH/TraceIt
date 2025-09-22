@@ -1,5 +1,5 @@
 import { z } from "../zod-openapi-init";
-import { dateISOField } from "./fields";
+import { dateISOField, nameField } from "./fields";
 import {
   descriptionFieldDoc,
   projectIdFieldDoc,
@@ -35,11 +35,11 @@ export const uuidParamsSchema = z.object({
 export const projectSchema = z
   .object({
     id: projectIdFieldDoc,
-    name: z.string(),
+    name: nameField,
     description: descriptionFieldDoc.optional(),
     status: ProjectStatusFieldDoc,
-    createdAt: z.union([dateISOField, z.date()]),
-    updatedAt: z.union([dateISOField, z.date()]).optional(),
+    createdAt: dateISOField,
+    updatedAt: dateISOField.optional(),
   })
   .openapi({ title: "ProjectDto" });
 

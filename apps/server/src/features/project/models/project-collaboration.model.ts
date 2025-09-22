@@ -1,4 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
+import { ProjectRoleAttributes } from "./project-role.model";
+import { ProjectAttributes } from "./project.model";
+import { UserAttributes } from "../../user/models/user.model";
 
 export type ProjectCollaborationAttributes = {
   id: string;
@@ -7,9 +10,9 @@ export type ProjectCollaborationAttributes = {
 };
 
 export interface ProjectCollaborationRelationships {
-  user: any;
-  project: any;
-  projectRoles: any[];
+  user: UserAttributes;
+  project: ProjectAttributes;
+  projectRoles: ProjectRoleAttributes[];
 }
 
 export type ProjectCollaborationModelType = NeogmaModel<
