@@ -83,9 +83,7 @@ export default function LoginPage() {
               type="text"
               autoComplete="username"
             />
-            {errors.username && (
-              <p className="mt-2 text-sm text-destructive">{errors.username.message}</p>
-            )}
+            {errors.username && <p className="mt-2 text-sm">{errors.username.message}</p>}
           </label>
 
           {/* Password */}

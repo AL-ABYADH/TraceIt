@@ -11,7 +11,6 @@ import {
   CreatePrimaryUseCaseDto,
   createPrimaryUseCaseSchema,
   UseCaseImportanceLevel,
-  ActorDto,
 } from "@repo/shared-schemas";
 import { Controller, useForm } from "react-hook-form";
 import { useActors } from "../../actor/hooks/useActors";
@@ -169,7 +168,7 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
           )}
         />
 
-        <div className="flex items-center justify-end gap-3 pt-4">
+        <div className="flex items-center justify-end gap-3 pt-4 mt-8">
           <Button
             type="button"
             variant="ghost"
@@ -179,7 +178,11 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
             Cancel
           </Button>
 
-          <Button type="submit" disabled={createUseCase.isPending || isSubmitting} className="px-6">
+          <Button
+            type="submit"
+            disabled={createUseCase.isPending || isSubmitting}
+            className="px-6 "
+          >
             {createUseCase.isPending || isSubmitting ? "Adding..." : "Add Use Case"}
           </Button>
         </div>

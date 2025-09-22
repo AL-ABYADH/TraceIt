@@ -4,9 +4,11 @@ import { useActors } from "../hooks/useActors";
 import Table, { Column } from "@/components/Table";
 import Button from "@/components/Button";
 import ActorForm from "./ActorForm";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { ActorDto } from "@repo/shared-schemas";
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
+import { useDeleteActor } from "../hooks/useDeleteActor";
 
 interface ActorsTableProps {
   projectId: string;
@@ -16,40 +18,50 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isError, isLoading, error } = useActors(projectId);
 
+  const [editingActor, setEditingActor] = useState<ActorDto | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<ActorDto | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const deleteMutation = useDeleteActor(deleteTarget?.id ?? "", {
+    onSuccess: () => {
+      notifications.show({
+        title: "Deleted",
+        message: `Actor "${deleteTarget?.name}" deleted successfully`,
+        color: "green",
+      });
+      setIsDeleteOpen(false);
+      setDeleteTarget(null);
+    },
+    onError: () => {
+      notifications.show({
+        title: "Error",
+        message: "Failed to delete actor",
+        color: "red",
+      });
+    },
+  });
+
   const handleEdit = (actor: ActorDto) => {
-    console.log("Edit actor:", actor);
-    notifications.show({
-      title: "Edit Actor",
-      message: "Edit functionality coming soon",
-      color: "blue",
-    });
+    setEditingActor(actor);
+    setIsEditOpen(true);
   };
 
   const handleDelete = (actor: ActorDto) => {
-    console.log("Delete actor:", actor);
-    notifications.show({
-      title: "Delete Actor",
-      message: "Delete functionality coming soon",
-      color: "orange",
-    });
+    setDeleteTarget(actor);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate();
   };
 
   const columns: Column<ActorDto>[] = [
-    {
-      key: "name",
-      title: "Actor Name",
-      width: "30%",
-    },
-    {
-      key: "type",
-      title: "Actor Type",
-      width: "25%",
-    },
-    {
-      key: "subtype",
-      title: "Subtype",
-      width: "25%",
-    },
+    { key: "name", title: "Actor Name", width: "30%" },
+    { key: "type", title: "Actor Type", width: "25%" },
+    { key: "subtype", title: "Subtype", width: "25%" },
     {
       key: "id",
       title: "Actions",
@@ -74,15 +86,14 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     },
   ];
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-muted-foreground">Loading actors...</div>
       </div>
     );
-  }
 
-  if (isError) {
+  if (isError)
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
@@ -90,7 +101,6 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
         </div>
       </div>
     );
-  }
 
   return (
     <div className="space-y-4">
@@ -101,7 +111,24 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
 
       <Table columns={columns} data={data || []} />
 
-      <ActorForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
+      <ActorForm
+        isOpen={isFormOpen || isEditOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setIsEditOpen(false);
+          setEditingActor(null);
+        }}
+        projectId={projectId}
+      />
+
+      <ConfirmationDialog
+        isOpen={isDeleteOpen}
+        message={`Are you sure you want to delete actor "${deleteTarget?.name}"?`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setIsDeleteOpen(false)}
+        confirmText="Delete"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }

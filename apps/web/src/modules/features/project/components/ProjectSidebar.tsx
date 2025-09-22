@@ -76,7 +76,7 @@ export default function ProjectSidebar({
                   active && "text-primary-foreground",
                 )}
               />
-              <div className="w-5"></div>
+              <div className="w-2"></div>
               <span className="truncate font-medium">{page.title}</span>
             </Link>
           );

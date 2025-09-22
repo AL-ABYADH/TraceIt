@@ -19,7 +19,7 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
     ref,
   ) => {
     return (
-      <div className="space-y-2 mt-4">
+      <div className="space-y-2 my-5">
         {label && <label className="block text-sm font-medium text-foreground">{label}</label>}
         <div className="relative">
           <select

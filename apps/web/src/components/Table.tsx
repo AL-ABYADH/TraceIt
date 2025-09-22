@@ -13,16 +13,22 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
   className?: string;
+  onRowClick?: (item: T, index: number) => void;
 }
 
-export default function DataTable<T>({ columns, data, className = "" }: DataTableProps<T>) {
+export default function DataTable<T>({
+  columns,
+  data,
+  className = "",
+  onRowClick,
+}: DataTableProps<T>) {
   return (
     <div className={`rounded-lg border border-border overflow-hidden ${className}`}>
       <table className="w-full">
         {/* Header */}
         <thead>
           <tr className="border-b border-border bg-surface">
-            {columns.map((column, index) => (
+            {columns.map((column) => (
               <th
                 key={String(column.key)}
                 className="px-4 py-3 text-left text-sm font-medium text-foreground"
@@ -46,13 +52,16 @@ export default function DataTable<T>({ columns, data, className = "" }: DataTabl
             data.map((item, rowIndex) => (
               <tr
                 key={rowIndex}
-                className="border-b border-border/50 hover:bg-card/30 transition-colors"
+                onClick={() => onRowClick?.(item, rowIndex)}
+                className={`border-b border-border/50 transition-colors ${
+                  onRowClick ? "hover:bg-card/40 cursor-pointer" : "hover:bg-card/30"
+                }`}
               >
                 {columns.map((column) => (
                   <td key={String(column.key)} className="px-4 py-3 text-sm text-foreground">
                     {column.render
                       ? column.render(item[column.key], item, rowIndex)
-                      : String(item[column.key] || "")}
+                      : String(item[column.key] ?? "")}
                   </td>
                 ))}
               </tr>

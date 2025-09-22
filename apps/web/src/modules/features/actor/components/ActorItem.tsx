@@ -26,7 +26,7 @@ export default function ActorItem({
         <div className="flex items-center gap-2">
           {onEdit && (
             <button
-              onClick={() => onEdit(actor)}
+              onClick={() => onEdit(actor)} //
               className="text-primary hover:text-primary-hover text-sm transition-colors"
             >
               Edit

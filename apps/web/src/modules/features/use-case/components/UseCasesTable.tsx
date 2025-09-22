@@ -2,9 +2,11 @@
 
 import Button from "@/components/Button";
 import Table, { Column } from "@/components/Table";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { notifications } from "@mantine/notifications";
 import { UseCaseListDto } from "@repo/shared-schemas";
 import { useState } from "react";
+import { useDeletePrimaryUseCase } from "../hooks/useDeletePrimaryUseCase";
 import { useUseCases } from "../hooks/useUseCases";
 import UseCaseForm from "./UseCaseForm";
 
@@ -16,8 +18,32 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isError, isLoading, error } = useUseCases(projectId);
 
+  // State for confirmation dialog
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCaseListDto | null>(null);
+
+  const deleteMutation = useDeletePrimaryUseCase(selectedUseCase?.id ?? "", {
+    onSuccess: () => {
+      notifications.show({
+        title: "Use Case Deleted",
+        message: "The use case has been successfully deleted.",
+        color: "green",
+      });
+      setConfirmOpen(false);
+      setSelectedUseCase(null);
+    },
+    onError: () => {
+      notifications.show({
+        title: "Delete Failed",
+        message: "Failed to delete the use case. Please try again.",
+        color: "red",
+      });
+      setConfirmOpen(false);
+      setSelectedUseCase(null);
+    },
+  });
+
   const handleEdit = (useCase: UseCaseListDto) => {
-    console.log("Edit use case:", useCase);
     notifications.show({
       title: "Edit Use Case",
       message: "Edit functionality coming soon",
@@ -25,13 +51,9 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
     });
   };
 
-  const handleDelete = (useCase: UseCaseListDto) => {
-    console.log("Delete use case:", useCase);
-    notifications.show({
-      title: "Delete Use Case",
-      message: "Delete functionality coming soon",
-      color: "orange",
-    });
+  const requestDelete = (useCase: UseCaseListDto) => {
+    setSelectedUseCase(useCase);
+    setConfirmOpen(true);
   };
 
   const columns: Column<UseCaseListDto>[] = [
@@ -55,7 +77,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
           </button>
           <span className="text-muted-foreground">|</span>
           <button
-            onClick={() => handleDelete(useCase)}
+            onClick={() => requestDelete(useCase)}
             className="text-destructive hover:text-destructive/80 text-sm transition-colors"
           >
             Delete
@@ -93,6 +115,22 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
       <Table columns={columns} data={data || []} />
 
       <UseCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
+
+      <ConfirmationDialog
+        isOpen={confirmOpen}
+        title="Delete Use Case"
+        message={`Are you sure you want to delete "${
+          selectedUseCase?.name ?? ""
+        }"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={() => deleteMutation.mutate()}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setSelectedUseCase(null);
+        }}
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }

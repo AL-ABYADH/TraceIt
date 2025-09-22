@@ -3,43 +3,39 @@
 import Button from "@/components/Button";
 import Dialog from "@/components/Dialog";
 import InputField from "@/components/InputField";
-import SelectField from "@/components/SelectField";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { notifications } from "@mantine/notifications";
-import { ActorSubtype, AddActorDto, addActorSchema } from "@repo/shared-schemas";
+import { ActorDto, UpdateActorDto, updateActorSchema } from "@repo/shared-schemas";
 import { useForm } from "react-hook-form";
-import { useAddActor } from "../hooks/useAddActor";
+import { useUpdateActor } from "../hooks/useUpdateActor";
 
-interface ActorFormProps {
+interface UpdateActorFormProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string;
+  actor: ActorDto; // actor to edit
 }
 
-export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps) {
+export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorFormProps) {
   const {
     register,
     handleSubmit,
     setError,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<AddActorDto>({
-    resolver: zodResolver(addActorSchema),
+  } = useForm<UpdateActorDto>({
+    resolver: zodResolver(updateActorSchema),
     mode: "onSubmit",
     defaultValues: {
-      name: "",
-      subType: ActorSubtype.HUMAN,
-      projectId,
+      name: actor.name,
     },
   });
 
-  const createActor = useAddActor({
+  const updateActor = useUpdateActor(actor.id, {
     onSuccess: () => {
-      reset();
       notifications.show({
         title: "Success",
-        message: "Actor created successfully",
+        message: "Actor updated successfully",
         color: "green",
       });
       onClose();
@@ -52,8 +48,7 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
         );
         return;
       }
-
-      const msg = err?.response?.data?.message ?? err?.message ?? "Create actor failed";
+      const msg = err?.response?.data?.message ?? err?.message ?? "Update actor failed";
       notifications.show({
         title: "Error",
         message: msg,
@@ -62,8 +57,8 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
     },
   });
 
-  const onSubmit = (values: AddActorDto) => {
-    createActor.mutate(values);
+  const onSubmit = (values: UpdateActorDto) => {
+    updateActor.mutate(values);
   };
 
   const handleCancel = () => {
@@ -72,43 +67,28 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Add Actor" className="max-w-lg">
+    <Dialog isOpen={isOpen} onClose={onClose} title="Edit Actor" className="max-w-lg">
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         <InputField
           {...register("name")}
           label="Name"
           placeholder="Enter actor name"
           error={errors.name?.message}
-          className="m-8"
-          disabled={createActor.isPending || isSubmitting}
+          disabled={updateActor.isPending || isSubmitting}
         />
-
-        <SelectField
-          {...register("subType")}
-          label="Subtype"
-          error={errors.subType?.message}
-          disabled={createActor.isPending || isSubmitting}
-          defaultValue={ActorSubtype.HUMAN}
-        >
-          <option value="HUMAN">Human</option>
-          <option value="SOFTWARE">Software</option>
-          <option value="HARDWARE">Hardware</option>
-          <option value="AI_AGENT">AI Agent</option>
-          <option value="EVENT">Event</option>
-        </SelectField>
 
         <div className="flex items-center justify-end gap-3 pt-4 mt-4">
           <Button
             type="button"
             variant="ghost"
             onClick={handleCancel}
-            disabled={createActor.isPending || isSubmitting}
+            disabled={updateActor.isPending || isSubmitting}
           >
             Cancel
           </Button>
 
-          <Button type="submit" disabled={createActor.isPending || isSubmitting} className="px-6">
-            {createActor.isPending || isSubmitting ? "Adding..." : "Add Actor"}
+          <Button type="submit" disabled={updateActor.isPending || isSubmitting} className="px-6">
+            {updateActor.isPending || isSubmitting ? "Updating..." : "Update Actor"}
           </Button>
         </div>
       </form>

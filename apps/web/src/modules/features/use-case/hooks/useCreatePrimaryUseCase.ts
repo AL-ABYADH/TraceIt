@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreatePrimaryUseCaseDto } from "@repo/shared-schemas";
-import { useCaseClient } from "../api/clients/use-case-client";
+import { primaryUseCaseClient } from "../api/clients/primary-use-case-client";
 import { useCaseQueryKeys } from "../query/use-case-query-keys";
 
 type UseCreatePrimaryUseCaseOptions = {
@@ -12,7 +12,8 @@ export function useCreatePrimaryUseCase(opts?: UseCreatePrimaryUseCaseOptions) {
   const qc = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (useCase: CreatePrimaryUseCaseDto) => useCaseClient.createPrimaryUseCase(useCase),
+    mutationFn: (useCase: CreatePrimaryUseCaseDto) =>
+      primaryUseCaseClient.createPrimaryUseCase(useCase),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: useCaseQueryKeys.list });
     },

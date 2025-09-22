@@ -39,7 +39,7 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
     );
 
     return (
-      <div ref={ref} className={`space-y-2 mt-2 relative ${className}`}>
+      <div ref={ref} className={`space-y-2 my-5 relative ${className}`}>
         {label && <label className="block text-sm font-medium text-foreground">{label}</label>}
 
         <div
