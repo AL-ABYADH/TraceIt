@@ -97,11 +97,11 @@ export default function ActorForm({ hideForm, projectId }: Props) {
               className="w-full border rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
             >
               <>
-                <option value="human">Human</option>
-                <option value="software">Software</option>
-                <option value="hardware">Hardware</option>
-                <option value="ai-agent">AI Agent</option>
-                <option value="event">Event</option>
+                <option value="HUMAN">Human</option>
+                <option value="SOFTWARE">Software</option>
+                <option value="HARDWARE">Hardware</option>
+                <option value="AI_AGENT">AI Agent</option>
+                <option value="EVENT">Event</option>
               </>
             </select>
             {errors.subType && (
