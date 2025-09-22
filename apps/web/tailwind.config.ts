@@ -45,6 +45,12 @@ export default {
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui"],
       },
+      spacing: {
+        "18": "4.5rem", // 72px
+        "20": "5rem", // 80px
+        "80": "20rem", // 320px
+        "128": "32rem", // 512px
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

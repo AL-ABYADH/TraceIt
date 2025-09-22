@@ -12,12 +12,9 @@ export default async function ProjectLayout({
 
   return (
     <ProjectLayoutShell projectId={projectId}>
-      <div className="min-h-screen flex bg-background text-foreground">
-        <ProjectSidebar projectId={projectId} />
-
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">{children}</div>
-        </main>
+      <div className="flex flex-row min-h-screen bg-background text-foreground">
+        <ProjectSidebar projectId={projectId} className="w-72" />
+        <main className="flex-1 min-w-0 overflow-auto p-8">{children}</main>
       </div>
     </ProjectLayoutShell>
   );
