@@ -5,10 +5,10 @@ import {
   permissionIdsField,
   permissionNameFieldDoc,
   ProjectActionFieldDoc,
-  projectDescriptionField,
+  projectDescriptionFieldDoc,
   projectInvitationStatusFieldDoc,
-  projectNameField,
-  projectRoleIdsField,
+  projectNameFieldDoc,
+  projectRoleIdsFieldDoc,
   projectUserIdField,
   roleIdsField,
   roleNameFieldDoc,
@@ -56,15 +56,15 @@ export const createProjectCollaborationSchema = z
 
 export const createProjectSchema = z
   .object({
-    name: projectNameField,
-    description: projectDescriptionField,
+    name: projectNameFieldDoc,
+    description: projectDescriptionFieldDoc,
   })
   .openapi({ title: "CreateProjectDto" });
 
 export const updateProjectSchema = z
   .object({
-    name: projectNameField.optional(),
-    description: projectDescriptionField.optional(),
+    name: projectNameFieldDoc.optional(),
+    description: projectDescriptionFieldDoc.optional(),
   })
   .openapi({ title: "UpdateProjectDto" });
 
@@ -107,7 +107,7 @@ export const createProjectInvitationSchema = z
     senderId: projectUserIdField,
     receiverId: projectUserIdField,
     projectId: projectUserIdField,
-    projectRoleIds: projectRoleIdsField,
+    projectRoleIds: projectRoleIdsFieldDoc,
     expirationDate: expirationDateField,
   })
   .openapi({ title: "CreateProjectInvitationDto" });
