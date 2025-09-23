@@ -1,3 +1,6 @@
+import "./diagram/index";
+// import "./diagram/index";
+import "./traceability/index";
 import "./requirement/index";
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import "./auth/index";
