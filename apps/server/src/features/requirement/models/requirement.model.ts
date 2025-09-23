@@ -1,53 +1,67 @@
-import {
-  AbstractModelFactoryDefinition,
-  AbstractNeogmaModel,
-  defineAbstractModelFactory,
-} from "@repo/custom-neogma";
+import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
-import { ProjectAttributes } from "../../project/models/project.model";
+import { ActorAttributes } from "../../actor/models/actor.model";
+import { RequirementExceptionAttributes } from "./requirement-exception.model";
 
 export type RequirementAttributes = {
   id: string;
-  depth: number;
+  operation: string;
+  condition?: string;
   createdAt: string;
   updatedAt?: string;
 };
 
 export interface RequirementRelationships {
   useCase: UseCaseAttributes;
-  project: ProjectAttributes;
+  actors?: ActorAttributes[];
+  nestedRequirements?: RequirementAttributes[];
+  exceptions?: RequirementExceptionAttributes[];
 }
 
-export type RequirementModelType = AbstractNeogmaModel<
-  RequirementAttributes,
-  RequirementRelationships
->;
+export type RequirementModelType = NeogmaModel<RequirementAttributes, RequirementRelationships>;
 
-export const RequirementModel: AbstractModelFactoryDefinition<
+export const RequirementModel: ModelFactoryDefinition<
   RequirementAttributes,
   RequirementRelationships
-> = defineAbstractModelFactory<RequirementAttributes, RequirementRelationships>({
+> = defineModelFactory<RequirementAttributes, RequirementRelationships>({
   name: "Requirement",
   label: ["Requirement"],
   schema: {
-    depth: {
-      type: "number",
+    operation: {
+      type: "string",
       required: true,
-      minimum: 0,
+      allowEmpty: false,
+    },
+    condition: {
+      type: "string",
+      required: false,
+      allowEmpty: false,
     },
   },
   relationships: {
     useCase: {
       model: "UseCase",
-      direction: "out",
       name: "BELONGS_TO",
+      direction: "out",
       cardinality: "one",
     },
-    project: {
-      model: "Project",
-      direction: "out",
+    actors: {
+      model: "Actor",
       name: "BELONGS_TO",
-      cardinality: "one",
+      direction: "out",
+      cardinality: "many",
+    },
+    nestedRequirements: {
+      model: "self",
+      name: "BELONGS_TO",
+      direction: "out",
+      cardinality: "many",
+    },
+    exceptions: {
+      model: "RequirementException",
+      name: "BELONGS_TO",
+      direction: "in",
+      cardinality: "many",
     },
   },
 });
