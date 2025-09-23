@@ -37,7 +37,7 @@ export default function Projects() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Welcome back, Mustafa</h1>
+            <h1 className="text-3xl font-semibold text-foreground mb-2">Welcome back</h1>
             <h2 className="text-xl font-semibold text-foreground">Recent Projects</h2>
           </div>
 

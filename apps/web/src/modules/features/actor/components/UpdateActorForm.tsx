@@ -13,7 +13,7 @@ import { useUpdateActor } from "../hooks/useUpdateActor";
 interface UpdateActorFormProps {
   isOpen: boolean;
   onClose: () => void;
-  actor: ActorDto; // actor to edit
+  actor: ActorDto;
 }
 
 export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorFormProps) {

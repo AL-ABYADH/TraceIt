@@ -1,25 +1,25 @@
 "use client";
 
-import { useActors } from "../hooks/useActors";
-import Table, { Column } from "@/components/Table";
 import Button from "@/components/Button";
-import ActorForm from "./ActorForm";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import Table, { Column } from "@/components/Table";
+import { notifications } from "@mantine/notifications";
 import { ActorDto } from "@repo/shared-schemas";
 import { useState } from "react";
-import { notifications } from "@mantine/notifications";
+import { useActors } from "../hooks/useActors";
 import { useDeleteActor } from "../hooks/useDeleteActor";
+import ActorForm from "./ActorForm";
+import UpdateActorForm from "./UpdateActorForm"; // ✅ Import the update form
 
 interface ActorsTableProps {
   projectId: string;
 }
 
 export default function ActorsTable({ projectId }: ActorsTableProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false); // add
   const { data, isError, isLoading, error } = useActors(projectId);
 
-  const [editingActor, setEditingActor] = useState<ActorDto | null>(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingActor, setEditingActor] = useState<ActorDto | null>(null); // ✅ for editing
 
   const [deleteTarget, setDeleteTarget] = useState<ActorDto | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -45,7 +45,6 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
 
   const handleEdit = (actor: ActorDto) => {
     setEditingActor(actor);
-    setIsEditOpen(true);
   };
 
   const handleDelete = (actor: ActorDto) => {
@@ -111,15 +110,15 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
 
       <Table columns={columns} data={data || []} />
 
-      <ActorForm
-        isOpen={isFormOpen || isEditOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setIsEditOpen(false);
-          setEditingActor(null);
-        }}
-        projectId={projectId}
-      />
+      <ActorForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
+
+      {editingActor && (
+        <UpdateActorForm
+          isOpen={!!editingActor}
+          onClose={() => setEditingActor(null)}
+          actor={editingActor}
+        />
+      )}
 
       <ConfirmationDialog
         isOpen={isDeleteOpen}

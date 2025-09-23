@@ -1,8 +1,8 @@
 "use client";
 
 import Button from "@/components/Button";
-import Table, { Column } from "@/components/Table";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import Table, { Column } from "@/components/Table";
 import { notifications } from "@mantine/notifications";
 import { UseCaseListDto } from "@repo/shared-schemas";
 import { useState } from "react";
