@@ -119,3 +119,10 @@ export const diagramIdSchema = z
 export const typeDiagramSchema = z.object({
   type: DiagramTypeFieldDoc,
 });
+
+export const diagramTypeSchema = DiagramTypeFieldDoc.openapi({
+  title: "EdgeTypeDto",
+});
+export const edgeTypeSchema = EdgeTypeFieldDoc.openapi({
+  title: "EdgeTypeDto",
+});

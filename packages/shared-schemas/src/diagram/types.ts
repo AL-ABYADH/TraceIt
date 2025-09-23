@@ -4,6 +4,7 @@ import {
   diagramAttributesSchema,
   diagramIdSchema,
   edgeAttributesSchema,
+  edgeTypeSchema,
   nodeAttributesSchema,
   typeDiagramSchema,
   updateDiagramSchema,
@@ -27,5 +28,5 @@ export type NodeAttributes = z.infer<typeof nodeAttributesSchema>;
 export type EdgeAttributes = z.infer<typeof edgeAttributesSchema>;
 export type TypeDiagramDto = z.infer<typeof typeDiagramSchema>;
 
-// Enum exports
-export { DiagramType, NodeType, EdgeType } from "./fields";
+export type DiagramTypeDto = z.infer<typeof edgeTypeSchema>;
+export type EdgeTypeDto = z.infer<typeof edgeTypeSchema>;
