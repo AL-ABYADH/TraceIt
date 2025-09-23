@@ -124,6 +124,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         }"? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
+        confirmColor="bg-red-600 hover:bg-red-700 text-white"
         onConfirm={() => deleteMutation.mutate()}
         onCancel={() => {
           setConfirmOpen(false);

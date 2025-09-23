@@ -126,6 +126,7 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setIsDeleteOpen(false)}
         confirmText="Delete"
+        confirmColor="bg-red-600 hover:bg-red-700 text-white"
         loading={deleteMutation.isPending}
       />
     </div>
