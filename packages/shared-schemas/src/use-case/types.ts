@@ -5,8 +5,6 @@ import {
   updatePrimaryUseCaseSchema,
   createSecondaryUseCaseSchema,
   updateSecondaryUseCaseSchema,
-  createDiagramSchema,
-  updateDiagramSchema,
   actorsSchema,
   useCaseDiagramDetailSchema,
   primaryUseCaseDetailSchema,
@@ -43,12 +41,6 @@ export type CreateSecondaryUseCaseDto = z.infer<
 export type UpdateSecondaryUseCaseDto = z.infer<
   typeof updateSecondaryUseCaseSchema
 >;
-
-/**
- * Diagram types
- */
-export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
-export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 
 /**
  * Actor management types
