@@ -1,16 +1,18 @@
 import {
-  loginUsernameField,
-  emailField,
-  usernameField,
-  passwordField,
-  displayNameField,
-  uuidField,
-  nameField,
+  booleanField,
+  dateField,
+  dateISOField,
   descriptionField,
+  displayNameField,
+  emailField,
+  loginUsernameField,
+  nameField,
+  passwordField,
   ProjectStatus,
   ProjectStatusField,
   requirementIdField,
-  dateField,
+  usernameField,
+  uuidField,
 } from "./fields";
 
 export const loginUsernameFieldDoc = loginUsernameField;
@@ -64,4 +66,14 @@ export const ProjectStatusFieldDoc = ProjectStatusField.openapi({
 export const requirementIdFieldDoc = requirementIdField.openapi({
   description: "UUID of the referenced requirement",
   example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
+});
+
+export const dateISOFieldDoc = dateISOField.openapi({
+  example: new Date().toISOString(),
+  description: "ISO 8601 date string",
+});
+
+export const booleanFieldDoc = booleanField.openapi({
+  example: true,
+  description: "Boolean flag",
 });

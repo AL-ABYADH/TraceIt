@@ -1,32 +1,7 @@
 import { createEnumField, createField, uuidField } from "../common";
-export { uuidField };
-const NAME_DESC_REGEX = /^(?! )[A-Za-z0-9 _-]*(?<! )$/;
-const DATA_FIELD_REGEX = /^[\s\S]*$/;
-
-// Base fields (reuse from common if available, otherwise define)
-
-export const dateISOField = createField("string", {
-  regex: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/,
-  message: "Invalid ISO date format",
-});
-
-export const nameField = createField("string", {
-  min: 1,
-  max: 100,
-  regex: NAME_DESC_REGEX,
-  message:
-    "Name is not valid. Allowed: letters, numbers, spaces, underscores, hyphens.",
-});
-
-export const positiveNumberField = createField("number", {
-  min: 0,
-  message: "Value must be a positive number",
-});
-
-export const booleanField = createField("boolean");
 
 export const dataField = createField("string", {
-  regex: DATA_FIELD_REGEX,
+  regex: /^[\s\S]*$/,
   message: "Data field must be a valid string",
 });
 

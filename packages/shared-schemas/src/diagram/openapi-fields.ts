@@ -1,38 +1,19 @@
 import {
-  uuidField,
-  nameField,
-  dateISOField,
-  booleanField,
   dataField,
-  DiagramTypeField,
-  NodeTypeField,
-  EdgeTypeField,
-  positionField,
-  dimensionField,
-  zIndexField,
-  nodeIdField,
-  handleField,
   DiagramType,
-  NodeType,
-  EdgeType,
-  nodesArrayField,
+  DiagramTypeField,
+  dimensionField,
   edgesArrayField,
+  EdgeType,
+  EdgeTypeField,
+  handleField,
+  nodeIdField,
+  nodesArrayField,
+  NodeType,
+  NodeTypeField,
+  positionField,
+  zIndexField,
 } from "./fields";
-
-export const nameFieldDoc = nameField.openapi({
-  example: "My Diagram",
-  description: "Diagram name (1-100 characters)",
-});
-
-export const dateISOFieldDoc = dateISOField.openapi({
-  example: new Date().toISOString(),
-  description: "ISO 8601 date string",
-});
-
-export const booleanFieldDoc = booleanField.openapi({
-  example: true,
-  description: "Boolean flag",
-});
 
 export const dataFieldDoc = dataField.openapi({
   example: '{"label": "Node 1", "color": "#ff0000"}',
