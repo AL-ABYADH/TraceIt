@@ -16,25 +16,13 @@ import { ResponseSchema } from "src/common/decorators/response-schema.decorator"
 @Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Put()
+  @Put("me")
   @ResponseSchema(safeUserDetailSchema)
   updateProfile(
     @CurrentUserId() userId: UuidParamsDto,
     @Body(zodBody(updateUserSchema)) dto: UpdateUserDto,
   ): Promise<SafeUserDetailDto> {
     return this.userService.updateProfile(userId.id, dto);
-  }
-
-  // @Get(":id")
-  // find(@Param(zodParam(uuidParamsSchema)) userId: UuidParamsDto): Promise<User> {
-  //   return this.userService.findById(userId.id);
-  // }
-
-  @Put("verify-email")
-  @ResponseSchema(safeUserDetailSchema)
-  verifyEmail(@CurrentUserId() userId: UuidParamsDto): Promise<SafeUserDetailDto> {
-    return this.userService.verifyEmail(userId.id);
   }
 
   @Get("me")

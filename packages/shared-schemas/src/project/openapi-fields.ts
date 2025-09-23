@@ -1,28 +1,24 @@
 // schemas/project/openapi-fields.ts
-import { z } from "../zod-openapi-init";
 import {
   permissionCodeField,
   permissionNameField,
-  projectActionField,
+  ProjectAction,
+  ProjectActionField,
+  projectDescriptionField,
   ProjectInvitationStatus,
-  projectInvitationStatusField,
-  ProjectStatus,
-  projectStatusField,
+  ProjectInvitationStatusField,
+  projectNameField,
+  projectRoleIdsField,
   roleNameField,
 } from "./fields";
-import {
-  uuidField,
-  nameField,
-  descriptionField,
-  dateISOField,
-} from "../common";
+import { uuidField, dateISOField, createField } from "../common";
 
-export const projectNameField = nameField.openapi({
+export const projectNameFieldDoc = projectNameField.openapi({
   example: "Client Website Revamp",
   description: "Name of the project",
 });
 
-export const projectDescriptionField = descriptionField.optional().openapi({
+export const projectDescriptionFieldDoc = projectDescriptionField.openapi({
   example: "Redesign the client-facing web platform",
   description: "Brief summary of the project",
 });
@@ -47,25 +43,28 @@ export const roleNameFieldDoc = roleNameField.openapi({
   description: "Name of the project role",
 });
 
-export const permissionIdsField = z.array(uuidField).openapi({
+export const permissionIdsField = createField("array", {
+  elementType: uuidField,
+}).openapi({
   example: ["1fa85f64-5717-4562-b3fc-2c963f66afa6"],
   description: "List of permission UUIDs assigned to the role",
 });
 
-export const roleIdsField = z.array(uuidField).openapi({
+export const roleIdsField = createField("array", {
+  elementType: uuidField,
+  description: "List of role IDs to assign to the user",
+}).openapi({
   example: [
     "f6e0b4f6-efbb-41c9-9373-12f72bdfcae7",
     "3c5e4f3c-e3f6-4e88-a86b-e7597b4a8d22",
   ],
-  description: "List of role IDs to assign to the user",
 });
 
-export const projectRoleIdsField = z.array(uuidField).openapi({
+export const projectRoleIdsFieldDoc = projectRoleIdsField.openapi({
   example: [
     "72c61fcd-c0a4-431e-9b61-f5b8d7c87670",
     "c0f8aa3d-f50d-4e0e-81c7-89de0f06c5c5",
   ],
-  description: "Role IDs to assign to the invited user",
 });
 
 export const expirationDateField = dateISOField.openapi({
@@ -73,17 +72,13 @@ export const expirationDateField = dateISOField.openapi({
   description: "Expiration date for the invitation",
 });
 
-export const projectActionFieldDoc = projectActionField.openapi({
-  example: "activate",
+export const ProjectActionFieldDoc = ProjectActionField.openapi({
+  example: ProjectAction.ACTIVATE,
   description: "The status of the project",
 });
 
-export const projectStatusFieldDoc = projectStatusField.openapi({
-  example: ProjectStatus.ARCHIVED,
-  description: "The status of the project",
-});
-
-export const projectInvitationStatusFieldDoc = projectInvitationStatusField.openapi({
-  description: "The current status of the project invitation",
-  example: ProjectInvitationStatus.ACCEPTED,
-});
+export const projectInvitationStatusFieldDoc =
+  ProjectInvitationStatusField.openapi({
+    description: "The current status of the project invitation",
+    example: ProjectInvitationStatus.ACCEPTED,
+  });

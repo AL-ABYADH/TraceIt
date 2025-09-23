@@ -307,17 +307,12 @@ export function ModelFactory<
     return parameters.name;
   };
 
-  model.skipNeedsDelete = async (id: string): Promise<void> => {
+  model.skipNeedUpdateOrSkipNeedDelete = async (project_Id: string): Promise<void> => {
+    // eslint-disable-next-line no-useless-catch
     try {
-      await neogma.queryRunner.run(`MATCH (n) WHERE n.id = "${id}" SET n.needsDelete = False;`);
-    } catch (error) {
-      throw Error(error.message);
-    }
-  };
-
-  model.skipNeedsUpdate = async (id: string): Promise<void> => {
-    try {
-      await neogma.queryRunner.run(`MATCH (n) WHERE n.id = "${id}"  SET n.needsUpdate = False;`);
+      await neogma.queryRunner.run(
+        `MATCH (n)-[]->(z) WHERE n.id = "${project_Id}" SET z.needsDelete = False SET z.needsUpdate = False;`,
+      );
     } catch (error) {
       throw Error(error.message);
     }

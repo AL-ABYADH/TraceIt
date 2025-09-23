@@ -6,15 +6,15 @@ import {
   type CreateProjectDto,
   createProjectSchema,
   type ProjectActionDto,
-  projectActionSchema,
-  type ProjectDetailDto,
   type ProjectStatusDto,
   projectStatusSchema,
   type UpdateProjectDto,
   updateProjectSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
-  ProjectListDto,
+  type ProjectIdDto,
+  projectIdSchema,
+  ProjectDto,
+  ProjectActionSchema,
+  ProjectAction,
 } from "@repo/shared-schemas";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
 
@@ -27,52 +27,50 @@ export class ProjectController {
     @CurrentUserId() userId: string,
     @Query(zodQuery(projectStatusSchema))
     status: ProjectStatusDto,
-  ): Promise<ProjectListDto[]> {
+  ): Promise<ProjectDto[]> {
     // return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
     return this.projectService.listUserProjects(userId, status as unknown as ProjectStatus);
   }
 
-  @Get(":id")
-  async find(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-  ): Promise<ProjectDetailDto> {
-    return this.projectService.findById(projectId.id);
+  @Get(":projectId")
+  async find(@Param(zodParam(projectIdSchema)) params: ProjectIdDto): Promise<ProjectDto> {
+    return this.projectService.findById(params.projectId);
   }
 
   @Post()
   async create(
     @CurrentUserId() userId: string,
     @Body(zodBody(createProjectSchema)) dto: CreateProjectDto,
-  ): Promise<ProjectDetailDto> {
+  ): Promise<ProjectDto> {
     return this.projectService.create({ name: dto.name, description: dto.description, userId });
   }
 
-  @Put(":id")
+  @Put(":projectId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectSchema)) dto: UpdateProjectDto,
-  ): Promise<ProjectDetailDto> {
-    return this.projectService.update(projectId.id, dto);
+  ): Promise<ProjectDto> {
+    return this.projectService.update(params.projectId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":projectId")
   async delete(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.projectService.delete(projectId.id);
+    const success = await this.projectService.delete(params.projectId);
     return { success };
   }
 
-  @Patch(":id")
+  @Patch(":projectId")
   async activate(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
-    @Query(zodQuery(projectActionSchema)) projectStatus: ProjectActionDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
+    @Query(zodQuery(ProjectActionSchema)) projectStatus: ProjectActionDto,
   ): Promise<{ success: boolean }> {
-    if (projectStatus.status === "activate") {
-      const success = await this.projectService.activate(projectId.id);
+    if (projectStatus.status === ProjectAction.ACTIVATE) {
+      const success = await this.projectService.activate(params.projectId);
       return { success };
-    } else if (projectStatus.status === "archive") {
-      const success = await this.projectService.archive(projectId.id);
+    } else if (projectStatus.status === ProjectAction.ARCHIVE) {
+      const success = await this.projectService.archive(params.projectId);
       return { success };
     } else {
       return { success: false };

@@ -1,18 +1,20 @@
 import { z } from "../zod-openapi-init";
 import {
-  stringField,
-  numberField,
-  booleanField,
-  dateField,
   uuidField,
   emailField,
-  // Assuming these would be added to fields.ts
   urlField,
   integerField,
-  arrayField,
+  dateField,
 } from "./fields";
 
 import { ZodEnum, ZodNativeEnum, ZodTypeAny } from "zod";
+
+const arrayField = <T extends z.ZodTypeAny>(elementType: T): z.ZodArray<T> =>
+  z.array(elementType);
+
+const stringField = z.string();
+const numberField = z.number();
+const booleanField = z.boolean();
 
 // Expanded field type list with additional types
 type FieldType =
@@ -25,12 +27,17 @@ type FieldType =
   | "url"
   | "integer"
   | "array";
+
 // Enhanced options interface with more validation capabilities
 interface FieldOptions<T extends ZodTypeAny = ZodTypeAny> {
   min?: number;
   max?: number;
   regex?: RegExp;
-  message?: string;
+  message?: string; // fallback
+  minMessage?: string;
+  maxMessage?: string;
+  regexMessage?: string;
+  enumMessage?: string;
   nullable?: boolean;
   optional?: boolean;
   default?: unknown;
@@ -42,7 +49,7 @@ interface FieldOptions<T extends ZodTypeAny = ZodTypeAny> {
 /* -------------------------
    Type-level mapping
    ------------------------- */
-type BaseSchemaFor<
+export type BaseSchemaFor<
   T extends FieldType,
   E extends ZodTypeAny = ZodTypeAny,
 > = T extends "array"
@@ -124,6 +131,7 @@ export function createField<
   if (options.min !== undefined && supportsMinMax(type)) {
     field = (field as any).min(options.min, {
       message:
+        options.minMessage ??
         options.message ??
         `Must be at least ${options.min} ${isStringType(type) ? "characters" : ""}`,
     });
@@ -132,6 +140,7 @@ export function createField<
   if (options.max !== undefined && supportsMinMax(type)) {
     field = (field as any).max(options.max, {
       message:
+        options.maxMessage ??
         options.message ??
         `Cannot exceed ${options.max} ${isStringType(type) ? "characters" : ""}`,
     });
@@ -140,7 +149,7 @@ export function createField<
   // Apply regex for string fields
   if (isStringType(type) && options.regex) {
     field = (field as any).regex(options.regex, {
-      message: options.message || "Invalid format",
+      message: options.regexMessage || options.message || "Invalid format",
     });
   }
 
@@ -148,7 +157,9 @@ export function createField<
   if (isStringType(type) && options.enum) {
     field = field.refine((val) => options.enum!.includes(val as string), {
       message:
-        options.message || `Value must be one of: ${options.enum.join(", ")}`,
+        options.enumMessage ||
+        options.message ||
+        `Value must be one of: ${options.enum.join(", ")}`,
     });
   }
 
@@ -172,46 +183,9 @@ export function createField<
   return field as BaseSchemaFor<T, E>;
 }
 
-// Interface for enum field options
-// interface EnumFieldOptions<T extends readonly string[]> {
-//   message?: string;
-//   nullable?: boolean;
-//   optional?: boolean;
-//   default?: T[number]; // Type ensures default is one of the enum values
-//   description?: string;
-// }
-
-/**
- * Creates a strongly-typed Zod enum schema based on provided values and options
- */
-// export function createEnumField<T extends readonly [string, ...string[]]>(
-//   values: [...T],
-//   options: EnumFieldOptions<T> = {},
-// ) {
-//   let field = z.enum(values);
-
-//   // Apply optional/nullable transformations
-//   if (options.nullable) {
-//     field = (field as any).nullable();
-//   }
-
-//   if (options.optional) {
-//     field = (field as any).optional();
-//   }
-
-//   if (options.default !== undefined) {
-//     field = (field as any).default(options.default);
-//   }
-
-//   if (options.description) {
-//     field = field.describe(options.description);
-//   }
-
-//   return field;
-// }
-
-
-type MutableTuple<T extends readonly any[]> = { -readonly [P in keyof T]: T[P] };
+type MutableTuple<T extends readonly any[]> = {
+  -readonly [P in keyof T]: T[P];
+};
 
 interface EnumFieldOptions<T extends string = string> {
   message?: string;
@@ -224,19 +198,19 @@ interface EnumFieldOptions<T extends string = string> {
 // Overload: readonly tuple input -> ZodEnum of mutable tuple
 export function createEnumField<T extends readonly [string, ...string[]]>(
   values: T,
-  options?: EnumFieldOptions<T[number]>
+  options?: EnumFieldOptions<T[number]>,
 ): ZodEnum<MutableTuple<T>>;
 
 // Overload: object-style enum -> ZodNativeEnum
 export function createEnumField<T extends { [key: string]: string }>(
   values: T,
-  options?: EnumFieldOptions<T[keyof T]>
+  options?: EnumFieldOptions<T[keyof T]>,
 ): ZodNativeEnum<T>;
 
 // Implementation signature must be the union of the overload input types so TS can narrow:
 export function createEnumField(
   values: readonly string[] | { [key: string]: string },
-  options: EnumFieldOptions = {}
+  options: EnumFieldOptions = {},
 ): ZodTypeAny {
   let field: ZodTypeAny;
 
@@ -254,7 +228,7 @@ export function createEnumField(
     field = z.nativeEnum(values as any);
   } else {
     throw new Error(
-      "Enum must be a non-empty array of strings or a string-valued object."
+      "Enum must be a non-empty array of strings or a string-valued object.",
     );
   }
 

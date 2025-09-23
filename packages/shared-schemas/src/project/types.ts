@@ -1,5 +1,5 @@
 // schemas/project/types.ts
-import { projectListSchema } from "../common";
+import { projectSchema } from "../common";
 import { z } from "../zod-openapi-init";
 import {
   createProjectSchema,
@@ -11,13 +11,11 @@ import {
   updateProjectCollaborationSchema,
   createProjectInvitationSchema,
   createProjectCollaborationSchema,
-  projectStatusSchema,
-  projectActionSchema,
   projectCollaborationSchema,
-  projectDetailSchema,
   projectRoleSchema,
   projectPermissionSchema,
-  projectInvitationSchema
+  projectInvitationSchema,
+  ProjectActionSchema,
 } from "./schemas";
 
 export type CreateProjectDto = z.infer<typeof createProjectSchema>;
@@ -40,12 +38,11 @@ export type CreateProjectCollaborationDto = z.infer<
   typeof createProjectCollaborationSchema
 >;
 
-export type ProjectStatusDto = z.infer<typeof projectStatusSchema>;
 export type ProjectRoleDto = z.infer<typeof projectRoleSchema>;
 export type ProjectPermissionDto = z.infer<typeof projectPermissionSchema>;
-export type ProjectActionDto = z.infer<typeof projectActionSchema>;
-export type ProjectDetailDto = z.infer<typeof projectDetailSchema>;
-export type ProjectListDto = z.infer<typeof projectListSchema>;
-export type ProjectCollaborationDto = z.infer<typeof projectCollaborationSchema>;
+export type ProjectActionDto = z.infer<typeof ProjectActionSchema>;
+export type ProjectDto = z.infer<typeof projectSchema>;
+export type ProjectCollaborationDto = z.infer<
+  typeof projectCollaborationSchema
+>;
 export type ProjectInvitationDto = z.infer<typeof projectInvitationSchema>;
-

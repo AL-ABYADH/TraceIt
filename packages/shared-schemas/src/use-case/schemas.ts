@@ -1,21 +1,11 @@
-import {
-  actorCreatedAtFieldDoc,
-  actorIdFieldDoc,
-  actorNameFieldDoc,
-  actorSchema,
-  actorSubTypeEnumDoc,
-  actorTypeEnumDoc,
-  actorUpdatedAtFieldDoc,
-} from "../actor";
+import { actorSchema } from "../actor";
 import {
   dateFieldDoc,
-  dateISOField,
-  descriptionFieldDoc,
   projectIdFieldDoc,
-  projectListSchema,
+  projectSchema,
+  requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
-import { requirementListSchema } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
@@ -27,7 +17,7 @@ import {
   initialStateFieldDoc,
   finalStateFieldDoc,
   useCaseIdsFieldDoc,
-  useCaseImportanceEnumDoc,
+  UseCaseImportanceEnumDoc,
   actorsIdsFieldDoc,
 } from "./openapi-fields";
 
@@ -38,25 +28,52 @@ import {
  */
 export const projectIdSchema = z
   .object({
-    projectId: projectIdFieldDoc,
+    projectId: uuidFieldDoc,
   })
   .openapi({ title: "ProjectIdDto" });
+
+export const secondaryUseCaseIdSchema = z
+  .object({
+    secondaryUseCaseId: uuidFieldDoc,
+  })
+  .openapi({ title: "SecondaryUseCaseIdDto" });
+
+export const useCaseDiagramIdSchema = z
+  .object({
+    useCaseDiagramId: uuidFieldDoc,
+  })
+  .openapi({ title: "UseCaseDiagramIdDto" });
+export const primaryUseCaseIdSchema = z
+  .object({
+    primaryUseCaseId: uuidFieldDoc,
+  })
+  .openapi({ title: "PrimaryUseCaseIdDto" });
 
 /**
  * =========================
  * PRIMARY USE CASE SCHEMAS
  * =========================
  */
-export const createUseCaseSchema = z
+export const createPrimaryUseCaseSchema = z
   .object({
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,
     primaryActorIds: primaryActorIdsFieldDoc,
     secondaryActorIds: secondaryActorIdsFieldDoc,
     description: useCaseDescriptionFieldDoc.optional(),
-    importanceLevel: useCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceEnumDoc.optional(),
   })
   .openapi({ title: "CreateUseCaseDto" });
+
+// add subtype when khaled comes
+export const useCaseListSchema = z
+  .object({
+    id: uuidFieldDoc,
+    name: useCaseNameFieldDoc,
+    createdAt: dateFieldDoc,
+    updatedAt: dateFieldDoc.optional(),
+  })
+  .openapi({ title: "UseCaseAttributes" });
 
 export const updatePrimaryUseCaseSchema = z
   .object({
@@ -64,7 +81,7 @@ export const updatePrimaryUseCaseSchema = z
     description: useCaseDescriptionFieldDoc.optional(),
     primaryActorIds: primaryActorIdsFieldDoc.optional(),
     secondaryActorIds: secondaryActorIdsFieldDoc.optional(),
-    importanceLevel: useCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceEnumDoc.optional(),
   })
   .openapi({ title: "UpdatePrimaryUseCaseDto" });
 
@@ -78,6 +95,7 @@ export const createSecondaryUseCaseSchema = z
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,
     primaryUseCaseId: primaryUseCaseIdFieldDoc,
+    requirementId: requirementIdFieldDoc,
   })
   .openapi({ title: "CreateSecondaryUseCaseDto" });
 
@@ -128,43 +146,6 @@ export const useCaseDiagramAttributesSchema = z
   })
   .openapi({ title: "UseCaseDiagramAttributes" });
 
-export const useCaseListSchema = z
-  .object({
-    id: uuidFieldDoc,
-    name: useCaseNameFieldDoc,
-    createdAt: dateFieldDoc,
-    updatedAt: dateFieldDoc.optional(),
-  })
-  .openapi({ title: "UseCaseAttributes" });
-
-// export const useCaseRelationshipsSchema = z
-//   .object({
-//     project: projectListSchema.optional().describe("Project this use case belongs to"),
-//     requirements: z.array(requirementListSchema).optional().describe(
-//       "Array of requirements associated with this use case"
-//     ),
-//     includedUseCases: z.array(useCaseListSchema).optional().describe(
-//       "Array of included use cases"
-//     ),
-//     extendedUseCases: z.array(useCaseListSchema).optional().describe(
-//       "Array of extended use cases"
-//     ),
-//   })
-//   .openapi({
-//     title: "UseCaseRelationships",
-//     description: "Relationships of a use case with project, requirements, and other use cases",
-//   });
-
-// export const primaryUseCaseAttributesSchema = useCaseAttributesSchema.extend({
-//   description: z.string().optional().openapi({
-//     description: "Optional description of the primary use case",
-//     example: "Allows a user to register for an account"
-//   }),
-// }).openapi({
-//   title: "PrimaryUseCaseAttributes",
-//   description: "Represents attributes of a primary use case, including optional description",
-// });
-
 export const primaryUseCaseListSchema = useCaseListSchema
   .omit({})
   .extend({
@@ -203,7 +184,7 @@ export const primaryUseCaseDetailSchema = primaryUseCaseListSchema
 
 export const useCaseRelationshipsSchema = z
   .object({
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
     requirements: z.array(z.any()).optional(),
     includedUseCases: z.array(useCaseListSchema).optional(),
     extendedUseCases: z.array(useCaseListSchema).optional(),
@@ -233,18 +214,10 @@ export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
       "Detailed view of a secondary use case including its attributes and relationships",
   });
 
-// export const useCaseDiagramRelationshipsSchema = z
-//   .object({
-//     useCases: useCaseAttributesSchema, // single object or maybe array? You defined as single, so single here
-//     project: projectListSchema.optional(),
-//     actors: actorSchema, // you need to have this schema similar to useCaseAttributesSchema
-//   })
-//   .openapi({ title: "UseCaseDiagramRelationships" });
-
 export const useCaseDiagramRelationshipsSchema = z
   .object({
     useCases: useCaseListSchema.optional(), // Keep as single object but make optional
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
     actors: actorSchema.optional(), // Keep as single object but make optional
   })
   .openapi({ title: "UseCaseDiagramRelationships" });

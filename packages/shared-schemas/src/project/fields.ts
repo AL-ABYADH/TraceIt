@@ -1,12 +1,11 @@
+import { descriptionField, nameField, uuidField } from "../common";
 import { createEnumField, createField } from "../common/field-factory";
 
-// Permissions
 export const permissionNameField = createField("string", {
   min: 3,
   max: 50,
   regex: /^(?! )[A-Za-z0-9 _-]*(?<! )$/,
-  message:
-    "Only letters, numbers, spaces, underscores, hyphens; no leading/trailing spaces.",
+  message: "Only letters, numbers, spaces, underscores, hyphens.",
 });
 
 export const permissionCodeField = createField("string", {
@@ -16,7 +15,6 @@ export const permissionCodeField = createField("string", {
   message: "Only letters, numbers, and underscores.",
 });
 
-// Roles
 export const roleNameField = createField("string", {
   min: 1,
   max: 50,
@@ -24,37 +22,30 @@ export const roleNameField = createField("string", {
   message: "Only letters, numbers, and underscores.",
 });
 
-export const projectActionField = createEnumField(["activate", "archive"], {
+export enum ProjectAction {
+  ACTIVATE = "ACTIVATE",
+  ARCHIVE = "ARCHIVE",
+}
+export const projectRoleIdsField = createField("array", {
+  elementType: uuidField,
+  description: "Role IDs to assign to the invited user",
+});
+
+export const ProjectActionField = createEnumField(ProjectAction, {
   nullable: false,
   optional: false,
 });
-
-// export const projectStatusField = createEnumField(["active", "archived"], {
-//   nullable: true,
-//   optional: true,
-// });
-
-export enum ProjectStatus {
-  ACTIVE = "active",
-  ARCHIVED = "archived",
-}
-
-export const projectStatusField = createEnumField(ProjectStatus, {
-  // nullable: true,
-  // optional: true,
-});
-
-
 export enum ProjectInvitationStatus {
-  PENDING = "pending",
-  ACCEPTED = "accepted",
-  DENIED = "denied",
-  CANCELLED = "cancelled",
-  EXPIRED = "expired",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DENIED = "DENIED",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
 }
 
-// Base field (no OpenAPI yet)
-export const projectInvitationStatusField = createEnumField(ProjectInvitationStatus, {
-  // nullable: false,
-  // optional: false,
-});
+export const ProjectInvitationStatusField = createEnumField(
+  ProjectInvitationStatus,
+);
+
+export const projectDescriptionField = descriptionField.optional();
+export const projectNameField = nameField;

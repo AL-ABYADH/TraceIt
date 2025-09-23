@@ -1,4 +1,4 @@
-import { ActorSubtype } from "../enums/actor-subtype.enum";
+import ActorSubtype from "../enums/actor-subtype.enum";
 
 export interface AddActorParamsInterface {
   name: string;

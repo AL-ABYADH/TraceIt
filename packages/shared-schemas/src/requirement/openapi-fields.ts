@@ -1,5 +1,5 @@
 import {
-  requirementTypeEnum,
+  RequirementTypeEnum,
   depthField,
   operationField,
   conditionField,
@@ -8,11 +8,11 @@ import {
   communicationFacilityField,
   conditionalValueField,
   actorIdsField,
-  requirementIdField,
   requirementIdsField,
   useCaseIdField,
+  RequirementType,
 } from "./fields";
-import { uuidField } from "../common";
+import { requirementIdField, uuidField } from "../common";
 
 export const useCaseIdFieldDoc = useCaseIdField.openapi({
   description: "UUID of the use case this requirement belongs to",
@@ -25,9 +25,9 @@ export const referencedUseCaseIdFieldDoc = useCaseIdField.openapi({
 });
 
 // Common requirement fields
-export const requirementTypeEnumDoc = requirementTypeEnum.openapi({
+export const requirementTypeEnumDoc = RequirementTypeEnum.openapi({
   description: "Type of the requirement",
-  example: "SYSTEM_REQUIREMENT",
+  example: RequirementType.ACTOR_REQUIREMENT,
 });
 
 export const depthFieldDoc = depthField.openapi({
@@ -67,11 +67,6 @@ export const communicationFacilityFieldDoc = communicationFacilityField.openapi(
     example: "notification",
   },
 );
-
-export const requirementIdFieldDoc = requirementIdField.openapi({
-  description: "UUID of the referenced requirement",
-  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
-});
 
 // Composite requirement fields
 export const conditionalValueFieldDoc = conditionalValueField.openapi({

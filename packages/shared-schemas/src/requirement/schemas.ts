@@ -2,34 +2,32 @@ import { actorSchema, eventActorSchema } from "../actor";
 import {
   dateISOField,
   projectIdFieldDoc,
-  projectListSchema,
+  projectSchema,
+  requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
 import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
-import { userListSchema } from "../user";
 import { z } from "../zod-openapi-init";
 import {
-  useCaseIdFieldDoc,
-  depthFieldDoc,
-  operationFieldDoc,
-  conditionFieldDoc,
-  eventActorIdFieldDoc,
   actorIdsFieldDoc,
-  communicationInfoFieldDoc,
-  communicationFacilityFieldDoc,
-  requirementIdFieldDoc,
-  referencedUseCaseIdFieldDoc,
-  mainRequirementIdFieldDoc,
-  detailRequirementIdsFieldDoc,
-  conditionalValueFieldDoc,
-  primaryConditionIdFieldDoc,
   alternativeConditionIdsFieldDoc,
-  fallbackConditionIdFieldDoc,
-  simpleRequirementIdsFieldDoc,
+  communicationFacilityFieldDoc,
+  communicationInfoFieldDoc,
+  conditionalValueFieldDoc,
+  conditionFieldDoc,
+  depthFieldDoc,
+  detailRequirementIdsFieldDoc,
+  eventActorIdFieldDoc,
   exceptionalFieldDoc,
   exceptionRequirementIdsFieldDoc,
+  fallbackConditionIdFieldDoc,
+  mainRequirementIdFieldDoc,
+  operationFieldDoc,
+  primaryConditionIdFieldDoc,
+  referencedUseCaseIdFieldDoc,
   requirementTypeEnumDoc,
-  // eventActorSubTypeFieldDoc,
+  simpleRequirementIdsFieldDoc,
+  useCaseIdFieldDoc,
 } from "./openapi-fields";
 
 /**
@@ -317,8 +315,8 @@ export const requirementListSchema = z
   .object({
     id: uuidFieldDoc,
     depth: depthFieldDoc,
-    createdAt: z.union([dateISOField, z.date()]),
-    updatedAt: z.union([dateISOField, z.date()]).optional(),
+    createdAt: dateISOField,
+    updatedAt: dateISOField.optional(),
   })
   .openapi({ title: "RequirementAttributes" });
 
@@ -338,7 +336,7 @@ export const simpleRequirementListSchema = requirementListSchema
 export const requirementRelationshipsSchema = z
   .object({
     useCase: useCaseListSchema.optional(),
-    project: projectListSchema.optional(),
+    project: projectSchema.optional(),
   })
   .openapi({ title: "RequirementRelationships" });
 
@@ -404,8 +402,8 @@ export const eventSystemRequirementRelationshipsSchema =
   simpleRequirementRelationshipsSchema
     .omit({})
     .extend({
-      // event: eventActorSchema.optional(),
-      event: actorSchema.optional(),
+      event: eventActorSchema.optional(),
+      // event: actorSchema.optional(),
     })
     .openapi({ title: "EventSystemRequirementRelationships" });
 

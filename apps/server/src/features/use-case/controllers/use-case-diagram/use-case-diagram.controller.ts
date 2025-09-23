@@ -10,6 +10,10 @@ import {
   uuidParamsSchema,
   type UuidParamsDto,
   UseCaseDiagramDetailDto,
+  type UseCaseIdDto,
+  useCaseIdSchema,
+  useCaseDiagramIdSchema,
+  type UseCaseDiagramIdDto,
 } from "@repo/shared-schemas";
 import { UseCaseDiagramService } from "../../services/use-case-diagram/use-case-diagram.service";
 
@@ -31,41 +35,51 @@ export class UseCaseDiagramController {
     return await this.useCaseDiagramService.listByProject(params.projectId);
   }
 
-  @Get(":id")
+  @Get(":useCaseDiagramId")
   async getById(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
   ): Promise<UseCaseDiagramDetailDto> {
     return await this.useCaseDiagramService.findById(params.id);
   }
 
-  @Put(":id")
+  @Put(":useCaseDiagramId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(useCaseDiagramIdSchema)) params: UseCaseDiagramIdDto,
     @Body(zodBody(updateDiagramSchema)) updateDto: UpdateDiagramDto,
   ): Promise<UseCaseDiagramDetailDto> {
-    return await this.useCaseDiagramService.update(params.id, updateDto);
+    return await this.useCaseDiagramService.update(params.useCaseDiagramId, updateDto);
   }
 
-  @Delete(":id")
+  @Delete(":useCaseDiagramId")
   async delete(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(useCaseDiagramIdSchema)) params: UseCaseDiagramIdDto,
   ): Promise<{ success: boolean }> {
-    return { success: await this.useCaseDiagramService.delete(params.id) };
+    return { success: await this.useCaseDiagramService.delete(params.useCaseDiagramId) };
   }
 
-  @Post(":id/use-cases/:useCaseId")
+  @Post(":useCaseDiagramId/use-cases/:useCaseId")
   async addUseCase(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("useCaseId") useCaseId: string,
+    @Param(zodParam(useCaseDiagramIdSchema)) param1: UseCaseDiagramIdDto,
+    @Param(zodParam(useCaseIdSchema)) param2: UseCaseIdDto,
   ): Promise<{ success: boolean }> {
-    return { success: await this.useCaseDiagramService.addUseCase(params.id, useCaseId) };
+    return {
+      success: await this.useCaseDiagramService.addUseCase(
+        param1.useCaseDiagramId,
+        param2.useCaseId,
+      ),
+    };
   }
 
-  @Delete(":id/use-cases/:useCaseId")
+  @Delete(":useCaseDiagramId/use-cases/:useCaseId")
   async removeUseCase(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("useCaseId") useCaseId: string,
+    @Param(zodParam(useCaseDiagramIdSchema)) param1: UseCaseDiagramIdDto,
+    @Param(zodParam(useCaseIdSchema)) param2: UseCaseIdDto,
   ): Promise<{ success: boolean }> {
-    return { success: await this.useCaseDiagramService.removeUseCase(params.id, useCaseId) };
+    return {
+      success: await this.useCaseDiagramService.removeUseCase(
+        param1.useCaseDiagramId,
+        param2.useCaseId,
+      ),
+    };
   }
 }

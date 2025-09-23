@@ -9,12 +9,14 @@ import {
   actorSubtypeSchema,
   type UpdateActorDto,
   updateActorSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
+  type ProjectIdDto,
+  projectIdSchema,
   ActorDto,
+  type ActorIdDto,
+  actorIdSchema,
 } from "@repo/shared-schemas";
-import { ActorSubtype } from "../enums/actor-subtype.enum";
-import { ActorType } from "../enums/actor-type.enum";
+import ActorSubtype from "../enums/actor-subtype.enum";
+import ActorType from "../enums/actor-type.enum";
 
 @Controller("actors")
 export class ActorController {
@@ -28,7 +30,7 @@ export class ActorController {
     const newDto = {
       name: dto.name,
       projectId: dto.projectId,
-      subType: dto.subType as ActorSubtype,
+      subType: dto.subType,
     };
     return this.actorService.add(newDto);
   }
@@ -38,11 +40,11 @@ export class ActorController {
    */
   @Get("subtype/:subtype")
   async listProjectActorsBySubtype(
-    @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
+    @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
     @Param(zodParam(actorSubtypeSchema)) subtype: SubTypeActorDto,
   ): Promise<ActorDto[]> {
     return this.actorService.listProjectActorsBySubtype(
-      params.id,
+      params.projectId,
       subtype as unknown as ActorSubtype,
     );
   }
@@ -52,10 +54,13 @@ export class ActorController {
    */
   @Get("type/:type")
   async listProjectActorsByType(
-    @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
+    @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
     @Param(zodParam(actorTypeSchema)) type: ActorType,
   ): Promise<ActorDto[]> {
-    return this.actorService.listProjectActorsByType(params.id, type as unknown as ActorType);
+    return this.actorService.listProjectActorsByType(
+      params.projectId,
+      type as unknown as ActorType,
+    );
   }
 
   /**
@@ -63,30 +68,28 @@ export class ActorController {
    */
   @Get()
   async listProjectActors(
-    @Query(zodQuery(uuidParamsSchema)) params: UuidParamsDto,
+    @Query(zodQuery(projectIdSchema)) params: ProjectIdDto,
   ): Promise<ActorDto[]> {
-    return this.actorService.listProjectActors(params.id);
+    return this.actorService.listProjectActors(params.projectId);
   }
 
   /**
    * Update an existing actor
    */
-  @Put(":id")
+  @Put(":actorId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(actorIdSchema)) params: ActorIdDto,
     @Body(zodBody(updateActorSchema)) dto: UpdateActorDto,
   ): Promise<ActorDto> {
-    return this.actorService.update(params.id, dto);
+    return this.actorService.update(params.actorId, dto);
   }
 
   /**
    * Delete an actor
    */
-  @Delete(":id")
-  async remove(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<{ success: boolean }> {
-    const success = await this.actorService.remove(params.id);
+  @Delete(":actorId")
+  async remove(@Param(zodParam(actorIdSchema)) params: ActorIdDto): Promise<{ success: boolean }> {
+    const success = await this.actorService.remove(params.actorId);
     return { success };
   }
 }

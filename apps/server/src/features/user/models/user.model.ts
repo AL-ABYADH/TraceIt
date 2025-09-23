@@ -1,5 +1,7 @@
 import { NeogmaModel, defineModelFactory, ModelFactoryDefinition } from "@repo/custom-neogma";
 import { ProjectAttributes } from "../../project/models/project.model";
+import { ProjectCollaborationAttributes } from "src/features/project/models/project-collaboration.model";
+import { RefreshTokenAttributes } from "src/core/auth/models/refresh-token.model";
 
 export type UserAttributes = {
   id: string;
@@ -12,7 +14,7 @@ export type UserAttributes = {
 };
 
 export interface UserRelationships {
-  projects: ProjectAttributes[]; // made it an array or objects made it optional 
+  projects: ProjectAttributes[]; // made it an array or objects made it optional
   collaborations: any;
   refreshTokens: any;
 }

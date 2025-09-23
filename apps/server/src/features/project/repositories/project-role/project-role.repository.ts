@@ -21,22 +21,22 @@ export class ProjectRoleRepository {
         where: { params: { id: { [Op.in]: role.permissionIds } } },
       },
     });
-    return this.mapOneToProjectRoleEntity(projectRole);
+    return projectRole;
   }
 
   async getById(id: string): Promise<ProjectRole | null> {
     const projectRole = await this.projectRoleModel.findOne({ where: { id: id } });
 
-    return projectRole != null ? this.mapOneToProjectRoleEntity(projectRole) : null;
+    return projectRole != null ? projectRole : null;
   }
 
   async getAll(): Promise<ProjectRole[]> {
     const projectRoles = await this.projectRoleModel.findManyWithRelations({});
-    return this.mapToProjectRoleEntities(projectRoles);
+    return projectRoles;
   }
 
   async update(id: string, projectRoleInterface: UpdateProjectRoleInterface): Promise<ProjectRole> {
-    const updatedProjectRole = await this.projectRoleModel.update(
+    await this.projectRoleModel.updateOneOrThrow(
       { name: projectRoleInterface.name },
       {
         where: { id },
@@ -62,7 +62,10 @@ export class ProjectRoleRepository {
       where: { id: id },
       include: ["projectPermissions"],
     });
-    return this.mapOneToProjectRoleEntity(updatedRolsPermission);
+    if (!updatedRolsPermission) {
+      throw new Error(`Project role with ID ${id} not found after update`);
+    }
+    return updatedRolsPermission;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -71,25 +74,5 @@ export class ProjectRoleRepository {
       detach: true,
     });
     return deleteResult > 0;
-  }
-
-  private mapToProjectRoleEntities(data: any): ProjectRole[] {
-    if (!data) return [];
-    if (Array.isArray(data)) {
-      return data.map((item) => this.mapOneToProjectRoleEntity(item));
-    }
-    return [this.mapOneToProjectRoleEntity(data)];
-  }
-
-  private mapOneToProjectRoleEntity(item: any): ProjectRole {
-    const { createdAt, updatedAt, ...rest } = item ?? {};
-    const result: any = { ...rest };
-
-    if (createdAt != null)
-      result.createdAt = createdAt instanceof Date ? createdAt : new Date(createdAt);
-    if (updatedAt != null)
-      result.updatedAt = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
-
-    return result as ProjectRole;
   }
 }

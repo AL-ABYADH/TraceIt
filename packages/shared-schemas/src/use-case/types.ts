@@ -1,6 +1,6 @@
 import { z } from "../zod-openapi-init";
 import {
-  createUseCaseSchema,
+  createPrimaryUseCaseSchema,
   projectIdSchema,
   updatePrimaryUseCaseSchema,
   createSecondaryUseCaseSchema,
@@ -14,13 +14,22 @@ import {
   primaryUseCaseListSchema,
   secondaryUseCaseDetailSchema,
   secondaryUseCaseListSchema,
+  secondaryUseCaseIdSchema,
+  useCaseDiagramIdSchema,
+  primaryUseCaseIdSchema,
+  useCaseListSchema,
 } from "./schemas";
 
 /**
  * Primary and project-related types
  */
-export type CreateUseCaseDto = z.infer<typeof createUseCaseSchema>;
+export type CreatePrimaryUseCaseDto = z.infer<
+  typeof createPrimaryUseCaseSchema
+>;
 export type ProjectIdDto = z.infer<typeof projectIdSchema>;
+export type SecondaryUseCaseIdDto = z.infer<typeof secondaryUseCaseIdSchema>;
+export type UseCaseDiagramIdDto = z.infer<typeof useCaseDiagramIdSchema>;
+export type PrimaryUseCaseIdDto = z.infer<typeof primaryUseCaseIdSchema>;
 export type UpdatePrimaryUseCaseDto = z.infer<
   typeof updatePrimaryUseCaseSchema
 >;
@@ -46,8 +55,17 @@ export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
  */
 export type ActorsDto = z.infer<typeof actorsSchema>;
 export type UseCaseDetailDto = z.infer<typeof useCaseDetailSchema>;
-export type UseCaseDiagramDetailDto = z.infer<typeof useCaseDiagramDetailSchema>;
-export type PrimaryUseCaseDetailDto = z.infer<typeof primaryUseCaseDetailSchema>;
+export type UseCaseListDto = z.infer<typeof useCaseListSchema>;
+export type UseCaseDiagramDetailDto = z.infer<
+  typeof useCaseDiagramDetailSchema
+>;
+export type PrimaryUseCaseDetailDto = z.infer<
+  typeof primaryUseCaseDetailSchema
+>;
 export type PrimaryUseCaseListDto = z.infer<typeof primaryUseCaseListSchema>;
-export type SecondaryUseCaseDetailDto = z.infer<typeof secondaryUseCaseDetailSchema>;
-export type SecondaryUseCaseListDto = z.infer<typeof secondaryUseCaseListSchema>;
+export type SecondaryUseCaseDetailDto = z.infer<
+  typeof secondaryUseCaseDetailSchema
+>;
+export type SecondaryUseCaseListDto = z.infer<
+  typeof secondaryUseCaseListSchema
+>;

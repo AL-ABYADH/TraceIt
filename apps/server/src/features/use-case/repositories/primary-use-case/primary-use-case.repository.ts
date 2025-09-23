@@ -1,13 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import {
-  PrimaryUseCaseAttributes,
-  PrimaryUseCaseModel,
-  PrimaryUseCaseModelType,
-} from "../../models/primary-use-case.model";
+import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { Op } from "@repo/custom-neogma";
-import { CreateUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
 
 @Injectable()
@@ -24,7 +20,7 @@ export class PrimaryUseCaseRepository {
    * @param createDto - The data needed to create the primary use case
    * @returns A promise resolving to the created primary use case entity
    */
-  async create(createDto: CreateUseCaseInterface): Promise<PrimaryUseCase> {
+  async create(createDto: CreatePrimaryUseCaseInterface): Promise<PrimaryUseCase> {
     try {
       const useCase = await this.primaryUseCaseModel.createOne({
         name: createDto.name,

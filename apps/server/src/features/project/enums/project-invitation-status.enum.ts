@@ -1,7 +1,7 @@
 export enum ProjectInvitationStatus {
-  PENDING = "pending",
-  ACCEPTED = "accepted",
-  DENIED = "denied",
-  CANCELLED = "cancelled",
-  EXPIRED = "expired",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DENIED = "DENIED",
+  CANCELLED = "CANCELLED",
+  EXPIRED = "EXPIRED",
 }

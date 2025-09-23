@@ -5,8 +5,8 @@ import { CreateActorInterface } from "../../interfaces/create-actor.interface";
 import { UpdateActorInterface } from "../../interfaces/update-actor.interface";
 import { HumanActorModel, HumanActorModelType } from "../../models/human-actor.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { ActorType } from "../../enums/actor-type.enum";
-import { ActorSubtype } from "../../enums/actor-subtype.enum";
+import ActorType from "../../enums/actor-type.enum";
+import ActorSubtype from "../../enums/actor-subtype.enum";
 
 @Injectable()
 export class HumanActorRepository implements ConcreteActorRepositoryInterface<HumanActor> {

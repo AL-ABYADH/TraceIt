@@ -7,6 +7,9 @@ import {
   uuidField,
   nameField,
   descriptionField,
+  ProjectStatus,
+  ProjectStatusField,
+  requirementIdField,
   dateField,
 } from "./fields";
 
@@ -51,4 +54,14 @@ export const descriptionFieldDoc = descriptionField.openapi({
 
 export const dateFieldDoc = dateField.openapi({
   example: new Date().toISOString(),
+});
+
+export const ProjectStatusFieldDoc = ProjectStatusField.openapi({
+  example: ProjectStatus.ARCHIVED,
+  description: "The status of the project",
+});
+
+export const requirementIdFieldDoc = requirementIdField.openapi({
+  description: "UUID of the referenced requirement",
+  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
 });

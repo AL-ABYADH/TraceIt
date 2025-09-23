@@ -3,9 +3,9 @@ import { ProjectInvitationService } from "../../services/project-invitation/proj
 import {
   type CreateProjectInvitationDto,
   createProjectInvitationSchema,
+  type ProjectIdDto,
+  projectIdSchema,
   ProjectInvitationDto,
-  type UuidParamsDto,
-  uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
@@ -40,31 +40,31 @@ export class ProjectInvitationController {
   ): Promise<ProjectInvitationDto> {
     return this.projectInvitationService.invite(userID, {
       ...dto,
-      expirationDate: new Date(dto.expirationDate),
+      expirationDate: dto.expirationDate,
     });
   }
 
-  @Patch(":id/accept")
+  @Patch(":projectIds/accept")
   async accept(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const result = await this.projectInvitationService.accept(projectId.id);
+    const result = await this.projectInvitationService.accept(params.projectId);
     return { success: result };
   }
 
-  @Patch(":id/deny")
+  @Patch(":projectId/deny")
   async deny(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const result = await this.projectInvitationService.deny(projectId.id);
+    const result = await this.projectInvitationService.deny(params.projectId);
     return { success: result };
   }
 
-  @Patch(":id/cancel")
+  @Patch(":projectId/cancel")
   async cancel(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const result = await this.projectInvitationService.cancel(projectId.id);
+    const result = await this.projectInvitationService.cancel(params.projectId);
     return { success: result };
   }
 }

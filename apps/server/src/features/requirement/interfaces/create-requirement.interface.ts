@@ -1,3 +1,4 @@
+// Base interface for requirement creation
 export interface CreateRequirementInterface {
   operation: string;
   useCaseId: string;

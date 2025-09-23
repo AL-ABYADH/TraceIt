@@ -4,11 +4,11 @@ import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type CreateProjectRoleDto,
   createProjectRoleSchema,
+  type ProjectIdDto,
+  projectIdSchema,
   ProjectRoleDto,
   type UpdateProjectRoleDto,
   updateProjectRoleSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
 } from "@repo/shared-schemas";
 
 @Controller("project-roles")
@@ -22,9 +22,9 @@ export class ProjectRoleController {
     return this.projectRoleService.create(dto);
   }
 
-  @Get(":id")
-  async find(@Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto): Promise<ProjectRoleDto> {
-    return this.projectRoleService.find(projectId.id);
+  @Get(":projectId")
+  async find(@Param(zodParam(projectIdSchema)) params: ProjectIdDto): Promise<ProjectRoleDto> {
+    return this.projectRoleService.find(params.projectId);
   }
 
   @Get()
@@ -32,19 +32,19 @@ export class ProjectRoleController {
     return this.projectRoleService.list();
   }
 
-  @Put(":id")
+  @Put(":projectId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
     @Body(zodBody(updateProjectRoleSchema)) dto: UpdateProjectRoleDto,
   ): Promise<ProjectRoleDto> {
-    return this.projectRoleService.update(projectId.id, dto);
+    return this.projectRoleService.update(params.projectId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":projectId")
   async delete(
-    @Param(zodParam(uuidParamsSchema)) projectId: UuidParamsDto,
+    @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {
-    const result = await this.projectRoleService.delete(projectId.id);
+    const result = await this.projectRoleService.delete(params.projectId);
     return { success: result };
   }
 }
