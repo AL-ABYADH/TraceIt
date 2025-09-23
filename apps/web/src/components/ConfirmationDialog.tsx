@@ -12,6 +12,7 @@ interface ConfirmationDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+  confirmColor?: string;
 }
 
 export default function ConfirmationDialog({
@@ -23,6 +24,7 @@ export default function ConfirmationDialog({
   onConfirm,
   onCancel,
   loading = false,
+  confirmColor = "bg-primary hover:bg-primary/90",
 }: ConfirmationDialogProps) {
   return (
     <Dialog isOpen={isOpen} onClose={onCancel} title={title} className="max-w-md">
@@ -33,7 +35,12 @@ export default function ConfirmationDialog({
           {cancelText}
         </Button>
 
-        <Button type="button" onClick={onConfirm} disabled={loading}>
+        <Button
+          type="button"
+          onClick={onConfirm}
+          disabled={loading}
+          className={confirmColor} // ✅ custom color here
+        >
           {loading ? "Processing..." : confirmText}
         </Button>
       </div>
