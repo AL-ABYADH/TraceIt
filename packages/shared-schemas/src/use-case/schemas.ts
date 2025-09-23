@@ -1,34 +1,24 @@
-import {
-  actorCreatedAtFieldDoc,
-  actorIdFieldDoc,
-  actorNameFieldDoc,
-  actorSchema,
-  actorSubTypeEnumDoc,
-  actorTypeEnumDoc,
-  actorUpdatedAtFieldDoc,
-} from "../actor";
+import { actorSchema } from "../actor";
 import {
   dateFieldDoc,
-  dateISOField,
-  descriptionFieldDoc,
   projectIdFieldDoc,
   projectListSchema,
+  requirementIdField,
   uuidFieldDoc,
 } from "../common";
-import { requirementListSchema } from "../requirement";
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
-  useCaseNameFieldDoc,
-  useCaseDescriptionFieldDoc,
-  primaryActorIdsFieldDoc,
-  secondaryActorIdsFieldDoc,
-  primaryUseCaseIdFieldDoc,
-  initialStateFieldDoc,
+  actorsIdsFieldDoc,
   finalStateFieldDoc,
+  initialStateFieldDoc,
+  primaryActorIdsFieldDoc,
+  primaryUseCaseIdFieldDoc,
+  secondaryActorIdsFieldDoc,
+  useCaseDescriptionFieldDoc,
   useCaseIdsFieldDoc,
   useCaseImportanceEnumDoc,
-  actorsIdsFieldDoc,
+  useCaseNameFieldDoc,
 } from "./openapi-fields";
 
 /**
@@ -78,6 +68,7 @@ export const createSecondaryUseCaseSchema = z
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,
     primaryUseCaseId: primaryUseCaseIdFieldDoc,
+    requirementId: requirementIdField,
   })
   .openapi({ title: "CreateSecondaryUseCaseDto" });
 
@@ -93,7 +84,7 @@ export const updateSecondaryUseCaseSchema = z
  * USE CASE DIAGRAM SCHEMAS
  * =========================
  */
-export const createDiagramSchema = z
+const createDiagramSchema = z
   .object({
     projectId: projectIdFieldDoc,
     initial: initialStateFieldDoc,
@@ -102,7 +93,7 @@ export const createDiagramSchema = z
   })
   .openapi({ title: "CreateDiagramDto" });
 
-export const updateDiagramSchema = z
+const updateDiagramSchema = z
   .object({
     initial: initialStateFieldDoc.optional(),
     final: finalStateFieldDoc.optional(),

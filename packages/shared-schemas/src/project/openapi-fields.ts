@@ -6,15 +6,15 @@ import {
   projectActionField,
   ProjectInvitationStatus,
   projectInvitationStatusField,
-  ProjectStatus,
-  projectStatusField,
   roleNameField,
 } from "./fields";
 import {
-  uuidField,
-  nameField,
-  descriptionField,
   dateISOField,
+  descriptionField,
+  nameField,
+  ProjectStatus,
+  ProjectStatusField,
+  uuidField,
 } from "../common";
 
 export const projectNameField = nameField.openapi({
@@ -78,12 +78,13 @@ export const projectActionFieldDoc = projectActionField.openapi({
   description: "The status of the project",
 });
 
-export const projectStatusFieldDoc = projectStatusField.openapi({
+export const projectStatusFieldDoc = ProjectStatusField.openapi({
   example: ProjectStatus.ARCHIVED,
   description: "The status of the project",
 });
 
-export const projectInvitationStatusFieldDoc = projectInvitationStatusField.openapi({
-  description: "The current status of the project invitation",
-  example: ProjectInvitationStatus.ACCEPTED,
-});
+export const projectInvitationStatusFieldDoc =
+  projectInvitationStatusField.openapi({
+    description: "The current status of the project invitation",
+    example: ProjectInvitationStatus.ACCEPTED,
+  });

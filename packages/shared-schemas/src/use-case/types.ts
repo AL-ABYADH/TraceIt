@@ -1,19 +1,17 @@
 import { z } from "../zod-openapi-init";
 import {
-  createUseCaseSchema,
-  projectIdSchema,
-  updatePrimaryUseCaseSchema,
-  createSecondaryUseCaseSchema,
-  updateSecondaryUseCaseSchema,
-  createDiagramSchema,
-  updateDiagramSchema,
   actorsSchema,
-  useCaseDiagramDetailSchema,
+  createSecondaryUseCaseSchema,
+  createUseCaseSchema,
   primaryUseCaseDetailSchema,
-  useCaseDetailSchema,
   primaryUseCaseListSchema,
+  projectIdSchema,
   secondaryUseCaseDetailSchema,
   secondaryUseCaseListSchema,
+  updatePrimaryUseCaseSchema,
+  updateSecondaryUseCaseSchema,
+  useCaseDetailSchema,
+  useCaseDiagramDetailSchema,
 } from "./schemas";
 
 /**
@@ -38,16 +36,23 @@ export type UpdateSecondaryUseCaseDto = z.infer<
 /**
  * Diagram types
  */
-export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
-export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
+// export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 
 /**
  * Actor management types
  */
 export type ActorsDto = z.infer<typeof actorsSchema>;
 export type UseCaseDetailDto = z.infer<typeof useCaseDetailSchema>;
-export type UseCaseDiagramDetailDto = z.infer<typeof useCaseDiagramDetailSchema>;
-export type PrimaryUseCaseDetailDto = z.infer<typeof primaryUseCaseDetailSchema>;
+export type UseCaseDiagramDetailDto = z.infer<
+  typeof useCaseDiagramDetailSchema
+>;
+export type PrimaryUseCaseDetailDto = z.infer<
+  typeof primaryUseCaseDetailSchema
+>;
 export type PrimaryUseCaseListDto = z.infer<typeof primaryUseCaseListSchema>;
-export type SecondaryUseCaseDetailDto = z.infer<typeof secondaryUseCaseDetailSchema>;
-export type SecondaryUseCaseListDto = z.infer<typeof secondaryUseCaseListSchema>;
+export type SecondaryUseCaseDetailDto = z.infer<
+  typeof secondaryUseCaseDetailSchema
+>;
+export type SecondaryUseCaseListDto = z.infer<
+  typeof secondaryUseCaseListSchema
+>;

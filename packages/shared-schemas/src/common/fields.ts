@@ -1,4 +1,5 @@
 import { z } from "../zod-openapi-init";
+import { createEnumField } from "./field-factory";
 
 // ----------------------
 // Raw Field Validators (no .openapi())
@@ -52,11 +53,27 @@ export const passwordField = stringField
     },
   );
 
-export const displayNameField = stringField.min(1).max(50);
+export const displayNameField = stringField
+  .min(1, { message: "Display name must not be empty" })
+  .max(50, { message: "Display name must not exceed 50 characters" });
 
 export const loginUsernameField = z
-  .string()
-  .optional()
-  .transform((val) => val?.trim() || undefined);
+  .string({
+    invalid_type_error: "Username must be a string",
+  })
+  .min(3, { message: "Username must be at least 3 characters" })
+  .max(32, { message: "Username cannot exceed 32 characters" })
+  .transform((val) => val.trim())
+  .optional();
 
 export const emailVerifiedField = z.boolean();
+
+export enum ProjectStatus {
+  ACTIVE = "ACTIVE",
+  ARCHIVED = "ARCHIVED",
+}
+
+export const ProjectStatusField = createEnumField(ProjectStatus, {
+  optional: true,
+});
+export const requirementIdField = uuidField;

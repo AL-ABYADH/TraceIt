@@ -5,3 +5,5 @@ export * from "./actor";
 export * from "./common";
 export * from "./use-case";
 export * from "./requirement";
+export * from "./diagram";
+export * from "./traceability";
