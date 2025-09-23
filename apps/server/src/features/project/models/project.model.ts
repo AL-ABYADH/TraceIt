@@ -29,6 +29,7 @@ export type ProjectModelType = NeogmaModel<ProjectAttributes, ProjectRelationshi
 export const ProjectModel: ModelFactoryDefinition<ProjectAttributes, ProjectRelationships> =
   defineModelFactory<ProjectAttributes, ProjectRelationships>({
     name: "Project",
+    inTraceability: true,
     label: ["Project"],
     schema: {
       name: {
@@ -76,7 +77,7 @@ export const ProjectModel: ModelFactoryDefinition<ProjectAttributes, ProjectRela
       },
       useCases: {
         model: "UseCase",
-        direction: "in",
+        direction: "out",
         name: "BELONGS_TO",
         cardinality: "many",
       },

@@ -65,6 +65,7 @@ export const createPrimaryUseCaseSchema = z
   })
   .openapi({ title: "CreateUseCaseDto" });
 
+// add subtype when khaled comes
 export const useCaseListSchema = z
   .object({
     id: uuidFieldDoc,

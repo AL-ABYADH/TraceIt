@@ -6,8 +6,6 @@ import {
   type ProjectIdDto,
   projectIdSchema,
   ProjectInvitationDto,
-  type UuidParamsDto,
-  uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import { CurrentUserId } from "../../../../common/decorators/current-user-id.decorator";
@@ -42,11 +40,11 @@ export class ProjectInvitationController {
   ): Promise<ProjectInvitationDto> {
     return this.projectInvitationService.invite(userID, {
       ...dto,
-      expirationDate: new Date(dto.expirationDate),
+      expirationDate: dto.expirationDate,
     });
   }
 
-  @Patch(":projectId/accept")
+  @Patch(":projectIds/accept")
   async accept(
     @Param(zodParam(projectIdSchema)) params: ProjectIdDto,
   ): Promise<{ success: boolean }> {

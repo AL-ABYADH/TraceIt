@@ -16,7 +16,7 @@ export const uuidField = z.string().uuid({ message: "Invalid UUID format" });
 export const emailField = z
   .string()
   .email({ message: "Invalid email format" })
-  .max(254, { message: "Email must not exceed 254 characters" });
+  .max(254);
 
 // Add the missing field validators
 export const urlField = z.string().url({ message: "Invalid URL format" });
@@ -29,7 +29,7 @@ export const arrayField = <T extends z.ZodTypeAny>(
 ): z.ZodArray<T> => z.array(elementType);
 
 // Common fields with validation
-export const nameField = stringField.min(1).max(50);
+export const nameField = stringField.min(1).max(100);
 export const descriptionField = stringField.max(500);
 export const usernameField = stringField
   .min(3, { message: "Username must be at least 3 characters" })
@@ -39,11 +39,7 @@ export const usernameField = stringField
       "Username can only contain letters, numbers, underscores and hyphens",
   });
 
-export const passwordField = z
-  .string({
-    required_error: "Password is required",
-    invalid_type_error: "Password must be a string",
-  })
+export const passwordField = stringField
   .min(8, { message: "Password must be at least 8 characters" })
   .refine(
     (val) =>
@@ -67,7 +63,7 @@ export const loginUsernameField = z
   })
   .min(3, { message: "Username must be at least 3 characters" })
   .max(32, { message: "Username cannot exceed 32 characters" })
-  .transform((val) => (typeof val === "string" ? val.trim() : val))
+  .transform((val) => val.trim())
   .optional();
 
 export const emailVerifiedField = z.boolean();
@@ -77,5 +73,7 @@ export enum ProjectStatus {
   ARCHIVED = "ARCHIVED",
 }
 
-export const ProjectStatusField = createEnumField(ProjectStatus);
+export const ProjectStatusField = createEnumField(ProjectStatus, {
+  optional: true,
+});
 export const requirementIdField = uuidField;

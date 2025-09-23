@@ -29,7 +29,7 @@ export class ProjectCollaborationRepository {
           where: { params: { id: { [Op.in]: projectCollaboration.roleIds } } },
         },
       });
-    return this.mapOneToProjectCollaborationEntities(collaboration);
+    return collaboration;
   }
 
   async getByProject(projectId: string): Promise<ProjectCollaboration[]> {
@@ -38,7 +38,7 @@ export class ProjectCollaborationRepository {
       relationshipAlias: "project",
     });
 
-    return this.mapToProjectCollaborationEntities(projectCollaborations);
+    return projectCollaborations;
   }
 
   async update(
@@ -65,7 +65,11 @@ export class ProjectCollaborationRepository {
       include: ["projectRoles"],
     });
 
-    return this.mapOneToProjectCollaborationEntities(updatedCollaboration);
+    if (!updatedCollaboration) {
+      throw new Error(`ProjectCollaboration with ID ${id} not found`);
+    }
+
+    return updatedCollaboration;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -74,27 +78,5 @@ export class ProjectCollaborationRepository {
     });
 
     return deletedCount > 0;
-  }
-
-  /**
-   * Transforms raw data into a ProjectCollaboration entity instance.
-   */
-
-  private mapOneToProjectCollaborationEntities(item: any): ProjectCollaboration {
-    const { createdAt, updatedAt, ...rest } = item ?? {};
-    const result: any = { ...rest };
-
-    if (createdAt != null)
-      result.createdAt = createdAt instanceof Date ? createdAt : new Date(createdAt);
-    if (updatedAt != null)
-      result.updatedAt = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
-
-    return result as ProjectCollaboration;
-  }
-
-  private mapToProjectCollaborationEntities(data: any): ProjectCollaboration[] {
-    return Array.isArray(data)
-      ? data.map((d) => this.mapOneToProjectCollaborationEntities(d))
-      : [this.mapOneToProjectCollaborationEntities(data)];
   }
 }

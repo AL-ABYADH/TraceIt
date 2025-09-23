@@ -23,7 +23,7 @@ export const actorNameField = createField("string", {
   max: 50,
   regex: /^(?! )[A-Za-z0-9 _-]*(?<! )$/,
   message:
-    "is not a valid name. It can only contain letters, numbers, spaces, underscores, hyphens, and no leading or trailing spaces.",
+    "is not a valid name. It can only contain letters, numbers, spaces, underscores, hyphens",
 });
 
 export const actorTypeVirtual = z.literal(ActorType.VIRTUAL).openapi({

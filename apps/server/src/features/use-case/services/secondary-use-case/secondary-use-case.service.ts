@@ -1,17 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
 import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
 import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
-import { RequirementService } from "../../../requirement/services/requirement/requirement.service";
-import { RequirementType } from "../../../requirement/enums/requirement-type.enum";
+import { RequirementService } from "../../../requirement/services/requirement.service";
 
 @Injectable()
 export class SecondaryUseCaseService {
@@ -30,35 +24,32 @@ export class SecondaryUseCaseService {
    */
   async create(createDto: CreateSecondaryUseCaseInterface): Promise<SecondaryUseCase> {
     try {
-      // Verify project exists
+      // التحقق من وجود المشروع وحالة الاستخدام الأساسية
       await this.projectService.findById(createDto.projectId);
-
-      // Verify primary use case exists
       await this.primaryUseCaseService.findById(createDto.primaryUseCaseId);
 
+      // التحقق من وجود المتطلب
       const requirement = await this.requirementService.findById(createDto.requirementId);
-      const type = await this.requirementService.getRequirementTypeFromEntity(requirement);
-      if (
-        !(
-          type === RequirementType.LOGICAL_GROUP_REQUIREMENT ||
-          type === RequirementType.EXCEPTIONAL_REQUIREMENT
-        )
-      ) {
-        throw new UnprocessableEntityException(
-          "he requirementId shouild be EXCEPTIONAL_REQUIREMENT or LOGICAL_GROUP_REQUIREMENT",
+
+      // التحقق من أن المتطلب لديه متطلبات متداخلة
+      if (!requirement.nestedRequirements || requirement.nestedRequirements.length === 0) {
+        throw new BadRequestException(
+          `لا يمكن إنشاء حالة استخدام ثانوية للمتطلب رقم ${createDto.requirementId} لأنه لا يحتوي على متطلبات متداخلة.`,
         );
       }
-      // Create the secondary use case
-      return this.secondaryUseCaseRepository.create(createDto);
+
+      // إنشاء حالة الاستخدام الثانوية
+      const useCase = await this.secondaryUseCaseRepository.create(createDto);
+      await this.requirementService.transferNestedRequirementsToSecondaryUseCase(
+        requirement.id,
+        createDto.primaryUseCaseId,
+        useCase.id,
+      );
+
+      return useCase;
     } catch (error) {
       if (error instanceof NotFoundException) {
-        if (error.message.includes("Project")) {
-          throw new BadRequestException(`Project with ID ${createDto.projectId} not found`);
-        } else {
-          throw new BadRequestException(
-            `Primary use case with ID ${createDto.primaryUseCaseId} not found`,
-          );
-        }
+        throw new BadRequestException(error.message);
       }
       throw error;
     }

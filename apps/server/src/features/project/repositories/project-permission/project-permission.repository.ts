@@ -20,20 +20,18 @@ export class ProjectPermissionRepository {
     const projectPermission = await this.projectPermissionModel.createOne({
       ...permission,
     });
-    return this.mapOneToProjectPermissionEntity(projectPermission);
+    return projectPermission;
   }
 
   async getById(id: string): Promise<ProjectPermission | null> {
     const projectPermission = await this.projectPermissionModel.findOne({ where: { id } });
 
-    return projectPermission != null
-      ? this.mapOneToProjectPermissionEntity(projectPermission)
-      : null;
+    return projectPermission != null ? projectPermission : null;
   }
 
   async getAll(): Promise<ProjectPermission[]> {
     const projectPermissions = await this.projectPermissionModel.findManyWithRelations({});
-    return this.mapToProjectPermissionEntities(projectPermissions);
+    return projectPermissions;
   }
 
   async update(
@@ -47,7 +45,7 @@ export class ProjectPermissionRepository {
       },
     );
 
-    return this.mapToProjectPermissionEntities(updatedProjectPermission);
+    return updatedProjectPermission;
   }
 
   async delete(id: string): Promise<boolean> {
@@ -57,25 +55,5 @@ export class ProjectPermissionRepository {
     });
 
     return deleteResult > 0;
-  }
-
-  private mapToProjectPermissionEntities(data: any): ProjectPermission[] {
-    if (!data) return [];
-    if (Array.isArray(data)) {
-      return data.map((item) => this.mapOneToProjectPermissionEntity(item));
-    }
-    return [this.mapOneToProjectPermissionEntity(data)];
-  }
-
-  private mapOneToProjectPermissionEntity(item: any): ProjectPermission {
-    const { createdAt, updatedAt, ...rest } = item ?? {};
-    const result: any = { ...rest };
-
-    if (createdAt != null)
-      result.createdAt = createdAt instanceof Date ? createdAt : new Date(createdAt);
-    if (updatedAt != null)
-      result.updatedAt = updatedAt instanceof Date ? updatedAt : new Date(updatedAt);
-
-    return result as ProjectPermission;
   }
 }

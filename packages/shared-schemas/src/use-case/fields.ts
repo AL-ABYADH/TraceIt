@@ -1,41 +1,32 @@
 import { createEnumField, createField, uuidField } from "../common";
 
-// Enum for use case importance level
-// export const useCaseImportanceLevel = createEnumField(
-//   ["HIGH", "MEDIUM", "LOW"] as const,
-//   {
-//     description: "Importance level of the use case for prioritization purposes",
-//   },
-// );
-
 export enum UseCaseImportanceLevel {
   HIGH = "HIGH",
   MEDIUM = "MEDIUM",
   LOW = "LOW",
 }
 
-// Base field (no OpenAPI yet)
 export const UseCaseImportanceLevelField = createEnumField(
   UseCaseImportanceLevel,
-  {
-    // nullable: false,
-    // optional: false,
-  },
 );
 
-// Core use case fields
 export const useCaseNameField = createField("string", {
   min: 1,
+  minMessage: "Use case name must at least contain one characeter!",
   max: 100,
+  maxMessage: "Usecase name must at most 100 characters long",
   regex: /^(?! )[A-Za-z0-9 _-]*(?<! )$/,
   message:
-    "Use case name must contain only letters, numbers, spaces, hyphens, and underscores with no leading/trailing spaces",
+    "Use case name must contain only letters, numbers, spaces, hyphens, and underscores.",
   description:
     "The name of the use case (e.g., 'User Login', 'Generate Report')",
 });
 
 export const useCaseDescriptionField = createField("string", {
+  min: 3,
+  minMessage: "useCase description must at least contain three characters",
   max: 1000,
+  maxMessage: "use case description must at most 1000 characters",
   optional: true,
   description:
     "A detailed explanation of the use case functionality, including its purpose and key behaviors",

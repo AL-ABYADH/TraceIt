@@ -1,17 +1,20 @@
 import { z } from "../zod-openapi-init";
 import {
-  stringField,
-  numberField,
-  booleanField,
-  dateField,
   uuidField,
   emailField,
   urlField,
   integerField,
-  arrayField,
+  dateField,
 } from "./fields";
 
 import { ZodEnum, ZodNativeEnum, ZodTypeAny } from "zod";
+
+const arrayField = <T extends z.ZodTypeAny>(elementType: T): z.ZodArray<T> =>
+  z.array(elementType);
+
+const stringField = z.string();
+const numberField = z.number();
+const booleanField = z.boolean();
 
 // Expanded field type list with additional types
 type FieldType =
@@ -24,12 +27,17 @@ type FieldType =
   | "url"
   | "integer"
   | "array";
+
 // Enhanced options interface with more validation capabilities
 interface FieldOptions<T extends ZodTypeAny = ZodTypeAny> {
   min?: number;
   max?: number;
   regex?: RegExp;
-  message?: string;
+  message?: string; // fallback
+  minMessage?: string;
+  maxMessage?: string;
+  regexMessage?: string;
+  enumMessage?: string;
   nullable?: boolean;
   optional?: boolean;
   default?: unknown;
@@ -41,7 +49,7 @@ interface FieldOptions<T extends ZodTypeAny = ZodTypeAny> {
 /* -------------------------
    Type-level mapping
    ------------------------- */
-type BaseSchemaFor<
+export type BaseSchemaFor<
   T extends FieldType,
   E extends ZodTypeAny = ZodTypeAny,
 > = T extends "array"
@@ -123,6 +131,7 @@ export function createField<
   if (options.min !== undefined && supportsMinMax(type)) {
     field = (field as any).min(options.min, {
       message:
+        options.minMessage ??
         options.message ??
         `Must be at least ${options.min} ${isStringType(type) ? "characters" : ""}`,
     });
@@ -131,6 +140,7 @@ export function createField<
   if (options.max !== undefined && supportsMinMax(type)) {
     field = (field as any).max(options.max, {
       message:
+        options.maxMessage ??
         options.message ??
         `Cannot exceed ${options.max} ${isStringType(type) ? "characters" : ""}`,
     });
@@ -139,7 +149,7 @@ export function createField<
   // Apply regex for string fields
   if (isStringType(type) && options.regex) {
     field = (field as any).regex(options.regex, {
-      message: options.message || "Invalid format",
+      message: options.regexMessage || options.message || "Invalid format",
     });
   }
 
@@ -147,7 +157,9 @@ export function createField<
   if (isStringType(type) && options.enum) {
     field = field.refine((val) => options.enum!.includes(val as string), {
       message:
-        options.message || `Value must be one of: ${options.enum.join(", ")}`,
+        options.enumMessage ||
+        options.message ||
+        `Value must be one of: ${options.enum.join(", ")}`,
     });
   }
 

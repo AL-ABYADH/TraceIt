@@ -1,7 +1,3 @@
-import { ProjectPermission } from "./project-permission.entity";
+import { ProjectRoleAttributes, ProjectRoleRelationships } from "../models/project-role.model";
 
-export class ProjectRole {
-  id: string;
-  name: string;
-  projectPermissions: ProjectPermission[] | null;
-}
+export type ProjectRole = ProjectRoleAttributes & Partial<ProjectRoleRelationships>;
