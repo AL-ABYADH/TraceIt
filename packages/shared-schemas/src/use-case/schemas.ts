@@ -111,21 +111,14 @@ export const updateSecondaryUseCaseSchema = z
  * USE CASE DIAGRAM SCHEMAS
  * =========================
  */
-export const createDiagramSchema = z
-  .object({
-    projectId: projectIdFieldDoc,
-    initial: initialStateFieldDoc,
-    final: finalStateFieldDoc.optional(),
-    useCaseIds: useCaseIdsFieldDoc.optional(),
-  })
-  .openapi({ title: "CreateDiagramDto" });
-
-export const updateDiagramSchema = z
-  .object({
-    initial: initialStateFieldDoc.optional(),
-    final: finalStateFieldDoc.optional(),
-  })
-  .openapi({ title: "UpdateDiagramDto" });
+// export const createDiagramSchema = z
+//   .object({
+//     projectId: projectIdFieldDoc,
+//     initial: initialStateFieldDoc,
+//     final: finalStateFieldDoc.optional(),
+//     useCaseIds: useCaseIdsFieldDoc.optional(),
+//   })
+//   .openapi({ title: "CreateDiagramDto" });
 
 /**
  * =========================
