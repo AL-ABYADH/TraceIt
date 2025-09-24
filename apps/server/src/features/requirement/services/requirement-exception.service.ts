@@ -17,11 +17,10 @@ export class RequirementExceptionService {
    */
   async create(createDto: CreateRequirementExceptionInterface): Promise<RequirementException> {
     try {
-      createDto.requirementIds.map(async (item) => {
-        await this.requirementService.findById(item);
-      });
-
-      return this.exceptionalRequirementRepository.create(createDto);
+      await this.requirementService.findById(createDto.requirementId);
+      const exception = await this.exceptionalRequirementRepository.create(createDto);
+      await this.requirementService.addException(createDto.requirementId, exception.id);
+      return exception;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new BadRequestException(error.message);
@@ -62,19 +61,15 @@ export class RequirementExceptionService {
   }
 
   /**
-   * إزالة متطلب من استثناء
-   */
-  async removeRequirement(exceptionId: string, requirementId: string): Promise<boolean> {
-    await this.findById(exceptionId);
-    await this.requirementService.findById(exceptionId);
-    return this.exceptionalRequirementRepository.removeRequirement(exceptionId, requirementId);
-  }
-
-  /**
    * حذف استثناء
    */
   async remove(id: string): Promise<boolean> {
-    await this.findById(id);
+    const details = await this.findById(id);
+    if (details.requirements) {
+      for (const detail of details.requirements) {
+        await this.requirementService.removeRequirement(detail.id);
+      }
+    }
     return this.exceptionalRequirementRepository.delete(id);
   }
 }

@@ -21,6 +21,11 @@ export class RequirementService {
    */
   async createRequirement(createDto: CreateRequirementInterface): Promise<Requirement> {
     try {
+      if (createDto.exceptionId && createDto.parentRequirementId) {
+        throw new BadRequestException(
+          "You must provide either parentRequirementId or exceptionId, but not both.",
+        );
+      }
       await this.useCaseService.findById(createDto.useCaseId);
 
       if (createDto.actorIds && createDto.actorIds.length > 0) {
@@ -29,9 +34,24 @@ export class RequirementService {
         }
       }
 
-      return this.requirementRepository.create(createDto);
+      const created = await this.requirementRepository.create(createDto);
+      if (createDto.parentRequirementId) {
+        await this.requirementRepository.addNestedRequirement(
+          createDto.parentRequirementId,
+          created.id,
+        );
+      } else if (createDto.exceptionId) {
+        await this.exceptionalRequirementRepository.addRequirement(
+          createDto.exceptionId,
+          created.id,
+        );
+      }
+      return created;
     } catch (error) {
       if (error instanceof NotFoundException) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof BadRequestException) {
         throw new BadRequestException(error.message);
       }
       throw error;
@@ -122,7 +142,17 @@ export class RequirementService {
    * حذف متطلب
    */
   async removeRequirement(id: string): Promise<boolean> {
-    await this.findById(id);
+    const data = await this.findById(id);
+    if (data.nestedRequirements) {
+      for (const nestedRequirement of data.nestedRequirements) {
+        await this.requirementRepository.delete(nestedRequirement.id);
+      }
+    }
+    if (data.exceptions) {
+      for (const exception of data.exceptions) {
+        await this.exceptionalRequirementRepository.delete(exception.id);
+      }
+    }
     return this.requirementRepository.delete(id);
   }
 
