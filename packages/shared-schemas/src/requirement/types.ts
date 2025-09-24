@@ -2,6 +2,10 @@ import { z } from "../zod-openapi-init";
 import {
   createRequirementExceptionSchema,
   createRequirementSchema,
+  requirementDetailSchema,
+  requirementExceptionDetailSchema,
+  requirementExceptionListSchema,
+  requirementListSchema,
   updateRequirementExceptionSchema,
   updateRequirementSchema,
   useCaseIdSchema,
@@ -17,4 +21,12 @@ export type UpdateRequirementDto = z.infer<typeof updateRequirementSchema>;
 
 export type UpdateRequirementExceptionDto = z.infer<
   typeof updateRequirementExceptionSchema
+>;
+export type RequirementDetailDto = z.infer<typeof requirementDetailSchema>;
+export type RequirementListDto = z.infer<typeof requirementListSchema>;
+export type RequirementExceptionDetailDto = z.infer<
+  typeof requirementExceptionDetailSchema
+>;
+export type RequirementExceptionListDto = z.infer<
+  typeof requirementExceptionListSchema
 >;

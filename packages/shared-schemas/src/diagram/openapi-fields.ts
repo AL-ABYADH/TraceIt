@@ -1,3 +1,4 @@
+import { uuidField } from "../common";
 import {
   dataField,
   DiagramType,
@@ -68,4 +69,10 @@ export const nodesArrayFieldDoc = nodesArrayField.openapi({
 export const edgesArrayFieldDoc = edgesArrayField.openapi({
   example: ["edge-1", "edge-2"],
   description: "Array of edge IDs belonging to the diagram",
+});
+
+export const useCaseDiagramIdDoc = uuidField.openapi({
+  description:
+    "The unique identifier of the project that contains this use case",
+  example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
 });

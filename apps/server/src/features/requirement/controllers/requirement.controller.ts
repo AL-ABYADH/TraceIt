@@ -5,6 +5,7 @@ import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type CreateRequirementDto,
   createRequirementSchema,
+  RequirementListDto,
   type UpdateRequirementDto,
   updateRequirementSchema,
   type UseCaseIdDto,
@@ -21,14 +22,14 @@ export class RequirementController {
   @Post()
   async create(
     @Body(zodBody(createRequirementSchema)) dto: CreateRequirementDto,
-  ): Promise<Requirement> {
+  ): Promise<RequirementListDto> {
     return this.requirementService.createRequirement(dto);
   }
 
   @Get("use-case/:useCaseId")
   async getByUseCase(
     @Param(zodParam(useCaseIdSchema)) useCaseId: UseCaseIdDto,
-  ): Promise<Requirement[]> {
+  ): Promise<RequirementListDto[]> {
     return this.requirementService.findByUseCase(useCaseId.useCaseId);
   }
 
@@ -41,7 +42,7 @@ export class RequirementController {
   async update(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Body(zodBody(updateRequirementSchema)) dto: UpdateRequirementDto,
-  ): Promise<Requirement> {
+  ): Promise<RequirementListDto> {
     return this.requirementService.updateRequirement(params.id, dto);
   }
 
@@ -57,7 +58,7 @@ export class RequirementController {
   async addNestedRequirement(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Param("childId") childId: string,
-  ): Promise<Requirement> {
+  ): Promise<RequirementListDto> {
     return this.requirementService.addNestedRequirement(params.id, childId);
   }
 
@@ -74,7 +75,7 @@ export class RequirementController {
   async addException(
     @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
     @Param("exceptionId") exceptionId: string,
-  ): Promise<Requirement> {
+  ): Promise<RequirementListDto> {
     return this.requirementService.addException(params.id, exceptionId);
   }
 

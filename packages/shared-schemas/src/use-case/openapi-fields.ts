@@ -20,6 +20,10 @@ export const primaryUseCaseIdFieldDoc = uuidField.openapi({
   example: "b2c3d4e5-f6a7-8901-bcde-f1234567890a",
 });
 
+export const secondaryUseCaseIdFieldDoc = uuidField.openapi({
+  description: "The unique identifier of the secondary use case",
+  example: "b2c3d4e5-f6a7-8901-bcde-f1234567890a",
+});
 // Use case core fields
 export const useCaseNameFieldDoc = useCaseNameField.openapi({
   description:
