@@ -60,7 +60,7 @@ export class RequirementController {
     return { success };
   }
 
-  @Post(":requirementId/nested/:childId")
+  @Put(":requirementId/nested/:childId")
   async addNestedRequirement(
     @Param(zodParam(requirementIdSchema)) param1: RequirementIdDto,
     @Param(zodParam(childIdSchema)) param2: ChildIdDto,
