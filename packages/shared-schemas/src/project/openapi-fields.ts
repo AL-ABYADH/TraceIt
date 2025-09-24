@@ -11,7 +11,14 @@ import {
   projectRoleIdsField,
   roleNameField,
 } from "./fields";
-import { uuidField, dateISOField, createField } from "../common";
+// import { uuidField, dateISOField, createField } from "../common";
+import {
+  createField,
+  dateISOField,
+  ProjectStatus,
+  ProjectStatusField,
+  uuidField,
+} from "../common";
 
 export const projectNameFieldDoc = projectNameField.openapi({
   example: "Client Website Revamp",
@@ -74,6 +81,11 @@ export const expirationDateField = dateISOField.openapi({
 
 export const ProjectActionFieldDoc = ProjectActionField.openapi({
   example: ProjectAction.ACTIVATE,
+  description: "The status of the project",
+});
+
+export const projectStatusFieldDoc = ProjectStatusField.openapi({
+  example: ProjectStatus.ARCHIVED,
   description: "The status of the project",
 });
 

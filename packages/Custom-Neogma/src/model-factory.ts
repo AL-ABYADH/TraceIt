@@ -2,17 +2,16 @@ import {
   ModelFactory as OriginalModelFactory,
   Neo4jSupportedProperties,
   Neogma,
-  QueryBuilder,
   RelationshipsI,
   WhereParamsI,
 } from "neogma";
 
 import {
   AnyObject,
-  ModelParams,
   FindWithRelationsOptions,
-  NeogmaSchema,
   ModelFactoryDefinition,
+  ModelParams,
+  NeogmaSchema,
 } from "./types";
 import { ModelRegistry } from "./model-registry";
 import { RelationshipManager } from "./relationship-manager";
@@ -323,16 +322,9 @@ export function ModelFactory<
    * Automatically populates `id` and `createdAt` fields during entity creation,
    * regardless of whether they were provided.
    */
-  model.beforeCreate = (data: any) => {
-    // Always set id if not provided
-    data.id = data.id || uuidv4();
-
-    // Always set createdAt if not provided
-    data.createdAt = data.createdAt || new Date().toISOString();
-    data.updatedAt = data.updatedAt || new Date().toISOString();
-    data.needsUpdate = data.needsUpdate || false;
-    data.needsDelete = data.needsDelete || false;
-  };
+  // model.beforeCreate = (data: any) => {
+  //   // Always set id if not provided
+  // };
 
   // Proxy wrapper to auto-update `updatedAt` field during updates
   /**
@@ -344,6 +336,15 @@ export function ModelFactory<
       // Always return plain object for createOne
       if (prop === "createOne") {
         return async (data: any, params?: any) => {
+          if (data) {
+            data.id = data.id || uuidv4();
+
+            // Always set createdAt if not provided
+            data.createdAt = data.createdAt || new Date().toISOString();
+            data.updatedAt = data.updatedAt || new Date().toISOString();
+            data.needsUpdate = data.needsUpdate || false;
+            data.needsDelete = data.needsDelete || false;
+          }
           const instance = await target.createOne.call(target, data, params);
           return (instance as any).getDataValues();
         };
@@ -351,10 +352,21 @@ export function ModelFactory<
       // Always return array of plain objects for createMany
       if (prop === "createMany") {
         return async (data: any[], params?: any) => {
+          if (data && Array.isArray(data)) {
+            data.forEach((item: any) => {
+              item.id = item.id || uuidv4();
+              // Always set createdAt if not provided
+              item.createdAt = item.createdAt || new Date().toISOString();
+              item.updatedAt = item.updatedAt || new Date().toISOString();
+              item.needsUpdate = item.needsUpdate || false;
+              item.needsDelete = item.needsDelete || false;
+            });
+          }
           const instances = await target.createMany.call(target, data, params);
           return instances.map((i: any) => i.getDataValues());
         };
       }
+
       // Always update updatedAt and return plain array for update
       // Modificar el proxy para update
       if (prop === "update") {

@@ -9,7 +9,7 @@ import { UseCaseService } from "./services/use-case/use-case.service";
 import { UseCaseController } from "./controllers/use-case/use-case.controller";
 import { SecondaryUseCaseController } from "./controllers/secondary-use-case/secondary-use-case.controller";
 import { SecondaryUseCaseService } from "./services/secondary-use-case/secondary-use-case.service";
-import { UseCaseDiagramController } from "./controllers/use-case-diagram/use-case-diagram.controller";
+// import { UseCaseDiagramController } from "./controllers/use-case-diagram/use-case-diagram.controller";
 import { UseCaseDiagramService } from "./services/use-case-diagram/use-case-diagram.service";
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
@@ -21,7 +21,7 @@ import { RequirementModule } from "../requirement/requirement.module";
     PrimaryUseCaseController,
     UseCaseController,
     SecondaryUseCaseController,
-    UseCaseDiagramController,
+    // UseCaseDiagramController,
   ],
   providers: [
     UseCaseRepository,

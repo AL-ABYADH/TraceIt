@@ -7,6 +7,7 @@ import { AuthModule } from "./core/auth/auth.module";
 import { ActorModule } from "./features/actor/actor.module";
 import { UseCaseModule } from "./features/use-case/use-case.module";
 import { RequirementModule } from "./features/requirement/requirement.module";
+import { DiagramModule } from "./features/diagram/diagram.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RequirementModule } from "./features/requirement/requirement.module";
     ActorModule,
     UseCaseModule,
     RequirementModule,
+    DiagramModule,
   ],
   controllers: [],
   providers: [],

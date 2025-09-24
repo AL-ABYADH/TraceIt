@@ -77,3 +77,5 @@ export const ProjectStatusField = createEnumField(ProjectStatus, {
   optional: true,
 });
 export const requirementIdField = uuidField;
+export const exceptionIdField = uuidField;
+export const childIdField = uuidField;

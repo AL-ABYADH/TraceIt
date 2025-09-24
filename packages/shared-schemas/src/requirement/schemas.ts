@@ -6,7 +6,9 @@ import {
   useCaseIdFieldDoc,
 } from "./openapi-fields";
 import {
+  childIdFieldDoc,
   dateISOFieldDoc,
+  exceptionIdFieldDoc,
   nameFieldDoc,
   requirementIdFieldDoc,
   uuidFieldDoc,
@@ -33,7 +35,6 @@ export const useCaseIdSchema = z
  * =========================
  */
 
-/** DTO used to create an Event System Requirement (system requirement tied to an event actor). */
 export const createRequirementSchema = z
   .object({
     operation: operationFieldDoc,
@@ -99,3 +100,26 @@ export const requirementExceptionDetailSchema = requirementExceptionListSchema
 export const requirementDetailSchema = requirementListSchema
   .merge(requirementRelationshipsSchema)
   .openapi({ title: "RequirementDto" });
+
+export const requirementIdSchema = z
+  .object({
+    requirementId: requirementIdFieldDoc,
+  })
+  .openapi({ title: "RequirementId" });
+
+export const requirementExceptionIdSchema = z
+  .object({
+    requirementExceptionId: requirementIdFieldDoc,
+  })
+  .openapi({ title: "RequirementExceptionId" });
+
+export const exceptionIdSchema = z
+  .object({
+    exceptionId: exceptionIdFieldDoc,
+  })
+  .openapi({ title: "ExceptionId" });
+export const childIdSchema = z
+  .object({
+    childId: childIdFieldDoc,
+  })
+  .openapi({ title: "ExceptionId" });

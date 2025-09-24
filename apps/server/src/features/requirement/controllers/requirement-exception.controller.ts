@@ -4,13 +4,14 @@ import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
   type CreateRequirementExceptionDto,
   createRequirementExceptionSchema,
+  requirementExceptionIdSchema,
+  RequirementExceptionListDto,
+  type RequirementExceptionIdDto,
   type UpdateRequirementExceptionDto,
   updateRequirementExceptionSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
+  requirementIdSchema,
+  type RequirementIdDto,
 } from "@repo/shared-schemas";
-import { RequirementException } from "../entities/requirement-exception.entity";
-
 @Controller("requirement-exceptions")
 export class RequirementExceptionController {
   constructor(private readonly exceptionService: RequirementExceptionService) {}
@@ -18,47 +19,53 @@ export class RequirementExceptionController {
   @Post()
   async create(
     @Body(zodBody(createRequirementExceptionSchema)) dto: CreateRequirementExceptionDto,
-  ): Promise<RequirementException> {
+  ): Promise<RequirementExceptionListDto> {
     return this.exceptionService.create(dto);
   }
 
-  @Get(":id")
+  @Get(":requirementExceptionId")
   async getById(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-  ): Promise<RequirementException> {
-    return this.exceptionService.findById(params.id);
+    @Param(zodParam(requirementExceptionIdSchema)) params: RequirementExceptionIdDto,
+  ): Promise<RequirementExceptionListDto> {
+    return this.exceptionService.findById(params.requirementExceptionId);
   }
 
-  @Put(":id")
+  @Put(":requirementExceptionId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(requirementExceptionIdSchema)) params: RequirementExceptionIdDto,
     @Body(zodBody(updateRequirementExceptionSchema)) dto: UpdateRequirementExceptionDto,
-  ): Promise<RequirementException> {
-    return this.exceptionService.update(params.id, dto);
+  ): Promise<RequirementExceptionListDto> {
+    return this.exceptionService.update(params.requirementExceptionId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":requirementExceptionId")
   async remove(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(requirementExceptionIdSchema)) params: RequirementExceptionIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.exceptionService.remove(params.id);
+    const success = await this.exceptionService.remove(params.requirementExceptionId);
     return { success };
   }
 
-  @Post(":id/requirements/:requirementId")
+  @Post(":requirementExceptionId/requirements/:requirementId")
   async addRequirement(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("requirementId") requirementId: string,
-  ): Promise<RequirementException> {
-    return this.exceptionService.addRequirement(params.id, requirementId);
+    @Param(zodParam(requirementExceptionIdSchema)) param1: RequirementExceptionIdDto,
+    @Param(zodParam(requirementIdSchema)) param2: RequirementIdDto,
+  ): Promise<RequirementExceptionListDto> {
+    return this.exceptionService.addRequirement(
+      param1.requirementExceptionId,
+      param2.requirementId,
+    );
   }
 
-  @Delete(":id/requirements/:requirementId")
+  @Delete(":requirementExceptionId/requirements/:requirementId")
   async removeRequirement(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("requirementId") requirementId: string,
+    @Param(zodParam(requirementExceptionIdSchema)) param1: RequirementExceptionIdDto,
+    @Param(zodParam(requirementIdSchema)) param2: RequirementIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.exceptionService.removeRequirement(params.id, requirementId);
+    const success = await this.exceptionService.removeRequirement(
+      param1.requirementExceptionId,
+      param2.requirementId,
+    );
     return { success };
   }
 }
