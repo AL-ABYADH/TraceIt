@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { UseCaseModel, UseCaseModelType } from "../../models/use-case.model";
 import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UseCase } from "../../entities/use-case.entity";
-import { Op } from "@repo/custom-neogma";
 
 @Injectable()
 export class UseCaseRepository {
@@ -19,13 +18,14 @@ export class UseCaseRepository {
         id: id,
       },
     });
-    const useCasesIds = useCases.map((uc) => uc.id);
+    // const useCasesIds = useCases.map((uc) => uc.id);
+    //
+    // const useCaseWithRelationships = await this.useCaseModel.findManyWithRelations({
+    //   where: { id: { [Op.in]: useCasesIds } },
+    // });
 
-    const useCaseWithRelationships = await this.useCaseModel.findManyWithRelations({
-      where: { id: { [Op.in]: useCasesIds } },
-    });
-
-    return useCaseWithRelationships;
+    // return useCaseWithRelationships;
+    return useCases;
   }
 
   async getById(id: string): Promise<UseCase | null> {
