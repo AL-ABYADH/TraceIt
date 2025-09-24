@@ -6,7 +6,6 @@ import {
 } from "../models/requirement-exception.model";
 import { CreateRequirementExceptionInterface } from "../interfaces/create-requirement.interface";
 import { RequirementException } from "../entities/requirement-exception.entity";
-import { Op } from "@repo/custom-neogma";
 
 @Injectable()
 export class ExceptionalRequirementRepository {
@@ -21,7 +20,7 @@ export class ExceptionalRequirementRepository {
       const exception = await this.exceptionalRequirementModel.createOne({
         name: createDto.name,
         requirements: {
-          where: { params: { id: { [Op.in]: createDto.requirementIds } } },
+          where: { params: { id: createDto.requirementId } },
         },
       });
       return exception;
