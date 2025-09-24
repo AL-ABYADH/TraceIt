@@ -74,7 +74,7 @@ export const edgeAttributesSchema = z
   })
   .openapi({ title: "EdgeAttributes" });
 
-export const createDiagramsSchema = z
+export const createDiagramSchema = z
   .object({
     projectId: projectIdFieldDoc.describe(
       "ID of the project this diagram belongs to",
@@ -84,7 +84,7 @@ export const createDiagramsSchema = z
   })
   .openapi({ title: "CreateDiagramDto" });
 
-export const updateDiagramsSchema = atLeastOneOfSchema(
+export const updateDiagramSchema = atLeastOneOfSchema(
   {
     name: nameFieldDoc.optional(),
     nodes: z

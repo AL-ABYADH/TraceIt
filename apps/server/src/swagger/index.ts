@@ -1,3 +1,5 @@
+import "./diagram/index";
+import "./traceability/index";
 import "./auth/index";
 import "./user/index";
 import "./project/index";

@@ -35,6 +35,12 @@ export const ProjectActionField = createEnumField(ProjectAction, {
   nullable: false,
   optional: false,
 });
+
+// export const projectStatusField = createEnumField(["active", "archived"], {
+//   nullable: true,
+//   optional: true,
+// });
+
 export enum ProjectInvitationStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",

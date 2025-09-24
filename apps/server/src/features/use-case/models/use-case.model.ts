@@ -4,6 +4,7 @@ import {
   defineAbstractModelFactory,
 } from "@repo/custom-neogma";
 import { Project } from "../../project/entities/project.entity";
+import { RequirementAttributes } from "../../requirement/models/requirement.model";
 
 export type UseCaseAttributes = {
   id: string;
@@ -14,8 +15,7 @@ export type UseCaseAttributes = {
 
 export interface UseCaseRelationships {
   project: Project;
-  // requirements: Requirement[];
-  requirements: any;
+  requirements: RequirementAttributes[];
   includedUseCases: UseCaseAttributes[];
   extendedUseCases: UseCaseAttributes[];
 }

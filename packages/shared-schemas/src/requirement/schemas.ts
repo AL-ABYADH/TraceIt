@@ -35,7 +35,6 @@ export const useCaseIdSchema = z
  * =========================
  */
 
-/** DTO used to create an Event System Requirement (system requirement tied to an event actor). */
 export const createRequirementSchema = z
   .object({
     operation: operationFieldDoc,
