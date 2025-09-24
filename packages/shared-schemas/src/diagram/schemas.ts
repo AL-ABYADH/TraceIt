@@ -8,6 +8,7 @@ import {
   nodeIdFieldDoc,
   NodeTypeFieldDoc,
   positionFieldDoc,
+  useCaseDiagramIdDoc,
   zIndexFieldDoc,
 } from "./openapi-fields";
 import {
@@ -73,7 +74,7 @@ export const edgeAttributesSchema = z
   })
   .openapi({ title: "EdgeAttributes" });
 
-export const createDiagramSchema = z
+export const createDiagramsSchema = z
   .object({
     projectId: projectIdFieldDoc.describe(
       "ID of the project this diagram belongs to",
@@ -83,7 +84,7 @@ export const createDiagramSchema = z
   })
   .openapi({ title: "CreateDiagramDto" });
 
-export const updateDiagramSchema = atLeastOneOfSchema(
+export const updateDiagramsSchema = atLeastOneOfSchema(
   {
     name: nameFieldDoc.optional(),
     nodes: z
@@ -121,8 +122,17 @@ export const typeDiagramSchema = z.object({
 });
 
 export const diagramTypeSchema = DiagramTypeFieldDoc.openapi({
-  title: "EdgeTypeDto",
+  title: "DiagramTypeDto",
 });
 export const edgeTypeSchema = EdgeTypeFieldDoc.openapi({
   title: "EdgeTypeDto",
 });
+export const nodeTypeSchema = NodeTypeFieldDoc.openapi({
+  title: "NodeTypeDto",
+});
+
+export const useCaseDiagramIdSchema = z
+  .object({
+    useCaseDiagramId: useCaseDiagramIdDoc,
+  })
+  .openapi({ title: "ProjectIdDto" });

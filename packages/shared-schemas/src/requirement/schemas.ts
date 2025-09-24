@@ -5,7 +5,14 @@ import {
   operationFieldDoc,
   useCaseIdFieldDoc,
 } from "./openapi-fields";
-import { nameFieldDoc, requirementIdFieldDoc } from "../common";
+import {
+  dateISOFieldDoc,
+  nameFieldDoc,
+  requirementIdFieldDoc,
+  uuidFieldDoc,
+} from "../common";
+import { useCaseDetailSchema } from "../use-case";
+import { actorSchema } from "../actor";
 
 /**
  * =========================
@@ -50,3 +57,45 @@ export const updateRequirementSchema = z.object({
 export const updateRequirementExceptionSchema = z.object({
   name: nameFieldDoc.optional(),
 });
+
+export const requirementExceptionListSchema = z
+  .object({
+    id: uuidFieldDoc,
+    name: nameFieldDoc,
+    createdAt: dateISOFieldDoc,
+    updatedAt: dateISOFieldDoc.optional(),
+  })
+  .openapi({ title: "RequirementExceptionAttributes" });
+
+export const requirementListSchema = z
+  .object({
+    id: requirementIdFieldDoc,
+    operation: operationFieldDoc,
+    condition: conditionFieldDoc.optional(),
+    createdAt: dateISOFieldDoc,
+    updatedAt: dateISOFieldDoc.optional(),
+  })
+  .openapi({ title: "RequirementAttributes" });
+
+export const requirementRelationshipsSchema = z
+  .object({
+    useCase: useCaseDetailSchema,
+    actors: z.array(actorSchema).optional(),
+    nestedRequirements: z.array(requirementListSchema).optional(),
+    exceptions: z.array(requirementExceptionListSchema).optional(),
+  })
+  .openapi({ title: "RequirementRelationships" });
+
+export const requirementExceptionRelationshipsSchema = z
+  .object({
+    requirements: z.array(requirementListSchema),
+  })
+  .openapi({ title: "RequirementExceptionRelationships" });
+
+export const requirementExceptionDetailSchema = requirementExceptionListSchema
+  .merge(requirementExceptionRelationshipsSchema)
+  .openapi({ title: "RequirementExceptionDto" });
+
+export const requirementDetailSchema = requirementListSchema
+  .merge(requirementRelationshipsSchema)
+  .openapi({ title: "RequirementDto" });

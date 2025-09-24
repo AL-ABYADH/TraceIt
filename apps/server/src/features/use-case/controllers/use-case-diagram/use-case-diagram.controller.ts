@@ -2,16 +2,14 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
   createDiagramSchema,
-  type CreateDiagramDto,
   projectIdSchema,
   type ProjectIdDto,
-  updateDiagramSchema,
-  type UpdateDiagramDto,
-  uuidParamsSchema,
-  type UuidParamsDto,
   UseCaseDiagramDetailDto,
   type UseCaseIdDto,
   useCaseIdSchema,
+  type CreateDiagramDto,
+  updateDiagramSchema,
+  type UpdateDiagramDto,
   useCaseDiagramIdSchema,
   type UseCaseDiagramIdDto,
 } from "@repo/shared-schemas";
@@ -37,9 +35,9 @@ export class UseCaseDiagramController {
 
   @Get(":useCaseDiagramId")
   async getById(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(useCaseDiagramIdSchema)) params: UseCaseDiagramIdDto,
   ): Promise<UseCaseDiagramDetailDto> {
-    return await this.useCaseDiagramService.findById(params.id);
+    return await this.useCaseDiagramService.findById(params.useCaseDiagramId);
   }
 
   @Put(":useCaseDiagramId")
