@@ -1,10 +1,12 @@
 import {
   booleanField,
+  childIdField,
   dateField,
   dateISOField,
   descriptionField,
   displayNameField,
   emailField,
+  exceptionIdField,
   loginUsernameField,
   nameField,
   passwordField,
@@ -64,6 +66,14 @@ export const ProjectStatusFieldDoc = ProjectStatusField.openapi({
 });
 
 export const requirementIdFieldDoc = requirementIdField.openapi({
+  description: "UUID of the referenced requirement",
+  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
+});
+export const exceptionIdFieldDoc = exceptionIdField.openapi({
+  description: "UUID of the referenced requirement",
+  example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
+});
+export const childIdFieldDoc = childIdField.openapi({
   description: "UUID of the referenced requirement",
   example: "f6a7b8c9-0123-4567-89ab-cdef01234567",
 });
