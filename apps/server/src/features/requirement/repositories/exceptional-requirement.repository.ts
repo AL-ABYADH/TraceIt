@@ -19,9 +19,6 @@ export class ExceptionalRequirementRepository {
     try {
       const exception = await this.exceptionalRequirementModel.createOne({
         name: createDto.name,
-        requirements: {
-          where: { params: { id: createDto.requirementId } },
-        },
       });
       return exception;
     } catch (error) {

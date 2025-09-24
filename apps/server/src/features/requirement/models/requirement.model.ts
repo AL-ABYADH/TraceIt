@@ -59,7 +59,7 @@ export const RequirementModel: ModelFactoryDefinition<
     },
     exceptions: {
       model: "RequirementException",
-      name: "BELONGS_TO",
+      name: "EXCEPTION_AT",
       direction: "in",
       cardinality: "many",
     },
