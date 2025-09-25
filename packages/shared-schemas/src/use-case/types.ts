@@ -1,7 +1,7 @@
 import { z } from "../zod-openapi-init";
 import {
   actorsSchema,
-  createDiagramSchema,
+  // createDiagramSchema,
   createSecondaryUseCaseSchema,
   createPrimaryUseCaseSchema,
   primaryUseCaseDetailSchema,
@@ -9,7 +9,7 @@ import {
   projectIdSchema,
   secondaryUseCaseDetailSchema,
   secondaryUseCaseListSchema,
-  updateDiagramSchema,
+  // updateDiagramSchema,
   updatePrimaryUseCaseSchema,
   updateSecondaryUseCaseSchema,
   useCaseDetailSchema,
@@ -65,7 +65,7 @@ export type SecondaryUseCaseListDto = z.infer<
   typeof secondaryUseCaseListSchema
 >;
 
-export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
-export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
+// export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
+// export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 export type PrimaryUseCaseIdDto = z.infer<typeof primaryUseCaseIdSchema>;
 export type SecondaryUseCaseIdDto = z.infer<typeof secondaryUseCaseIdSchema>;

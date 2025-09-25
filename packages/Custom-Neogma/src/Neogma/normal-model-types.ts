@@ -98,7 +98,8 @@ interface NeogmaModelStaticsI<
   RelatedNodesToAssociateI extends AnyObject = object,
   MethodsI extends AnyObject = object,
   CreateData = CreateDataI<
-    Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">,
+    Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete"> &
+      Partial<Pick<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">>,
     RelatedNodesToAssociateI
   >,
   UpdateData = UpdateDataI<Properties>,

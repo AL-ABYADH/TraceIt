@@ -3,15 +3,19 @@ import { RequirementService } from "../services/requirement.service";
 
 import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
+  type ChildIdDto,
+  childIdSchema,
   type CreateRequirementDto,
   createRequirementSchema,
+  type ExceptionIdDto,
+  exceptionIdSchema,
+  type RequirementIdDto,
+  requirementIdSchema,
   RequirementListDto,
   type UpdateRequirementDto,
   updateRequirementSchema,
   type UseCaseIdDto,
   useCaseIdSchema,
-  type UuidParamsDto,
-  uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { Requirement } from "../entities/requirement.entity";
 
@@ -33,58 +37,66 @@ export class RequirementController {
     return this.requirementService.findByUseCase(useCaseId.useCaseId);
   }
 
-  @Get(":id")
-  async getById(@Param(zodParam(uuidParamsSchema)) params: UuidParamsDto): Promise<Requirement> {
-    return this.requirementService.findById(params.id);
+  @Get(":requirementId")
+  async getById(
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
+  ): Promise<Requirement> {
+    return this.requirementService.findById(params.requirementId);
   }
 
-  @Put(":id")
+  @Put(":requirementId")
   async update(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
     @Body(zodBody(updateRequirementSchema)) dto: UpdateRequirementDto,
   ): Promise<RequirementListDto> {
-    return this.requirementService.updateRequirement(params.id, dto);
+    return this.requirementService.updateRequirement(params.requirementId, dto);
   }
 
-  @Delete(":id")
+  @Delete(":requirementId")
   async remove(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.requirementService.removeRequirement(params.id);
+    const success = await this.requirementService.removeRequirement(params.requirementId);
     return { success };
   }
 
-  @Post(":id/nested/:childId")
+  @Post(":requirementId/nested/:childId")
   async addNestedRequirement(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("childId") childId: string,
+    @Param(zodParam(requirementIdSchema)) param1: RequirementIdDto,
+    @Param(zodParam(childIdSchema)) param2: ChildIdDto,
   ): Promise<RequirementListDto> {
-    return this.requirementService.addNestedRequirement(params.id, childId);
+    return this.requirementService.addNestedRequirement(param1.requirementId, param2.childId);
   }
 
-  @Delete(":id/nested/:childId")
+  @Delete(":requirementId/nested/:childId")
   async removeNestedRequirement(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("childId") childId: string,
+    @Param(zodParam(requirementIdSchema)) param1: RequirementIdDto,
+    @Param(zodParam(childIdSchema)) param2: ChildIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.requirementService.removeNestedRequirement(params.id, childId);
+    const success = await this.requirementService.removeNestedRequirement(
+      param1.requirementId,
+      param2.childId,
+    );
     return { success };
   }
 
-  @Post(":id/exceptions/:exceptionId")
+  @Post(":requirementId/exceptions/:exceptionId")
   async addException(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("exceptionId") exceptionId: string,
+    @Param(zodParam(requirementIdSchema)) param1: RequirementIdDto,
+    @Param(zodParam(exceptionIdSchema)) param2: ExceptionIdDto,
   ): Promise<RequirementListDto> {
-    return this.requirementService.addException(params.id, exceptionId);
+    return this.requirementService.addException(param1.requirementId, param2.exceptionId);
   }
 
-  @Delete(":id/exceptions/:exceptionId")
+  @Delete(":requirementId/exceptions/:exceptionId")
   async removeException(
-    @Param(zodParam(uuidParamsSchema)) params: UuidParamsDto,
-    @Param("exceptionId") exceptionId: string,
+    @Param(zodParam(requirementIdSchema)) param1: RequirementIdDto,
+    @Param(zodParam(exceptionIdSchema)) param2: ExceptionIdDto,
   ): Promise<{ success: boolean }> {
-    const success = await this.requirementService.removeException(params.id, exceptionId);
+    const success = await this.requirementService.removeException(
+      param1.requirementId,
+      param2.exceptionId,
+    );
     return { success };
   }
 }

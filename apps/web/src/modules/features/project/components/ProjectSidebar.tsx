@@ -24,6 +24,11 @@ const pages = [
     href: "/projects/[project-id]/requirements",
     icon: Ellipsis,
   },
+  {
+    title: "Use Case Diagram",
+    href: "/projects/[project-id]/use-case-diagram",
+    icon: GitBranchIcon,
+  },
 ] as const;
 
 type Page = (typeof pages)[number];
