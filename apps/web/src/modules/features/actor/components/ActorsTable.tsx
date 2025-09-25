@@ -3,24 +3,25 @@
 import Button from "@/components/Button";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import Table, { Column } from "@/components/Table";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 import { notifications } from "@mantine/notifications";
 import { ActorDto } from "@repo/shared-schemas";
 import { useState } from "react";
 import { useActors } from "../hooks/useActors";
 import { useDeleteActor } from "../hooks/useDeleteActor";
 import ActorForm from "./ActorForm";
-import UpdateActorForm from "./UpdateActorForm"; // ✅ Import the update form
+import UpdateActorForm from "./UpdateActorForm";
 
 interface ActorsTableProps {
   projectId: string;
 }
 
 export default function ActorsTable({ projectId }: ActorsTableProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false); // add
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isError, isLoading, error } = useActors(projectId);
 
-  const [editingActor, setEditingActor] = useState<ActorDto | null>(null); // ✅ for editing
-
+  const [editingActor, setEditingActor] = useState<ActorDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ActorDto | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -28,30 +29,20 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     onSuccess: () => {
       notifications.show({
         title: "Deleted",
-        message: `Actor "${deleteTarget?.name}" deleted successfully`,
+        message: "Actor deleted successfully",
         color: "green",
       });
       setIsDeleteOpen(false);
       setDeleteTarget(null);
     },
-    onError: () => {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete actor",
-        color: "red",
-      });
-    },
+    onError: () => {},
   });
 
-  const handleEdit = (actor: ActorDto) => {
-    setEditingActor(actor);
-  };
-
+  const handleEdit = (actor: ActorDto) => setEditingActor(actor);
   const handleDelete = (actor: ActorDto) => {
     setDeleteTarget(actor);
     setIsDeleteOpen(true);
   };
-
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
     deleteMutation.mutate();
@@ -85,21 +76,13 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     },
   ];
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading actors...</div>
-      </div>
-    );
+  if (isLoading) {
+    return <Loading isOpen={isLoading} message="Loading actors..." />;
+  }
 
-  if (isError)
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-          Error loading actors: {error.message}
-        </div>
-      </div>
-    );
+  if (isError) {
+    return <ErrorMessage message={`Error loading actors: ${error.message}`} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -126,9 +109,17 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
         onConfirm={handleDeleteConfirm}
         onCancel={() => setIsDeleteOpen(false)}
         confirmText="Delete"
-        confirmColor="bg-red-600 hover:bg-red-700 text-white"
+        confirmVariant="danger"
         loading={deleteMutation.isPending}
       />
+
+      {deleteMutation.isError && (
+        <ErrorMessage
+          message={`Failed to delete actor: ${
+            (deleteMutation.error as any)?.message ?? "Unknown error"
+          }`}
+        />
+      )}
     </div>
   );
 }

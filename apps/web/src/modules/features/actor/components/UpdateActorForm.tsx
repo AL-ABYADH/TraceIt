@@ -3,12 +3,15 @@
 import Button from "@/components/Button";
 import Dialog from "@/components/Dialog";
 import InputField from "@/components/InputField";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { notifications } from "@mantine/notifications";
 import { ActorDto, UpdateActorDto, updateActorSchema } from "@repo/shared-schemas";
 import { useForm } from "react-hook-form";
 import { useUpdateActor } from "../hooks/useUpdateActor";
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
 
 interface UpdateActorFormProps {
   isOpen: boolean;
@@ -17,6 +20,8 @@ interface UpdateActorFormProps {
 }
 
 export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorFormProps) {
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -26,18 +31,17 @@ export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorF
   } = useForm<UpdateActorDto>({
     resolver: zodResolver(updateActorSchema),
     mode: "onSubmit",
-    defaultValues: {
-      name: actor.name,
-    },
+    defaultValues: { name: actor.name },
   });
 
   const updateActor = useUpdateActor(actor.id, {
     onSuccess: () => {
       notifications.show({
-        title: "Success",
-        message: "Actor updated successfully",
+        title: "Updated",
+        message: `Actor updated successfully`,
         color: "green",
       });
+      setErrorMsg(null);
       onClose();
     },
     onError: (err: any) => {
@@ -49,15 +53,12 @@ export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorF
         return;
       }
       const msg = err?.response?.data?.message ?? err?.message ?? "Update actor failed";
-      notifications.show({
-        title: "Error",
-        message: msg,
-        color: "red",
-      });
+      setErrorMsg(msg);
     },
   });
 
   const onSubmit = (values: UpdateActorDto) => {
+    setErrorMsg(null);
     updateActor.mutate(values);
   };
 
@@ -68,6 +69,12 @@ export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorF
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Edit Actor" className="max-w-lg">
+      {(updateActor.isPending || isSubmitting) && (
+        <Loading isOpen={updateActor.isPending || isSubmitting} message="Updating actor..." />
+      )}
+
+      {errorMsg && <ErrorMessage message={errorMsg} />}
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         <InputField
           {...register("name")}

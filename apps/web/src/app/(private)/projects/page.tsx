@@ -1,32 +1,43 @@
 "use client";
 
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
+
 import ProjectCard from "@/modules/features/project/components/ProjectCard";
 import ProjectForm from "@/modules/features/project/components/ProjectForm";
 import Button from "@/components/Button";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 import { useProjects } from "@/modules/features/project/hooks/useProjects";
-import { useState } from "react";
+import { CreateProjectDto } from "@repo/shared-schemas";
 
 export default function Projects() {
   const [showForm, setShowForm] = useState(false);
-  const { data, isLoading, isError, error } = useProjects();
+  const { data, isLoading, isError, error, refetch } = useProjects();
 
   const handleCreateProjectClick = () => setShowForm(true);
   const handleCloseForm = () => setShowForm(false);
 
+  const handleProjectCreate = (project: CreateProjectDto) => {
+    notifications.show({
+      title: "Created",
+      message: "Project created successfully!",
+      color: "green",
+      autoClose: 3000,
+    });
+
+    setShowForm(false);
+    refetch();
+  };
+
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-muted-foreground">Loading...</div>
-      </div>
-    );
+    return <Loading isOpen={isLoading} message="Loading projects..." mode="fullscreen" />;
   }
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-          {error.message}
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <ErrorMessage message={error?.message || "Failed to load projects."} />
       </div>
     );
   }
@@ -34,7 +45,6 @@ export default function Projects() {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-semibold text-foreground mb-2">Welcome back</h1>
@@ -44,7 +54,6 @@ export default function Projects() {
           <Button onClick={handleCreateProjectClick}>New Project</Button>
         </div>
 
-        {/* Projects List */}
         {data && data.length > 0 ? (
           <div className="space-y-3">
             {data.map((project) => (
@@ -59,8 +68,12 @@ export default function Projects() {
         )}
       </div>
 
-      {/* Dialog Form */}
-      <ProjectForm isOpen={showForm} onClose={handleCloseForm} />
+      <ProjectForm
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        mode="create"
+        onSubmitCreate={handleProjectCreate}
+      />
     </div>
   );
 }

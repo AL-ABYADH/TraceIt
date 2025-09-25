@@ -10,3 +10,10 @@ export const requirementEndpoints = {
     isPublic: false,
   },
 } as const;
+
+export const useCaseRequirementsEndpoints = {
+  list: {
+    path: `${PREFIX}/use-case/:useCaseId`,
+    isPublic: false,
+  },
+} as const;

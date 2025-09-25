@@ -12,7 +12,8 @@ interface ConfirmationDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
-  confirmColor?: string;
+  confirmStyle?: string;
+  confirmVariant?: "primary" | "secondary" | "ghost" | "danger";
 }
 
 export default function ConfirmationDialog({
@@ -23,12 +24,14 @@ export default function ConfirmationDialog({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
+  confirmVariant = "primary",
   loading = false,
-  confirmColor = "bg-primary hover:bg-primary/90",
+
+  confirmStyle = "bg-primary hover:bg-primary/90",
 }: ConfirmationDialogProps) {
   return (
     <Dialog isOpen={isOpen} onClose={onCancel} title={title} className="max-w-md">
-      <p className="text-sm text-muted-foreground mb-6">{message}</p>
+      <p className="text-sm text-muted-foreground my-6">{message}</p>
 
       <div className="flex justify-end gap-3">
         <Button type="button" variant="ghost" onClick={onCancel} disabled={loading}>
@@ -36,10 +39,11 @@ export default function ConfirmationDialog({
         </Button>
 
         <Button
+          variant={confirmVariant}
           type="button"
           onClick={onConfirm}
           disabled={loading}
-          className={confirmColor} // ✅ custom color here
+          className={confirmStyle}
         >
           {loading ? "Processing..." : confirmText}
         </Button>
