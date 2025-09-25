@@ -10,7 +10,8 @@ export const operationField = createField("string", {
 export const conditionField = createField("string", {
   min: 1,
   max: 50,
-  message: "Condition must not exceed 50 characters",
+  minMessage: "condition must be at least one character",
+  maxMessage: "Condition must not exceed 50 characters",
 });
 
 // Fields for relationships

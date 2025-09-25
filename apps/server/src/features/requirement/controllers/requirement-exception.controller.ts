@@ -56,16 +56,4 @@ export class RequirementExceptionController {
       param2.requirementId,
     );
   }
-
-  @Delete(":requirementExceptionId/requirements/:requirementId")
-  async removeRequirement(
-    @Param(zodParam(requirementExceptionIdSchema)) param1: RequirementExceptionIdDto,
-    @Param(zodParam(requirementIdSchema)) param2: RequirementIdDto,
-  ): Promise<{ success: boolean }> {
-    const success = await this.exceptionService.removeRequirement(
-      param1.requirementExceptionId,
-      param2.requirementId,
-    );
-    return { success };
-  }
 }
