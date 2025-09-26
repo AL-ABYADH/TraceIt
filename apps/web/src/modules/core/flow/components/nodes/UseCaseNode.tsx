@@ -4,7 +4,7 @@ import { Handle, Position } from "@xyflow/react";
 import { useMemo, useState } from "react";
 
 export default function UseCaseNode(props: NodeProps<any>) {
-  const { data } = props;
+  const { data, selected } = props;
   const name = data?.name ?? "Unnamed Use Case";
 
   // hover state (controls handle visibility)
@@ -104,7 +104,7 @@ export default function UseCaseNode(props: NodeProps<any>) {
         }}
       />
 
-      <UseCaseShape name={name} />
+      <UseCaseShape name={name} selected={selected} />
     </div>
   );
 }

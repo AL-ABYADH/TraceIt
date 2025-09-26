@@ -5,7 +5,7 @@ import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import ActorShape from "@/modules/features/use-case-diagram/components/ActorShape";
 
-export default function ActorNode({ data }: NodeProps<any>) {
+export default function ActorNode({ data, selected }: NodeProps<any>) {
   const name = data?.name ?? "Actor";
 
   // hover state for handles
@@ -94,7 +94,7 @@ export default function ActorNode({ data }: NodeProps<any>) {
         }}
       />
 
-      <ActorShape name={name} />
+      <ActorShape name={name} selected={selected} />
     </div>
   );
 }
