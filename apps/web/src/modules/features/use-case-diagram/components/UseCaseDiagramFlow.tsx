@@ -6,12 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
-  markAsSaved,
   onConnect,
   onEdgesChange,
   onNodesChange,
   selectEdges,
-  selectIsDirty,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
 import { useUseCaseDiagram } from "../hooks/useUseCaseDiagram";
@@ -37,7 +35,6 @@ export default function UseCaseDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
-  const isDirty = useSelector(selectIsDirty);
 
   const handleNodesChange = useCallback((changes: NodeChange[]) => {
     dispatch(onNodesChange(changes));
@@ -135,14 +132,6 @@ export default function UseCaseDiagramFlow() {
         }}
       >
         Add Use Actor
-      </Button>
-      <Button
-        onClick={() => {
-          dispatch(markAsSaved());
-        }}
-        disabled={!isDirty}
-      >
-        Save
       </Button>
       <Flow
         onNodesChange={handleNodesChange}

@@ -20,9 +20,11 @@ import {
   redo,
   selectCanUndo,
   selectCanRedo,
+  markAsSaved,
+  selectIsDirty,
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { Undo, Redo } from "lucide-react";
+import { Undo, Redo, Save } from "lucide-react";
 
 type Props = {
   onNodesChange: (changes: NodeChange[]) => void;
@@ -35,6 +37,7 @@ export default function Flow({ onNodesChange, onEdgesChange, onConnect }: Props)
   const edges = useSelector(selectEdges);
   const canUndo = useSelector(selectCanUndo);
   const canRedo = useSelector(selectCanRedo);
+  const isDirty = useSelector(selectIsDirty);
 
   const nodeTypes = useMemo(() => getNodeTypesForReactFlow(), []);
   const edgeTypes = useMemo(() => getEdgeTypesForReactFlow(), []);
@@ -97,15 +100,24 @@ export default function Flow({ onNodesChange, onEdgesChange, onConnect }: Props)
           onClick={handleUndo}
           className={`p-3 rounded-lg ${canUndo ? "text-foreground" : "text-muted-foreground opacity-50"}`}
         >
-          {<Undo />}
+          <Undo />
         </button>
         <button
           onClick={handleRedo}
           className={`p-3 rounded-lg ${canRedo ? "text-foreground" : "text-muted-foreground opacity-50"}`}
         >
-          {<Redo />}
+          <Redo />
+        </button>
+        <button
+          onClick={() => {
+            dispatch(markAsSaved());
+          }}
+          className={`p-3 rounded-lg ${isDirty ? "text-foreground" : "text-muted-foreground opacity-50"}`}
+        >
+          <Save />
         </button>
       </div>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
