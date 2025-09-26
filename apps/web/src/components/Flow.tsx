@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   ReactFlow,
   Controls,
@@ -13,6 +13,8 @@ import {
   Connection,
 } from "@xyflow/react";
 import { getEdgeTypesForReactFlow, getNodeTypesForReactFlow } from "@/modules/core/flow/registry";
+import { useDispatch } from "react-redux";
+import { deleteEdges, deleteNodes } from "@/modules/core/flow/store/flow-slice";
 
 type Props = {
   nodes: Node[];
@@ -25,6 +27,28 @@ type Props = {
 export default function Flow({ nodes, edges, onNodesChange, onEdgesChange, onConnect }: Props) {
   const nodeTypes = useMemo(() => getNodeTypesForReactFlow(), []);
   const edgeTypes = useMemo(() => getEdgeTypesForReactFlow(), []);
+
+  const dispatch = useDispatch();
+
+  const handleDelete = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "Delete") {
+        const selectedNode = nodes.find((node) => node.selected);
+        const selectedEdge = edges.find((edge) => edge.selected);
+
+        if (selectedNode) dispatch(deleteNodes([selectedNode.id]));
+        if (selectedEdge) dispatch(deleteEdges([selectedEdge.id]));
+      }
+    },
+    [nodes, edges, dispatch],
+  );
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleDelete);
+    return () => {
+      document.removeEventListener("keydown", handleDelete);
+    };
+  }, [handleDelete]);
 
   return (
     <div style={{ width: "100%", height: "600px" }}>
