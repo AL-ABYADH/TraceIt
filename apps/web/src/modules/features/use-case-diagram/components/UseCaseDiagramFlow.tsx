@@ -145,8 +145,6 @@ export default function UseCaseDiagramFlow() {
         Save
       </Button>
       <Flow
-        nodes={nodes}
-        edges={edges}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
