@@ -4,9 +4,12 @@ import Button from "@/components/Button";
 import Dialog from "@/components/Dialog";
 import InputField from "@/components/InputField";
 import SelectField from "@/components/SelectField";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
+
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { notifications } from "@mantine/notifications";
+import { notifications } from "@mantine/notifications"; // ✅ still used for success only
 import { ActorSubtype, AddActorDto, addActorSchema } from "@repo/shared-schemas";
 import { useForm } from "react-hook-form";
 import { useAddActor } from "../hooks/useAddActor";
@@ -38,7 +41,7 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
     onSuccess: () => {
       reset();
       notifications.show({
-        title: "Success",
+        title: "Created",
         message: "Actor created successfully",
         color: "green",
       });
@@ -52,20 +55,10 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
         );
         return;
       }
-
-      const msg = err?.response?.data?.message ?? err?.message ?? "Create actor failed";
-      notifications.show({
-        title: "Error",
-        message: msg,
-        color: "red",
-      });
     },
   });
 
-  const onSubmit = (values: AddActorDto) => {
-    createActor.mutate(values);
-  };
-
+  const onSubmit = (values: AddActorDto) => createActor.mutate(values);
   const handleCancel = () => {
     reset();
     onClose();
@@ -73,13 +66,20 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Actor" className="max-w-lg">
+      {createActor.isPending && (
+        <Loading message="Adding actor..." isOpen={createActor.isPending} />
+      )}
+
+      {createActor.isError && (
+        <ErrorMessage message={createActor.error?.message ?? "Something went wrong"} />
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         <InputField
           {...register("name")}
           label="Name"
           placeholder="Enter actor name"
           error={errors.name?.message}
-          className="m-8"
           disabled={createActor.isPending || isSubmitting}
         />
 
@@ -97,7 +97,7 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
           <option value="EVENT">Event</option>
         </SelectField>
 
-        <div className="flex items-center justify-end gap-3 pt-4 mt-4">
+        <div className="flex justify-end gap-3 pt-4">
           <Button
             type="button"
             variant="ghost"

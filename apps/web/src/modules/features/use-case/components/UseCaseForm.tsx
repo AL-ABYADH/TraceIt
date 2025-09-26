@@ -4,9 +4,10 @@ import Button from "@/components/Button";
 import Dialog from "@/components/Dialog";
 import InputField from "@/components/InputField";
 import SelectField from "@/components/SelectField";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { notifications } from "@mantine/notifications";
 import {
   CreatePrimaryUseCaseDto,
   createPrimaryUseCaseSchema,
@@ -16,6 +17,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useActors } from "../../actor/hooks/useActors";
 import { useCreatePrimaryUseCase } from "../hooks/useCreatePrimaryUseCase";
 import MultiSelect from "@/components/MultiSelect";
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
 
 interface UseCaseFormProps {
   isOpen: boolean;
@@ -24,6 +27,8 @@ interface UseCaseFormProps {
 }
 
 export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormProps) {
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -50,15 +55,17 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
 
   const createUseCase = useCreatePrimaryUseCase({
     onSuccess: () => {
-      reset();
       notifications.show({
-        title: "Success",
-        message: "Use case created successfully",
+        title: "Created",
+        message: `Use case created successfully`,
         color: "green",
       });
+      reset();
+      setServerError(null);
       onClose();
     },
     onError: (err: any) => {
+      setServerError(null);
       if (isApiValidationError(err)) {
         const serverErrors = (err as any).data.errors as ApiFieldValidationError[];
         serverErrors.forEach(({ field, message }) =>
@@ -67,20 +74,18 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
         return;
       }
       const msg = err?.response?.data?.message ?? err?.message ?? "Create use case failed";
-      notifications.show({
-        title: "Error",
-        message: msg,
-        color: "red",
-      });
+      setServerError(msg);
     },
   });
 
   const onSubmit = (values: CreatePrimaryUseCaseDto) => {
+    setServerError(null);
     createUseCase.mutate(values);
   };
 
   const handleCancel = () => {
     reset();
+    setServerError(null);
     onClose();
   };
 
@@ -89,6 +94,12 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Use Case" className="max-w-lg">
+      {(createUseCase.isPending || isSubmitting || actorsLoading) && (
+        <Loading isOpen={createUseCase.isPending || isSubmitting} message="Processing..." />
+      )}
+
+      {serverError && <ErrorMessage message={serverError} />}
+
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         {/* Name */}
         <InputField
@@ -134,7 +145,6 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
                 .map((a) => ({ value: a.id, label: `${a.name} (${a.subtype})` }))}
               value={field.value || []}
               onChange={(ids: string[]) => {
-                // Remove from secondary if selected
                 const newSecondary = secondarySelectedIds.filter((id) => !ids.includes(id));
                 setValue("primaryActorIds", ids, { shouldValidate: true });
                 setValue("secondaryActorIds", newSecondary, { shouldValidate: true });
@@ -178,11 +188,7 @@ export default function UseCaseForm({ isOpen, onClose, projectId }: UseCaseFormP
             Cancel
           </Button>
 
-          <Button
-            type="submit"
-            disabled={createUseCase.isPending || isSubmitting}
-            className="px-6 "
-          >
+          <Button type="submit" disabled={createUseCase.isPending || isSubmitting} className="px-6">
             {createUseCase.isPending || isSubmitting ? "Adding..." : "Add Use Case"}
           </Button>
         </div>
