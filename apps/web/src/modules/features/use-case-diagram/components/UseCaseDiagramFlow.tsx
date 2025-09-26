@@ -54,9 +54,7 @@ export default function UseCaseDiagramFlow() {
         (edge.source === conn.target && edge.target === conn.source),
     );
 
-    if (edge) return;
-
-    if (targetNode?.type === NodeType.ACTOR) return;
+    if (edge || conn.source === conn.target || targetNode?.type === NodeType.ACTOR) return;
 
     if (sourceNode?.type === NodeType.USE_CASE && targetNode?.type === NodeType.USE_CASE) {
       setNewConnection(conn);
