@@ -48,10 +48,15 @@ export default function UseCaseDiagramFlow() {
   }, []);
 
   const handleConnect = (conn: Connection) => {
-    const sourceNode = nodes.find((node) => node.id == conn.source);
-    const targetNode = nodes.find((node) => node.id == conn.target);
+    const sourceNode = nodes.find((node) => node.id === conn.source);
+    const targetNode = nodes.find((node) => node.id === conn.target);
 
-    const edge = edges.find((edge) => edge.target == conn.target && edge.source == conn.source);
+    const edge = edges.find(
+      (edge) =>
+        (edge.source === conn.source && edge.target === conn.target) ||
+        (edge.source === conn.target && edge.target === conn.source),
+    );
+
     if (edge) return;
 
     if (targetNode?.type === NodeType.ACTOR) return;
