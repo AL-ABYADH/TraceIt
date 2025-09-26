@@ -1,18 +1,16 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
   onConnect,
-  onEdgesChange,
-  onNodesChange,
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
 import { useUseCaseDiagram } from "../hooks/useUseCaseDiagram";
-import { Connection, EdgeChange, NodeChange } from "@xyflow/react";
+import { Connection } from "@xyflow/react";
 import Button from "@/components/Button";
 import { useParams } from "next/navigation";
 import UseCaseSelection from "./UseCasesSelection";
@@ -35,14 +33,6 @@ export default function UseCaseDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
-
-  const handleNodesChange = useCallback((changes: NodeChange[]) => {
-    dispatch(onNodesChange(changes));
-  }, []);
-
-  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
-    dispatch(onEdgesChange(changes));
-  }, []);
 
   const handleConnect = (conn: Connection) => {
     const sourceNode = nodes.find((node) => node.id === conn.source);
@@ -131,11 +121,7 @@ export default function UseCaseDiagramFlow() {
       >
         Add Use Actor
       </Button>
-      <Flow
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={handleConnect}
-      />
+      <Flow onConnect={handleConnect} />
     </>
   );
 }

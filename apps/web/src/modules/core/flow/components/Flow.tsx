@@ -22,17 +22,17 @@ import {
   selectCanRedo,
   markAsSaved,
   selectIsDirty,
+  onNodesChange,
+  onEdgesChange,
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { Undo, Redo, Save } from "lucide-react";
 
 type Props = {
-  onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (conn: Connection) => void;
 };
 
-export default function Flow({ onNodesChange, onEdgesChange, onConnect }: Props) {
+export default function Flow({ onConnect }: Props) {
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
   const canUndo = useSelector(selectCanUndo);
@@ -86,6 +86,14 @@ export default function Flow({ onNodesChange, onEdgesChange, onConnect }: Props)
     dispatch(redo());
   }, [dispatch]);
 
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
+    dispatch(onNodesChange(changes));
+  }, []);
+
+  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
+    dispatch(onEdgesChange(changes));
+  }, []);
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -121,8 +129,8 @@ export default function Flow({ onNodesChange, onEdgesChange, onConnect }: Props)
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
