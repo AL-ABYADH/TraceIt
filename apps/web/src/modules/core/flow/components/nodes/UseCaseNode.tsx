@@ -29,7 +29,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
   }, [name]);
 
   // handles are visible only when hovered
-  const handlesVisible = hovered;
+  const handlesVisible = hovered || selected;
 
   return (
     <div

@@ -10,7 +10,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
 
   // hover state for handles
   const [hovered, setHovered] = useState(false);
-  const handlesVisible = hovered;
+  const handlesVisible = hovered || selected;
 
   const transition = "opacity 180ms ease, transform 180ms cubic-bezier(.2,.8,.2,1)";
   const handleTop = 32;
