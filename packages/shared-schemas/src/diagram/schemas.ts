@@ -24,7 +24,7 @@ import {
 // Base Entity Schemas (Attributes Only)
 // ----------------------
 
-export const diagramAttributesSchema = z
+export const diagramSchema = z
   .object({
     id: uuidFieldDoc,
     name: nameFieldDoc,
@@ -34,7 +34,7 @@ export const diagramAttributesSchema = z
   })
   .openapi({ title: "DiagramAttributes" });
 
-export const nodeAttributesSchema = z
+export const nodeSchema = z
   .object({
     id: uuidFieldDoc,
     type: NodeTypeFieldDoc,
@@ -55,7 +55,7 @@ export const nodeAttributesSchema = z
   })
   .openapi({ title: "NodeAttributes" });
 
-export const edgeAttributesSchema = z
+export const edgeSchema = z
   .object({
     id: uuidFieldDoc,
     type: EdgeTypeFieldDoc,
@@ -89,7 +89,7 @@ export const updateDiagramSchema = atLeastOneOfSchema(
     name: nameFieldDoc.optional(),
     nodes: z
       .array(
-        nodeAttributesSchema.omit({
+        nodeSchema.omit({
           createdAt: true,
           updatedAt: true,
         }),
@@ -97,7 +97,7 @@ export const updateDiagramSchema = atLeastOneOfSchema(
       .optional(),
     edges: z
       .array(
-        edgeAttributesSchema.omit({
+        edgeSchema.omit({
           createdAt: true,
           updatedAt: true,
         }),
