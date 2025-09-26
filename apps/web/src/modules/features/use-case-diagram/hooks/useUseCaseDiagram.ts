@@ -1,4 +1,3 @@
-import { EdgeType, NodeType } from "@repo/shared-schemas";
 import { useQuery } from "@tanstack/react-query";
 
 export const useUseCaseDiagram = (projectId: string) => {
