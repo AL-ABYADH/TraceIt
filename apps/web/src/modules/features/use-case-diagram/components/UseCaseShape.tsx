@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 
-// Reusable UseCaseShape component
 interface UseCaseShapeProps {
   name: string;
   maxWidth?: number;
