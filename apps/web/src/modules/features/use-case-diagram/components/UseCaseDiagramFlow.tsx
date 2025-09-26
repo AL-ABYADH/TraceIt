@@ -1,6 +1,5 @@
 "use client";
 
-import Flow from "@/components/Flow";
 import { useDispatch, useSelector } from "react-redux";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -20,6 +19,7 @@ import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
 import { EdgeType, NodeType } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
+import Flow from "@/modules/core/flow/components/Flow";
 
 export default function UseCaseDiagramFlow() {
   const params = useParams<"/projects/[project-id]/use-case-diagram">();
