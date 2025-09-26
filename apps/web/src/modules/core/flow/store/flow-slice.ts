@@ -1,5 +1,5 @@
 import { RootState } from "@/store/store";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { EdgeType } from "@repo/shared-schemas";
 import {
   Node,
@@ -49,6 +49,9 @@ export interface FlowState {
   // Change tracking
   isDirty: boolean;
   lastSavedState: FlowSnapshot | null;
+
+  // Flag to temporarily disable history tracking (internal use)
+  _skipHistory: boolean;
 }
 
 interface LoadFlowDataPayload {
@@ -107,6 +110,7 @@ const initialState: FlowState = {
   },
   isDirty: false,
   lastSavedState: null,
+  _skipHistory: false,
 };
 
 // ===================
@@ -114,7 +118,7 @@ const initialState: FlowState = {
 // ===================
 
 const flow = createSlice({
-  name: "use-case-diagram",
+  name: "flow",
   initialState,
   reducers: {
     // ===================
@@ -132,13 +136,16 @@ const flow = createSlice({
       // Set as last saved state
       state.lastSavedState = createSnapshot(nodes, edges);
 
-      // Clear history
+      // Clear history and set initial state
       state.history = {
         past: [],
-        present: null,
+        present: createSnapshot(nodes, edges),
         future: [],
         maxHistorySize: 50,
       };
+
+      // Skip history tracking for this action
+      state._skipHistory = true;
     },
 
     markAsSaved: (state) => {
@@ -356,10 +363,10 @@ const flow = createSlice({
     },
 
     // ===================
-    // HISTORY OPERATIONS
+    // HISTORY OPERATIONS (INTERNAL)
     // ===================
 
-    saveToHistory: (state) => {
+    _saveToHistory: (state) => {
       const currentState = createSnapshot(state.nodes, state.edges);
 
       // Don't save if nothing changed
@@ -391,6 +398,9 @@ const flow = createSlice({
         state.selectedNodes = [];
         state.selectedEdges = [];
 
+        // Skip history tracking for undo/redo operations
+        state._skipHistory = true;
+
         // Update dirty state
         if (state.lastSavedState) {
           state.isDirty = !statesAreEqual(previous, state.lastSavedState);
@@ -410,6 +420,9 @@ const flow = createSlice({
         state.selectedNodes = [];
         state.selectedEdges = [];
 
+        // Skip history tracking for undo/redo operations
+        state._skipHistory = true;
+
         // Update dirty state
         if (state.lastSavedState) {
           state.isDirty = !statesAreEqual(next, state.lastSavedState);
@@ -425,6 +438,62 @@ const flow = createSlice({
         maxHistorySize: 50,
       };
     },
+
+    // Internal action to reset skip flag
+    _resetSkipHistory: (state) => {
+      state._skipHistory = false;
+    },
+  },
+});
+
+// ===================
+// LISTENER MIDDLEWARE
+// ===================
+
+export const flowListenerMiddleware = createListenerMiddleware();
+
+// Actions that should trigger history save
+const historyTriggerActions = [
+  flow.actions.onNodesChange,
+  flow.actions.onEdgesChange,
+  flow.actions.onConnect,
+  flow.actions.addNode,
+  flow.actions.updateNode,
+  flow.actions.deleteNodes,
+  flow.actions.duplicateNodes,
+  flow.actions.addEdgeManually,
+  flow.actions.updateEdge,
+  flow.actions.deleteEdges,
+  flow.actions.clearFlow,
+];
+
+// Debounced history save configuration
+let historyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+const HISTORY_DEBOUNCE_MS = 500; // Wait 500ms after last change before saving
+
+// Add listener for all actions that modify flow data
+flowListenerMiddleware.startListening({
+  matcher: isAnyOf(...historyTriggerActions),
+  effect: async (action, listenerApi) => {
+    const state = listenerApi.getState() as RootState;
+
+    // Skip if history tracking is disabled
+    if (state.flow._skipHistory) {
+      // Reset the flag
+      listenerApi.dispatch(flow.actions._resetSkipHistory());
+      return;
+    }
+
+    // Clear existing timer
+    if (historyDebounceTimer) {
+      clearTimeout(historyDebounceTimer);
+    }
+
+    // Set new timer to save history after debounce period
+    historyDebounceTimer = setTimeout(() => {
+      listenerApi.dispatch(flow.actions._saveToHistory());
+      historyDebounceTimer = null;
+    }, HISTORY_DEBOUNCE_MS);
   },
 });
 
@@ -464,12 +533,13 @@ export const {
   // Viewport operations
   updateViewport,
 
-  // History operations
-  saveToHistory,
+  // History operations (public)
   undo,
   redo,
   clearHistory,
 } = flow.actions;
+
+// Note: _saveToHistory is now internal and handled automatically by the listener middleware
 
 // ===================
 // SELECTORS
