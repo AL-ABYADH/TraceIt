@@ -26,7 +26,7 @@ import {
 export const diagramSchema = z
   .object({
     id: uuidFieldDoc,
-    name: nameFieldDoc,
+    name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
@@ -96,7 +96,7 @@ export const createDiagramSchema = z
     projectId: projectIdFieldDoc.describe(
       "ID of the project this diagram belongs to",
     ),
-    name: nameFieldDoc,
+    name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
   })
   .openapi({ title: "CreateDiagramDto" });

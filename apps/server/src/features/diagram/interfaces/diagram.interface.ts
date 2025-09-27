@@ -7,7 +7,7 @@ export interface Position {
 
 export interface DiagramInterface {
   projectId: string;
-  name: string;
+  name?: string;
   type: DiagramType;
 }
 
