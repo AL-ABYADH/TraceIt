@@ -1,33 +1,116 @@
 import { Neo4jSupportedProperties, Neogma, RelationshipsI, WhereParamsI } from "neogma";
 import { NeogmaModel } from "./Neogma/normal-model-types";
 import { NeogmaModel as AbstractNeogmaModel } from "./Neogma/abstract-model-types";
+
 // =============================================================================
-// TYPES & INTERFACES
+// BASIC TYPES
 // =============================================================================
 
+/**
+ * Generic record type for any object with string keys
+ */
+export type AnyObject = Record<string, any>;
+
+/**
+ * Schema definition for Neogma models
+ */
+export type NeogmaSchema<Properties> = {
+  [K in keyof Properties]: any;
+};
+
+// =============================================================================
+// RELATIONSHIP TYPES
+// =============================================================================
+
+/**
+ * Enhanced relationship definition with cardinality information
+ */
+export type EnhancedRelationshipsI<RelatedNodes extends AnyObject> = {
+  [alias in keyof RelatedNodes]: {
+    model: string | NeogmaModel<any, any, any, any> | "self";
+    name: string;
+    direction: "out" | "in" | "none";
+    properties?: RelationshipsI<RelatedNodes>[alias]["properties"];
+    cardinality?: "one" | "many"; // Explicit cardinality definition
+    inTraceability?: boolean; // Enable traceability features
+  };
+};
+
+/**
+ * Metadata about a relationship between nodes
+ */
+export interface RelationshipInfo {
+  direction: "out" | "in" | "none";
+  name: string;
+  properties?: Record<string, any>;
+}
+
+/**
+ * Configuration for dynamically loading relationships at runtime
+ */
+export interface DynamicRelation {
+  name: string; // Relationship name in the database
+  alias?: string; // Name to use in the result (defaults to name)
+  direction?: "out" | "in" | "none"; // Direction of relationship (defaults to 'out')
+  targetLabel?: string; // Target node label
+  limit?: number; // Maximum number of related nodes to return
+  many?: boolean; // Is this a one-to-many relationship? (defaults to true)
+}
+
+/**
+ * Options for fetching node relationships
+ */
+export interface FetchRelationsOptions {
+  include?: string[]; // Relationships to include (if empty, include all)
+  exclude?: string[]; // Relationships to exclude
+  limits?: Record<string, number>; // Maximum number of related nodes per relationship
+  session?: any; // Database session for transaction handling
+  direction?: "out" | "in" | "none"; // Override default relationship direction
+  includeRelationshipInfo?: boolean; // Include relationship metadata in results
+  dynamicRelations?: DynamicRelation[]; // Dynamic relationships to load
+}
+
+/**
+ * Extended options for finding entities with their relationships
+ */
+export interface FindWithRelationsOptions extends FetchRelationsOptions {
+  where?: WhereParamsI; // Conditions to filter entities
+  limit?: number; // Maximum number of entities to return
+  skip?: number; // Number of entities to skip
+  order?: Array<[string, "ASC" | "DESC"]>; // Ordering criteria
+  throwIfNotFound?: boolean; // Throw error if entity not found
+  throwIfNoneFound?: boolean; // Throw error if no entities found
+  plain?: boolean; // Return plain objects instead of model instances
+}
+
+// =============================================================================
+// MODEL DEFINITION TYPES
+// =============================================================================
+
+/**
+ * Parameters for creating a Neogma model
+ */
 export interface ModelParams<
   Properties extends Neo4jSupportedProperties,
   RelatedNodes extends AnyObject,
   Methods extends AnyObject,
   Statics extends AnyObject,
 > {
-  name: string;
-  inTraceability?: boolean;
+  name: string; // Model name
+  inTraceability?: boolean; // Enable traceability features
   schema: NeogmaSchema<
     Omit<Properties, "id" | "createdAt" | "updatedAt" | "needsUpdate" | "needsDelete">
-  >;
-  /** the label of the nodes */
-  label: string[];
-  /** statics of the Model */
-  statics?: Partial<Statics> | undefined;
-  /** method of the Instance */
-  methods?: Partial<Methods> | undefined;
-  /** the id key of this model. Is required in order to perform specific instance methods */
-  primaryKeyField?: Extract<keyof Properties, string> | undefined;
-  /** relationships with other models or itself. Alternatively, relationships can be added using Model.addRelationships */
-  relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>> | undefined;
+  >; // Model schema definition
+  label: string[]; // Node labels in Neo4j
+  statics?: Partial<Statics>; // Static methods for the Model
+  methods?: Partial<Methods>; // Instance methods
+  primaryKeyField?: Extract<keyof Properties, string>; // Primary key field name
+  relationships?: Partial<EnhancedRelationshipsI<RelatedNodes>>; // Relationship definitions
 }
 
+/**
+ * Factory function definition for creating concrete Neogma models
+ */
 export interface ModelFactoryDefinition<
   Properties extends Neo4jSupportedProperties,
   RelatedNodes extends AnyObject = AnyObject,
@@ -38,6 +121,9 @@ export interface ModelFactoryDefinition<
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
 }
 
+/**
+ * Factory function definition for creating abstract Neogma models
+ */
 export interface AbstractModelFactoryDefinition<
   Properties extends Neo4jSupportedProperties,
   RelatedNodes extends AnyObject = AnyObject,
@@ -46,55 +132,4 @@ export interface AbstractModelFactoryDefinition<
 > {
   (neogma: Neogma): AbstractNeogmaModel<Properties, RelatedNodes, Methods, Statics>;
   parameters: ModelParams<Properties, RelatedNodes, Methods, Statics>;
-}
-
-export type NeogmaSchema<Properties> = {
-  [K in keyof Properties]: any;
-};
-
-export type AnyObject = Record<string, any>;
-
-/**
- * Enhanced relationship definition with cardinality info
- */
-export type EnhancedRelationshipsI<RelatedNodes extends AnyObject> = {
-  [alias in keyof RelatedNodes]: {
-    model: string | NeogmaModel<any, any, any, any> | "self";
-    name: string;
-    direction: "out" | "in" | "none";
-    properties?: RelationshipsI<RelatedNodes>[alias]["properties"];
-    cardinality?: "one" | "many"; // Explicit cardinality definition
-  };
-};
-
-// إضافة نوع للمعلومات المرتبطة بالعلاقة
-export interface RelationshipInfo {
-  direction: "out" | "in" | "none";
-  name: string;
-  properties?: Record<string, any>;
-}
-
-/**
- * Options for fetching relationships
- */
-export interface FetchRelationsOptions {
-  include?: string[];
-  exclude?: string[];
-  limits?: Record<string, number>;
-  session?: any;
-  direction?: "out" | "in" | "none";
-  includeRelationshipInfo?: boolean; // إضافة خيار لتضمين معلومات العلاقة
-}
-
-/**
- * Options for finding entities with relationships
- */
-export interface FindWithRelationsOptions extends FetchRelationsOptions {
-  where?: WhereParamsI;
-  limit?: number;
-  skip?: number;
-  order?: Array<[string, "ASC" | "DESC"]>;
-  throwIfNotFound?: boolean;
-  throwIfNoneFound?: boolean;
-  plain?: boolean;
 }

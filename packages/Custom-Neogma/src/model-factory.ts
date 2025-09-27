@@ -8,13 +8,14 @@ import {
 
 import {
   AnyObject,
+  DynamicRelation,
   FindWithRelationsOptions,
   ModelFactoryDefinition,
   ModelParams,
   NeogmaSchema,
 } from "./types";
 import { ModelRegistry } from "./model-registry";
-import { RelationshipManager } from "./relationship-manager";
+import { NeogmaGraphRelationService } from "./relationship-manager";
 import { v4 as uuidv4 } from "uuid";
 import { GenericConfiguration, NeogmaModel } from "./Neogma/normal-model-types";
 import { NotFoundException } from "@nestjs/common";
@@ -114,7 +115,7 @@ export function ModelFactory<
   }
 
   // Add needsUpdate field if it doesn't exist
-  if (!enhancedSchema.hasOwnProperty("needsUpdate")) {
+  if (!enhancedSchema.hasOwnProperty("needsUpdate") && parameters.inTraceability) {
     enhancedSchema["needsUpdate"] = {
       type: "boolean",
       default: false,
@@ -122,7 +123,7 @@ export function ModelFactory<
   }
 
   // Add needsDelete field if it doesn't exist
-  if (!enhancedSchema.hasOwnProperty("needsDelete")) {
+  if (!enhancedSchema.hasOwnProperty("needsDelete") && parameters.inTraceability) {
     enhancedSchema["needsDelete"] = {
       type: "boolean",
       default: false,
@@ -219,7 +220,7 @@ export function ModelFactory<
   }
 
   // Create a relationship manager instance to handle advanced relationship features
-  const manager = new RelationshipManager(model, relationshipDefinitions);
+  const manager = new NeogmaGraphRelationService(model, relationshipDefinitions);
 
   // Relationship-aware query: fetch a single entity and load its relations
   model.findOneWithRelations = <Plain extends boolean = false>(
@@ -231,8 +232,13 @@ export function ModelFactory<
       include?: Array<keyof RelatedNodes>;
       exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
+      dynamicRelations?: DynamicRelation[]; // Add this parameter
     } = {},
   ) => manager.findOneWithRelations(params);
+
+  model.getNeogma = (): Neogma => {
+    return neogma;
+  };
 
   // Fetch multiple entities along with their associated relationships
   model.findManyWithRelations = <Plain extends boolean = false>(
@@ -246,6 +252,7 @@ export function ModelFactory<
       include?: Array<keyof RelatedNodes>;
       exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
+      dynamicRelations?: DynamicRelation[]; // Add this parameter
     } = {},
   ) => manager.findManyWithRelations(params);
 
@@ -306,11 +313,58 @@ export function ModelFactory<
     return parameters.name;
   };
 
-  model.skipNeedUpdateOrSkipNeedDelete = async (project_Id: string): Promise<void> => {
-    // eslint-disable-next-line no-useless-catch
+  /**
+   * Finds the root project node connected to the specified node
+   */
+  model.findRootProject = async (nodeId: string) => {
+    const result = await neogma.queryRunner.run(
+      `MATCH (node {id: $nodeId}), (rootNode:Project)
+     MATCH path = shortestPath((node)-[*..50]-(rootNode))
+     ORDER BY length(path) ASC
+     RETURN rootNode
+     LIMIT 1;`,
+      { nodeId },
+    );
+    return result.records[0];
+  };
+
+  /**
+   * Creates a dynamic relationship between two nodes
+   * No predefined relationship type is required
+   */
+  model.createDynamicRelationship = async (sourceId: string, targetId: string) => {
+    const result = await neogma.queryRunner.run(
+      `MERGE (source {id: $sourceId})
+     MERGE (target {id: $targetId})
+     MERGE (source)-[relationship:\`data\`]->(target)
+     RETURN relationship {.*, from: source.id, to: target.id} AS relationship`,
+      { sourceId, targetId },
+    );
+    return result.records[0];
+  };
+
+  /**
+   * Deletes all dynamic relationships between two nodes
+   * No predefined relationship type is required
+   */
+  model.deleteDynamicRelationship = async (firstId: string, secondId: string) => {
+    if (!firstId || !secondId) {
+      return false;
+    }
+
+    const result = await neogma.queryRunner.run(
+      `MATCH (firstNode {id: $firstId})-[relationship]-(secondNode {id: $secondId})
+     DELETE relationship;`,
+      { firstId, secondId },
+    );
+
+    return result.records.length > 0;
+  };
+
+  model.skipNeedUpdateOrSkipNeedDelete = async (Id: string): Promise<void> => {
     try {
       await neogma.queryRunner.run(
-        `MATCH (n)-[]->(z) WHERE n.id = "${project_Id}" SET z.needsDelete = False SET z.needsUpdate = False;`,
+        `MATCH (n)-[]->(z) WHERE n.id = "${Id}" SET z.needsDelete = False SET z.needsUpdate = False;`,
       );
     } catch (error) {
       throw Error(error.message);
