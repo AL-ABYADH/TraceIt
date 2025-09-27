@@ -4,7 +4,6 @@ import { UserAttributes } from "../../user/models/user.model";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { ActorAttributes } from "../../actor/models/actor.model";
 import { ProjectCollaborationAttributes } from "./project-collaboration.model";
-import { UseCaseDiagramAttributes } from "../../use-case/models/use-case-diagram.model";
 
 export type ProjectAttributes = {
   id: string;
@@ -20,7 +19,7 @@ export interface ProjectRelationships {
   collaborations: ProjectCollaborationAttributes[];
   actors: ActorAttributes[];
   useCases: UseCaseAttributes[];
-  useCaseDiagram: UseCaseDiagramAttributes[];
+  // useCaseDiagram: any;
   // classes: any[];
 }
 
@@ -81,12 +80,12 @@ export const ProjectModel: ModelFactoryDefinition<ProjectAttributes, ProjectRela
         name: "BELONGS_TO",
         cardinality: "many",
       },
-      useCaseDiagram: {
-        model: "UseCaseDiagram",
-        direction: "in",
-        name: "BELONGS_TO_PROJECT",
-        cardinality: "many",
-      },
+      // useCaseDiagram: {
+      //   model: "UseCaseDiagram",
+      //   direction: "in",
+      //   name: "BELONGS_TO_PROJECT",
+      //   cardinality: "many",
+      // },
       // classes: {
       //   model: "Class",
       //   direction: "in",

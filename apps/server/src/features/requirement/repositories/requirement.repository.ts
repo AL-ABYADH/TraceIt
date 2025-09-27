@@ -119,8 +119,14 @@ export class RequirementRepository {
         whereRelated: { id: useCaseId },
         relationshipAlias: "useCase",
       });
-
-      return requirements;
+      const data: Requirement[] = [];
+      for (const item of requirements) {
+        const cache = await this.requirementModel.findOneWithRelations({ where: { id: item.id } });
+        if (cache) {
+          data.push(cache);
+        }
+      }
+      return data;
     } catch (error) {
       throw new Error(`Failed to retrieve requirements for use case: ${error.message}`);
     }
