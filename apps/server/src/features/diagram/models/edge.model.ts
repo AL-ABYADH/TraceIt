@@ -14,13 +14,13 @@ export type EdgeAttributes = {
   selectable?: boolean;
   selected?: boolean;
   zIndex?: number;
-  data: string;
   createdAt: string;
   updatedAt?: string;
 };
 
 export interface EdgeRelationships {
   diagram: DiagramAttributes;
+  data?: any;
 }
 
 export type EdgeModelType = NeogmaModel<EdgeAttributes, EdgeRelationships>;
@@ -78,16 +78,12 @@ export const EdgeModel: ModelFactoryDefinition<EdgeAttributes, EdgeRelationships
         message: "Z-index must be a number",
         required: false,
       },
-      data: {
-        type: "string",
-        required: true,
-      },
     },
     relationships: {
       diagram: {
         model: "Diagram",
         direction: "out",
-        name: "BELONGS_TO_DIAGRAM",
+        name: "PART_OF",
         cardinality: "one",
       },
     },
