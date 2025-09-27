@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "sm" | "md" | "lg";
   onClick?: () => void;
   className?: string;
@@ -29,6 +29,7 @@ export default function Button({
     primary: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-sm hover:shadow-md",
     secondary: "bg-secondary text-secondary-foreground hover:bg-accent border border-border",
     ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",
+    danger: "bg-red-600 hover:bg-red-700 text-white",
   };
 
   const sizes = {
@@ -37,7 +38,7 @@ export default function Button({
     lg: "px-8 py-4 text-base font-medium",
   };
 
-  const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = `${className} ${baseClasses} ${variants[variant]} ${sizes[size]} `;
 
   return (
     <button className={classes} onClick={onClick} disabled={disabled} type={type} {...props}>

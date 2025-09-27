@@ -3,7 +3,7 @@
 import { useProjectDetail } from "@/modules/features/project/hooks/useProjectDetail";
 import { ProjectDto } from "@repo/shared-schemas";
 import clsx from "clsx";
-import { GitBranchIcon, UsersIcon } from "lucide-react";
+import { GitBranchIcon, UsersIcon, Ellipsis } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { route } from "nextjs-routes";
@@ -18,6 +18,11 @@ const pages = [
     title: "Use Cases",
     href: "/projects/[project-id]/use-cases",
     icon: GitBranchIcon,
+  },
+  {
+    title: "Requirements",
+    href: "/projects/[project-id]/requirements",
+    icon: Ellipsis,
   },
   {
     title: "Use Case Diagram",

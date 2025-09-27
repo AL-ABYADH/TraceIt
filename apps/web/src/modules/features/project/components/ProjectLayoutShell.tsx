@@ -1,8 +1,9 @@
 "use client";
-import ProjectLayoutLoading from "./ProjectLayoutLoading";
-import ProjectLayoutError from "./ProjectLayoutError";
+import React from "react";
 import { useProjectDetail } from "../hooks/useProjectDetail";
 import { useParams } from "next/navigation";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 export default function ProjectLayoutShell({
   children,
@@ -14,8 +15,8 @@ export default function ProjectLayoutShell({
   const params = useParams();
   const { isLoading, isError, error } = useProjectDetail(projectId!);
 
-  if (isLoading) return <ProjectLayoutLoading />;
-  if (isError) return <ProjectLayoutError error={error} />;
+  if (isLoading) return <Loading isOpen={isLoading} message="Loading..." mode="fullscreen" />;
+  if (isError) return <ErrorMessage message={error?.message} />;
 
   return <>{children}</>;
 }
