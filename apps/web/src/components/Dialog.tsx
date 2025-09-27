@@ -33,10 +33,8 @@ export default function Dialog({ isOpen, onClose, children, title, className = "
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Dialog Content */}
       <div
         className={`
         relative bg-card rounded-2xl border border-border shadow-2xl 
@@ -54,7 +52,7 @@ export default function Dialog({ isOpen, onClose, children, title, className = "
           </div>
         )}
 
-        <div className={title ? "p-6" : "p-6"}>{children}</div>
+        <div className={title ? "px-6 pb-6" : "px-6 pb-6"}>{children}</div>
       </div>
     </div>
   );

@@ -54,4 +54,7 @@ export const ProjectInvitationStatusField = createEnumField(
 );
 
 export const projectDescriptionField = descriptionField.optional();
-export const projectNameField = nameField;
+export const projectNameField = createField("string", {
+  max: 50,
+  maxMessage: "Project Name should not exceed 50 characters",
+});

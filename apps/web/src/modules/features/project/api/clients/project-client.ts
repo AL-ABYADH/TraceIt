@@ -23,7 +23,7 @@ async function createProject(project: CreateProjectDto): Promise<ProjectDto> {
   return http.post(projectEndpoints.list, { body: project });
 }
 
-async function deleteProject(id: string) {
+async function removeProject(id: string) {
   return http.del(projectEndpoints.detail, { pathParams: { id } });
 }
 
@@ -37,5 +37,5 @@ export const projectClient = {
   getProject,
   createProject,
   updateProject,
-  deleteProject,
+  removeProject,
 };

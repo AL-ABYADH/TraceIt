@@ -14,7 +14,7 @@ interface InputFieldProps {
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   ({ label, placeholder, error, type = "text", disabled, className = "", ...props }, ref) => {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 my-5">
         {label && <label className="block text-sm font-medium text-foreground">{label}</label>}
         <input
           ref={ref}
