@@ -1,6 +1,5 @@
 import { z } from "../zod-openapi-init";
 import {
-  dataFieldDoc,
   DiagramTypeFieldDoc,
   dimensionFieldDoc,
   EdgeTypeFieldDoc,
@@ -38,8 +37,12 @@ export const nodeSchema = z
   .object({
     id: uuidFieldDoc,
     type: NodeTypeFieldDoc,
-    x: positionFieldDoc,
-    y: positionFieldDoc,
+    position: z
+      .object({
+        x: positionFieldDoc,
+        y: positionFieldDoc,
+      })
+      .transform(({ x, y }) => ({ x, y })),
     width: dimensionFieldDoc,
     height: dimensionFieldDoc,
     draggable: booleanFieldDoc.optional().default(true),
@@ -49,10 +52,19 @@ export const nodeSchema = z
     dragging: booleanFieldDoc.optional().default(false),
     selected: booleanFieldDoc.optional().default(false),
     zIndex: zIndexFieldDoc.optional().default(0),
-    data: dataFieldDoc,
+    data: z
+      .object({
+        id: uuidFieldDoc,
+      })
+      .catchall(z.any())
+      .optional(),
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })
+  .transform(({ position, createdAt, updatedAt, ...rest }) => ({
+    ...rest,
+    ...position,
+  }))
   .openapi({ title: "NodeAttributes" });
 
 export const edgeSchema = z
@@ -68,7 +80,12 @@ export const edgeSchema = z
     selectable: booleanFieldDoc.optional().default(true),
     selected: booleanFieldDoc.optional().default(false),
     zIndex: zIndexFieldDoc.optional().default(0),
-    data: dataFieldDoc,
+    data: z
+      .object({
+        id: uuidFieldDoc,
+      })
+      .catchall(z.any())
+      .optional(),
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })
@@ -87,14 +104,7 @@ export const createDiagramSchema = z
 export const updateDiagramSchema = atLeastOneOfSchema(
   {
     name: nameFieldDoc.optional(),
-    nodes: z
-      .array(
-        nodeSchema.omit({
-          createdAt: true,
-          updatedAt: true,
-        }),
-      )
-      .optional(),
+    nodes: z.array(nodeSchema).optional(),
     edges: z
       .array(
         edgeSchema.omit({
