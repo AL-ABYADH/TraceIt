@@ -4,13 +4,13 @@ import { PrimaryUseCaseRepository } from "./repositories/primary-use-case/primar
 import { SecondaryUseCaseRepository } from "./repositories/secondary-use-case/secondary-use-case.repository";
 import { PrimaryUseCaseController } from "./controllers/primary-use-case/primary-use-case.controller";
 import { PrimaryUseCaseService } from "./services/primary-use-case/primary-use-case.service";
-import { UseCaseDiagramRepository } from "./repositories/use-case-diagram/use-case-diagram.repository";
+// import { UseCaseDiagramRepository } from "./repositories/use-case-diagram/use-case-diagram.repository";
 import { UseCaseService } from "./services/use-case/use-case.service";
 import { UseCaseController } from "./controllers/use-case/use-case.controller";
 import { SecondaryUseCaseController } from "./controllers/secondary-use-case/secondary-use-case.controller";
 import { SecondaryUseCaseService } from "./services/secondary-use-case/secondary-use-case.service";
 // import { UseCaseDiagramController } from "./controllers/use-case-diagram/use-case-diagram.controller";
-import { UseCaseDiagramService } from "./services/use-case-diagram/use-case-diagram.service";
+// import { UseCaseDiagramService } from "./services/use-case-diagram/use-case-diagram.service";
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
 import { RequirementModule } from "../requirement/requirement.module";
@@ -27,12 +27,12 @@ import { RequirementModule } from "../requirement/requirement.module";
     UseCaseRepository,
     PrimaryUseCaseRepository,
     SecondaryUseCaseRepository,
-    UseCaseDiagramRepository,
+    // UseCaseDiagramRepository,
     PrimaryUseCaseService,
     UseCaseService,
     SecondaryUseCaseService,
-    UseCaseDiagramService,
+    // UseCaseDiagramService,
   ],
-  exports: [PrimaryUseCaseService, SecondaryUseCaseService, UseCaseService, UseCaseDiagramService],
+  exports: [PrimaryUseCaseService, SecondaryUseCaseService, UseCaseService],
 })
 export class UseCaseModule {}

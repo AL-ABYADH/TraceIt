@@ -232,9 +232,14 @@ export class DiagramService {
         throw new BadRequestException(`Node at index ${index} is missing required 'type' field`);
       }
 
-      if (node.x === undefined || node.y === undefined) {
+      // Check for position data in either format
+      const hasPosition =
+        node.position && node.position.x !== undefined && node.position.y !== undefined;
+      const hasCoords = node.x !== undefined && node.y !== undefined;
+
+      if (!hasPosition && !hasCoords) {
         throw new BadRequestException(
-          `Node at index ${index} is missing required position fields (x, y)`,
+          `Node at index ${index} is missing required position data (either as x,y properties or position object)`,
         );
       }
 

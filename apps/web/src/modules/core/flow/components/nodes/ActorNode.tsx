@@ -5,12 +5,12 @@ import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import ActorShape from "@/modules/features/use-case-diagram/components/ActorShape";
 
-export default function ActorNode({ data }: NodeProps<any>) {
+export default function ActorNode({ data, selected }: NodeProps<any>) {
   const name = data?.name ?? "Actor";
 
   // hover state for handles
   const [hovered, setHovered] = useState(false);
-  const handlesVisible = hovered;
+  const handlesVisible = hovered || selected;
 
   const transition = "opacity 180ms ease, transform 180ms cubic-bezier(.2,.8,.2,1)";
   const handleTop = 32;
@@ -94,7 +94,7 @@ export default function ActorNode({ data }: NodeProps<any>) {
         }}
       />
 
-      <ActorShape name={name} />
+      <ActorShape name={name} selected={selected} />
     </div>
   );
 }

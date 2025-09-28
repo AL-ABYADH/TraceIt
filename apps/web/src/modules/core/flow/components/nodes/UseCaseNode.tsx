@@ -3,8 +3,7 @@ import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import { useMemo, useState } from "react";
 
-export default function UseCaseNode(props: NodeProps<any>) {
-  const { data } = props;
+export default function UseCaseNode({ data, selected }: NodeProps<any>) {
   const name = data?.name ?? "Unnamed Use Case";
 
   // hover state (controls handle visibility)
@@ -30,7 +29,7 @@ export default function UseCaseNode(props: NodeProps<any>) {
   }, [name]);
 
   // handles are visible only when hovered
-  const handlesVisible = hovered;
+  const handlesVisible = hovered || selected;
 
   return (
     <div
@@ -104,7 +103,7 @@ export default function UseCaseNode(props: NodeProps<any>) {
         }}
       />
 
-      <UseCaseShape name={name} />
+      <UseCaseShape name={name} selected={selected} />
     </div>
   );
 }

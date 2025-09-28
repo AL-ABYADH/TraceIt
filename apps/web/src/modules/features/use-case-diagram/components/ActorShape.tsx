@@ -1,8 +1,8 @@
-"use client";
 import React, { useMemo } from "react";
 
 export interface ActorShapeProps {
-  name?: string;
+  name: string;
+  selected?: boolean;
   actorBodyWidth?: number;
   actorBodyHeight?: number;
   headR?: number;
@@ -20,19 +20,20 @@ export interface ActorShapeProps {
 }
 
 export default function ActorShape({
-  name = "Actor",
+  name,
+  selected = false,
   actorBodyWidth = 60,
   actorBodyHeight = 86,
   headR = 12,
   headPaddingTop = 6,
   bodyLength = 22,
-  stroke = "#FFFFFF",
+  stroke = selected ? "var(--primary)" : "#fff",
   strokeWidth = 2,
   className,
   style,
   labelFontSize = 12,
   labelFontWeight = 700,
-  labelColor = "#FFFFFF",
+  labelColor = "#fff",
   labelGap = 6,
   labelLineHeight = 16,
 }: ActorShapeProps) {

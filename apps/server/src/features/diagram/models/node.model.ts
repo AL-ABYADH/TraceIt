@@ -17,13 +17,13 @@ export type NodeAttributes = {
   dragging?: boolean;
   selected?: boolean;
   zIndex?: number;
-  data: string;
   createdAt: string;
   updatedAt?: string;
 };
 
 export interface NodeRelationships {
   diagram: DiagramAttributes;
+  data?: any;
 }
 
 export type NodeModelType = NeogmaModel<NodeAttributes, NodeRelationships>;
@@ -39,7 +39,6 @@ export const NodeModel: ModelFactoryDefinition<NodeAttributes, NodeRelationships
         enum: Object.values(NodeType),
         message: "Node type must be a valid type",
       },
-      // Position attributes
       x: {
         type: "number",
         required: true,
@@ -81,15 +80,12 @@ export const NodeModel: ModelFactoryDefinition<NodeAttributes, NodeRelationships
         type: "boolean",
         message: "Deletable must be a boolean value",
       },
-      data: {
-        type: "string",
-      },
     },
     relationships: {
       diagram: {
         model: "Diagram",
         direction: "out",
-        name: "BELONGS_TO_DIAGRAM",
+        name: "PART_OF",
         cardinality: "one",
       },
     },

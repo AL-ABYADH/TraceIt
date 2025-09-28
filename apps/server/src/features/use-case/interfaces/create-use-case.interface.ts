@@ -12,10 +12,3 @@ export interface CreateSecondaryUseCaseInterface {
   primaryUseCaseId: string;
   requirementId: string;
 }
-
-export interface CreateDiagramUseCaseInterface {
-  projectId: string;
-  initial: string;
-  final?: string;
-  useCaseIds?: string[];
-}

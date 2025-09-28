@@ -3,8 +3,9 @@ import {
   AbstractNeogmaModel,
   defineAbstractModelFactory,
 } from "@repo/custom-neogma";
-import { Project } from "../../project/entities/project.entity";
 import { RequirementAttributes } from "../../requirement/models/requirement.model";
+import { ProjectAttributes } from "../../project/models/project.model";
+import { DiagramAttributes } from "../../diagram/models/diagram.model";
 
 export type UseCaseAttributes = {
   id: string;
@@ -14,10 +15,11 @@ export type UseCaseAttributes = {
 };
 
 export interface UseCaseRelationships {
-  project: Project;
+  project: ProjectAttributes;
   requirements: RequirementAttributes[];
   includedUseCases: UseCaseAttributes[];
   extendedUseCases: UseCaseAttributes[];
+  useCaseDiagram: DiagramAttributes;
 }
 
 export type UseCaseModelType = AbstractNeogmaModel<UseCaseAttributes, UseCaseRelationships>;
@@ -59,6 +61,12 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         model: "self",
         direction: "out",
         name: "EXTENDS",
+        cardinality: "many",
+      },
+      useCaseDiagram: {
+        model: "Diagram",
+        direction: "out",
+        name: "RELATED_TO",
         cardinality: "many",
       },
     },

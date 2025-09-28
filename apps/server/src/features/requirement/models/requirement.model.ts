@@ -16,6 +16,7 @@ export interface RequirementRelationships {
   actors?: ActorAttributes[];
   nestedRequirements?: RequirementAttributes[];
   exceptions?: RequirementExceptionAttributes[];
+  exceptionRequirement?: RequirementExceptionAttributes[];
 }
 
 export type RequirementModelType = NeogmaModel<RequirementAttributes, RequirementRelationships>;
@@ -58,6 +59,12 @@ export const RequirementModel: ModelFactoryDefinition<
       cardinality: "many",
     },
     exceptions: {
+      model: "RequirementException",
+      name: "EXCEPTION_AT",
+      direction: "in",
+      cardinality: "many",
+    },
+    exceptionRequirement: {
       model: "RequirementException",
       name: "BELONGS_TO",
       direction: "in",

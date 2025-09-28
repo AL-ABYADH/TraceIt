@@ -1,27 +1,23 @@
 "use client";
 
-import Flow from "@/components/Flow";
 import { useDispatch, useSelector } from "react-redux";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
-  markAsSaved,
   onConnect,
-  onEdgesChange,
-  onNodesChange,
   selectEdges,
-  selectIsDirty,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
 import { useUseCaseDiagram } from "../hooks/useUseCaseDiagram";
-import { Connection, EdgeChange, NodeChange } from "@xyflow/react";
+import { Connection } from "@xyflow/react";
 import Button from "@/components/Button";
 import { useParams } from "next/navigation";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
 import { EdgeType, NodeType } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
+import Flow from "@/modules/core/flow/components/Flow";
 
 export default function UseCaseDiagramFlow() {
   const params = useParams<"/projects/[project-id]/use-case-diagram">();
@@ -37,24 +33,18 @@ export default function UseCaseDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
-  const isDirty = useSelector(selectIsDirty);
-
-  const handleNodesChange = useCallback((changes: NodeChange[]) => {
-    dispatch(onNodesChange(changes));
-  }, []);
-
-  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
-    dispatch(onEdgesChange(changes));
-  }, []);
 
   const handleConnect = (conn: Connection) => {
-    const sourceNode = nodes.find((node) => node.id == conn.source);
-    const targetNode = nodes.find((node) => node.id == conn.target);
+    const sourceNode = nodes.find((node) => node.id === conn.source);
+    const targetNode = nodes.find((node) => node.id === conn.target);
 
-    const edge = edges.find((edge) => edge.target == conn.target && edge.source == conn.source);
-    if (edge) return;
+    const edge = edges.find(
+      (edge) =>
+        (edge.source === conn.source && edge.target === conn.target) ||
+        (edge.source === conn.target && edge.target === conn.source),
+    );
 
-    if (targetNode?.type === NodeType.ACTOR) return;
+    if (edge || conn.source === conn.target || targetNode?.type === NodeType.ACTOR) return;
 
     if (sourceNode?.type === NodeType.USE_CASE && targetNode?.type === NodeType.USE_CASE) {
       setNewConnection(conn);
@@ -131,21 +121,7 @@ export default function UseCaseDiagramFlow() {
       >
         Add Use Actor
       </Button>
-      <Button
-        onClick={() => {
-          dispatch(markAsSaved());
-        }}
-        disabled={!isDirty}
-      >
-        Save
-      </Button>
-      <Flow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={handleNodesChange}
-        onEdgesChange={handleEdgesChange}
-        onConnect={handleConnect}
-      />
+      <Flow onConnect={handleConnect} />
     </>
   );
 }

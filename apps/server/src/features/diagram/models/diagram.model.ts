@@ -50,13 +50,13 @@ export const DiagramModel: ModelFactoryDefinition<DiagramAttributes, DiagramRela
       nodes: {
         model: "Node",
         direction: "in",
-        name: "HAS_NODES",
+        name: "PART_OF",
         cardinality: "many",
       },
       edges: {
         model: "Edge",
         direction: "in",
-        name: "HAS_EDGES",
+        name: "PART_OF",
         cardinality: "many",
       },
     },

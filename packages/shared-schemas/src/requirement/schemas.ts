@@ -41,12 +41,14 @@ export const createRequirementSchema = z
     useCaseId: useCaseIdFieldDoc,
     condition: conditionFieldDoc.optional(),
     actorIds: actorIdsFieldDoc.optional(),
+    exceptionId: exceptionIdFieldDoc.optional(),
+    parentRequirementId: requirementIdFieldDoc.optional(),
   })
   .openapi({ title: "CreateEventSystemRequirementDto" });
 
 export const createRequirementExceptionSchema = z.object({
   name: nameFieldDoc,
-  requirementIds: z.array(requirementIdFieldDoc),
+  requirementId: requirementIdFieldDoc,
 });
 
 export const updateRequirementSchema = z.object({

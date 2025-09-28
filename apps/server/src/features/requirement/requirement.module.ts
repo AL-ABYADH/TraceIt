@@ -5,8 +5,6 @@ import { RequirementExceptionController } from "./controllers/requirement-except
 import { RequirementService } from "./services/requirement.service";
 import { RequirementExceptionService } from "./services/requirement-exception.service";
 import { ExceptionalRequirementRepository } from "./repositories/exceptional-requirement.repository";
-
-// الوحدات ذات الصلة
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
 import { UseCaseModule } from "../use-case/use-case.module";

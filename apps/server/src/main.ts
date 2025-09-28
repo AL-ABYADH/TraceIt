@@ -8,7 +8,7 @@ import { AuthService } from "./core/auth/services/auth.service";
 import { setupSwagger } from "./swagger";
 import { ModelRegistry } from "@repo/custom-neogma";
 import { TokenBlacklistService } from "./core/auth/services/token-blacklist.service";
-import { PasswordExcludeInterceptor } from "./common/interceptors/passwordExcludeInterceptor";
+import { SensitiveFieldsInterceptor } from "./common/interceptors/sensitiveFieldsInterceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,7 +31,7 @@ async function bootstrap() {
   const authService = app.get(AuthService);
   const blacklistService = app.get(TokenBlacklistService);
   app.useGlobalGuards(new JwtAuthGuard(reflector, authService, blacklistService));
-  app.useGlobalInterceptors(new PasswordExcludeInterceptor());
+  app.useGlobalInterceptors(new SensitiveFieldsInterceptor());
 
   const origin = ["http://localhost:3000", "http://127.0.0.1:3000"];
 
