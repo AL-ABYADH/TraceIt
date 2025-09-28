@@ -21,7 +21,12 @@ export default function ProjectLayoutShell({
   if (isError) return <ErrorMessage message={error?.message} />;
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div
+      className="flex min-h-screen bg-background text-foreground"
+      style={{
+        minWidth: isCollapsed ? 300 : 500,
+      }}
+    >
       <ProjectSidebar
         projectId={projectId}
         isCollapsed={isCollapsed}
@@ -30,7 +35,7 @@ export default function ProjectLayoutShell({
       />
 
       <main
-        className="flex-1 overflow-auto p-4 transition-all duration-300"
+        className="flex-1 overflow-auto p-4 w-full transition-all duration-300"
         style={{
           minWidth: isCollapsed ? 300 : 500,
         }}
