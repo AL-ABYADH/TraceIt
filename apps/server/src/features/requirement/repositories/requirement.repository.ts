@@ -4,6 +4,7 @@ import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { Op } from "@repo/custom-neogma";
+import { Neo4jService } from "../../../core/neo4j/neo4j.service";
 
 @Injectable()
 export class RequirementRepository {
