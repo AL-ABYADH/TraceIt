@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import Button from "@/components/Button";
+import Dialog from "@/components/Dialog";
+import ErrorMessage from "@/components/ErrorMessage";
+import InputField from "@/components/InputField";
+import Loading from "@/components/Loading";
+import MultiSelect from "@/components/MultiSelect";
+import RequirementPreview from "./RequirementPreview";
+import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateRequirementDto, createRequirementSchema } from "@repo/shared-schemas";
-import { useCreateRequirement } from "../hooks/useCreateRequirement";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useActors } from "../../actor/hooks/useActors";
-import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
-import Dialog from "@/components/Dialog";
-import InputField from "@/components/InputField";
-import MultiSelect from "@/components/MultiSelect";
-import Button from "@/components/Button";
-import TextareaField from "@/components/TextAreaField";
-import Loading from "@/components/Loading";
-import ErrorMessage from "@/components/ErrorMessage";
+import { useCreateRequirement } from "../hooks/useCreateRequirement";
 
 interface RequirementFormProps {
   isOpen: boolean;
@@ -36,14 +36,14 @@ export default function RequirementForm({
     setError,
     reset,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CreateRequirementDto>({
     resolver: zodResolver(createRequirementSchema),
     mode: "onSubmit",
     defaultValues: {
       operation: "",
-      useCaseId: useCaseId,
-      condition: "",
+      useCaseId,
       actorIds: [],
     },
   });
@@ -80,6 +80,9 @@ export default function RequirementForm({
     onClose();
   };
 
+  const operation = watch("operation");
+  const condition = watch("condition");
+
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Requirement" className="max-w-2xl">
       {(createRequirement.isPending || isSubmitting) && (
@@ -99,11 +102,12 @@ export default function RequirementForm({
           disabled={createRequirement.isPending || isSubmitting}
         />
 
-        <TextareaField
-          {...register("condition")}
+        <InputField
+          {...register("condition", {
+            setValueAs: (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+          })}
           label="Condition (Optional)"
           placeholder="Enter condition if applicable"
-          rows={3}
           error={errors.condition?.message}
           disabled={createRequirement.isPending || isSubmitting}
         />
@@ -126,6 +130,8 @@ export default function RequirementForm({
             />
           )}
         />
+
+        <RequirementPreview operation={operation} condition={condition} />
 
         <div className="flex items-center justify-end gap-3 pt-4">
           <Button
