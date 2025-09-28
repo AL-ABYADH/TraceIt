@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { UserModel, UserModelType } from "../../models/user.model";
 import { CreateUserInterface } from "../../interfaces/create-user.interface";
 import { UpdateUserInterface } from "../../interfaces/update-user.interface";
 import { User } from "../../entities/user.entity";
+import { Neo4jService } from "./../../../../core/neo4j/neo4j.service";
 
 @Injectable()
 export class UserRepository {
