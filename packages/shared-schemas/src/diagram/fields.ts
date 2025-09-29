@@ -1,3 +1,4 @@
+import z from "zod";
 import { createEnumField, createField, uuidField } from "../common";
 
 export const dataField = createField("string", {

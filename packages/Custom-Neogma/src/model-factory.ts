@@ -332,11 +332,11 @@ export function ModelFactory<
    * Creates a dynamic relationship between two nodes
    * No predefined relationship type is required
    */
-  model.createDynamicRelationship = async (sourceId: string, targetId: string) => {
+  model.createDynamicRelationship = async (sourceId: string, targetId: string, name: string) => {
     const result = await neogma.queryRunner.run(
       `MERGE (source {id: $sourceId})
      MERGE (target {id: $targetId})
-     MERGE (source)-[relationship:\`data\`]->(target)
+     MERGE (source)-[relationship:\`${name}\`]->(target)
      RETURN relationship {.*, from: source.id, to: target.id} AS relationship`,
       { sourceId, targetId },
     );

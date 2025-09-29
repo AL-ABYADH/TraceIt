@@ -111,7 +111,7 @@ interface NeogmaModelStaticsI<
     MethodsI
   >,
 > {
-  createDynamicRelationship: (sourceId: string, targetId: string) => Promise<any>;
+  createDynamicRelationship: (sourceId: string, targetId: string, name: string) => Promise<any>;
   findRootProject: (nodeId: string) => Promise<any>;
   deleteDynamicRelationship: (firstID: string, socndID: string) => Promise<boolean>;
   getNeogma: any;

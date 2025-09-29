@@ -1,11 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseInterceptors,
+} from "@nestjs/common";
 import { DiagramService } from "../services/diagram.service";
 import { Diagram } from "../entities/diagram.entity";
 import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
   type CreateDiagramDto,
   createDiagramSchema,
-  DiagramDto,
+  DiagramDetailDto,
+  DiagramListDto,
   type DiagramIdDto,
   diagramIdSchema,
   type ProjectIdDto,
@@ -14,8 +25,12 @@ import {
   typeDiagramSchema,
   type UpdateDiagramDto,
   updateDiagramSchema,
+  diagramDetailSchema,
 } from "@repo/shared-schemas";
+import { ZodResponseInterceptor } from "src/common/interceptors/zodResponseInterceptor";
+import { ResponseSchema } from "src/common/decorators/response-schema.decorator";
 
+@UseInterceptors(ZodResponseInterceptor)
 @Controller("diagrams")
 export class DiagramController {
   constructor(private readonly diagramService: DiagramService) {}
@@ -29,20 +44,23 @@ export class DiagramController {
   async listByProject(
     @Query(zodQuery(projectIdSchema)) projectId: ProjectIdDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
-  ): Promise<DiagramDto[]> {
+  ): Promise<DiagramListDto[]> {
     return this.diagramService.listByProject(projectId.projectId, type?.type);
   }
 
   @Get(":diagramId")
-  async findById(@Param(zodParam(diagramIdSchema)) params: DiagramIdDto): Promise<Diagram> {
-    return this.diagramService.findById(params.diagramId);
+  @ResponseSchema(diagramDetailSchema)
+  async findById(
+    @Param(zodParam(diagramIdSchema)) params: DiagramIdDto,
+  ): Promise<DiagramDetailDto> {
+    return (await this.diagramService.findById(params.diagramId)) as any;
   }
 
   @Put(":diagramId")
   async update(
     @Param(zodParam(diagramIdSchema)) params: DiagramIdDto,
     @Body(zodBody(updateDiagramSchema)) updateDto: UpdateDiagramDto,
-  ): Promise<DiagramDto> {
+  ): Promise<DiagramListDto> {
     return this.diagramService.update(params.diagramId, updateDto);
   }
 

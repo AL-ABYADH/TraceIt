@@ -23,31 +23,6 @@ export class DiagramRepository {
   }
 
   /**
-   * Adds position object to node for client convenience
-   */
-  private addPositionToNode(node: Node): Node {
-    if (node) {
-      const { x, y, ...restNode } = node;
-      return { position: { x: node.x, y: node.y }, ...restNode } as any;
-    }
-    return node;
-  }
-
-  /**
-   * Extracts position from incoming node data
-   */
-  private extractPosition(nodeData: NodeInterface): any {
-    // Use position object if provided, otherwise use x,y properties
-    const x = nodeData.position?.x ?? nodeData.x;
-    const y = nodeData.position?.y ?? nodeData.y;
-
-    // Remove position to avoid Neo4j schema issues
-    const { position, ...rest } = nodeData;
-
-    return { ...rest, x, y };
-  }
-
-  /**
    * Creates a new diagram with the given data
    */
   async createDiagram(createDto: CreateDiagramDto): Promise<Diagram> {
@@ -246,23 +221,19 @@ export class DiagramRepository {
    */
   async createNode(nodeData: NodeInterface, diagramId: string): Promise<Node> {
     try {
-      // Validate required fields
-      this.validateNodeData(nodeData);
-
       // Extract data and prepare node data
       const { data, ...rest } = nodeData;
-      const dbNodeData = this.extractPosition(rest);
 
       // Create the node
       const node = await this.nodeModel.createOne({
-        ...dbNodeData,
+        ...rest,
         diagram: {
           where: [{ params: { id: diagramId } }],
         },
       });
 
       if (data && data.id) {
-        await this.nodeModel.createDynamicRelationship(node.id, data.id);
+        await this.nodeModel.createDynamicRelationship(node.id, data.id, "HAS_DATA");
       }
 
       // Fetch the complete node with relationships
@@ -270,14 +241,13 @@ export class DiagramRepository {
         where: { id: node.id },
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
       });
 
-      // Add position property
-      return this.addPositionToNode(nodeWithRelations as Node);
+      return nodeWithRelations!;
     } catch (error) {
       this.logger.error(`Failed to create node: ${error.message}`, error.stack);
       throw new Error(`Failed to create node: ${error.message}`);
@@ -293,10 +263,9 @@ export class DiagramRepository {
 
       // Extract data and prepare node data
       const { data, ...rest } = updateDto;
-      const dbNodeData = this.extractPosition(rest);
 
       // Update basic node properties
-      await this.nodeModel.updateOneOrThrow(dbNodeData, {
+      await this.nodeModel.updateOneOrThrow(rest, {
         where: { id: updateDto.id },
       });
 
@@ -306,7 +275,7 @@ export class DiagramRepository {
           where: { id: updateDto.id },
           dynamicRelations: [
             {
-              name: "data",
+              name: "HAS_DATA",
               alias: "data",
             },
           ],
@@ -316,7 +285,7 @@ export class DiagramRepository {
           if (dataValue?.data?.id) {
             await this.nodeModel.deleteDynamicRelationship(updateDto.id, dataValue.data.id);
           }
-          await this.nodeModel.createDynamicRelationship(updateDto.id, data.id);
+          await this.nodeModel.createDynamicRelationship(updateDto.id, data.id, "HAS_DATA");
         }
       }
 
@@ -325,14 +294,13 @@ export class DiagramRepository {
         where: { id: updateDto.id },
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
       });
 
-      // Add position property
-      return this.addPositionToNode(updatedNode as Node);
+      return updatedNode;
     } catch (error) {
       this.logger.error(`Failed to update node: ${error.message}`, error.stack);
       throw new Error(`Failed to update node: ${error.message}`);
@@ -344,10 +312,6 @@ export class DiagramRepository {
    */
   async createEdge(edgeData: EdgeInterface, diagramId: string): Promise<Edge> {
     try {
-      // Validate required fields
-      this.validateEdgeData(edgeData);
-
-      // Extract data property if it exists
       const { data, ...rest } = edgeData;
 
       // Create the edge
@@ -360,7 +324,7 @@ export class DiagramRepository {
 
       // Create data relationship if data is provided
       if (data && data.id) {
-        await this.edgeModel.createDynamicRelationship(edge.id, data.id);
+        await this.edgeModel.createDynamicRelationship(edge.id, data.id, "HAS_DATA");
       }
 
       // Fetch the complete edge with relationships
@@ -368,7 +332,7 @@ export class DiagramRepository {
         where: { id: edge.id },
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
@@ -402,7 +366,7 @@ export class DiagramRepository {
           where: { id: updateDto.id },
           dynamicRelations: [
             {
-              name: "data",
+              name: "HAS_DATA",
               alias: "data",
             },
           ],
@@ -415,7 +379,7 @@ export class DiagramRepository {
             await this.edgeModel.deleteDynamicRelationship(updateDto.id, dataValue.data.id);
           }
           // Create new relationship
-          await this.edgeModel.createDynamicRelationship(updateDto.id, data.id);
+          await this.edgeModel.createDynamicRelationship(updateDto.id, data.id, "HAS_DATA");
         }
       }
 
@@ -424,7 +388,7 @@ export class DiagramRepository {
         where: { id: updateDto.id },
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
@@ -453,14 +417,13 @@ export class DiagramRepository {
         exclude: ["diagram"],
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
       });
 
-      // Add position property for client convenience
-      data.push(this.addPositionToNode(d as Node));
+      data.push(d!);
     }
     return data;
   }
@@ -482,7 +445,7 @@ export class DiagramRepository {
         exclude: ["diagram"],
         dynamicRelations: [
           {
-            name: "data",
+            name: "HAS_DATA",
             alias: "data",
           },
         ],
@@ -507,47 +470,6 @@ export class DiagramRepository {
     } catch (error) {
       this.logger.error(`Failed to get diagram elements: ${error.message}`, error.stack);
       throw new Error(`Failed to get diagram elements: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validates node data for required fields
-   */
-  private validateNodeData(nodeData: any): void {
-    if (!nodeData.type) {
-      throw new Error("Node type is required");
-    }
-
-    // Check for position data in either format
-    const hasPosition =
-      nodeData.position && nodeData.position.x !== undefined && nodeData.position.y !== undefined;
-    const hasCoords = nodeData.x !== undefined && nodeData.y !== undefined;
-
-    if (!hasPosition && !hasCoords) {
-      throw new Error(
-        "Node position data is required (either as x,y properties or position object)",
-      );
-    }
-
-    if (!nodeData.width || !nodeData.height) {
-      throw new Error("Node dimensions (width, height) are required");
-    }
-  }
-
-  /**
-   * Validates edge data for required fields
-   */
-  private validateEdgeData(edgeData: any): void {
-    if (!edgeData.type) {
-      throw new Error("Edge type is required");
-    }
-
-    if (!edgeData.source || !edgeData.target) {
-      throw new Error("Edge source and target are required");
-    }
-
-    if (!edgeData.sourceHandle || !edgeData.targetHandle) {
-      throw new Error("Edge source and target handles are required");
     }
   }
 }
