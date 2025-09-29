@@ -61,13 +61,6 @@ export class DiagramService {
     await this.findById(id);
 
     try {
-      // Validate input data
-      this.validateUpdateData(updateDto);
-      if (!updateDto.nodes) {
-        throw new NotFoundException();
-      }
-
-      // Perform update
       const updatedDiagram = await this.diagramRepository.updateDiagram(
         id,
         updateDto.name,
@@ -195,89 +188,6 @@ export class DiagramService {
       throw new BadRequestException(
         `Invalid diagram type: ${type}. Valid types are: ${validTypes.join(", ")}`,
       );
-    }
-  }
-
-  /**
-   * Validates update data before processing
-   *
-   * @param updateDto Data to validate
-   * @throws BadRequestException if validation fails
-   */
-  private validateUpdateData(updateDto: UpdateDiagramInterface): void {
-    // Validate nodes if provided
-    if (updateDto.nodes) {
-      this.validateNodes(updateDto.nodes);
-    }
-
-    // Validate edges if provided
-    if (updateDto.edges) {
-      this.validateEdges(updateDto.edges);
-    }
-  }
-
-  /**
-   * Validates node data
-   *
-   * @param nodes Nodes to validate
-   * @throws BadRequestException if validation fails
-   */
-  private validateNodes(nodes: NodeInterface[]): void {
-    if (!Array.isArray(nodes)) {
-      throw new BadRequestException("Nodes must be an array");
-    }
-
-    for (const [index, node] of nodes.entries()) {
-      if (!node.type) {
-        throw new BadRequestException(`Node at index ${index} is missing required 'type' field`);
-      }
-
-      // Check for position data in either format
-      const hasPosition =
-        node.position && node.position.x !== undefined && node.position.y !== undefined;
-      const hasCoords = node.x !== undefined && node.y !== undefined;
-
-      if (!hasPosition && !hasCoords) {
-        throw new BadRequestException(
-          `Node at index ${index} is missing required position data (either as x,y properties or position object)`,
-        );
-      }
-
-      if (!node.width || !node.height) {
-        throw new BadRequestException(
-          `Node at index ${index} is missing required dimension fields (width, height)`,
-        );
-      }
-    }
-  }
-
-  /**
-   * Validates edge data
-   *
-   * @param edges Edges to validate
-   * @throws BadRequestException if validation fails
-   */
-  private validateEdges(edges: EdgeInterface[]): void {
-    if (!Array.isArray(edges)) {
-      throw new BadRequestException("Edges must be an array");
-    }
-
-    for (const [index, edge] of edges.entries()) {
-      if (!edge.type) {
-        throw new BadRequestException(`Edge at index ${index} is missing required 'type' field`);
-      }
-
-      if (!edge.source || !edge.target) {
-        throw new BadRequestException(
-          `Edge at index ${index} is missing required connection fields (source, target)`,
-        );
-      }
-
-      if (!edge.sourceHandle || !edge.targetHandle) {
-        throw new BadRequestException(
-          `Edge at index ${index} is missing required handle fields (sourceHandle, targetHandle)`,
-        );
-      }
     }
   }
 

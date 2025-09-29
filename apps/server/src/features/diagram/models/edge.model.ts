@@ -9,10 +9,6 @@ export type EdgeAttributes = {
   target: string;
   sourceHandle: string;
   targetHandle: string;
-  reconnectable?: boolean;
-  deletable?: boolean;
-  selectable?: boolean;
-  selected?: boolean;
   zIndex?: number;
   createdAt: string;
   updatedAt?: string;
@@ -36,7 +32,6 @@ export const EdgeModel: ModelFactoryDefinition<EdgeAttributes, EdgeRelationships
         enum: Object.values(EdgeType),
         message: "Edge type must be a valid type",
       },
-      // Connection attributes
       source: {
         type: "string",
         required: true,
@@ -57,22 +52,6 @@ export const EdgeModel: ModelFactoryDefinition<EdgeAttributes, EdgeRelationships
         message: "Target handle must be a string",
         required: true,
       },
-      deletable: {
-        type: "boolean",
-        message: "Deletable must be a boolean value",
-        required: false,
-      },
-      selectable: {
-        type: "boolean",
-        message: "Selectable must be a boolean value",
-        required: false,
-      },
-      selected: {
-        type: "boolean",
-        message: "Selected must be a boolean value",
-        required: false,
-      },
-      // Interaction attributes
       zIndex: {
         type: "number",
         message: "Z-index must be a number",
