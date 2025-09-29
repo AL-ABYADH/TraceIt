@@ -105,6 +105,9 @@ export const createDiagramSchema = z
     projectId: projectIdFieldDoc.describe(
       "ID of the project this diagram belongs to",
     ),
+    relatedEntityId: uuidFieldDoc.describe(
+      "ID of the entity this diagram is related to",
+    ),
     name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
   })

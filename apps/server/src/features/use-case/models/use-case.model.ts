@@ -19,6 +19,7 @@ export interface UseCaseRelationships {
   requirements: RequirementAttributes[];
   includedUseCases: UseCaseAttributes[];
   extendedUseCases: UseCaseAttributes[];
+  activityDiagrams: DiagramAttributes[];
   useCaseDiagram: DiagramAttributes;
 }
 
@@ -61,6 +62,12 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         model: "self",
         direction: "out",
         name: "EXTENDS",
+        cardinality: "many",
+      },
+      activityDiagrams: {
+        model: "Diagram",
+        direction: "in",
+        name: "RELATED_TO",
         cardinality: "many",
       },
       useCaseDiagram: {

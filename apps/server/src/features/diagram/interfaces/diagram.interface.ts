@@ -2,6 +2,7 @@ import { DiagramType, EdgeType, NodeType } from "@repo/shared-schemas";
 
 export interface DiagramInterface {
   projectId: string;
+  relatedEntityId: string;
   name?: string;
   type: DiagramType;
 }

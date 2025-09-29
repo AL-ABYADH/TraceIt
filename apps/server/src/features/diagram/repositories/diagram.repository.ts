@@ -34,6 +34,12 @@ export class DiagramRepository {
         },
       });
 
+      await this.diagramModel.createDynamicRelationship(
+        diagram.id,
+        createDto.relatedEntityId,
+        "RELATED_TO",
+      );
+
       return diagram;
     } catch (error) {
       this.logger.error(`Failed to create diagram: ${error.message}`, error.stack);
