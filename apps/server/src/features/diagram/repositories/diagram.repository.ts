@@ -6,8 +6,7 @@ import { EdgeModel, EdgeModelType } from "../models/edge.model";
 import { Diagram } from "../entities/diagram.entity";
 import { Node } from "../entities/node.entity";
 import { Edge } from "../entities/edge.entity";
-import { CreateDiagramDto } from "@repo/shared-schemas";
-import { EdgeInterface, NodeInterface } from "../interfaces/diagram.interface";
+import { DiagramInterface, EdgeInterface, NodeInterface } from "../interfaces/diagram.interface";
 
 @Injectable()
 export class DiagramRepository {
@@ -25,7 +24,7 @@ export class DiagramRepository {
   /**
    * Creates a new diagram with the given data
    */
-  async createDiagram(createDto: CreateDiagramDto): Promise<Diagram> {
+  async createDiagram(createDto: DiagramInterface): Promise<Diagram> {
     try {
       const diagram = await this.diagramModel.createOne({
         name: createDto.name,
