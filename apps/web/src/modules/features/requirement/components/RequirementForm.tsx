@@ -6,7 +6,6 @@ import ErrorMessage from "@/components/ErrorMessage";
 import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import MultiSelect from "@/components/MultiSelect";
-import RequirementPreview from "./RequirementPreview";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateRequirementDto, createRequirementSchema } from "@repo/shared-schemas";
@@ -14,6 +13,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useActors } from "../../actor/hooks/useActors";
 import { useCreateRequirement } from "../hooks/useCreateRequirement";
+import RequirementPreview from "./RequirementPreview";
 
 interface RequirementFormProps {
   isOpen: boolean;

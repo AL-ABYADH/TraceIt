@@ -6,6 +6,13 @@ export enum UseCaseImportanceLevel {
   LOW = "LOW",
 }
 
+export enum UseCaseSubtype {
+  PRIMARY = "PRIMARY",
+  SECONDARY = "SECONDARY",
+}
+
+export const UseCaseSubtypeField = createEnumField(UseCaseSubtype);
+
 export const UseCaseImportanceLevelField = createEnumField(
   UseCaseImportanceLevel,
 );
