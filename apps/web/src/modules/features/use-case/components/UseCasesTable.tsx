@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { route } from "nextjs-routes";
-import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import Table, { Column } from "@/components/Table";
-import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
+import Table, { Column } from "@/components/Table";
+import { notifications } from "@mantine/notifications";
 import { UseCaseListDto } from "@repo/shared-schemas";
+import { useRouter } from "next/navigation";
+import { route } from "nextjs-routes";
+import { useEffect, useState } from "react";
 import { useDeletePrimaryUseCase } from "../hooks/useDeletePrimaryUseCase";
 import { useUseCases } from "../hooks/useUseCases";
 import UseCaseForm from "./UseCaseForm";
-import { notifications } from "@mantine/notifications";
 
 interface UseCasesTableProps {
   projectId: string;
@@ -20,6 +20,7 @@ interface UseCasesTableProps {
 
 export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editUseCase, setEditUseCase] = useState<UseCaseListDto | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUseCase, setSelectedUseCase] = useState<UseCaseListDto | null>(null);
@@ -29,7 +30,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
 
   useEffect(() => {
     if (isError && !serverError) {
-      setServerError(error?.message ?? "Failed to load use cases");
+      setServerError(error?.message ?? "Failed to load use cases. Please refresh and try again.");
     }
   }, [isError, error, serverError]);
 
@@ -40,19 +41,26 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         message: `Use Case deleted successfully`,
         color: "green",
       });
-      setConfirmOpen(false);
-      setSelectedUseCase(null);
+      resetDeleteState();
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message ?? err?.message ?? "Failed to delete use case";
+      const msg =
+        err?.response?.data?.message ??
+        err?.message ??
+        "Failed to delete use case. Please try again.";
       setServerError(msg);
-      setConfirmOpen(false);
-      setSelectedUseCase(null);
+      resetDeleteState();
     },
   });
 
+  const resetDeleteState = () => {
+    setConfirmOpen(false);
+    setSelectedUseCase(null);
+  };
+
   const handleEdit = (useCase: UseCaseListDto) => {
-    setServerError(`Edit functionality for "${useCase.name}" not implemented yet`);
+    setEditUseCase(useCase);
+    setIsFormOpen(true);
   };
 
   const requestDelete = (useCase: UseCaseListDto) => {
@@ -64,8 +72,14 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
     {
       key: "name",
       title: "Use Case Name",
-      width: "90%",
+      width: "60%",
       render: (_, useCase) => <span>{useCase.name}</span>,
+    },
+    {
+      key: "subtype",
+      title: "Type",
+      width: "20%",
+      render: (_, useCase) => <h2>{useCase.subtype}</h2>,
     },
     {
       key: "id",
@@ -110,23 +124,38 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         <Button onClick={() => setIsFormOpen(true)}>Add Use Case</Button>
       </div>
 
-      <Table
-        columns={columns}
-        data={data || []}
-        onRowClick={(useCase) =>
-          router.push(
-            route({
-              pathname: "/projects/[project-id]/use-cases/[use-case-id]/details",
-              query: {
-                "project-id": projectId,
-                "use-case-id": useCase.id,
-              },
-            }),
-          )
-        }
-      />
+      {data?.length ? (
+        <Table
+          columns={columns}
+          data={data}
+          onRowClick={(useCase) =>
+            router.push(
+              route({
+                pathname: "/projects/[project-id]/use-cases/[use-case-id]/details",
+                query: {
+                  "project-id": projectId,
+                  "use-case-id": useCase.id,
+                },
+              }),
+            )
+          }
+        />
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          No use cases found. Click <strong>Add Use Case</strong> to create one.
+        </p>
+      )}
 
-      <UseCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
+      <UseCaseForm
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditUseCase(null);
+        }}
+        projectId={projectId}
+        mode={editUseCase ? "edit" : "create"}
+        useCaseId={editUseCase?.id ?? undefined}
+      />
 
       <ConfirmationDialog
         isOpen={confirmOpen}
@@ -136,10 +165,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         cancelText="Cancel"
         confirmVariant="danger"
         onConfirm={() => deleteMutation.mutate()}
-        onCancel={() => {
-          setConfirmOpen(false);
-          setSelectedUseCase(null);
-        }}
+        onCancel={resetDeleteState}
         loading={deleteMutation.isPending}
       />
     </div>

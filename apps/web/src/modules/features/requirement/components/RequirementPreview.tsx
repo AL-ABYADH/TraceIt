@@ -30,7 +30,7 @@ export default function RequirementPreview({ operation, condition }: Requirement
   return (
     <div className="p-4 rounded-lg bg-card border border-border mt-4">
       <h4 className="font-medium text-foreground mb-2">Preview</h4>
-      <p className="text-sm text-foreground leading-relaxed">
+      <p className="text-sm text-foreground leading-relaxed mb-2">
         {formatRequirementText(fakeRequirement as RequirementListDto)}
       </p>
     </div>
