@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { route } from "nextjs-routes";
+import { useRouter } from "next/navigation";
 import Button from "@/components/Button";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import Table, { Column } from "@/components/Table";
@@ -22,6 +24,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [selectedUseCase, setSelectedUseCase] = useState<UseCaseListDto | null>(null);
 
+  const router = useRouter();
   const { data, isError, isLoading, error } = useUseCases(projectId);
 
   useEffect(() => {
@@ -71,14 +74,20 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
       render: (_, useCase) => (
         <div className="flex items-center gap-2">
           <button
-            onClick={() => handleEdit(useCase)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(useCase);
+            }}
             className="text-primary hover:text-primary-hover text-sm transition-colors"
           >
             Edit
           </button>
           <span className="text-muted-foreground">|</span>
           <button
-            onClick={() => requestDelete(useCase)}
+            onClick={(e) => {
+              e.stopPropagation();
+              requestDelete(useCase);
+            }}
             className="text-destructive hover:text-destructive/80 text-sm transition-colors"
           >
             Delete
@@ -89,7 +98,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   ];
 
   if (isLoading) {
-    return <Loading isOpen={isLoading} message="Loading use cases..." mode="fullscreen" />;
+    return <Loading isOpen={isLoading} message="Loading use cases..." mode="dialog" />;
   }
 
   return (
@@ -101,7 +110,21 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         <Button onClick={() => setIsFormOpen(true)}>Add Use Case</Button>
       </div>
 
-      <Table columns={columns} data={data || []} />
+      <Table
+        columns={columns}
+        data={data || []}
+        onRowClick={(useCase) =>
+          router.push(
+            route({
+              pathname: "/projects/[project-id]/use-cases/[use-case-id]/details",
+              query: {
+                "project-id": projectId,
+                "use-case-id": useCase.id,
+              },
+            }),
+          )
+        }
+      />
 
       <UseCaseForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
 

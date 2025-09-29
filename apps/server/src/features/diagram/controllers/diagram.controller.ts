@@ -5,6 +5,7 @@ import { zodBody, zodParam, zodQuery } from "src/common/pipes/zod";
 import {
   type CreateDiagramDto,
   createDiagramSchema,
+  DiagramDto,
   type DiagramIdDto,
   diagramIdSchema,
   type ProjectIdDto,
@@ -28,7 +29,7 @@ export class DiagramController {
   async listByProject(
     @Query(zodQuery(projectIdSchema)) projectId: ProjectIdDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
-  ): Promise<Diagram[]> {
+  ): Promise<DiagramDto[]> {
     return this.diagramService.listByProject(projectId.projectId, type?.type);
   }
 
@@ -41,7 +42,7 @@ export class DiagramController {
   async update(
     @Param(zodParam(diagramIdSchema)) params: DiagramIdDto,
     @Body(zodBody(updateDiagramSchema)) updateDto: UpdateDiagramDto,
-  ): Promise<Diagram> {
+  ): Promise<DiagramDto> {
     return this.diagramService.update(params.diagramId, updateDto);
   }
 

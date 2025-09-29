@@ -7,6 +7,10 @@ import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { RequirementService } from "../../../requirement/services/requirement.service";
 
+/**
+ * Service for managing secondary use cases, including their relationships
+ * with primary use cases, requirements, and projects
+ */
 @Injectable()
 export class SecondaryUseCaseService {
   constructor(
@@ -16,30 +20,36 @@ export class SecondaryUseCaseService {
     private readonly requirementService: RequirementService,
   ) {}
 
+  //====================================
+  // Creation and Modification
+  //====================================
+
   /**
-   * Creates a new secondary use case
+   * Creates a new secondary use case and transfers nested requirements
    * @param createDto - Data transfer object containing secondary use case details
-   * @returns Promise resolving to the created secondary use case
-   * @throws BadRequestException if project or primary use case don't exist
+   * @returns Created secondary use case
+   * @throws BadRequestException if validations fail
    */
   async create(createDto: CreateSecondaryUseCaseInterface): Promise<SecondaryUseCase> {
     try {
-      // التحقق من وجود المشروع وحالة الاستخدام الأساسية
+      // Verify project and primary use case exist
       await this.projectService.findById(createDto.projectId);
       await this.primaryUseCaseService.findById(createDto.primaryUseCaseId);
 
-      // التحقق من وجود المتطلب
+      // Verify requirement exists
       const requirement = await this.requirementService.findById(createDto.requirementId);
 
-      // التحقق من أن المتطلب لديه متطلبات متداخلة
+      // Verify requirement has nested requirements
       if (!requirement.nestedRequirements || requirement.nestedRequirements.length === 0) {
         throw new BadRequestException(
-          `لا يمكن إنشاء حالة استخدام ثانوية للمتطلب رقم ${createDto.requirementId} لأنه لا يحتوي على متطلبات متداخلة.`,
+          `Cannot create a secondary use case for requirement ${createDto.requirementId} as it has no nested requirements.`,
         );
       }
 
-      // إنشاء حالة الاستخدام الثانوية
+      // Create the secondary use case
       const useCase = await this.secondaryUseCaseRepository.create(createDto);
+
+      // Transfer nested requirements to the secondary use case
       await this.requirementService.transferNestedRequirementsToSecondaryUseCase(
         requirement.id,
         createDto.primaryUseCaseId,
@@ -59,9 +69,8 @@ export class SecondaryUseCaseService {
    * Updates an existing secondary use case
    * @param id - ID of the secondary use case to update
    * @param updateDto - Data to update in the secondary use case
-   * @returns Promise resolving to the updated secondary use case
+   * @returns Updated secondary use case
    * @throws NotFoundException if the secondary use case doesn't exist
-   * @throws BadRequestException if the referenced primary use case doesn't exist
    */
   async update(id: string, updateDto: UpdateSecondaryUseCaseInterface): Promise<SecondaryUseCase> {
     // Verify secondary use case exists
@@ -85,10 +94,49 @@ export class SecondaryUseCaseService {
   }
 
   /**
+   * Changes the primary use case association for a secondary use case
+   * @param id - ID of the secondary use case to update
+   * @param primaryUseCaseId - ID of the new primary use case
+   * @returns Updated secondary use case
+   */
+  async changePrimaryUseCase(id: string, primaryUseCaseId: string): Promise<SecondaryUseCase> {
+    // Verify secondary use case exists
+    await this.findById(id);
+
+    // Verify primary use case exists
+    try {
+      await this.primaryUseCaseService.findById(primaryUseCaseId);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new BadRequestException(`Primary use case with ID ${primaryUseCaseId} not found`);
+      }
+      throw error;
+    }
+
+    return this.secondaryUseCaseRepository.update(id, { primaryUseCaseId });
+  }
+
+  /**
+   * Removes a secondary use case
+   * @param id - ID of the secondary use case to remove
+   * @returns Boolean indicating success
+   */
+  async remove(id: string): Promise<boolean> {
+    // Verify secondary use case exists
+    await this.findById(id);
+
+    return this.secondaryUseCaseRepository.delete(id);
+  }
+
+  //====================================
+  // Retrieval Methods
+  //====================================
+
+  /**
    * Retrieves a secondary use case by its ID
-   * @param id - ID of the secondary use case to findById
-   * @returns Promise resolving to the secondary use case
-   * @throws NotFoundException if the secondary use case doesn't exist
+   * @param id - ID of the secondary use case to retrieve
+   * @returns Secondary use case
+   * @throws NotFoundException if not found
    */
   async findById(id: string): Promise<SecondaryUseCase> {
     const useCase = await this.secondaryUseCaseRepository.getById(id);
@@ -100,7 +148,7 @@ export class SecondaryUseCaseService {
 
   /**
    * Retrieves all secondary use cases
-   * @returns Promise resolving to an array of secondary use cases
+   * @returns Array of all secondary use cases
    */
   async findAll(): Promise<SecondaryUseCase[]> {
     return this.secondaryUseCaseRepository.getAll();
@@ -109,8 +157,7 @@ export class SecondaryUseCaseService {
   /**
    * Retrieves all secondary use cases for a specific project
    * @param projectId - ID of the project
-   * @returns Promise resolving to an array of secondary use cases
-   * @throws BadRequestException if the project doesn't exist
+   * @returns Array of secondary use cases in the project
    */
   async listByProject(projectId: string): Promise<SecondaryUseCase[]> {
     try {
@@ -130,8 +177,7 @@ export class SecondaryUseCaseService {
   /**
    * Retrieves all secondary use cases for a specific primary use case
    * @param primaryUseCaseId - ID of the primary use case
-   * @returns Promise resolving to an array of secondary use cases
-   * @throws BadRequestException if the primary use case doesn't exist
+   * @returns Array of secondary use cases related to the primary use case
    */
   async listByPrimaryUseCase(primaryUseCaseId: string): Promise<SecondaryUseCase[]> {
     try {
@@ -149,43 +195,5 @@ export class SecondaryUseCaseService {
       }
       throw error;
     }
-  }
-
-  /**
-   * Removes a secondary use case
-   * @param id - ID of the secondary use case to remove
-   * @returns Promise resolving to a boolean indicating success
-   * @throws NotFoundException if the secondary use case doesn't exist
-   */
-  async remove(id: string): Promise<boolean> {
-    // Verify secondary use case exists
-    await this.findById(id);
-
-    return this.secondaryUseCaseRepository.delete(id);
-  }
-
-  /**
-   * Changes the primary use case association for a secondary use case
-   * @param id - ID of the secondary use case to update
-   * @param primaryUseCaseId - ID of the new primary use case
-   * @returns Promise resolving to the updated secondary use case
-   * @throws NotFoundException if the secondary use case doesn't exist
-   * @throws BadRequestException if the primary use case doesn't exist
-   */
-  async changePrimaryUseCase(id: string, primaryUseCaseId: string): Promise<SecondaryUseCase> {
-    // Verify secondary use case exists
-    await this.findById(id);
-
-    // Verify primary use case exists
-    try {
-      await this.primaryUseCaseService.findById(primaryUseCaseId);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new BadRequestException(`Primary use case with ID ${primaryUseCaseId} not found`);
-      }
-      throw error;
-    }
-
-    return this.secondaryUseCaseRepository.update(id, { primaryUseCaseId });
   }
 }

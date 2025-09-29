@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { RequirementModel, RequirementModelType } from "../models/requirement.model";
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { Op } from "@repo/custom-neogma";
+import { Neo4jService } from "../../../core/neo4j/neo4j.service";
 
+/**
+ * Repository for managing requirement entities in Neo4j database
+ * Handles CRUD operations and relationship management for requirements
+ */
 @Injectable()
 export class RequirementRepository {
   private requirementModel: RequirementModelType;
@@ -14,6 +18,15 @@ export class RequirementRepository {
     this.requirementModel = RequirementModel(this.neo4jService.getNeogma());
   }
 
+  //====================================
+  // CRUD Operations
+  //====================================
+
+  /**
+   * Creates a new requirement
+   * @param createDto - Data for creating the requirement
+   * @returns Newly created requirement
+   */
   async create(createDto: CreateRequirementInterface): Promise<Requirement> {
     try {
       const requirement = await this.requirementModel.createOne({
@@ -33,6 +46,12 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Updates an existing requirement
+   * @param id - ID of the requirement to update
+   * @param updateDto - Data for updating the requirement
+   * @returns Updated requirement with relationships
+   */
   async update(id: string, updateDto: UpdateRequirementInterface): Promise<Requirement> {
     try {
       const updateData: Record<string, any> = {};
@@ -49,6 +68,7 @@ export class RequirementRepository {
         where: { id },
       });
 
+      // Update actor relationships if provided
       if (updateDto.actorIds !== undefined) {
         await this.requirementModel.deleteRelationships({
           alias: "actors",
@@ -87,6 +107,11 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Deletes a requirement
+   * @param id - ID of the requirement to delete
+   * @returns True if deletion was successful
+   */
   async delete(id: string): Promise<boolean> {
     try {
       const result = await this.requirementModel.delete({
@@ -100,11 +125,16 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Retrieves a requirement by its ID with all relationships
+   * @param id - ID of the requirement to retrieve
+   * @returns Requirement with relationships or null if not found
+   */
   async getById(id: string): Promise<Requirement | null> {
     try {
       const requirement = await this.requirementModel.findOneWithRelations({
         where: { id },
-        include: ["useCase", "actors", "nestedRequirements", "exceptions"],
+        include: ["useCase", "actors", "nestedRequirements", "exceptions", "exceptionRequirement"],
       });
 
       return requirement ?? null;
@@ -113,19 +143,58 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Retrieves all requirements associated with a specific use case
+   * without duplicating requirements that appear as nested requirements
+   * @param useCaseId - ID of the use case to fetch requirements for
+   * @returns Array of requirements with their relationships, without duplication
+   */
   async getByUseCase(useCaseId: string): Promise<Requirement[]> {
     try {
+      // Find all requirements related to the use case with their relationships
       const requirements = await this.requirementModel.findByRelatedEntity({
         whereRelated: { id: useCaseId },
         relationshipAlias: "useCase",
+        include: ["nestedRequirements", "actors", "exceptions", "exceptionRequirement"],
       });
 
-      return requirements;
+      if (!requirements.length) {
+        return [];
+      }
+
+      // Step 1: Collect all IDs that appear as nested requirements
+      const nestedRequirementIds = new Set<string>();
+      requirements.forEach((req, index) => {
+        if (req.nestedRequirements && req.nestedRequirements.length) {
+          req.nestedRequirements.forEach((nested) => {
+            nestedRequirementIds.add(nested.id);
+          });
+        }
+        if (req.exceptionRequirement) {
+          nestedRequirementIds.add(req.id);
+          requirements.splice(index, 1);
+        }
+      });
+
+      // Step 2: Filter out requirements that appear as nested requirements of other requirements
+      const filteredRequirements = requirements.filter((req) => !nestedRequirementIds.has(req.id));
+
+      return filteredRequirements;
     } catch (error) {
       throw new Error(`Failed to retrieve requirements for use case: ${error.message}`);
     }
   }
 
+  //====================================
+  // Relationship Management
+  //====================================
+
+  /**
+   * Adds a nested requirement relationship
+   * @param parentId - ID of the parent requirement
+   * @param childId - ID of the child requirement to nest
+   * @returns Updated parent requirement
+   */
   async addNestedRequirement(parentId: string, childId: string): Promise<Requirement> {
     try {
       await this.requirementModel.relateTo({
@@ -147,6 +216,12 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Removes a nested requirement relationship
+   * @param parentId - ID of the parent requirement
+   * @param childId - ID of the child requirement to remove
+   * @returns True if removal was successful
+   */
   async removeNestedRequirement(parentId: string, childId: string): Promise<boolean> {
     try {
       const result = await this.requirementModel.deleteRelationships({
@@ -163,6 +238,12 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Adds an exception relationship
+   * @param requirementId - ID of the requirement
+   * @param exceptionId - ID of the exception to add
+   * @returns Updated requirement
+   */
   async addException(requirementId: string, exceptionId: string): Promise<Requirement> {
     try {
       await this.requirementModel.relateTo({
@@ -184,6 +265,12 @@ export class RequirementRepository {
     }
   }
 
+  /**
+   * Removes an exception relationship
+   * @param requirementId - ID of the requirement
+   * @param exceptionId - ID of the exception to remove
+   * @returns True if removal was successful
+   */
   async removeException(requirementId: string, exceptionId: string): Promise<boolean> {
     try {
       const result = await this.requirementModel.deleteRelationships({
@@ -199,8 +286,13 @@ export class RequirementRepository {
       throw new Error(`Failed to remove exception: ${error.message}`);
     }
   }
+
   /**
-   * تغيير ارتباط المتطلب من حالة استخدام إلى أخرى
+   * Changes the use case association for a requirement
+   * @param requirementId - ID of the requirement to move
+   * @param fromUseCaseId - ID of the current use case
+   * @param toUseCaseId - ID of the target use case
+   * @returns True if the change was successful
    */
   async changeUseCase(
     requirementId: string,
@@ -208,7 +300,7 @@ export class RequirementRepository {
     toUseCaseId: string,
   ): Promise<boolean> {
     try {
-      // حذف العلاقة مع حالة الاستخدام الأساسية
+      // Remove relationship with the original use case
       await this.requirementModel.deleteRelationships({
         alias: "useCase",
         where: {
@@ -217,7 +309,7 @@ export class RequirementRepository {
         },
       });
 
-      // إنشاء علاقة مع حالة الاستخدام الثانوية
+      // Create relationship with the new use case
       await this.requirementModel.relateTo({
         alias: "useCase",
         where: {
@@ -228,7 +320,7 @@ export class RequirementRepository {
 
       return true;
     } catch (error) {
-      throw new Error(`فشل في نقل المتطلب إلى حالة الاستخدام الجديدة: ${error.message}`);
+      throw new Error(`Failed to transfer requirement to new use case: ${error.message}`);
     }
   }
 }

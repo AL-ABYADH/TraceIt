@@ -6,7 +6,7 @@ import { NodeAttributes } from "./node.model";
 
 export type DiagramAttributes = {
   id: string;
-  name: string;
+  name?: string;
   type: DiagramType;
   createdAt: string;
   updatedAt?: string;
@@ -27,7 +27,7 @@ export const DiagramModel: ModelFactoryDefinition<DiagramAttributes, DiagramRela
     schema: {
       name: {
         type: "string",
-        required: true,
+        required: false,
         minLength: 1,
         maxLength: 100,
         allowEmpty: false,
@@ -50,13 +50,13 @@ export const DiagramModel: ModelFactoryDefinition<DiagramAttributes, DiagramRela
       nodes: {
         model: "Node",
         direction: "in",
-        name: "HAS_NODES",
+        name: "PART_OF",
         cardinality: "many",
       },
       edges: {
         model: "Edge",
         direction: "in",
-        name: "HAS_EDGES",
+        name: "PART_OF",
         cardinality: "many",
       },
     },

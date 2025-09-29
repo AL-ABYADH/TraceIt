@@ -12,7 +12,12 @@ export const dateField = z.string();
 export const dateISOField = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
-export const uuidField = z.string().uuid({ message: "Invalid UUID format" });
+export const uuidField = z
+  .string()
+  .uuid({ message: "Invalid UUID format" })
+  .regex(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+  );
 export const emailField = z
   .string()
   .email({ message: "Invalid email format" })

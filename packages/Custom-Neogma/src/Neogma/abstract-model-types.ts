@@ -119,7 +119,10 @@ interface NeogmaModelStaticsI<
   beforeDelete: (instance: Instance) => void;
   checkIsTraceability: () => boolean;
   skipNeedUpdateOrSkipNeedDelete: (project_Id: string) => Promise<void>;
-
+  deleteDynamicRelationship: (firstID: string, socndID: string) => Promise<boolean>;
+  makeRelationship: (sourceID: string, targetID: string) => Promise<any>;
+  getProject: (id: string) => void;
+  getNeogma: any;
   getRelationshipByAlias: <Alias extends keyof RelatedNodesToAssociateI>(
     alias: Alias,
   ) => Pick<RelatedNodesToAssociateI[Alias], "name" | "direction" | "model">;

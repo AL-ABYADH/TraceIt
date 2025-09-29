@@ -1,34 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PrimaryUseCaseListDto } from "@repo/shared-schemas";
-import { ChevronRightIcon, ChevronDownIcon, PlusIcon } from "lucide-react";
+import { ChevronRightIcon, ChevronDownIcon } from "lucide-react";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import RequirementItem from "../../requirement/components/RequirementItem";
 import RequirementForm from "../../requirement/components/RequirementForm";
-import Button from "@/components/Button";
+import EllipsisMenu from "@/components/EllipsisMenu";
 
 interface UseCaseItemProps {
   useCase: PrimaryUseCaseListDto;
   projectId: string;
-  onAddSubRequirement?: (requirementId: string) => void;
+  number: number; // ✅ New
 }
 
-export default function UseCaseItem({ useCase, projectId, onAddSubRequirement }: UseCaseItemProps) {
+export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRequirementFormOpen, setIsRequirementFormOpen] = useState(false);
 
   const { data: requirements = [], isLoading, isError } = useUseCasesRequirements(useCase.id);
 
   const toggleExpanded = () => setIsExpanded(!isExpanded);
+  const handleAddRequirement = () => setIsRequirementFormOpen(true);
+  const handleCloseRequirementForm = () => setIsRequirementFormOpen(false);
 
-  const handleAddRequirement = () => {
-    setIsRequirementFormOpen(true);
-  };
-
-  const handleCloseRequirementForm = () => {
-    setIsRequirementFormOpen(false);
-  };
+  const sortedRequirements = [...requirements].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
 
   return (
     <div className="border border-border rounded-lg bg-surface/50">
@@ -43,18 +41,24 @@ export default function UseCaseItem({ useCase, projectId, onAddSubRequirement }:
             )}
           </button>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-medium text-muted-foreground bg-surface px-2 py-1 rounded">
+              {number}.
+            </span>
             <h3 className="font-medium text-foreground truncate">{useCase.name}</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              UC-{useCase.id.slice(-3).toUpperCase()}
-            </p>
           </div>
         </div>
 
-        <Button variant="ghost" size="sm" onClick={handleAddRequirement} className="text-xs">
-          <PlusIcon className="w-3 h-3 mr-1" />
-          Add Requirement
-        </Button>
+        {/* Ellipsis Menu for actions */}
+        <EllipsisMenu
+          actions={[
+            {
+              label: "Add Requirement",
+              onClick: handleAddRequirement,
+            },
+          ]}
+          className="text-xs"
+        />
       </div>
 
       {/* Requirements List */}
@@ -64,18 +68,18 @@ export default function UseCaseItem({ useCase, projectId, onAddSubRequirement }:
             <div className="p-4 text-center text-muted-foreground">Loading requirements...</div>
           ) : isError ? (
             <div className="p-4 text-center text-destructive">Error loading requirements</div>
-          ) : requirements.length === 0 ? (
+          ) : sortedRequirements.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">
-              No requirements yet. Click "Add Requirement" to create one.
+              No requirements yet. Use the menu to add one.
             </div>
           ) : (
             <div className="divide-y divide-border/30">
-              {requirements.map((requirement) => (
+              {sortedRequirements.map((requirement, index) => (
                 <RequirementItem
                   key={requirement.id}
                   requirement={requirement}
                   level={0}
-                  onAddSubRequirement={onAddSubRequirement}
+                  number={index + 1}
                 />
               ))}
             </div>
@@ -83,7 +87,6 @@ export default function UseCaseItem({ useCase, projectId, onAddSubRequirement }:
         </div>
       )}
 
-      {/* Requirement Form for this Use Case */}
       <RequirementForm
         isOpen={isRequirementFormOpen}
         onClose={handleCloseRequirementForm}

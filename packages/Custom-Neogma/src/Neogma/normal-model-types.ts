@@ -8,6 +8,7 @@ import {
   WhereParamsI,
 } from "neogma";
 import { QueryResult } from "neo4j-driver";
+import { DynamicRelation } from "../types";
 
 type AnyObject = Record<string, any>;
 /** the type of the properties to be added to a relationship */
@@ -110,6 +111,10 @@ interface NeogmaModelStaticsI<
     MethodsI
   >,
 > {
+  createDynamicRelationship: (sourceId: string, targetId: string) => Promise<any>;
+  findRootProject: (nodeId: string) => Promise<any>;
+  deleteDynamicRelationship: (firstID: string, socndID: string) => Promise<boolean>;
+  getNeogma: any;
   skipNeedUpdateOrSkipNeedDelete: (project_Id: string) => Promise<void>;
   checkIsTraceability: () => boolean;
   prototype: MethodsI;
@@ -272,6 +277,7 @@ interface NeogmaModelStaticsI<
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
       direction?: "out" | "in" | "none";
+      dynamicRelations?: DynamicRelation[]; // Add this parameter
     },
   ) => Promise<(Properties & RelatedNodesToAssociateI) | null>;
 
@@ -291,6 +297,7 @@ interface NeogmaModelStaticsI<
       exclude?: Array<keyof RelatedNodesToAssociateI>;
       limits?: Record<string, number>;
       direction?: "out" | "in" | "none";
+      dynamicRelations?: DynamicRelation[]; // Add this parameter
     },
   ) => Promise<Array<Properties & RelatedNodesToAssociateI>>;
 
