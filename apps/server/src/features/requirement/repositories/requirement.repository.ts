@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { RequirementModel, RequirementModelType } from "../models/requirement.model";
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { Op } from "@repo/custom-neogma";
+import { Neo4jService } from "../../../core/neo4j/neo4j.service";
 
 /**
  * Repository for managing requirement entities in Neo4j database

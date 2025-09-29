@@ -9,25 +9,39 @@ import Button from "@/components/Button";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
 import { useProjects } from "@/modules/features/project/hooks/useProjects";
+import { useCreateProject } from "@/modules/features/project/hooks/useCreateProject";
 import { CreateProjectDto } from "@repo/shared-schemas";
 
 export default function Projects() {
   const [showForm, setShowForm] = useState(false);
-  const { data, isLoading, isError, error, refetch } = useProjects();
+  const { data, isLoading, isError, error } = useProjects();
 
-  const handleCreateProjectClick = () => setShowForm(true);
-  const handleCloseForm = () => setShowForm(false);
+  const createProject = useCreateProject({
+    onSuccess: (_data, variables) => {
+      notifications.show({
+        title: "Created",
+        message: `Project "${variables.name}" created successfully!`,
+        color: "green",
+        autoClose: 3000,
+      });
+      setShowForm(false);
+    },
+    onError: (err) => {
+      const msg =
+        (err as any)?.response?.data?.message ??
+        (err as any)?.message ??
+        "Failed to create project";
+      notifications.show({
+        title: "Error",
+        message: msg,
+        color: "red",
+        autoClose: 5000,
+      });
+    },
+  });
 
-  const handleProjectCreate = (project: CreateProjectDto) => {
-    notifications.show({
-      title: "Created",
-      message: "Project created successfully!",
-      color: "green",
-      autoClose: 3000,
-    });
-
-    setShowForm(false);
-    refetch();
+  const handleCreate = (project: CreateProjectDto) => {
+    createProject.mutate(project);
   };
 
   if (isLoading) {
@@ -51,7 +65,7 @@ export default function Projects() {
             <h2 className="text-xl font-semibold text-foreground">Recent Projects</h2>
           </div>
 
-          <Button onClick={handleCreateProjectClick}>New Project</Button>
+          <Button onClick={() => setShowForm(true)}>New Project</Button>
         </div>
 
         {data && data.length > 0 ? (
@@ -63,16 +77,17 @@ export default function Projects() {
         ) : (
           <div className="text-center py-12">
             <div className="text-muted-foreground mb-4">No projects found</div>
-            <Button onClick={handleCreateProjectClick}>Create your first project</Button>
+            <Button onClick={() => setShowForm(true)}>Create your first project</Button>
           </div>
         )}
       </div>
 
       <ProjectForm
         isOpen={showForm}
-        onClose={handleCloseForm}
+        onClose={() => setShowForm(false)}
         mode="create"
-        onSubmitCreate={handleProjectCreate}
+        onSubmitCreate={handleCreate}
+        isPending={createProject.isPending}
       />
     </div>
   );
