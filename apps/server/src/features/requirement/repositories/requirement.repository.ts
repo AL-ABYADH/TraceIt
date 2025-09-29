@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { RequirementModel, RequirementModelType } from "../models/requirement.model";
+import { Op } from "@repo/custom-neogma";
+import { Neo4jService } from "../../../core/neo4j/neo4j.service";
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
-import { Op } from "@repo/custom-neogma";
-import { Neo4jService } from "../../../core/neo4j/neo4j.service";
+import { RequirementModel, RequirementModelType } from "../models/requirement.model";
 
 /**
  * Repository for managing requirement entities in Neo4j database
@@ -151,37 +151,49 @@ export class RequirementRepository {
    */
   async getByUseCase(useCaseId: string): Promise<Requirement[]> {
     try {
-      // Find all requirements related to the use case with their relationships
+      // fetch all requirements with relations
       const requirements = await this.requirementModel.findByRelatedEntity({
         whereRelated: { id: useCaseId },
         relationshipAlias: "useCase",
         include: ["nestedRequirements", "actors", "exceptions", "exceptionRequirement"],
       });
 
-      if (!requirements.length) {
+      console.log("Fetched requirements:", requirements.length);
+
+      if (!requirements || requirements.length === 0) {
         return [];
       }
 
-      // Step 1: Collect all IDs that appear as nested requirements
-      const nestedRequirementIds = new Set<string>();
-      requirements.forEach((req, index) => {
-        if (req.nestedRequirements && req.nestedRequirements.length) {
-          req.nestedRequirements.forEach((nested) => {
-            nestedRequirementIds.add(nested.id);
-          });
-        }
-        if (req.exceptionRequirement) {
-          nestedRequirementIds.add(req.id);
-          requirements.splice(index, 1);
-        }
-      });
+      // Collect IDs of all nested/exception requirements (children we want to exclude)
+      const childIds = new Set<string>();
 
-      // Step 2: Filter out requirements that appear as nested requirements of other requirements
-      const filteredRequirements = requirements.filter((req) => !nestedRequirementIds.has(req.id));
+      for (const req of requirements) {
+        // nestedRequirements: array of requirement objects
+        if (Array.isArray(req.nestedRequirements) && req.nestedRequirements.length > 0) {
+          for (const nested of req.nestedRequirements) {
+            if (nested && nested.id) childIds.add(nested.id);
+          }
+        }
+
+        // exceptionRequirement: can be an array
+        const exc = req.exceptionRequirement;
+        if (Array.isArray(exc) && exc.length > 0) {
+          for (const e of exc) {
+            if (e && e.id) childIds.add(e.id);
+          }
+        } else if (exc && "id" in exc && typeof exc.id === "string" && exc.id) {
+          childIds.add(exc.id);
+        }
+      }
+
+      // Return only requirements whose id is NOT a nested/exception id
+      const filteredRequirements = requirements.filter((req) => !childIds.has(req.id));
 
       return filteredRequirements;
-    } catch (error) {
-      throw new Error(`Failed to retrieve requirements for use case: ${error.message}`);
+    } catch (error: any) {
+      throw new Error(
+        `Failed to retrieve requirements for use case: ${error?.message ?? String(error)}`,
+      );
     }
   }
 
