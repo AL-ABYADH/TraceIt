@@ -1,12 +1,14 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseAttributes, UseCaseModel, UseCaseRelationships } from "./use-case.model";
 import { ActorAttributes } from "../../actor/models/actor.model";
+import { UseCaseImportanceLevel } from "../enums/use-case-importance-level.enum";
 import { SecondaryUseCaseAttributes } from "./secondary-use-case.model";
+import { UseCaseAttributes, UseCaseModel, UseCaseRelationships } from "./use-case.model";
 
 /**
  * Attributes for the PrimaryUseCase entity, extending the base UseCase attributes.
  */
 export type PrimaryUseCaseAttributes = UseCaseAttributes & {
+  importanceLevel: UseCaseImportanceLevel;
   description?: string;
 };
 
@@ -41,6 +43,7 @@ export const PrimaryUseCaseModel: ModelFactoryDefinition<
   schema: {
     ...UseCaseModel.parameters.schema,
     description: { type: "string", required: false },
+    importanceLevel: UseCaseImportanceLevel,
   },
   relationships: {
     ...UseCaseModel.parameters.relationships,

@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { UseCaseSubtype } from "@repo/shared-schemas";
+import { Neo4jService } from "src/core/neo4j/neo4j.service";
+import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
+import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import {
   SecondaryUseCaseModel,
   SecondaryUseCaseModelType,
 } from "../../models/secondary-use-case.model";
-import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
-import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
-import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 
 @Injectable()
 export class SecondaryUseCaseRepository {
@@ -28,6 +29,7 @@ export class SecondaryUseCaseRepository {
       requirements: {
         where: [{ params: { id: createDto.requirementId } }],
       },
+      subtype: UseCaseSubtype.SECONDARY,
     });
     return useCase;
   }

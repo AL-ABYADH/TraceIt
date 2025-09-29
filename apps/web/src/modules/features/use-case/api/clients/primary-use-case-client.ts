@@ -1,11 +1,11 @@
 import { http } from "@/services/api/http";
-import { primaryUseCaseEndpoints } from "../use-case-endpoints";
 import {
   CreatePrimaryUseCaseDto,
-  UpdatePrimaryUseCaseDto,
   PrimaryUseCaseDetailDto,
   PrimaryUseCaseListDto,
+  UpdatePrimaryUseCaseDto,
 } from "@repo/shared-schemas";
+import { primaryUseCaseEndpoints } from "../use-case-endpoints";
 
 async function listPrimaryUseCases(projectId: string): Promise<PrimaryUseCaseListDto[]> {
   return http.get(primaryUseCaseEndpoints.list, { params: { projectId } });
@@ -15,6 +15,10 @@ async function createPrimaryUseCase(
   useCase: CreatePrimaryUseCaseDto,
 ): Promise<PrimaryUseCaseDetailDto> {
   return http.post(primaryUseCaseEndpoints.list, { body: useCase });
+}
+
+async function getPrimaryUseCase(id: string): Promise<PrimaryUseCaseDetailDto> {
+  return http.get(primaryUseCaseEndpoints.detail, { pathParams: { id } });
 }
 
 async function updatePrimaryUseCase(
@@ -33,4 +37,5 @@ export const primaryUseCaseClient = {
   updatePrimaryUseCase,
   removePrimaryUseCase,
   listPrimaryUseCases,
+  getPrimaryUseCase,
 };
