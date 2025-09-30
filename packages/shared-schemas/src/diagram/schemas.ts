@@ -6,24 +6,33 @@ import {
   handleFieldDoc,
   nodeIdFieldDoc,
   NodeTypeFieldDoc,
-  positionFieldDoc,
   useCaseDiagramIdDoc,
   zIndexFieldDoc,
 } from "./openapi-fields";
 import {
   atLeastOneOfSchema,
-  booleanFieldDoc,
   dateISOFieldDoc,
   nameFieldDoc,
   projectIdFieldDoc,
   uuidFieldDoc,
-} from "../common"; // Assuming you have project schema
+} from "../common";
+
+// ----------------------
+// Misc
+// ----------------------
+
+export const positionSchema = z
+  .object({
+    x: z.number().finite(),
+    y: z.number().finite(),
+  })
+  .openapi({ title: "PositionDto" });
 
 // ----------------------
 // Base Entity Schemas (Attributes Only)
 // ----------------------
 
-export const diagramSchema = z
+export const diagramListSchema = z
   .object({
     id: uuidFieldDoc,
     name: nameFieldDoc.optional(),
@@ -31,41 +40,47 @@ export const diagramSchema = z
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })
-  .openapi({ title: "DiagramAttributes" });
+  .openapi({ title: "DiagramListDto" });
 
-export const nodeSchema = z
-  .object({
-    id: uuidFieldDoc,
-    type: NodeTypeFieldDoc,
-    position: z
-      .object({
-        x: positionFieldDoc,
-        y: positionFieldDoc,
-      })
-      .transform(({ x, y }) => ({ x, y })),
-    width: dimensionFieldDoc,
-    height: dimensionFieldDoc,
-    draggable: booleanFieldDoc.optional().default(true),
-    connectable: booleanFieldDoc.optional().default(true),
-    selectable: booleanFieldDoc.optional().default(true),
-    deletable: booleanFieldDoc.optional().default(true),
-    dragging: booleanFieldDoc.optional().default(false),
-    selected: booleanFieldDoc.optional().default(false),
-    zIndex: zIndexFieldDoc.optional().default(0),
-    data: z
-      .object({
-        id: uuidFieldDoc,
-      })
-      .catchall(z.any())
-      .optional(),
-    createdAt: dateISOFieldDoc,
-    updatedAt: dateISOFieldDoc.optional(),
+export const nodeSchema = z.object({
+  id: uuidFieldDoc,
+  type: NodeTypeFieldDoc,
+  position: positionSchema,
+  width: dimensionFieldDoc.optional(),
+  height: dimensionFieldDoc.optional(),
+  zIndex: zIndexFieldDoc.default(0).optional(),
+  data: z
+    .object({
+      id: uuidFieldDoc,
+    })
+    .catchall(z.any())
+    .optional(),
+});
+
+export const nodeInputSchema = nodeSchema
+  .transform((node) => {
+    const position = node.position;
+    return {
+      ...node,
+      position: JSON.stringify(position),
+    };
   })
-  .transform(({ position, createdAt, updatedAt, ...rest }) => ({
-    ...rest,
-    ...position,
-  }))
-  .openapi({ title: "NodeAttributes" });
+  .openapi({ title: "NodeDto" });
+
+export const nodeOutputSchema = nodeSchema
+  .extend({
+    position: z.preprocess((val) => {
+      if (typeof val === "string") {
+        try {
+          return JSON.parse(val);
+        } catch {
+          return val;
+        }
+      }
+      return val;
+    }, positionSchema),
+  })
+  .openapi({ title: "NodeDto" });
 
 export const edgeSchema = z
   .object({
@@ -75,26 +90,23 @@ export const edgeSchema = z
     target: nodeIdFieldDoc,
     sourceHandle: handleFieldDoc,
     targetHandle: handleFieldDoc,
-    reconnectable: booleanFieldDoc.optional().default(true),
-    deletable: booleanFieldDoc.optional().default(true),
-    selectable: booleanFieldDoc.optional().default(true),
-    selected: booleanFieldDoc.optional().default(false),
-    zIndex: zIndexFieldDoc.optional().default(0),
+    zIndex: zIndexFieldDoc.default(0).optional(),
     data: z
       .object({
         id: uuidFieldDoc,
       })
       .catchall(z.any())
       .optional(),
-    createdAt: dateISOFieldDoc,
-    updatedAt: dateISOFieldDoc.optional(),
   })
-  .openapi({ title: "EdgeAttributes" });
+  .openapi({ title: "EdgeDto" });
 
 export const createDiagramSchema = z
   .object({
     projectId: projectIdFieldDoc.describe(
       "ID of the project this diagram belongs to",
+    ),
+    relatedEntityId: uuidFieldDoc.describe(
+      "ID of the entity this diagram is related to",
     ),
     name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
@@ -104,18 +116,24 @@ export const createDiagramSchema = z
 export const updateDiagramSchema = atLeastOneOfSchema(
   {
     name: nameFieldDoc.optional(),
-    nodes: z.array(nodeSchema).optional(),
-    edges: z
-      .array(
-        edgeSchema.omit({
-          createdAt: true,
-          updatedAt: true,
-        }),
-      )
-      .optional(),
+    nodes: z.array(nodeInputSchema),
+    edges: z.array(edgeSchema),
   },
   ["name", "nodes", "edges"],
 ).openapi({ title: "UpdateDiagramDto" });
+
+// ----------------------
+// Relationship Schemas
+// ----------------------
+
+export const diagramRelationshipsSchema = z.object({
+  nodes: z.array(nodeOutputSchema).optional(),
+  edges: z.array(edgeSchema).optional(),
+});
+
+export const diagramDetailSchema = diagramListSchema
+  .merge(diagramRelationshipsSchema)
+  .openapi({ title: "DiagramDetailDto" });
 
 // ----------------------
 // Parameter Schemas

@@ -1,12 +1,8 @@
 import { DiagramType, EdgeType, NodeType } from "@repo/shared-schemas";
 
-export interface Position {
-  x: number;
-  y: number;
-}
-
 export interface DiagramInterface {
   projectId: string;
+  relatedEntityId: string;
   name?: string;
   type: DiagramType;
 }
@@ -18,10 +14,6 @@ export interface EdgeInterface {
   target: string;
   sourceHandle: string;
   targetHandle: string;
-  reconnectable?: boolean;
-  deletable?: boolean;
-  selectable?: boolean;
-  selected?: boolean;
   zIndex?: number;
   data?: any;
 }
@@ -29,18 +21,9 @@ export interface EdgeInterface {
 export interface NodeInterface {
   id: string;
   type: NodeType;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  position?: Position; // Added for client convenience
-
-  draggable?: boolean;
-  connectable?: boolean;
-  selectable?: boolean;
-  deletable?: boolean;
-  dragging?: boolean;
-  selected?: boolean;
+  position: string;
+  width?: number;
+  height?: number;
   zIndex?: number;
   data?: any;
 }

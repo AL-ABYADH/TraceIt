@@ -1,7 +1,6 @@
 import { z } from "../zod-openapi-init";
 import {
   createDiagramSchema,
-  diagramSchema,
   diagramIdSchema,
   edgeSchema,
   edgeTypeSchema,
@@ -10,6 +9,9 @@ import {
   typeDiagramSchema,
   updateDiagramSchema,
   useCaseDiagramIdSchema,
+  diagramListSchema,
+  diagramDetailSchema,
+  positionSchema,
 } from "./schemas";
 
 // ----------------------
@@ -19,12 +21,14 @@ import {
 export type DiagramIdDto = z.infer<typeof diagramIdSchema>;
 
 // Diagram Types
-export type DiagramDto = z.infer<typeof diagramSchema>;
+export type DiagramListDto = z.infer<typeof diagramListSchema>;
+export type DiagramDetailDto = z.infer<typeof diagramDetailSchema>;
 export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
 export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 
 // Node Types
 export type NodeDto = z.infer<typeof nodeSchema>;
+export type Position = z.infer<typeof positionSchema>;
 
 // Edge Types
 export type EdgeDto = z.infer<typeof edgeSchema>;
