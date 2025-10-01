@@ -260,7 +260,13 @@ export function ModelFactory<
   model.findByRelatedEntity = <Plain extends boolean = false>(
     params: GenericConfiguration & {
       whereRelated: WhereParamsI;
-      relationshipAlias: keyof RelatedNodes;
+      relationshipAlias?: keyof RelatedNodes;
+      dynamicRelationship?: {
+        name: string;
+        direction?: "out" | "in" | "none";
+        targetLabel?: string;
+        relationshipWhere?: WhereParamsI;
+      };
       where?: WhereParamsI;
       limit?: number;
       skip?: number;
@@ -270,6 +276,7 @@ export function ModelFactory<
       include?: Array<keyof RelatedNodes>;
       exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     },
   ) => manager.findByRelatedEntity(params);
 

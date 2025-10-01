@@ -325,13 +325,24 @@ export class NeogmaGraphRelationService {
 
   /**
    * Find entities based on their relationship with another entity.
-   * Works through existing relationship definitions in the current model.
+   * Supports both predefined relationships and dynamic relationships.
    *
    * @example
-   * // Get all projects owned by a specific user (through 'owner' relationship)
+   * // Using predefined relationship
    * const projects = await ProjectModel.findByRelatedEntity({
    *   whereRelated: { id: 'user-123' },
    *   relationshipAlias: 'owner'
+   * });
+   *
+   * @example
+   * // Using dynamic relationship
+   * const entities = await Model.findByRelatedEntity({
+   *   whereRelated: { id: 'related-entity-123' },
+   *   dynamicRelationship: {
+   *     name: 'CUSTOM_RELATION',
+   *     direction: 'out',
+   *     targetLabel: 'RelatedEntity'
+   *   }
    * });
    *
    * @param params - Query parameters for finding related entities
@@ -339,7 +350,13 @@ export class NeogmaGraphRelationService {
    */
   async findByRelatedEntity(params: {
     whereRelated: WhereParamsI;
-    relationshipAlias: keyof any;
+    relationshipAlias?: keyof any;
+    dynamicRelationship?: {
+      name: string;
+      direction?: "out" | "in" | "none";
+      targetLabel?: string;
+      relationshipWhere?: WhereParamsI;
+    };
     where?: WhereParamsI;
     limit?: number;
     skip?: number;
@@ -352,7 +369,50 @@ export class NeogmaGraphRelationService {
     limits?: Record<string, number>;
     direction?: "out" | "in" | "none";
   }): Promise<any[]> {
-    // Verify relationship exists in current model
+    // Validate that either relationshipAlias or dynamicRelationship is provided
+    if (!params.relationshipAlias && !params.dynamicRelationship) {
+      throw new Error('Either "relationshipAlias" or "dynamicRelationship" must be provided');
+    }
+
+    // Case 1: Using predefined relationship (existing behavior)
+    if (params.relationshipAlias) {
+      return this.findByPredefinedRelationship({
+        ...params,
+        relationshipAlias: params.relationshipAlias,
+      });
+    }
+
+    // Case 2: Using dynamic relationship (new behavior)
+    if (params.dynamicRelationship) {
+      return this.findByDynamicRelationship({
+        ...params,
+        dynamicRelationship: params.dynamicRelationship,
+      });
+    }
+
+    // This should never be reached due to the validation above
+    throw new Error("Invalid state: neither relationshipAlias nor dynamicRelationship provided");
+  }
+
+  /**
+   * Find entities using a predefined relationship from the model
+   * (Original implementation)
+   */
+  private async findByPredefinedRelationship(params: {
+    relationshipAlias: keyof any;
+    whereRelated: WhereParamsI;
+    where?: WhereParamsI;
+    limit?: number;
+    skip?: number;
+    order?: Array<[string, "ASC" | "DESC"]>;
+    session?: any;
+    plain?: boolean;
+    throwIfNoneFound?: boolean;
+    include?: any[];
+    exclude?: any[];
+    limits?: Record<string, number>;
+    direction?: "out" | "in" | "none";
+  }): Promise<any[]> {
     const relationships = this.model.relationships || {};
     const relationship = relationships[params.relationshipAlias as string];
 
@@ -362,12 +422,11 @@ export class NeogmaGraphRelationService {
       );
     }
 
-    // Use existing findRelationships to find connections
     const results = await this.model.findRelationships({
       alias: params.relationshipAlias,
       where: {
-        target: params.whereRelated, // Conditions for related entity
-        source: params.where, // Additional filters on current model entities
+        target: params.whereRelated,
+        source: params.where,
       },
       limit: params.limit,
       session: params.session,
@@ -380,12 +439,8 @@ export class NeogmaGraphRelationService {
       return [];
     }
 
-    // Extract source entities (current model entities)
-    // and add direction and relationship name info to each result
     let foundEntities = results.map((rel: any) => {
       const sourceEntity = rel.source;
-
-      // Add relationship info to entity
       if (sourceEntity.getDataValues) {
         const dataValues = sourceEntity.getDataValues();
         dataValues._relationshipInfo = {
@@ -393,7 +448,6 @@ export class NeogmaGraphRelationService {
           name: relationship.name,
           properties: rel.relationship,
         };
-        // Reassign data with additional info
         Object.keys(dataValues).forEach((key) => {
           sourceEntity[key] = dataValues[key];
         });
@@ -404,23 +458,18 @@ export class NeogmaGraphRelationService {
           properties: rel.relationship,
         };
       }
-
       return sourceEntity;
     });
 
-    // Remove duplicates
     foundEntities = this.removeDuplicateEntities(foundEntities);
 
-    // Apply ordering if specified
     if (params.order) {
       foundEntities.sort((a: any, b: any) => {
         const dataA = a.getDataValues ? a.getDataValues() : a;
         const dataB = b.getDataValues ? b.getDataValues() : b;
-
         for (const [field, direction] of params.order!) {
           const valueA = dataA[field];
           const valueB = dataB[field];
-
           if (valueA < valueB) return direction === "ASC" ? -1 : 1;
           if (valueA > valueB) return direction === "ASC" ? 1 : -1;
         }
@@ -428,7 +477,6 @@ export class NeogmaGraphRelationService {
       });
     }
 
-    // Apply skip and limits
     if (params.skip) {
       foundEntities = foundEntities.slice(params.skip);
     }
@@ -436,7 +484,6 @@ export class NeogmaGraphRelationService {
       foundEntities = foundEntities.slice(0, params.limit);
     }
 
-    // Load additional relationships if requested
     if (params.include || params.exclude || params.limits) {
       const entitiesWithRelations = await Promise.all(
         foundEntities.map((entity: any) =>
@@ -450,12 +497,206 @@ export class NeogmaGraphRelationService {
       );
       return entitiesWithRelations;
     }
-
     // Return plain data if requested
+
     if (params.plain) {
       return foundEntities.map((entity: any) =>
         entity.getDataValues ? entity.getDataValues() : entity,
       );
+    }
+
+    return foundEntities;
+  }
+
+  /**
+   * Find entities using a dynamic relationship (not predefined in the model)
+   */
+  /**
+   * Find entities using a dynamic relationship (not predefined in the model)
+   */
+  private async findByDynamicRelationship(params: {
+    dynamicRelationship: {
+      name: string;
+      direction?: "out" | "in" | "none";
+      targetLabel?: string;
+      relationshipWhere?: WhereParamsI;
+    };
+    whereRelated: WhereParamsI;
+    where?: WhereParamsI;
+    limit?: number;
+    skip?: number;
+    order?: Array<[string, "ASC" | "DESC"]>;
+    session?: any;
+    plain?: boolean;
+    throwIfNoneFound?: boolean;
+    include?: any[];
+    exclude?: any[];
+    limits?: Record<string, number>;
+  }): Promise<any[]> {
+    const { dynamicRelationship, whereRelated, where, session } = params;
+    const relationName = dynamicRelationship.name;
+    const direction = dynamicRelationship.direction || "out";
+    const targetLabel = dynamicRelationship.targetLabel || "";
+
+    // Build Cypher query
+    const bindParam = new BindParam();
+    const queryBuilder = new QueryBuilder(bindParam);
+
+    const sourceIdentifier = "source";
+    const relationIdentifier = "r";
+    const targetIdentifier = "target";
+
+    // Build match pattern based on direction
+    if (direction === "out") {
+      queryBuilder.match({
+        related: [
+          {
+            identifier: sourceIdentifier,
+            label: this.model.getLabel(),
+          },
+          {
+            direction: "out",
+            name: relationName,
+            identifier: relationIdentifier,
+          },
+          {
+            identifier: targetIdentifier,
+            label: targetLabel,
+          },
+        ],
+      });
+    } else if (direction === "in") {
+      queryBuilder.match({
+        related: [
+          {
+            identifier: targetIdentifier,
+            label: targetLabel,
+          },
+          {
+            direction: "in",
+            name: relationName,
+            identifier: relationIdentifier,
+          },
+          {
+            identifier: sourceIdentifier,
+            label: this.model.getLabel(),
+          },
+        ],
+      });
+    } else {
+      queryBuilder.match({
+        related: [
+          {
+            identifier: sourceIdentifier,
+            label: this.model.getLabel(),
+          },
+          {
+            direction: "none",
+            name: relationName,
+            identifier: relationIdentifier,
+          },
+          {
+            identifier: targetIdentifier,
+            label: targetLabel,
+          },
+        ],
+      });
+    }
+
+    // ✅ الإصلاح الرئيسي: دمج جميع شروط WHERE في كائن واحد
+    const whereConditions: Record<string, any> = {};
+
+    // Add conditions for related entity (target)
+    if (whereRelated) {
+      whereConditions[targetIdentifier] = whereRelated;
+    }
+
+    // Add conditions for source entity
+    if (where) {
+      whereConditions[sourceIdentifier] = where;
+    }
+
+    // Add relationship property filters
+    if (dynamicRelationship.relationshipWhere) {
+      whereConditions[relationIdentifier] = dynamicRelationship.relationshipWhere;
+    }
+
+    // Apply all WHERE conditions in a single call
+    if (Object.keys(whereConditions).length > 0) {
+      queryBuilder.where(whereConditions);
+    }
+
+    queryBuilder.return([sourceIdentifier, targetIdentifier, relationIdentifier]);
+
+    // Execute query
+    const queryRunner = this.model.getNeogma().queryRunner;
+    const result = await queryBuilder.run(queryRunner, session);
+
+    if (!result.records.length) {
+      if (params.throwIfNoneFound) {
+        throw new Error(`No entities found matching the specified criteria`);
+      }
+      return [];
+    }
+
+    // Process results
+    let foundEntities = result.records.map((record) => {
+      const source = record.get(sourceIdentifier);
+      const relationship = record.get(relationIdentifier);
+
+      const sourceData = source.properties;
+      sourceData._relationshipInfo = {
+        direction: direction,
+        name: relationName,
+        properties: relationship.properties,
+      };
+
+      return sourceData;
+    });
+
+    // Remove duplicates
+    foundEntities = this.removeDuplicateEntities(foundEntities);
+
+    // Apply ordering
+    if (params.order) {
+      foundEntities.sort((a: any, b: any) => {
+        for (const [field, direction] of params.order!) {
+          const valueA = a[field];
+          const valueB = b[field];
+          if (valueA < valueB) return direction === "ASC" ? -1 : 1;
+          if (valueA > valueB) return direction === "ASC" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    // Apply skip and limit
+    if (params.skip) {
+      foundEntities = foundEntities.slice(params.skip);
+    }
+    if (params.limit) {
+      foundEntities = foundEntities.slice(0, params.limit);
+    }
+
+    // Load additional relationships if requested
+    if (params.include || params.exclude || params.limits) {
+      const entitiesWithRelations = await Promise.all(
+        foundEntities.map((entityData: any) => {
+          // Build instance from data
+          const instance = this.model.buildFromRecord({
+            properties: entityData,
+            labels: this.model.getRawLabels(),
+          });
+
+          return this.loadRelations(instance, {
+            include: params.include,
+            exclude: params.exclude,
+            limits: params.limits,
+            session: params.session,
+          });
+        }),
+      );
+      return entitiesWithRelations;
     }
 
     return foundEntities;
