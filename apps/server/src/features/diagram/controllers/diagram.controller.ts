@@ -16,16 +16,18 @@ import {
   type CreateDiagramDto,
   createDiagramSchema,
   DiagramDetailDto,
-  DiagramListDto,
+  diagramDetailSchema,
   type DiagramIdDto,
   diagramIdSchema,
+  DiagramListDto,
   type ProjectIdDto,
   projectIdSchema,
   type TypeDiagramDto,
   typeDiagramSchema,
   type UpdateDiagramDto,
   updateDiagramSchema,
-  diagramDetailSchema,
+  type UuidParamsDto,
+  uuidParamsSchema,
 } from "@repo/shared-schemas";
 import { ZodResponseInterceptor } from "src/common/interceptors/zodResponseInterceptor";
 import { ResponseSchema } from "src/common/decorators/response-schema.decorator";
@@ -41,6 +43,7 @@ export class DiagramController {
   }
 
   @Get()
+  @ResponseSchema(diagramDetailSchema)
   async listByProject(
     @Query(zodQuery(projectIdSchema)) projectId: ProjectIdDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
@@ -54,6 +57,18 @@ export class DiagramController {
     @Param(zodParam(diagramIdSchema)) params: DiagramIdDto,
   ): Promise<DiagramDetailDto> {
     return (await this.diagramService.findById(params.diagramId)) as any;
+  }
+
+  @Get("by-relation/:relationId")
+  @ResponseSchema(diagramDetailSchema)
+  async findDiagramByRelatedEntityAndType(
+    @Query(zodQuery(uuidParamsSchema)) relationId: UuidParamsDto,
+    @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
+  ): Promise<DiagramDetailDto> {
+    return (await this.diagramService.findDiagramByRelatedEntityAndType(
+      relationId.id,
+      type.type,
+    )) as any;
   }
 
   @Put(":diagramId")
