@@ -2,12 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from "@nes
 import { DiagramRepository } from "../repositories/diagram.repository";
 import { Diagram } from "../entities/diagram.entity";
 import { ProjectService } from "../../project/services/project/project.service";
-import {
-  DiagramInterface,
-  EdgeInterface,
-  NodeInterface,
-  UpdateDiagramInterface,
-} from "../interfaces/diagram.interface";
+import { DiagramInterface, UpdateDiagramInterface } from "../interfaces/diagram.interface";
 import { DiagramType } from "@repo/shared-schemas";
 
 @Injectable()
@@ -44,6 +39,17 @@ export class DiagramService {
     } catch (error) {
       this.handleServiceError(error, "create diagram");
     }
+  }
+
+  async findDiagramByRelatedEntityAndType(relatedEntityId: string, type: DiagramType) {
+    const diagram = await this.diagramRepository.getDiagramByRelatedEntityAndType(
+      relatedEntityId,
+      type,
+    );
+    if (!diagram) {
+      throw new NotFoundException("Cannot find diagram with ID");
+    }
+    return diagram;
   }
 
   /**

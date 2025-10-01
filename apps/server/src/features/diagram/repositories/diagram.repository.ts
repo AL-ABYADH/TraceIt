@@ -7,6 +7,7 @@ import { Diagram } from "../entities/diagram.entity";
 import { Node } from "../entities/node.entity";
 import { Edge } from "../entities/edge.entity";
 import { DiagramInterface, EdgeInterface, NodeInterface } from "../interfaces/diagram.interface";
+import { DiagramType } from "@repo/shared-schemas";
 
 @Injectable()
 export class DiagramRepository {
@@ -64,6 +65,35 @@ export class DiagramRepository {
         ...diagram,
         ...elements,
       };
+    } catch (error) {
+      this.logger.error(`Failed to get diagram by ID: ${error.message}`, error.stack);
+      throw new Error(`Failed to get diagram by ID: ${error.message}`);
+    }
+  }
+
+  async getDiagramByRelatedEntityAndType(
+    relatedEntityId: string,
+    type: DiagramType,
+  ): Promise<Diagram | null> {
+    try {
+      const diagram = await this.diagramModel.findByRelatedEntity({
+        whereRelated: {
+          id: relatedEntityId,
+        },
+        where: {
+          type: type,
+        },
+        dynamicRelationship: {
+          name: "RELATED_TO",
+        },
+      });
+
+      if (!diagram) return null;
+
+      const elements = await this.getDiagramById(diagram[0]!.id);
+      if (!elements) return null;
+
+      return elements;
     } catch (error) {
       this.logger.error(`Failed to get diagram by ID: ${error.message}`, error.stack);
       throw new Error(`Failed to get diagram by ID: ${error.message}`);
