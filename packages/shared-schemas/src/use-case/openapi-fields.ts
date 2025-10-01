@@ -1,16 +1,18 @@
+import { uuidField } from "../common";
 import {
-  useCaseNameField,
-  useCaseDescriptionField,
+  UseCaseImportanceLevel,
+  UseCaseImportanceLevelField,
+  UseCaseSubtype,
+  UseCaseSubtypeField,
+  actorsIdsField,
+  finalStateField,
+  initialStateField,
   primaryActorIdsField,
   secondaryActorIdsField,
-  initialStateField,
-  finalStateField,
+  useCaseDescriptionField,
   useCaseIdsField,
-  actorsIdsField,
-  UseCaseImportanceLevelField,
-  UseCaseImportanceLevel,
+  useCaseNameField,
 } from "./fields";
-import { uuidField } from "../common";
 
 // Primary identifiers
 
@@ -31,6 +33,11 @@ export const useCaseNameFieldDoc = useCaseNameField.openapi({
   example: "Authenticate User Login",
 });
 
+export const useCaseSubTypeEnumDoc = UseCaseSubtypeField.openapi({
+  description: "The subtype of the use case",
+  example: UseCaseSubtype.PRIMARY,
+});
+
 export const useCaseDescriptionFieldDoc = useCaseDescriptionField.openapi({
   description:
     "A detailed explanation of the use case functionality, including its purpose and key behaviors",
@@ -38,11 +45,12 @@ export const useCaseDescriptionFieldDoc = useCaseDescriptionField.openapi({
     "This use case allows registered users to securely authenticate into the system using their email and password credentials. The system validates the credentials and grants access to authorized features upon successful authentication.",
 });
 
-export const UseCaseImportanceEnumDoc = UseCaseImportanceLevelField.openapi({
-  description:
-    "The importance level of this use case for prioritization purposes",
-  example: UseCaseImportanceLevel.HIGH,
-});
+export const UseCaseImportanceLevelEnumDoc =
+  UseCaseImportanceLevelField.openapi({
+    description:
+      "The importance level of this use case for prioritization purposes",
+    example: UseCaseImportanceLevel.HIGH,
+  });
 
 // Actor relationship fields
 export const primaryActorIdsFieldDoc = primaryActorIdsField.openapi({

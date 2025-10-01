@@ -2,9 +2,9 @@
 
 import Button from "@/components/Button";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import Table, { Column } from "@/components/Table";
-import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
+import Table, { Column } from "@/components/Table";
 import { notifications } from "@mantine/notifications";
 import { ActorDto } from "@repo/shared-schemas";
 import { useState } from "react";
@@ -55,7 +55,7 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     {
       key: "id",
       title: "Actions",
-      width: "20%",
+      width: "10%",
       render: (_, actor) => (
         <div className="flex items-center gap-2">
           <button

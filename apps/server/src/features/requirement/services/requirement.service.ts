@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { RequirementRepository } from "../repositories/requirement.repository";
-import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
+import { ActorService } from "../../actor/services/actor/actor.service";
+import { UseCaseService } from "../../use-case/services/use-case/use-case.service";
+import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
-import { Requirement } from "../entities/requirement.entity";
-import { UseCaseService } from "../../use-case/services/use-case/use-case.service";
-import { ActorService } from "../../actor/services/actor/actor.service";
 import { RequirementExceptionAttributes } from "../models/requirement-exception.model";
+import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
+import { RequirementRepository } from "../repositories/requirement.repository";
 
 /**
  * Service responsible for managing requirements, including their creation,
@@ -39,6 +39,8 @@ export class RequirementService {
         );
       }
 
+      console.log("I am here");
+
       // Validate use case exists
       await this.useCaseService.findById(createDto.useCaseId);
 
@@ -64,6 +66,8 @@ export class RequirementService {
           created.id,
         );
       }
+
+      console.log(created.operation);
 
       return created;
     } catch (error) {
@@ -150,6 +154,8 @@ export class RequirementService {
   async findByUseCase(useCaseId: string): Promise<Requirement[]> {
     // Get top-level requirements for the use case
     const topLevelRequirements = await this.requirementRepository.getByUseCase(useCaseId);
+
+    console.log("top:", topLevelRequirements.length);
 
     // Process each requirement to load its nested requirements and exceptions
     for (const requirement of topLevelRequirements) {

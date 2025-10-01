@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { PrimaryUseCaseListDto } from "@repo/shared-schemas";
-import { ChevronRightIcon, ChevronDownIcon } from "lucide-react";
-import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
-import RequirementItem from "../../requirement/components/RequirementItem";
-import RequirementForm from "../../requirement/components/RequirementForm";
 import EllipsisMenu from "@/components/EllipsisMenu";
+import { PrimaryUseCaseListDto } from "@repo/shared-schemas";
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
+import { useState } from "react";
+import RequirementForm from "../../requirement/components/RequirementForm";
+import RequirementItem from "../../requirement/components/RequirementItem";
+import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 
 interface UseCaseItemProps {
   useCase: PrimaryUseCaseListDto;
   projectId: string;
-  number: number; // ✅ New
+  number: number;
 }
 
 export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemProps) {

@@ -3,13 +3,15 @@ import {
   AbstractNeogmaModel,
   defineAbstractModelFactory,
 } from "@repo/custom-neogma";
-import { RequirementAttributes } from "../../requirement/models/requirement.model";
-import { ProjectAttributes } from "../../project/models/project.model";
+import { UseCaseSubtype } from "@repo/shared-schemas";
 import { DiagramAttributes } from "../../diagram/models/diagram.model";
+import { ProjectAttributes } from "../../project/models/project.model";
+import { RequirementAttributes } from "../../requirement/models/requirement.model";
 
 export type UseCaseAttributes = {
   id: string;
   name: string;
+  subtype: UseCaseSubtype;
   createdAt: string;
   updatedAt?: string;
 };
@@ -37,6 +39,12 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         maxLength: 100,
         pattern: "^(?! )[A-Za-z0-9 _-]*(?<! )$",
         message: "is not a valid use case name.",
+      },
+      subtype: {
+        type: "string",
+        required: true,
+        enum: Object.values(UseCaseSubtype),
+        message: "must be a valid use case subtype.",
       },
     },
     relationships: {

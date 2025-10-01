@@ -1,6 +1,6 @@
+import { CreateRequirementDto } from "@repo/shared-schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { requirementClient } from "../api/clients/requirement-client";
-import { CreateRequirementDto } from "@repo/shared-schemas";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
 
 type UseCreateRequirementOptions = {

@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
-import { Neo4jService } from "src/core/neo4j/neo4j.service";
-import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { Op } from "@repo/custom-neogma";
-import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { UseCaseSubtype } from "@repo/shared-schemas";
+import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
+import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
+import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
+import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
 
 @Injectable()
 export class PrimaryUseCaseRepository {
@@ -34,6 +35,8 @@ export class PrimaryUseCaseRepository {
         secondaryActors: {
           where: { params: { id: { [Op.in]: createDto.secondaryActorIds } } },
         },
+        subtype: UseCaseSubtype.PRIMARY,
+        importanceLevel: createDto.importanceLevel,
       });
 
       return useCase;

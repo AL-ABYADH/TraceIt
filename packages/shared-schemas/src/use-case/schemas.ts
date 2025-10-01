@@ -9,17 +9,15 @@ import {
 import { z } from "../zod-openapi-init";
 import { finalStateField, initialStateField } from "./fields";
 import {
+  UseCaseImportanceLevelEnumDoc,
   actorsIdsFieldDoc,
-  finalStateFieldDoc,
-  initialStateFieldDoc,
   primaryActorIdsFieldDoc,
   primaryUseCaseIdFieldDoc,
   secondaryActorIdsFieldDoc,
   secondaryUseCaseIdFieldDoc,
   useCaseDescriptionFieldDoc,
-  useCaseIdsFieldDoc,
-  UseCaseImportanceEnumDoc,
   useCaseNameFieldDoc,
+  useCaseSubTypeEnumDoc,
 } from "./openapi-fields";
 
 /**
@@ -45,7 +43,7 @@ export const createPrimaryUseCaseSchema = z
     primaryActorIds: primaryActorIdsFieldDoc,
     secondaryActorIds: secondaryActorIdsFieldDoc,
     description: useCaseDescriptionFieldDoc.optional(),
-    importanceLevel: UseCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceLevelEnumDoc,
   })
   .openapi({ title: "CreateUseCaseDto" });
 
@@ -55,7 +53,7 @@ export const updatePrimaryUseCaseSchema = z
     description: useCaseDescriptionFieldDoc.optional(),
     primaryActorIds: primaryActorIdsFieldDoc.optional(),
     secondaryActorIds: secondaryActorIdsFieldDoc.optional(),
-    importanceLevel: UseCaseImportanceEnumDoc.optional(),
+    importanceLevel: UseCaseImportanceLevelEnumDoc.optional(),
   })
   .openapi({ title: "UpdatePrimaryUseCaseDto" });
 
@@ -124,6 +122,7 @@ export const useCaseListSchema = z
   .object({
     id: uuidFieldDoc,
     name: useCaseNameFieldDoc,
+    subtype: useCaseSubTypeEnumDoc,
     createdAt: dateFieldDoc,
     updatedAt: dateFieldDoc.optional(),
   })
@@ -160,6 +159,7 @@ export const useCaseListSchema = z
 export const primaryUseCaseListSchema = useCaseListSchema
   .omit({})
   .extend({
+    importanceLevel: UseCaseImportanceLevelEnumDoc,
     description: z.string().optional().openapi({
       description: "Optional description of the primary use case",
       example: "Allows a user to register for an account",
