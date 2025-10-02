@@ -123,8 +123,8 @@ export const updateDiagramSchema = atLeastOneOfSchema(
 // ----------------------
 
 export const diagramRelationshipsSchema = z.object({
-  nodes: z.array(nodeOutputSchema).optional(),
-  edges: z.array(edgeSchema).optional(),
+  nodes: z.array(nodeOutputSchema),
+  edges: z.array(edgeSchema),
 });
 
 export const diagramDetailSchema = diagramListSchema
