@@ -1,7 +1,7 @@
 "use client";
 
-import { RequirementListDto } from "@repo/shared-schemas";
 import { formatRequirementText } from "@/utils/formatting-requirement-text";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 interface RequirementItemProps {
   requirement: RequirementListDto;

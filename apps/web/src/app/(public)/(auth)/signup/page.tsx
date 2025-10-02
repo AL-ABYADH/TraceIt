@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { showNotification } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { showNotification } from "@mantine/notifications";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { authClient } from "@/modules/core/auth/api/clients/auth-client";
-import { RegisterDto, registerSchema } from "@repo/shared-schemas";
 import { ApiFieldValidationError, isApiValidationError } from "@/services/api/api-errors";
+import { RegisterDto, registerSchema } from "@repo/shared-schemas";
 
-import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -65,24 +65,13 @@ export default function SignupPage() {
     signupMutation.mutate(payload);
   }
 
-  if (signupMutation.isPending) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading isOpen={signupMutation.isPending} message="Creating your account..." />
-      </div>
-    );
-  }
-
-  if (errorMsg) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <ErrorMessage message={errorMsg} />
-      </div>
-    );
-  }
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4">
+      {signupMutation.isPending && (
+        <Loading isOpen={signupMutation.isPending} message="Logging you in..." mode="fullscreen" />
+      )}
+
+      {errorMsg && <ErrorMessage message={errorMsg} />}
       <div className="w-full max-w-md p-8 rounded-xl shadow-lg bg-card">
         <h2 className="text-2xl font-semibold text-foreground mb-6">Create account</h2>
 
