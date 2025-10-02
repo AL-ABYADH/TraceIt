@@ -1,4 +1,5 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
+import { SecondaryUseCaseAttributes } from "src/features/use-case/models/secondary-use-case.model";
 import { RequirementAttributes } from "./requirement.model";
 
 export type RequirementExceptionAttributes = {
@@ -10,6 +11,7 @@ export type RequirementExceptionAttributes = {
 
 export interface RequirementExceptionRelationships {
   requirements: RequirementAttributes[];
+  secondaryUseCase?: SecondaryUseCaseAttributes;
 }
 
 export type RequirementExceptionModelType = NeogmaModel<
@@ -35,6 +37,12 @@ export const RequirementExceptionModel: ModelFactoryDefinition<
       model: "Requirement",
       name: "BELONGS_TO",
       direction: "out",
+      cardinality: "one",
+    },
+    secondaryUseCase: {
+      model: "SecondaryUseCase",
+      name: "EXCEPTIONAL_FLOW_FOR",
+      direction: "in",
       cardinality: "one",
     },
   },

@@ -1,22 +1,22 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
 import { RequirementService } from "../services/requirement.service";
 
-import { zodBody, zodParam } from "src/common/pipes/zod";
 import {
-  type ChildIdDto,
-  childIdSchema,
-  type CreateRequirementDto,
-  createRequirementSchema,
-  type ExceptionIdDto,
-  exceptionIdSchema,
-  type RequirementIdDto,
-  requirementIdSchema,
   RequirementListDto,
-  type UpdateRequirementDto,
+  childIdSchema,
+  createRequirementSchema,
+  exceptionIdSchema,
+  requirementIdSchema,
   updateRequirementSchema,
-  type UseCaseIdDto,
   useCaseIdSchema,
+  type ChildIdDto,
+  type CreateRequirementDto,
+  type ExceptionIdDto,
+  type RequirementIdDto,
+  type UpdateRequirementDto,
+  type UseCaseIdDto,
 } from "@repo/shared-schemas";
+import { zodBody, zodParam } from "src/common/pipes/zod";
 import { Requirement } from "../entities/requirement.entity";
 
 @Controller("requirements")

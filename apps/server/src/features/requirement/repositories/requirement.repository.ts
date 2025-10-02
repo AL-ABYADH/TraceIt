@@ -32,9 +32,9 @@ export class RequirementRepository {
       const requirement = await this.requirementModel.createOne({
         operation: createDto.operation,
         condition: createDto.condition,
-        useCase: {
-          where: [{ params: { id: createDto.useCaseId } }],
-        },
+        useCase: createDto.useCaseId
+          ? { where: [{ params: { id: createDto.useCaseId } }] }
+          : undefined,
         actors: {
           where: createDto.actorIds ? [{ params: { id: { [Op.in]: createDto.actorIds } } }] : [],
         },
@@ -134,7 +134,14 @@ export class RequirementRepository {
     try {
       const requirement = await this.requirementModel.findOneWithRelations({
         where: { id },
-        include: ["useCase", "actors", "nestedRequirements", "exceptions", "exceptionRequirement"],
+        include: [
+          "useCase",
+          "secondaryUseCase",
+          "actors",
+          "nestedRequirements",
+          "exceptions",
+          "exceptionRequirement",
+        ],
       });
 
       return requirement ?? null;
@@ -155,7 +162,13 @@ export class RequirementRepository {
       const requirements = await this.requirementModel.findByRelatedEntity({
         whereRelated: { id: useCaseId },
         relationshipAlias: "useCase",
-        include: ["nestedRequirements", "actors", "exceptions", "exceptionRequirement"],
+        include: [
+          "nestedRequirements",
+          "secondaryUseCase",
+          "actors",
+          "exceptions",
+          "exceptionRequirement",
+        ],
       });
 
       console.log("Fetched requirements:", requirements.length);
@@ -251,6 +264,36 @@ export class RequirementRepository {
   }
 
   /**
+   * Adds secondary use case relationship
+   * @param requirementId - ID of the requirement
+   * @param secondaryUseCaseId - ID of the use case to add
+   * @returns Updated requirement
+   */
+  async addSecondaryUseCase(
+    requirementId: string,
+    secondaryUseCaseId: string,
+  ): Promise<Requirement> {
+    try {
+      await this.requirementModel.relateTo({
+        alias: "secondaryUseCase",
+        where: {
+          source: { id: requirementId },
+          target: { id: secondaryUseCaseId },
+        },
+      });
+
+      const updatedRequirement = await this.getById(requirementId);
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ID ${requirementId} not found after update`);
+      }
+
+      return updatedRequirement;
+    } catch (error) {
+      throw new Error(`Failed to add exception: ${error.message}`);
+    }
+  }
+
+  /**
    * Adds an exception relationship
    * @param requirementId - ID of the requirement
    * @param exceptionId - ID of the exception to add
@@ -300,39 +343,24 @@ export class RequirementRepository {
   }
 
   /**
-   * Changes the use case association for a requirement
+   * add the use case association for a requirement
    * @param requirementId - ID of the requirement to move
-   * @param fromUseCaseId - ID of the current use case
-   * @param toUseCaseId - ID of the target use case
+   * @param useCaseId - ID of the target use case
    * @returns True if the change was successful
    */
-  async changeUseCase(
-    requirementId: string,
-    fromUseCaseId: string,
-    toUseCaseId: string,
-  ): Promise<boolean> {
-    try {
-      // Remove relationship with the original use case
-      await this.requirementModel.deleteRelationships({
-        alias: "useCase",
-        where: {
-          source: { id: requirementId },
-          target: { id: fromUseCaseId },
-        },
-      });
+  async addUseCase(requirementId: string, useCaseId: string): Promise<boolean> {
+    // Create relationship with the new use case
+    await this.requirementModel.relateTo({
+      alias: "useCase",
+      where: {
+        source: { id: requirementId },
+        target: { id: useCaseId },
+      },
+    });
 
-      // Create relationship with the new use case
-      await this.requirementModel.relateTo({
-        alias: "useCase",
-        where: {
-          source: { id: requirementId },
-          target: { id: toUseCaseId },
-        },
-      });
-
-      return true;
-    } catch (error) {
-      throw new Error(`Failed to transfer requirement to new use case: ${error.message}`);
-    }
+    return true;
+  }
+  catch(error) {
+    throw new Error(`Failed to transfer requirement to new use case: ${error.message}`);
   }
 }
