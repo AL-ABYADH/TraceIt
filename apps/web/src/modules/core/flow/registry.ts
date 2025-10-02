@@ -7,6 +7,17 @@ import { EdgeType, NodeType } from "@repo/shared-schemas";
 import { register } from "module";
 import ActorNode from "./components/nodes/ActorNode";
 import AssociationEdge from "./components/edges/AssociationEdge";
+import ActivityNode from "./components/nodes/ActivityNode";
+import { InitialNode } from "./components/nodes/InitialNode";
+import { FinalNode } from "./components/nodes/FinalNode";
+import TrueEdge from "./components/edges/TrueEdge";
+import FalseEdge from "./components/edges/FalseEdge";
+import { ForkNode } from "./components/nodes/ForkNode";
+import { FlowFinalNode } from "./components/nodes/FlowFinalNode";
+import { JoinNode } from "./components/nodes/JoinNode";
+import { MergeNode } from "./components/nodes/MergeNode";
+import DecisionNode from "./components/nodes/DecisionNode";
+import ActivityFlowEdge from "./components/edges/CustomFlow";
 
 export type NodeComponent = React.ComponentType<NodeProps<any>>;
 export type EdgeComponent = React.ComponentType<EdgeProps<any>>;
@@ -23,7 +34,7 @@ export function registerEdge(type: EdgeType, comp: EdgeComponent) {
 }
 
 /**
- * Build and return the NodeTypes object expected by React Flow.
+ * Build and return the NodeTypes object expected by Reasct Flow.
  * We create a fresh object and assert it to NodeTypes. This avoids the
  * incompatible index-signature error while still preserving type-safety
  * at registration time.
@@ -52,8 +63,19 @@ export function getEdgeTypesForReactFlow(): EdgeTypes {
 // Nodes
 registerNode(NodeType.USE_CASE, UseCaseNode);
 registerNode(NodeType.ACTOR, ActorNode);
+registerNode(NodeType.ACTIVITY, ActivityNode);
+registerNode(NodeType.MERGE_NODE, MergeNode);
+registerNode(NodeType.INITIAL_NODE, InitialNode);
+registerNode(NodeType.DECISION_NODE, DecisionNode);
+registerNode(NodeType.FINAL_NODE, FinalNode);
+registerNode(NodeType.FORK_NODE, ForkNode);
+registerNode(NodeType.JOIN_NODE, JoinNode);
+registerNode(NodeType.FLOW_FINAL_NODE, FlowFinalNode);
 
 // Edges
 registerEdge(EdgeType.EXTENDS, ExtendsEdge);
 registerEdge(EdgeType.INCLUDES, IncludesEdge);
 registerEdge(EdgeType.ASSOCIATION, AssociationEdge);
+registerEdge(EdgeType.TRUE, TrueEdge);
+registerEdge(EdgeType.FALSE, FalseEdge);
+registerEdge(EdgeType.ACTIVITY_FLOW, ActivityFlowEdge);
