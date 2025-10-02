@@ -34,7 +34,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Left}
-        id="left-target"
+        id="left-actor-target"
         style={{
           left: 2,
           top: handleTop,
@@ -49,7 +49,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Left}
-        id="left-source"
+        id="left-actor-source"
         style={{
           left: 2,
           top: handleTop,
@@ -66,7 +66,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Right}
-        id="right-target"
+        id="right-actor-target"
         style={{
           right: 2,
           top: handleTop,
@@ -81,7 +81,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Right}
-        id="right-source"
+        id="right-actor-source"
         style={{
           right: 2,
           top: handleTop,

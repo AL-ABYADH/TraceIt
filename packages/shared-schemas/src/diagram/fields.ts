@@ -1,3 +1,4 @@
+import z from "zod";
 import { createEnumField, createField, uuidField } from "../common";
 
 export const dataField = createField("string", {
@@ -28,16 +29,23 @@ export enum NodeType {
   ACTOR = "ACTOR",
   USE_CASE = "USE_CASE",
   ACTIVITY = "ACTIVITY",
-  CONDITION_NODE = "CONDITION_NODE",
+  DECISION_NODE = "DECISION_NODE", //
+  INITIAL_NODE = "INITIAL_NODE", //
+  FINAL_NODE = "FINAL_NODE", //
   FORK_NODE = "FORK_NODE",
   MERGE_NODE = "MERGE_NODE",
+  JOIN_NODE = "JOIN_NODE",
+  FLOW_FINAL_NODE = "FLOW_FINAL_NODE", //
 }
 
 export enum EdgeType {
   CONTROL_FLOW = "CONTROL_FLOW",
   EXTENDS = "EXTENDS",
   INCLUDES = "INCLUDES",
+  TRUE = "TRUE", //
+  FALSE = "FALSE", //
   ASSOCIATION = "ASSOCIATION",
+  ACTIVITY_FLOW = "ACTIVITY_FLOW",
 }
 
 // Diagram-specific fields

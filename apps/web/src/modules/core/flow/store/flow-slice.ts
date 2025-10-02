@@ -7,7 +7,6 @@ import {
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
-  MarkerType,
   NodeChange,
   EdgeChange,
   Connection,

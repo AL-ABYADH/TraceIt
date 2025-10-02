@@ -260,7 +260,13 @@ export function ModelFactory<
   model.findByRelatedEntity = <Plain extends boolean = false>(
     params: GenericConfiguration & {
       whereRelated: WhereParamsI;
-      relationshipAlias: keyof RelatedNodes;
+      relationshipAlias?: keyof RelatedNodes;
+      dynamicRelationship?: {
+        name: string;
+        direction?: "out" | "in" | "none";
+        targetLabel?: string;
+        relationshipWhere?: WhereParamsI;
+      };
       where?: WhereParamsI;
       limit?: number;
       skip?: number;
@@ -270,6 +276,7 @@ export function ModelFactory<
       include?: Array<keyof RelatedNodes>;
       exclude?: Array<keyof RelatedNodes>;
       limits?: Record<string, number>;
+      direction?: "out" | "in" | "none";
     },
   ) => manager.findByRelatedEntity(params);
 
@@ -332,11 +339,11 @@ export function ModelFactory<
    * Creates a dynamic relationship between two nodes
    * No predefined relationship type is required
    */
-  model.createDynamicRelationship = async (sourceId: string, targetId: string) => {
+  model.createDynamicRelationship = async (sourceId: string, targetId: string, name: string) => {
     const result = await neogma.queryRunner.run(
       `MERGE (source {id: $sourceId})
      MERGE (target {id: $targetId})
-     MERGE (source)-[relationship:\`data\`]->(target)
+     MERGE (source)-[relationship:\`${name}\`]->(target)
      RETURN relationship {.*, from: source.id, to: target.id} AS relationship`,
       { sourceId, targetId },
     );

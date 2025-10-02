@@ -111,7 +111,7 @@ interface NeogmaModelStaticsI<
     MethodsI
   >,
 > {
-  createDynamicRelationship: (sourceId: string, targetId: string) => Promise<any>;
+  createDynamicRelationship: (sourceId: string, targetId: string, name: string) => Promise<any>;
   findRootProject: (nodeId: string) => Promise<any>;
   deleteDynamicRelationship: (firstID: string, socndID: string) => Promise<boolean>;
   getNeogma: any;
@@ -305,8 +305,15 @@ interface NeogmaModelStaticsI<
     params: GenericConfiguration & {
       /** where params for the related entities to match against */
       whereRelated: WhereParamsI;
-      /** the alias of the relationship to traverse */
-      relationshipAlias: keyof RelatedNodesToAssociateI;
+      /** the alias of the relationship to traverse (predefined relationship) */
+      relationshipAlias?: keyof RelatedNodesToAssociateI;
+      /** dynamic relationship configuration (for relationships not defined in model) */
+      dynamicRelationship?: {
+        name: string;
+        direction?: "out" | "in" | "none";
+        targetLabel?: string;
+        relationshipWhere?: WhereParamsI; // Filter by relationship properties
+      };
       /** additional where params for the nodes of this Model */
       where?: WhereParamsI;
       limit?: number;

@@ -1,20 +1,20 @@
-import { UseCaseShape } from "@/modules/features/use-case-diagram/components/UseCaseShape";
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 import { useMemo, useState } from "react";
+import { ActivityShape } from "@/modules/features/activity-diagram/components/ActivityShape";
 
-export default function UseCaseNode({ data, selected }: NodeProps<any>) {
-  const name = data?.name ?? "Unnamed Use Case";
+export default function ActivityNode({ data, selected }: NodeProps<any>) {
+  const name = data?.name ?? "Activity";
 
   // hover state (controls handle visibility)
   const [hovered, setHovered] = useState(false);
 
-  // Calculate dimensions to position handles correctly (same logic as UseCase component)
+  // Calculate dimensions to position handles correctly (same logic as ActivityShape)
   const { svgWidth, svgHeight } = useMemo(() => {
     const maxWidth = 200;
-    const minWidth = 100;
-    const paddingX = 28;
-    const paddingY = 14;
+    const minWidth = 120;
+    const paddingX = 32;
+    const paddingY = 20;
     const fontSize = 14;
     const lineHeight = 20;
 
@@ -23,7 +23,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
     const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
     const width = Math.max(minWidth, textWidth);
-    const height = lines * lineHeight + paddingY * 2;
+    const height = Math.max(60, lines * lineHeight + paddingY * 2); // Minimum height for activity node
 
     return { svgWidth: width, svgHeight: height };
   }, [name]);
@@ -47,7 +47,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Left}
-        id="left-use-case-target"
+        id="left-target"
         style={{
           left: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -61,7 +61,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Left}
-        id="left-use-case-source"
+        id="left-source"
         style={{
           left: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -77,7 +77,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Right}
-        id="right-use-case-target"
+        id="right-target"
         style={{
           right: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -91,7 +91,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Right}
-        id="right-use-case-source"
+        id="right-source"
         style={{
           right: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -103,7 +103,67 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
         }}
       />
 
-      <UseCaseShape name={name} selected={selected} />
+      {/* TOP HANDLES */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="top-target"
+        style={{
+          top: handlesVisible ? -5 : 0,
+          left: svgWidth / 2,
+          background: "white",
+          border: "none",
+          opacity: handlesVisible ? 1 : 0,
+          pointerEvents: handlesVisible ? "auto" : "none",
+          transform: "translateX(-50%)",
+        }}
+      />
+      <Handle
+        type="source"
+        position={Position.Top}
+        id="top-source"
+        style={{
+          top: handlesVisible ? -5 : 0,
+          left: svgWidth / 2,
+          background: "white",
+          border: "none",
+          opacity: handlesVisible ? 1 : 0,
+          pointerEvents: handlesVisible ? "auto" : "none",
+          transform: "translateX(-50%)",
+        }}
+      />
+
+      {/* BOTTOM HANDLES */}
+      <Handle
+        type="target"
+        position={Position.Bottom}
+        id="bottom-target"
+        style={{
+          bottom: handlesVisible ? -5 : 0,
+          left: svgWidth / 2,
+          background: "white",
+          border: "none",
+          opacity: handlesVisible ? 1 : 0,
+          pointerEvents: handlesVisible ? "auto" : "none",
+          transform: "translateX(-50%)",
+        }}
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="bottom-source"
+        style={{
+          bottom: handlesVisible ? -5 : 0,
+          left: svgWidth / 2,
+          background: "white",
+          border: "none",
+          opacity: handlesVisible ? 1 : 0,
+          pointerEvents: handlesVisible ? "auto" : "none",
+          transform: "translateX(-50%)",
+        }}
+      />
+
+      <ActivityShape name={name} selected={selected} />
     </div>
   );
 }
