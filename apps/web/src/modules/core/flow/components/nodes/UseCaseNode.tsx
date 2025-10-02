@@ -47,7 +47,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Left}
-        id="left-target"
+        id="left-use-case-target"
         style={{
           left: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -61,7 +61,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Left}
-        id="left-source"
+        id="left-use-case-source"
         style={{
           left: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -77,7 +77,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="target"
         position={Position.Right}
-        id="right-target"
+        id="right-use-case-target"
         style={{
           right: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
@@ -91,7 +91,7 @@ export default function UseCaseNode({ data, selected }: NodeProps<any>) {
       <Handle
         type="source"
         position={Position.Right}
-        id="right-source"
+        id="right-use-case-source"
         style={{
           right: handlesVisible ? -5 : 0,
           top: svgHeight / 2,
