@@ -4,6 +4,8 @@ import Dialog from "@/components/Dialog";
 import { useActivities } from "../hooks/useActivities";
 import { ActivityListDto } from "@repo/shared-schemas";
 import { ActivityShape } from "./ActivityShape";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface ActivitySelectionProps {
   isOpen: boolean;
@@ -22,18 +24,8 @@ export default function ActivitySelection({
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Activity Object" className="max-w-lg">
-      {isLoading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-muted-foreground">Loading activities...</div>
-        </div>
-      )}
-      {isError && (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-            Error loading activities: {error!.message}
-          </div>
-        </div>
-      )}
+      {isLoading && <Loading isOpen={isLoading} message="Loading activities..." mode="dialog" />}
+      {isError && <ErrorMessage message={`Error loading activities: ${error!.message}`} />}
       {data !== undefined && (
         <div className="grid grid-cols-1 gap-3 p-1 max-h-96 overflow-y-auto">
           {data.toReversed()!.map((activity) => (

@@ -18,6 +18,8 @@ import ActorSelection from "./ActorsSelection";
 import { EdgeType, NodeType } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
+import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
 
 export default function UseCaseDiagramFlow() {
   const params = useParams<"/projects/[project-id]/use-case-diagram">();
@@ -69,21 +71,11 @@ export default function UseCaseDiagramFlow() {
   }, [data, dispatch]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading use cases...</div>
-      </div>
-    );
+    return <Loading isOpen={isLoading} message="Loading use case diagram..." mode="dialog" />;
   }
 
   if (isError) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-          Error loading use cases: {error.message}
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={`Error loading use case diagram: ${error!.message}`} />;
   }
 
   return (

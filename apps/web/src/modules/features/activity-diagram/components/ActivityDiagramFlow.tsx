@@ -18,6 +18,8 @@ import DecisionSelection from "./DecisionSelection";
 import DecisionEdgeTypesSelection from "./DecisionEdgeTypesSelection";
 import { EdgeType, NodeType } from "@repo/shared-schemas";
 import Flow from "@/modules/core/flow/components/Flow";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 export default function ActivityDiagramFlow() {
   const params = useParams<"/projects/[project-id]/use-case-diagram">();
@@ -79,21 +81,11 @@ export default function ActivityDiagramFlow() {
   }, [data, dispatch]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading activity diagram...</div>
-      </div>
-    );
+    return <Loading isOpen={isLoading} message="Loading activity diagram..." mode="dialog" />;
   }
 
   if (isError) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-          Error loading activity diagram: {error.message}
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={`Error loading activity diagram: ${error!.message}`} />;
   }
 
   return (

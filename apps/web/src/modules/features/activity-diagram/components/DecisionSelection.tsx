@@ -4,6 +4,8 @@ import Dialog from "@/components/Dialog";
 import { useActivities } from "../hooks/useActivities";
 import { ActivityListDto } from "@repo/shared-schemas";
 import { DecisionShape } from "./DecisionShape";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface DecisionSelectionProps {
   isOpen: boolean;
@@ -28,17 +30,9 @@ export default function DecisionSelection({
       className="max-w-lg"
     >
       {isLoading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-muted-foreground">Loading conditions...</div>
-        </div>
+        <Loading isOpen={isLoading} message="Loading condition nodes..." mode="dialog" />
       )}
-      {isError && (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-            Error loading conditions: {error!.message}
-          </div>
-        </div>
-      )}
+      {isError && <ErrorMessage message={`Error loading condition nodes: ${error!.message}`} />}
       {data !== undefined && (
         <div className="grid grid-cols-1 gap-3 p-1 max-h-96 overflow-y-auto">
           {data.toReversed()!.map((activity) => (
