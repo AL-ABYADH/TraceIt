@@ -41,7 +41,7 @@ export default function ProjectSidebar({
   const pathname = usePathname() || "/";
   const { data } = useProjectDetail(projectId!, (d: ProjectDto) => d.name);
 
-  const isActive = (href: string) => pathname === href.replace("[project-id]", projectId!);
+  const isActive = (href: string) => pathname.includes(href.replace("[project-id]", projectId!));
 
   return (
     <aside
