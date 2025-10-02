@@ -102,12 +102,8 @@ export const edgeSchema = z
 
 export const createDiagramSchema = z
   .object({
-    projectId: projectIdFieldDoc.describe(
-      "ID of the project this diagram belongs to",
-    ),
-    relatedEntityId: uuidFieldDoc.describe(
-      "ID of the entity this diagram is related to",
-    ),
+    projectId: projectIdFieldDoc.describe("ID of the project this diagram belongs to"),
+    relatedEntityId: uuidFieldDoc.describe("ID of the entity this diagram is related to"),
     name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
   })
