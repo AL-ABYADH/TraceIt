@@ -43,7 +43,6 @@ export class DiagramController {
   }
 
   @Get()
-  @ResponseSchema(diagramDetailSchema)
   async listByProject(
     @Query(zodQuery(projectIdSchema)) projectId: ProjectIdDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
