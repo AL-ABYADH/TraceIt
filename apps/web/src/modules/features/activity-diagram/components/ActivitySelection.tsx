@@ -22,19 +22,19 @@ export default function ActivitySelection({
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Activity Object" className="max-w-lg">
-      {isLoading ? (
+      {isLoading && (
         <div className="flex items-center justify-center py-8">
           <div className="text-muted-foreground">Loading activities...</div>
         </div>
-      ) : null}
-      {isError ? (
+      )}
+      {isError && (
         <div className="flex items-center justify-center py-8">
           <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
             Error loading activities: {error!.message}
           </div>
         </div>
-      ) : null}
-      {data !== undefined ? (
+      )}
+      {data !== undefined && (
         <div className="grid grid-cols-1 gap-3 p-1 max-h-96 overflow-y-auto">
           {data.toReversed()!.map((activity) => (
             <button
@@ -56,15 +56,15 @@ export default function ActivitySelection({
             </button>
           ))}
         </div>
-      ) : null}
-      {data !== undefined && data.length === 0 ? (
+      )}
+      {data !== undefined && data.length === 0 && (
         <div className="flex items-center justify-center py-8">
           <div className="text-muted-foreground text-center">
             <p>No activities found for this project.</p>
             <p className="text-sm mt-1">Create activities first to add them to the diagram.</p>
           </div>
         </div>
-      ) : null}
+      )}
     </Dialog>
   );
 }
