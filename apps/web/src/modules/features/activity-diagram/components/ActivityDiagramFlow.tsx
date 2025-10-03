@@ -6,6 +6,7 @@ import {
   addNode,
   loadFlowData,
   onConnect,
+  selectDiagramId,
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
@@ -36,6 +37,7 @@ export default function ActivityDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
+  const diagramId = useSelector(selectDiagramId);
 
   // Check if initial node already exists
   const hasInitialNode = nodes.some((node) => node.type === NodeType.INITIAL_NODE);
@@ -75,6 +77,7 @@ export default function ActivityDiagramFlow() {
         loadFlowData({
           nodes: data.nodes,
           edges: data.edges,
+          diagramId: data.id,
         }),
       );
     }
@@ -95,7 +98,7 @@ export default function ActivityDiagramFlow() {
         onClose={() => setIsActivitiesDialogOpen(false)}
         projectId={projectId}
         onActivityClick={(activity) =>
-          dispatch(addNode({ id: activity.id, type: NodeType.ACTIVITY, data: activity }))
+          dispatch(addNode({ type: NodeType.ACTIVITY, data: activity }))
         }
       />
 
@@ -106,7 +109,6 @@ export default function ActivityDiagramFlow() {
         onDecisionClick={(decision) =>
           dispatch(
             addNode({
-              id: decision.id,
               type: NodeType.DECISION_NODE,
               data: decision,
               position: { x: 200, y: 200 },
@@ -144,7 +146,6 @@ export default function ActivityDiagramFlow() {
             }
             dispatch(
               addNode({
-                id: `start-${Date.now()}`,
                 type: NodeType.INITIAL_NODE,
                 data: { name: "Start" },
                 position: { x: 100, y: 100 },
@@ -160,7 +161,6 @@ export default function ActivityDiagramFlow() {
           onClick={() => {
             dispatch(
               addNode({
-                id: `fork-${Date.now()}`,
                 type: NodeType.FORK_NODE,
                 data: { name: "Fork" },
                 position: { x: 200, y: 300 },
@@ -175,7 +175,6 @@ export default function ActivityDiagramFlow() {
           onClick={() => {
             dispatch(
               addNode({
-                id: `join-${Date.now()}`,
                 type: NodeType.JOIN_NODE,
                 data: { name: "Join" },
                 position: { x: 400, y: 300 },
@@ -190,7 +189,6 @@ export default function ActivityDiagramFlow() {
           onClick={() => {
             dispatch(
               addNode({
-                id: `merge-${Date.now()}`,
                 type: NodeType.MERGE_NODE,
                 data: { name: "Merge" },
                 position: { x: 600, y: 200 },
@@ -209,7 +207,6 @@ export default function ActivityDiagramFlow() {
             }
             dispatch(
               addNode({
-                id: `end-${Date.now()}`,
                 type: NodeType.FINAL_NODE,
                 data: { name: "End" },
                 position: { x: 300, y: 100 },
@@ -225,7 +222,6 @@ export default function ActivityDiagramFlow() {
           onClick={() => {
             dispatch(
               addNode({
-                id: `flow-final-${Date.now()}`,
                 type: NodeType.FLOW_FINAL_NODE,
                 data: { name: "Flow End" },
                 position: { x: 500, y: 200 },

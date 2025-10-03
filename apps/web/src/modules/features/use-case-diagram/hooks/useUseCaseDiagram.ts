@@ -1,17 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { diagramClient } from "../api/clients/diagram-client";
+import { diagramQueryKeys } from "../query/diagram-query-keys";
 
 export const useUseCaseDiagram = (projectId: string) => {
   return useQuery({
-    queryKey: ["diagram", projectId],
-    queryFn: () => fetchDiagram(projectId),
+    queryKey: diagramQueryKeys.byRelation(projectId),
+    queryFn: () => diagramClient.getUseCaseDiagram(projectId),
   });
 };
-
-async function fetchDiagram(projectId: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return {
-    nodes: [],
-    edges: [],
-  };
-}

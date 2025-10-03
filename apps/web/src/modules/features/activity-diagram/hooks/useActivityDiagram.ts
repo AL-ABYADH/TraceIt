@@ -13,5 +13,6 @@ async function fetchDiagram(projectId: string) {
   return {
     nodes: [],
     edges: [],
+    id: "id",
   };
 }

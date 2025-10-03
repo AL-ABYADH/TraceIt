@@ -6,6 +6,7 @@ import {
   addNode,
   loadFlowData,
   onConnect,
+  selectDiagramId,
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
@@ -15,9 +16,10 @@ import Button from "@/components/Button";
 import { useParams } from "next/navigation";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
-import { EdgeType, NodeType } from "@repo/shared-schemas";
+import { DiagramElementsDto, EdgeType, NodeType } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
+import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
 
@@ -35,6 +37,9 @@ export default function UseCaseDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
+  const diagramId = useSelector(selectDiagramId);
+
+  const updateDiagramMutation = useUpdateDiagram({ diagramId: diagramId! });
 
   const handleConnect = (conn: Connection) => {
     const sourceNode = nodes.find((node) => node.id === conn.source);
@@ -57,6 +62,11 @@ export default function UseCaseDiagramFlow() {
     dispatch(onConnect({ ...conn, type: EdgeType.ASSOCIATION }));
   };
 
+  const handleSave = (elements: DiagramElementsDto) => {
+    if (diagramId === null) return;
+    updateDiagramMutation.mutate(elements);
+  };
+
   const { data, isLoading, isError, error } = useUseCaseDiagram(projectId);
 
   useEffect(() => {
@@ -65,6 +75,7 @@ export default function UseCaseDiagramFlow() {
         loadFlowData({
           nodes: data.nodes,
           edges: data.edges,
+          diagramId: data.id,
         }),
       );
     }
@@ -80,21 +91,25 @@ export default function UseCaseDiagramFlow() {
 
   return (
     <>
+      {updateDiagramMutation.isError && (
+        <ErrorMessage
+          message={`Failed to save diagram: ${
+            (updateDiagramMutation.error as any)?.message ?? "Unknown error"
+          }`}
+        />
+      )}
+
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
         projectId={projectId}
-        onUseCaseClick={(useCase) =>
-          dispatch(addNode({ id: useCase.id, type: NodeType.USE_CASE, data: useCase }))
-        }
+        onUseCaseClick={(useCase) => dispatch(addNode({ type: NodeType.USE_CASE, data: useCase }))}
       />
       <ActorSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
         projectId={projectId}
-        onActorClick={(actor) =>
-          dispatch(addNode({ id: actor.id, type: NodeType.ACTOR, data: actor }))
-        }
+        onActorClick={(actor) => dispatch(addNode({ type: NodeType.ACTOR, data: actor }))}
       />
       <UseCaseEdgeTypesSelection
         onClose={() => setIsEdgeTypeDialogOpen(false)}
@@ -113,7 +128,11 @@ export default function UseCaseDiagramFlow() {
       >
         Add Use Actor
       </Button>
-      <Flow onConnect={handleConnect} />
+      <Flow
+        onConnect={handleConnect}
+        onSave={handleSave}
+        isSaving={updateDiagramMutation.isPending}
+      />
     </>
   );
 }
