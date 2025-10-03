@@ -65,21 +65,21 @@ export class RequirementService {
 
       // Establish relationships if specified
       if (createDto.parentRequirementId) {
+        const requirement = await this.findById(createDto.parentRequirementId);
         await this.requirementRepository.addNestedRequirement(
           createDto.parentRequirementId,
           created.id,
         );
-        const requirement = await this.findById(createDto.parentRequirementId);
         if (requirement.secondaryUseCase) {
           await this.requirementRepository.addUseCase(created.id, requirement.secondaryUseCase.id);
         }
       } else if (createDto.exceptionId) {
+        const exceptionRequirement = await this.exceptionalRequirementRepository.getById(
+          createDto.exceptionId,
+        );
         await this.exceptionalRequirementRepository.addRequirement(
           createDto.exceptionId,
           created.id,
-        );
-        const exceptionRequirement = await this.exceptionalRequirementRepository.getById(
-          createDto.exceptionId,
         );
         if (exceptionRequirement != null && exceptionRequirement.secondaryUseCase) {
           await this.requirementRepository.addUseCase(
