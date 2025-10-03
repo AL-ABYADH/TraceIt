@@ -1,5 +1,11 @@
 import { http } from "@/services/api/http";
-import { DiagramDetailDto, DiagramType, DiagramElementsDto } from "@repo/shared-schemas";
+import {
+  DiagramDetailDto,
+  DiagramType,
+  DiagramElementsDto,
+  DiagramListDto,
+  CreateDiagramDto,
+} from "@repo/shared-schemas";
 import { diagramEndpoints } from "../diagram-endpoints";
 
 async function getDiagramByRelation(
@@ -16,7 +22,12 @@ async function updateDiagram(id: string, diagram: DiagramElementsDto): Promise<v
   return http.put(diagramEndpoints.detail, { pathParams: { id }, body: diagram });
 }
 
+async function createDiagram(diagram: CreateDiagramDto): Promise<DiagramListDto> {
+  return http.post(diagramEndpoints.list, { body: diagram });
+}
+
 export const diagramClient = {
   getDiagramByRelation,
   updateDiagram,
+  createDiagram,
 };

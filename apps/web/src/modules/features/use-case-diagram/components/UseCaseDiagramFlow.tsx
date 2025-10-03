@@ -10,23 +10,23 @@ import {
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
-import { useUseCaseDiagram } from "../hooks/useUseCaseDiagram";
 import { Connection } from "@xyflow/react";
 import Button from "@/components/Button";
-import { useParams } from "next/navigation";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
-import { DiagramElementsDto, EdgeType, NodeType } from "@repo/shared-schemas";
+import { DiagramElementsDto, DiagramDetailDto, EdgeType, NodeType } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
 import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
 import ErrorMessage from "@/components/ErrorMessage";
-import Loading from "@/components/Loading";
 
-export default function UseCaseDiagramFlow() {
-  const params = useParams<"/projects/[project-id]/use-case-diagram">();
-  const projectId = params["project-id"];
-
+export default function UseCaseDiagramFlow({
+  diagram,
+  projectId,
+}: {
+  diagram: DiagramDetailDto;
+  projectId: string;
+}) {
   const [isUseCasesDialogOpen, setIsUseCasesDialogOpen] = useState(false);
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
   const [isEdgeTypeDialogOpen, setIsEdgeTypeDialogOpen] = useState(false);
@@ -67,27 +67,15 @@ export default function UseCaseDiagramFlow() {
     updateDiagramMutation.mutate(elements);
   };
 
-  const { data, isLoading, isError, error } = useUseCaseDiagram(projectId);
-
   useEffect(() => {
-    if (data) {
-      dispatch(
-        loadFlowData({
-          nodes: data.nodes,
-          edges: data.edges,
-          diagramId: data.id,
-        }),
-      );
-    }
-  }, [data, dispatch]);
-
-  if (isLoading) {
-    return <Loading isOpen={isLoading} message="Loading use case diagram..." mode="dialog" />;
-  }
-
-  if (isError) {
-    return <ErrorMessage message={`Error loading use case diagram: ${error!.message}`} />;
-  }
+    dispatch(
+      loadFlowData({
+        nodes: diagram.nodes,
+        edges: diagram.edges,
+        diagramId: diagram.id,
+      }),
+    );
+  }, [diagram, dispatch]);
 
   return (
     <>
