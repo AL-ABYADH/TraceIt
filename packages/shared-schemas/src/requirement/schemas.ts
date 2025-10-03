@@ -1,10 +1,5 @@
-import { z } from "../zod-openapi-init";
-import {
-  actorIdsFieldDoc,
-  conditionFieldDoc,
-  operationFieldDoc,
-  useCaseIdFieldDoc,
-} from "./openapi-fields";
+import z from "zod";
+import { actorSchema } from "../actor";
 import {
   childIdFieldDoc,
   dateISOFieldDoc,
@@ -13,8 +8,13 @@ import {
   requirementIdFieldDoc,
   uuidFieldDoc,
 } from "../common";
-import { useCaseDetailSchema } from "../use-case";
-import { actorSchema } from "../actor";
+import { secondaryUseCaseDetailSchema, useCaseDetailSchema } from "../use-case";
+import {
+  actorIdsFieldDoc,
+  conditionFieldDoc,
+  operationFieldDoc,
+  useCaseIdFieldDoc,
+} from "./openapi-fields";
 
 /**
  * =========================
@@ -93,6 +93,7 @@ export const requirementListSchema = z
 export const requirementRelationshipsSchema = z
   .object({
     useCase: useCaseDetailSchema,
+    secondaryUseCase: secondaryUseCaseDetailSchema.optional(),
     actors: z.array(actorSchema).optional(),
     nestedRequirements: z.array(requirementListSchema).optional(),
     exceptions: z.array(requirementExceptionListSchema).optional(),
