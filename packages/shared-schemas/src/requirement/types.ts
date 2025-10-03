@@ -40,5 +40,5 @@ export type RequirementDto = z.infer<typeof requirementListSchema> & {
   useCase: z.infer<typeof useCaseDetailSchema>;
   actors?: z.infer<typeof actorSchema>[];
   nestedRequirements?: RequirementDto[];
-  exceptions?: z.infer<typeof requirementExceptionListSchema>[];
+  exceptions?: any;
 };
