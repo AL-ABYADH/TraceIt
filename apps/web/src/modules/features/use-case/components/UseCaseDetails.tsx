@@ -39,7 +39,7 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
         </div>
 
         <div className="mt-6 space-y-4">
-          <Section title="Primary Actor">{primaryActors}</Section>
+          <Section title="Primary Actors">{primaryActors}</Section>
           <Section title="Actors">{secondaryActors}</Section>
           <Section title="Importance Level">{data.importanceLevel}</Section>
           <Section title="Description">{description}</Section>

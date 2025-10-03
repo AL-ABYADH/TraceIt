@@ -88,7 +88,7 @@ export class DiagramRepository {
         },
       });
 
-      if (!diagram) return null;
+      if (diagram.length === 0) return null;
 
       const elements = await this.getDiagramById(diagram[0]!.id);
       if (!elements) return null;

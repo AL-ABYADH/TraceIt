@@ -148,8 +148,19 @@ export default function UseCaseForm({
     onClose();
   };
 
-  const primarySelectedIds = watch("primaryActorIds");
-  const secondarySelectedIds = watch("secondaryActorIds");
+  useEffect(() => {
+    if (mode === "edit" && (initialData || detail)) {
+      reset({
+        ...(initialData ?? detail),
+        primaryActorIds: (initialData?.primaryActors ?? detail?.primaryActors ?? []).map(
+          (a) => a.id,
+        ),
+        secondaryActorIds: (initialData?.secondaryActors ?? detail?.secondaryActors ?? []).map(
+          (a) => a.id,
+        ),
+      });
+    }
+  }, [mode, initialData, detail, reset]);
 
   const isPending =
     createMutation.isPending ||
@@ -205,55 +216,55 @@ export default function UseCaseForm({
         <Controller
           control={control}
           name="primaryActorIds"
-          render={({ field }) => (
-            <MultiSelect
-              label="Primary Actors"
-              placeholder="Select primary actors"
-              options={actors
-                .filter((a) => !secondarySelectedIds.includes(a.id))
-                .map((a) => ({
-                  value: a.id,
-                  label: `${a.name} (${a.subtype})`,
-                }))}
-              value={field.value || []}
-              onChange={(ids: string[]) => {
-                const newSecondary = secondarySelectedIds.filter((id) => !ids.includes(id));
-                setValue("primaryActorIds", ids, { shouldValidate: true });
-                setValue("secondaryActorIds", newSecondary, {
-                  shouldValidate: true,
-                });
-              }}
-              disabled={isPending}
-              error={errors.primaryActorIds?.message}
-            />
-          )}
+          render={({ field }) => {
+            const primaryValue = field.value || [];
+            const secondaryValue = watch("secondaryActorIds") || [];
+
+            return (
+              <MultiSelect
+                label="Primary Actors"
+                placeholder="Select primary actors"
+                options={actors
+                  .filter((a) => !secondaryValue.includes(a.id))
+                  .map((a) => ({ value: a.id, label: `${a.name} (${a.subtype})` }))}
+                value={primaryValue}
+                onChange={(ids: string[]) => {
+                  const newSecondary = secondaryValue.filter((id) => !ids.includes(id));
+                  setValue("primaryActorIds", ids, { shouldValidate: true });
+                  setValue("secondaryActorIds", newSecondary, { shouldValidate: true });
+                }}
+                disabled={isPending}
+                error={errors.primaryActorIds?.message}
+              />
+            );
+          }}
         />
 
         <Controller
           control={control}
           name="secondaryActorIds"
-          render={({ field }) => (
-            <MultiSelect
-              label="Secondary Actors"
-              placeholder="Select secondary actors"
-              options={actors
-                .filter((a) => !primarySelectedIds.includes(a.id))
-                .map((a) => ({
-                  value: a.id,
-                  label: `${a.name} (${a.subtype})`,
-                }))}
-              value={field.value || []}
-              onChange={(ids: string[]) => {
-                const newPrimary = primarySelectedIds.filter((id) => !ids.includes(id));
-                setValue("secondaryActorIds", ids, { shouldValidate: true });
-                setValue("primaryActorIds", newPrimary, {
-                  shouldValidate: true,
-                });
-              }}
-              disabled={isPending}
-              error={errors.secondaryActorIds?.message}
-            />
-          )}
+          render={({ field }) => {
+            const secondaryValue = field.value || [];
+            const primaryValue = watch("primaryActorIds") || [];
+
+            return (
+              <MultiSelect
+                label="Secondary Actors"
+                placeholder="Select secondary actors"
+                options={actors
+                  .filter((a) => !primaryValue.includes(a.id))
+                  .map((a) => ({ value: a.id, label: `${a.name} (${a.subtype})` }))}
+                value={secondaryValue}
+                onChange={(ids: string[]) => {
+                  const newPrimary = primaryValue.filter((id) => !ids.includes(id));
+                  setValue("secondaryActorIds", ids, { shouldValidate: true });
+                  setValue("primaryActorIds", newPrimary, { shouldValidate: true });
+                }}
+                disabled={isPending}
+                error={errors.secondaryActorIds?.message}
+              />
+            );
+          }}
         />
 
         <div className="flex items-center justify-end gap-3 pt-4 mt-8">

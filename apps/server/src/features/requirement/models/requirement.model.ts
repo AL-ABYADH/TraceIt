@@ -1,6 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseAttributes } from "../../use-case/models/use-case.model";
+import { SecondaryUseCaseAttributes } from "src/features/use-case/models/secondary-use-case.model";
 import { ActorAttributes } from "../../actor/models/actor.model";
+import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { RequirementExceptionAttributes } from "./requirement-exception.model";
 
 export type RequirementAttributes = {
@@ -12,7 +13,8 @@ export type RequirementAttributes = {
 };
 
 export interface RequirementRelationships {
-  useCase: UseCaseAttributes;
+  useCase?: UseCaseAttributes;
+  secondaryUseCase?: SecondaryUseCaseAttributes;
   actors?: ActorAttributes[];
   nestedRequirements?: RequirementAttributes[];
   exceptions?: RequirementExceptionAttributes[];
@@ -44,6 +46,12 @@ export const RequirementModel: ModelFactoryDefinition<
       model: "UseCase",
       name: "BELONGS_TO",
       direction: "out",
+      cardinality: "one",
+    },
+    secondaryUseCase: {
+      model: "SecondaryUseCase",
+      name: "SUB_FLOW_FOR",
+      direction: "in",
       cardinality: "one",
     },
     actors: {

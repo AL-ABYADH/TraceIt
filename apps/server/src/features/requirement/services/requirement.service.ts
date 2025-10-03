@@ -39,10 +39,19 @@ export class RequirementService {
         );
       }
 
-      console.log("I am here");
+      if (
+        (createDto.useCaseId && createDto.exceptionId) ||
+        (createDto.useCaseId && createDto.parentRequirementId)
+      ) {
+        throw new BadRequestException(
+          "You cannot have both use case and exception or parent requirement.",
+        );
+      }
 
       // Validate use case exists
-      await this.useCaseService.findById(createDto.useCaseId);
+      if (createDto.useCaseId) {
+        await this.useCaseService.findById(createDto.useCaseId);
+      }
 
       // Validate all actor IDs exist
       if (createDto.actorIds && createDto.actorIds.length > 0) {
@@ -60,14 +69,25 @@ export class RequirementService {
           createDto.parentRequirementId,
           created.id,
         );
+        const requirement = await this.findById(createDto.parentRequirementId);
+        if (requirement.secondaryUseCase) {
+          await this.requirementRepository.addUseCase(created.id, requirement.secondaryUseCase.id);
+        }
       } else if (createDto.exceptionId) {
         await this.exceptionalRequirementRepository.addRequirement(
           createDto.exceptionId,
           created.id,
         );
+        const exceptionRequirement = await this.exceptionalRequirementRepository.getById(
+          createDto.exceptionId,
+        );
+        if (exceptionRequirement != null && exceptionRequirement.secondaryUseCase) {
+          await this.requirementRepository.addUseCase(
+            exceptionRequirement.secondaryUseCase.id,
+            created.id,
+          );
+        }
       }
-
-      console.log(created.operation);
 
       return created;
     } catch (error) {
@@ -154,8 +174,6 @@ export class RequirementService {
   async findByUseCase(useCaseId: string): Promise<Requirement[]> {
     // Get top-level requirements for the use case
     const topLevelRequirements = await this.requirementRepository.getByUseCase(useCaseId);
-
-    console.log("top:", topLevelRequirements.length);
 
     // Process each requirement to load its nested requirements and exceptions
     for (const requirement of topLevelRequirements) {
@@ -312,15 +330,13 @@ export class RequirementService {
    * @param toUseCaseId ID of the target use case
    * @returns True if transfer was successful
    */
-  async transferNestedRequirementsToSecondaryUseCase(
+  async setParentRequirementToSecondaryUseCase(
     parentRequirementId: string,
-    fromUseCaseId: string,
-    toUseCaseId: string,
+    secondaryUseCaseId: string,
   ): Promise<boolean> {
     // Verify the parent requirement and use cases exist
     const parentRequirement = await this.findById(parentRequirementId);
-    await this.useCaseService.findById(fromUseCaseId);
-    await this.useCaseService.findById(toUseCaseId);
+    await this.useCaseService.findById(secondaryUseCaseId);
 
     if (
       !parentRequirement.nestedRequirements ||
@@ -330,13 +346,14 @@ export class RequirementService {
         `Requirement with ID ${parentRequirementId} has no nested requirements.`,
       );
     }
+    await this.requirementRepository.addSecondaryUseCase(parentRequirement.id, secondaryUseCaseId);
 
     // Extract IDs for nested requirements
     const nestedRequirementIds = parentRequirement.nestedRequirements.map((req) => req.id);
 
     // Transfer each nested requirement from the primary to the secondary use case
     for (const reqId of nestedRequirementIds) {
-      await this.requirementRepository.changeUseCase(reqId, fromUseCaseId, toUseCaseId);
+      await this.requirementRepository.addUseCase(reqId, secondaryUseCaseId);
     }
 
     return true;

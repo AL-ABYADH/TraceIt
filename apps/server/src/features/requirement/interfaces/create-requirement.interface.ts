@@ -1,6 +1,6 @@
 export interface CreateRequirementInterface {
   operation: string;
-  useCaseId: string;
+  useCaseId?: string;
   condition?: string;
   actorIds?: string[];
   exceptionId?: string;

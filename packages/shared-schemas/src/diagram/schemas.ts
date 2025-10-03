@@ -102,12 +102,8 @@ export const edgeSchema = z
 
 export const createDiagramSchema = z
   .object({
-    projectId: projectIdFieldDoc.describe(
-      "ID of the project this diagram belongs to",
-    ),
-    relatedEntityId: uuidFieldDoc.describe(
-      "ID of the entity this diagram is related to",
-    ),
+    projectId: projectIdFieldDoc.describe("ID of the project this diagram belongs to"),
+    relatedEntityId: uuidFieldDoc.describe("ID of the entity this diagram is related to"),
     name: nameFieldDoc.optional(),
     type: DiagramTypeFieldDoc,
   })
@@ -127,8 +123,8 @@ export const updateDiagramSchema = atLeastOneOfSchema(
 // ----------------------
 
 export const diagramRelationshipsSchema = z.object({
-  nodes: z.array(nodeOutputSchema).optional(),
-  edges: z.array(edgeSchema).optional(),
+  nodes: z.array(nodeOutputSchema),
+  edges: z.array(edgeSchema),
 });
 
 export const diagramDetailSchema = diagramListSchema

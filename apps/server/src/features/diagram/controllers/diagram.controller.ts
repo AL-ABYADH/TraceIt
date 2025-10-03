@@ -43,7 +43,6 @@ export class DiagramController {
   }
 
   @Get()
-  @ResponseSchema(diagramDetailSchema)
   async listByProject(
     @Query(zodQuery(projectIdSchema)) projectId: ProjectIdDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
@@ -59,10 +58,10 @@ export class DiagramController {
     return (await this.diagramService.findById(params.diagramId)) as any;
   }
 
-  @Get("by-relation/:relationId")
+  @Get("by-relation/:id")
   @ResponseSchema(diagramDetailSchema)
   async findDiagramByRelatedEntityAndType(
-    @Query(zodQuery(uuidParamsSchema)) relationId: UuidParamsDto,
+    @Param(zodParam(uuidParamsSchema)) relationId: UuidParamsDto,
     @Query(zodQuery(typeDiagramSchema)) type: TypeDiagramDto,
   ): Promise<DiagramDetailDto> {
     return (await this.diagramService.findDiagramByRelatedEntityAndType(
