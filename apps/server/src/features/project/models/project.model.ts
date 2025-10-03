@@ -76,7 +76,7 @@ export const ProjectModel: ModelFactoryDefinition<ProjectAttributes, ProjectRela
       },
       useCases: {
         model: "UseCase",
-        direction: "out",
+        direction: "in", // recent
         name: "BELONGS_TO",
         cardinality: "many",
       },

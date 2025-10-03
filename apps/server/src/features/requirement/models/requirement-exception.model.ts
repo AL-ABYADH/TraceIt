@@ -11,6 +11,7 @@ export type RequirementExceptionAttributes = {
 
 export interface RequirementExceptionRelationships {
   requirements: RequirementAttributes[];
+  requirement: RequirementAttributes;
   secondaryUseCase?: SecondaryUseCaseAttributes;
 }
 
@@ -36,6 +37,12 @@ export const RequirementExceptionModel: ModelFactoryDefinition<
     requirements: {
       model: "Requirement",
       name: "BELONGS_TO",
+      direction: "in",
+      cardinality: "many",
+    },
+    requirement: {
+      model: "Requirement",
+      name: "EXCEPTION_AT",
       direction: "out",
       cardinality: "one",
     },

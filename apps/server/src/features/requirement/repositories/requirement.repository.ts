@@ -140,7 +140,7 @@ export class RequirementRepository {
           "actors",
           "nestedRequirements",
           "exceptions",
-          "exceptionRequirement",
+          "requirementException",
         ],
       });
 
@@ -167,7 +167,7 @@ export class RequirementRepository {
           "secondaryUseCase",
           "actors",
           "exceptions",
-          "exceptionRequirement",
+          "requirementException",
         ],
       });
 
@@ -188,8 +188,8 @@ export class RequirementRepository {
           }
         }
 
-        // exceptionRequirement: can be an array
-        const exc = req.exceptionRequirement;
+        // requirementException: can be an array
+        const exc = req.requirementException;
         if (Array.isArray(exc) && exc.length > 0) {
           for (const e of exc) {
             if (e && e.id) childIds.add(e.id);

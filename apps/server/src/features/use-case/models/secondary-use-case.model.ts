@@ -1,6 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
 import { UseCaseAttributes, UseCaseModel, UseCaseRelationships } from "./use-case.model";
-import { PrimaryUseCase } from "../entities/primary-use-case.entity";
+import { UseCase } from "../entities/use-case.entity";
+import { RequirementAttributes } from "src/features/requirement/models/requirement.model";
 
 /**
  * SecondaryUseCase shares the same attributes as a base UseCase (id, name).
@@ -13,7 +14,8 @@ export type SecondaryUseCaseAttributes = UseCaseAttributes & {};
  */
 export interface SecondaryUseCaseRelationships extends UseCaseRelationships {
   // primaryUseCase: PrimaryUseCaseModelType;  I updated this for schema sake!!!
-  primaryUseCase: PrimaryUseCase;
+  parentUseCase: UseCase;
+  requirement: RequirementAttributes;
 }
 
 /**
@@ -40,10 +42,17 @@ export const SecondaryUseCaseModel: ModelFactoryDefinition<
   },
   relationships: {
     ...UseCaseModel.parameters.relationships,
-    primaryUseCase: {
-      model: "PrimaryUseCase",
+    parentUseCase: {
+      model: "UseCase",
       direction: "out",
       name: "BELONGS_TO",
+      cardinality: "one",
+    },
+    // RECENT
+    requirement: {
+      model: "Requirement",
+      direction: "out",
+      name: "SUB_FLOW_FOR",
       cardinality: "one",
     },
   },

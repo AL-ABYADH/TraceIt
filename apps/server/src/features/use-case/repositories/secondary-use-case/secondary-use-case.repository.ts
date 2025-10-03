@@ -23,7 +23,7 @@ export class SecondaryUseCaseRepository {
       project: {
         where: [{ params: { id: createDto.projectId } }],
       },
-      primaryUseCase: {
+      parentUseCase: {
         where: [{ params: { id: createDto.primaryUseCaseId } }],
       },
       requirements: {
@@ -48,14 +48,14 @@ export class SecondaryUseCaseRepository {
 
     if (secondaryUpdateDto.primaryUseCaseId) {
       await this.secondaryUseCaseModel.deleteRelationships({
-        alias: "primaryUseCase",
+        alias: "parentUseCase",
         where: {
           source: { id },
         },
       });
 
       await this.secondaryUseCaseModel.relateTo({
-        alias: "primaryUseCase",
+        alias: "parentUseCase",
         where: {
           source: { id },
           target: { id: secondaryUpdateDto.primaryUseCaseId },
@@ -65,7 +65,7 @@ export class SecondaryUseCaseRepository {
 
     const result = await this.secondaryUseCaseModel.findOneWithRelations({
       where: { id },
-      include: ["primaryUseCase", "project"],
+      include: ["parentUseCase", "project"],
     });
 
     if (!result) {
@@ -87,7 +87,7 @@ export class SecondaryUseCaseRepository {
   async getById(id: string): Promise<SecondaryUseCase | null> {
     const useCase = await this.secondaryUseCaseModel.findOneWithRelations({
       where: { id },
-      include: ["primaryUseCase", "project"],
+      include: ["parentUseCase", "project"],
     });
 
     return useCase ? useCase : null;
@@ -95,7 +95,7 @@ export class SecondaryUseCaseRepository {
 
   async getAll(): Promise<SecondaryUseCase[]> {
     const useCases = await this.secondaryUseCaseModel.findManyWithRelations({
-      include: ["primaryUseCase", "project"],
+      include: ["parentUseCase", "project"],
     });
 
     return useCases;
