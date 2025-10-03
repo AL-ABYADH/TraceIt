@@ -18,8 +18,10 @@ import RequirementPreview from "./RequirementPreview";
 interface RequirementFormProps {
   isOpen: boolean;
   onClose: () => void;
-  useCaseId: string;
+  useCaseId?: string;
   projectId: string;
+  parentRequirementId?: string;
+  exceptionId?: string;
 }
 
 export default function RequirementForm({
@@ -27,6 +29,8 @@ export default function RequirementForm({
   onClose,
   useCaseId,
   projectId,
+  parentRequirementId,
+  exceptionId,
 }: RequirementFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -43,14 +47,17 @@ export default function RequirementForm({
     mode: "onSubmit",
     defaultValues: {
       operation: "",
+      condition: undefined,
       useCaseId,
+      parentRequirementId,
+      exceptionId,
       actorIds: [],
     },
   });
 
   const { data: actors = [], isLoading: actorsLoading } = useActors(projectId);
 
-  const createRequirement = useCreateRequirement(useCaseId, {
+  const createRequirement = useCreateRequirement(useCaseId ?? "", {
     onSuccess: () => {
       reset();
       setServerError(null);
@@ -71,7 +78,13 @@ export default function RequirementForm({
 
   const onSubmit = (values: CreateRequirementDto) => {
     setServerError(null);
-    createRequirement.mutate(values);
+
+    const payload: Partial<CreateRequirementDto> = { ...values };
+    if (!payload.useCaseId) delete payload.useCaseId;
+    if (!payload.exceptionId) delete payload.exceptionId;
+    if (!payload.parentRequirementId) delete payload.parentRequirementId;
+
+    createRequirement.mutate(payload as CreateRequirementDto);
   };
 
   const handleCancel = () => {

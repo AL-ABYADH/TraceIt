@@ -1,7 +1,7 @@
 "use client";
 
-import { formatRequirementText } from "@/utils/formatting-requirement-text";
-import { RequirementListDto } from "@repo/shared-schemas";
+import { renderRequirementText } from "@/utils/requirement_utils";
+import { RequirementDto, RequirementListDto } from "@repo/shared-schemas";
 
 interface RequirementPreviewProps {
   operation?: string;
@@ -31,7 +31,7 @@ export default function RequirementPreview({ operation, condition }: Requirement
     <div className="p-4 rounded-lg bg-card border border-border mt-4">
       <h4 className="font-medium text-foreground mb-2">Preview</h4>
       <p className="text-sm text-foreground leading-relaxed mb-2">
-        {formatRequirementText(fakeRequirement as RequirementListDto)}
+        {renderRequirementText(fakeRequirement as RequirementDto)}
       </p>
     </div>
   );

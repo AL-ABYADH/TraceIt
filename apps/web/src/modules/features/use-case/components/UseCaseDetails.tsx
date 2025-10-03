@@ -6,6 +6,9 @@ import Loading from "@/components/Loading";
 import { usePrimaryUseCaseDetail } from "@/modules/features/use-case/hooks/usePrimaryUseCaseDetail";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
+import MainFlowSection from "../../requirement/components/MainFlowSection";
+import RecursiveFlowSection from "../../requirement/components/RecursiveFlowSection";
+import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import UseCaseForm from "./UseCaseForm";
 
 interface UseCaseDetailsProps {
@@ -15,11 +18,21 @@ interface UseCaseDetailsProps {
 
 export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsProps) {
   const { data, isLoading, isError, error } = usePrimaryUseCaseDetail(useCaseId);
+  const {
+    data: requirements,
+    isLoading: reqLoading,
+    isError: reqError,
+    error: reqErrorMessage,
+  } = useUseCasesRequirements(useCaseId);
   const [isEditOpen, setEditOpen] = useState(false);
 
-  if (isLoading) return <Loading isOpen message="Loading use case..." />;
+  // Keep showing loading until both use case and requirements are loaded
+  if (isLoading || reqLoading)
+    return <Loading isOpen message="Loading use case and requirements..." />;
   if (isError) return <ErrorMessage message={error?.message ?? "Failed to load use case"} />;
-  if (!data) return <ErrorMessage message="Use case not found" />;
+  if (reqError)
+    return <ErrorMessage message={reqErrorMessage?.message ?? "Failed to load requirements"} />;
+  if (!data || !requirements) return <ErrorMessage message="Use case or requirements not found" />;
 
   const primaryActors = data.primaryActors?.map((a) => a.name).join(", ") || "—";
   const secondaryActors = data.secondaryActors?.map((a) => a.name).join(", ") || "—";
@@ -44,13 +57,18 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
           <Section title="Importance Level">{data.importanceLevel}</Section>
           <Section title="Description">{description}</Section>
         </div>
+
+        {/* Flows */}
+        <MainFlowSection requirements={requirements} projectId={projectId} />
+        <RecursiveFlowSection requirements={requirements} type="S" projectId={projectId} />
+        <RecursiveFlowSection requirements={requirements} type="E" projectId={projectId} />
+
         <UseCaseForm
           isOpen={isEditOpen}
           onClose={() => setEditOpen(false)}
           projectId={projectId}
           mode="edit"
           useCaseId={useCaseId}
-          // pass initial data to skip fetch
           initialData={{
             name: data.name,
             description: data.description,
