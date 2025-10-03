@@ -78,7 +78,6 @@ export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemP
                 <RequirementItem
                   key={requirement.id}
                   requirement={requirement}
-                  level={0}
                   number={index + 1}
                 />
               ))}

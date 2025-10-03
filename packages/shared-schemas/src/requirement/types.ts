@@ -12,6 +12,7 @@ import {
   requirementExceptionListSchema,
   requirementIdSchema,
   requirementListSchema,
+  requirementOptionalIdSchema,
   updateRequirementExceptionSchema,
   updateRequirementSchema,
   useCaseIdSchema,
@@ -30,6 +31,7 @@ export type RequirementExceptionDetailDto = z.infer<typeof requirementExceptionD
 export type RequirementExceptionListDto = z.infer<typeof requirementExceptionListSchema>;
 
 export type RequirementIdDto = z.infer<typeof requirementIdSchema>;
+export type RequirementOptionalIdDto = z.infer<typeof requirementOptionalIdSchema>;
 export type RequirementExceptionIdDto = z.infer<typeof requirementExceptionIdSchema>;
 
 export type ExceptionIdDto = z.infer<typeof exceptionIdSchema>;
@@ -40,5 +42,5 @@ export type RequirementDto = z.infer<typeof requirementListSchema> & {
   useCase: z.infer<typeof useCaseDetailSchema>;
   actors?: z.infer<typeof actorSchema>[];
   nestedRequirements?: RequirementDto[];
-  exceptions?: z.infer<typeof requirementExceptionListSchema>[];
+  exceptions?: any;
 };

@@ -1,8 +1,8 @@
 "use client";
+import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
 import React, { useState } from "react";
 import { useProjectDetail } from "../hooks/useProjectDetail";
-import Loading from "@/components/Loading";
-import ErrorMessage from "@/components/ErrorMessage";
 import ProjectSidebar from "./ProjectSidebar";
 
 export default function ProjectLayoutShell({
@@ -20,26 +20,21 @@ export default function ProjectLayoutShell({
   if (isLoading) return <Loading isOpen={isLoading} message="Loading..." mode="fullscreen" />;
   if (isError) return <ErrorMessage message={error?.message} />;
 
-  return (
-    <div
-      className="flex min-h-screen bg-background text-foreground"
-      style={{
-        minWidth: isCollapsed ? 300 : 500,
-      }}
-    >
-      <ProjectSidebar
-        projectId={projectId}
-        isCollapsed={isCollapsed}
-        toggleCollapse={toggleCollapse}
-        className="transition-all duration-300 flex-shrink-0"
-      />
+  const sidebarWidth = isCollapsed ? 80 : 250;
 
-      <main
-        className="flex-1 overflow-auto p-4 w-full transition-all duration-300"
-        style={{
-          minWidth: isCollapsed ? 300 : 500,
-        }}
-      >
+  return (
+    <div className="flex h-screen w-screen bg-background text-foreground">
+      <div className="h-screen flex-shrink-0 sticky top-0" style={{ width: sidebarWidth }}>
+        <ProjectSidebar
+          projectId={projectId}
+          isCollapsed={isCollapsed}
+          toggleCollapse={toggleCollapse}
+          className="h-full"
+        />
+      </div>
+
+      {/* Main scrolls only */}
+      <main className="flex-1 overflow-auto p-4" style={{ maxHeight: "100vh" }}>
         {children}
       </main>
     </div>

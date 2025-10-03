@@ -29,12 +29,6 @@ export const useCaseIdSchema = z
   })
   .openapi({ title: "UseCaseIdDto" });
 
-/**
- * =========================
- * CREATE SCHEMAS - SIMPLE REQUIREMENTS
- * =========================
- */
-
 export const createRequirementSchema = z
   .object({
     operation: operationFieldDoc,
@@ -44,7 +38,23 @@ export const createRequirementSchema = z
     exceptionId: exceptionIdFieldDoc.optional(),
     parentRequirementId: requirementIdFieldDoc.optional(),
   })
-  .openapi({ title: "CreateEventSystemRequirementDto" });
+  .refine((data) => !(data.exceptionId && data.parentRequirementId), {
+    message: "You must provide either parentRequirementId or exceptionId, but not both.",
+    path: ["exceptionId", "parentRequirementId"],
+  })
+  .refine((data) => !(data.useCaseId && data.exceptionId), {
+    message: "You cannot have both use case and exception.",
+    path: ["useCaseId", "exceptionId"],
+  })
+  .refine((data) => !(data.useCaseId && data.parentRequirementId), {
+    message: "You cannot have both use case and parent requirement.",
+    path: ["useCaseId", "parentRequirementId"],
+  })
+  .refine((data) => !!(data.useCaseId || data.exceptionId || data.parentRequirementId), {
+    message: "You must provide either useCaseId, exceptionId, or parentRequirementId.",
+    path: ["useCaseId", "exceptionId", "parentRequirementId"],
+  })
+  .openapi({ title: "CreateRequirementDto" });
 
 export const createRequirementExceptionSchema = z.object({
   name: nameFieldDoc,
@@ -107,6 +117,11 @@ export const requirementDetailSchema = requirementListSchema
 export const requirementIdSchema = z
   .object({
     requirementId: requirementIdFieldDoc,
+  })
+  .openapi({ title: "RequirementId" });
+export const requirementOptionalIdSchema = z
+  .object({
+    requirementId: requirementIdFieldDoc.optional(),
   })
   .openapi({ title: "RequirementId" });
 

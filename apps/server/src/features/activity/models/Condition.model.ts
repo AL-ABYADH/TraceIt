@@ -2,24 +2,24 @@ import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/c
 import { RequirementAttributes } from "src/features/requirement/models/requirement.model";
 import { UseCaseAttributes } from "src/features/use-case/models/use-case.model";
 
-export type ActivityAttributes = {
+export type ConditionAttributes = {
   id: string;
   name: string;
   createdAt: string;
   updatedAt?: string;
 };
 
-export interface ActivityRelationships {
+export interface ConditionRelationships {
   requirement: RequirementAttributes;
   useCase: UseCaseAttributes;
 }
 
-export type ActivityModelType = NeogmaModel<ActivityAttributes, ActivityRelationships>;
+export type ConditionModelType = NeogmaModel<ConditionAttributes, ConditionRelationships>;
 
-export const ActivityModel: ModelFactoryDefinition<ActivityAttributes, ActivityRelationships> =
-  defineModelFactory<ActivityAttributes, ActivityRelationships>({
-    name: "Activity",
-    label: ["Activity"],
+export const ConditionModel: ModelFactoryDefinition<ConditionAttributes, ConditionRelationships> =
+  defineModelFactory<ConditionAttributes, ConditionRelationships>({
+    name: "Condition",
+    label: ["Condition"],
     schema: {
       name: {
         type: "string",
@@ -27,7 +27,7 @@ export const ActivityModel: ModelFactoryDefinition<ActivityAttributes, ActivityR
         minLength: 1,
         maxLength: 100,
         allowEmpty: false,
-        message: "Activity name must be between 1 and 100 characters",
+        message: "Condition condition must be between 1 and 100 characters",
       },
     },
     relationships: {

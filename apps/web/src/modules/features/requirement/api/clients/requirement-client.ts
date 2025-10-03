@@ -1,12 +1,8 @@
 import { http } from "@/services/api/http";
-import {
-  CreateRequirementDto,
-  RequirementDetailDto,
-  RequirementListDto,
-} from "@repo/shared-schemas";
+import { CreateRequirementDto, RequirementDetailDto, RequirementDto } from "@repo/shared-schemas";
 import { requirementEndpoints, useCaseRequirementsEndpoints } from "../requirement-endpoints";
 
-async function listUseCaseRequirements(useCaseId: string): Promise<RequirementListDto[]> {
+async function listUseCaseRequirements(useCaseId: string): Promise<RequirementDto[]> {
   return http.get(useCaseRequirementsEndpoints.list, { pathParams: { useCaseId } });
 }
 

@@ -8,6 +8,7 @@ import { ActorModule } from "./features/actor/actor.module";
 import { UseCaseModule } from "./features/use-case/use-case.module";
 import { RequirementModule } from "./features/requirement/requirement.module";
 import { DiagramModule } from "./features/diagram/diagram.module";
+import { ActivityModule } from "./features/activity/activity.module";
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { DiagramModule } from "./features/diagram/diagram.module";
     UseCaseModule,
     RequirementModule,
     DiagramModule,
+    ActivityModule,
   ],
   controllers: [],
   providers: [],
