@@ -2,10 +2,13 @@ import { http } from "@/services/api/http";
 import { DiagramDetailDto, DiagramType, DiagramElementsDto } from "@repo/shared-schemas";
 import { diagramEndpoints } from "../diagram-endpoints";
 
-async function getUseCaseDiagram(projectId: string): Promise<DiagramDetailDto> {
+async function getDiagramByRelation(
+  relationId: string,
+  type: DiagramType,
+): Promise<DiagramDetailDto> {
   return http.get(diagramEndpoints.byRelation, {
-    pathParams: { relationId: projectId },
-    params: { type: DiagramType.USE_CASE },
+    pathParams: { relationId },
+    params: { type },
   });
 }
 
@@ -14,6 +17,6 @@ async function updateDiagram(id: string, diagram: DiagramElementsDto): Promise<v
 }
 
 export const diagramClient = {
-  getUseCaseDiagram,
+  getDiagramByRelation,
   updateDiagram,
 };
