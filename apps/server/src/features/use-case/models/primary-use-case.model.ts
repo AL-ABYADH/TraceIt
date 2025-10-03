@@ -59,12 +59,6 @@ export const PrimaryUseCaseModel: ModelFactoryDefinition<
       name: "HAS_SECONDARY_ACTOR",
       cardinality: "many",
     },
-    secondaryUseCases: {
-      model: "SecondaryUseCase",
-      direction: "in",
-      name: "BELONGS_TO",
-      cardinality: "many",
-    },
     // classes: {
     //   model: "Class",
     //   direction: "out",

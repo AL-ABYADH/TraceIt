@@ -134,7 +134,7 @@ export class RequirementRepository {
     try {
       const requirement = await this.requirementModel.findOneWithRelations({
         where: { id },
-        include: ["useCase", "actors", "nestedRequirements", "exceptions", "exceptionRequirement"],
+        include: ["useCase", "actors", "nestedRequirements", "exceptions", "requirementException"],
       });
 
       return requirement ?? null;
@@ -155,7 +155,7 @@ export class RequirementRepository {
       const requirements = await this.requirementModel.findByRelatedEntity({
         whereRelated: { id: useCaseId },
         relationshipAlias: "useCase",
-        include: ["nestedRequirements", "actors", "exceptions", "exceptionRequirement"],
+        include: ["nestedRequirements", "actors", "exceptions", "requirementException"],
       });
 
       console.log("Fetched requirements:", requirements.length);
@@ -175,8 +175,8 @@ export class RequirementRepository {
           }
         }
 
-        // exceptionRequirement: can be an array
-        const exc = req.exceptionRequirement;
+        // requirementException: can be an array
+        const exc = req.requirementException;
         if (Array.isArray(exc) && exc.length > 0) {
           for (const e of exc) {
             if (e && e.id) childIds.add(e.id);

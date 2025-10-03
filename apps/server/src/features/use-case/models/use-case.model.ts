@@ -50,14 +50,14 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
     relationships: {
       project: {
         model: "Project",
-        direction: "in",
+        direction: "out",
         name: "BELONGS_TO",
         cardinality: "one",
       },
       requirements: {
         model: "Requirement",
-        direction: "out",
-        name: "HAS_REQUIREMENT",
+        direction: "in",
+        name: "BELONGS_TO",
         cardinality: "many",
       },
       includedUseCases: {
@@ -77,12 +77,6 @@ export const UseCaseModel: AbstractModelFactoryDefinition<UseCaseAttributes, Use
         direction: "in",
         name: "RELATED_TO",
         cardinality: "many",
-      },
-      useCaseDiagram: {
-        model: "Diagram",
-        direction: "out",
-        name: "RELATED_TO",
-        cardinality: "many",
-      },
+      }, // deleted direct relationship with use case diagram
     },
   });
