@@ -7,3 +7,4 @@ export * from "./use-case";
 export * from "./requirement";
 export * from "./diagram";
 export * from "./traceability";
+export * from "./activity";
