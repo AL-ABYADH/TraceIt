@@ -1,3 +1,4 @@
+import "./activity/index";
 import "./auth/index";
 import "./user/index";
 import "./project/index";

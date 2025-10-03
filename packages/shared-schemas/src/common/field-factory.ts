@@ -1,16 +1,9 @@
 import { z } from "../zod-openapi-init";
-import {
-  uuidField,
-  emailField,
-  urlField,
-  integerField,
-  dateField,
-} from "./fields";
+import { uuidField, emailField, urlField, integerField, dateField } from "./fields";
 
 import { ZodEnum, ZodNativeEnum, ZodTypeAny } from "zod";
 
-const arrayField = <T extends z.ZodTypeAny>(elementType: T): z.ZodArray<T> =>
-  z.array(elementType);
+const arrayField = <T extends z.ZodTypeAny>(elementType: T): z.ZodArray<T> => z.array(elementType);
 
 const stringField = z.string();
 const numberField = z.number();
@@ -83,10 +76,10 @@ const isStringType = (type: FieldType): boolean =>
 /**
  * Creates a strongly-typed Zod schema field based on type and options
  */
-export function createField<
-  T extends FieldType,
-  E extends ZodTypeAny = ZodTypeAny,
->(type: T, options: FieldOptions<E> = {}): BaseSchemaFor<T, E> {
+export function createField<T extends FieldType, E extends ZodTypeAny = ZodTypeAny>(
+  type: T,
+  options: FieldOptions<E> = {},
+): BaseSchemaFor<T, E> {
   let field: ZodTypeAny;
 
   // Start with base field type
@@ -227,9 +220,7 @@ export function createEnumField(
     // nativeEnum works with objects whose values are strings (your `as const` object)
     field = z.nativeEnum(values as any);
   } else {
-    throw new Error(
-      "Enum must be a non-empty array of strings or a string-valued object.",
-    );
+    throw new Error("Enum must be a non-empty array of strings or a string-valued object.");
   }
 
   if (options.nullable) field = field.nullable();
@@ -238,4 +229,21 @@ export function createEnumField(
   if (options.description) field = field.describe(options.description);
 
   return field;
+}
+
+export function createExactlyOneSchema<T extends z.ZodRawShape>(shape: T) {
+  const baseSchema = z.object(shape);
+
+  return baseSchema.refine(
+    (data) => {
+      const providedFields = Object.keys(shape).filter(
+        (key) => data[key] !== undefined && data[key] !== null && data[key] !== "",
+      );
+      return providedFields.length === 1;
+    },
+    {
+      message: `Exactly one of the following fields must be provided: ${Object.keys(shape).join(", ")}`,
+      path: Object.keys(shape),
+    },
+  );
 }
