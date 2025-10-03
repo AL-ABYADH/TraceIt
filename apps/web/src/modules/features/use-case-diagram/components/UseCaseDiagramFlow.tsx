@@ -1,7 +1,7 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
@@ -14,7 +14,13 @@ import { Connection } from "@xyflow/react";
 import Button from "@/components/Button";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
-import { DiagramElementsDto, DiagramDetailDto, EdgeType, NodeType } from "@repo/shared-schemas";
+import {
+  DiagramDetailDto,
+  DiagramType,
+  DiagramElementsDto,
+  EdgeType,
+  NodeType,
+} from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
 import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
@@ -40,6 +46,29 @@ export default function UseCaseDiagramFlow({
   const diagramId = useSelector(selectDiagramId);
 
   const updateDiagramMutation = useUpdateDiagram({ diagramId: diagramId! });
+
+  const handleAddNode = (nodeType: NodeType) => {
+    switch (nodeType) {
+      case NodeType.USE_CASE:
+        setIsUseCasesDialogOpen(true);
+        break;
+
+      case NodeType.ACTOR:
+        setIsActorsDialogOpen(true);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleAddUseCase = (useCaseId: string) => {
+    dispatch(addNode({ type: NodeType.USE_CASE, data: { id: useCaseId } }));
+  };
+
+  const handleAddActor = (actorId: string) => {
+    dispatch(addNode({ type: NodeType.ACTOR, data: { id: actorId } }));
+  };
 
   const handleConnect = (conn: Connection) => {
     const sourceNode = nodes.find((node) => node.id === conn.source);
@@ -91,13 +120,13 @@ export default function UseCaseDiagramFlow({
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
         projectId={projectId}
-        onUseCaseClick={(useCase) => dispatch(addNode({ type: NodeType.USE_CASE, data: useCase }))}
+        onUseCaseClick={(useCase) => handleAddUseCase(useCase.id)}
       />
       <ActorSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
         projectId={projectId}
-        onActorClick={(actor) => dispatch(addNode({ type: NodeType.ACTOR, data: actor }))}
+        onActorClick={(actor) => handleAddActor(actor.id)}
       />
       <UseCaseEdgeTypesSelection
         onClose={() => setIsEdgeTypeDialogOpen(false)}
@@ -108,18 +137,12 @@ export default function UseCaseDiagramFlow({
         }}
       />
 
-      <Button onClick={() => setIsUseCasesDialogOpen(true)}>Add Use Case</Button>
-      <Button
-        onClick={() => {
-          setIsActorsDialogOpen(true);
-        }}
-      >
-        Add Use Actor
-      </Button>
       <Flow
         onConnect={handleConnect}
+        onAddNode={handleAddNode}
         onSave={handleSave}
         isSaving={updateDiagramMutation.isPending}
+        type={DiagramType.USE_CASE}
       />
     </>
   );

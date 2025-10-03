@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { InitialShape } from "@/modules/features/activity-diagram/components/InitialShape";
 
 interface InitialNodeProps {
   selected?: boolean;
@@ -61,30 +62,13 @@ export function InitialNode({
         }}
       />
 
-      {/* SVG circle for initial node */}
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        style={{
-          display: "block",
-          position: "absolute",
-          left: 0,
-          top: 0,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-        focusable={false}
-      >
-        <circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill={fillColor}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-        />
-      </svg>
+      <InitialShape
+        selected={selected}
+        size={size}
+        fillColor={fillColor}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+      />
     </div>
   );
 }

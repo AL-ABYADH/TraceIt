@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { FlowFinalShape } from "@/modules/features/activity-diagram/components/FlowFinalShape";
 
 interface FlowFinalNodeProps {
   selected?: boolean;
@@ -62,50 +63,13 @@ export function FlowFinalNode({
         }}
       />
 
-      {/* SVG for flow final node - circle with X inside */}
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        style={{
-          display: "block",
-          position: "absolute",
-          left: 0,
-          top: 0,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-        focusable={false}
-      >
-        {/* Outer circle */}
-        <circle
-          cx={center}
-          cy={center}
-          r={radius}
-          fill="white"
-          stroke={strokeColor} // Now black border
-          strokeWidth={strokeWidth}
-        />
-        {/* X symbol */}
-        <line
-          x1={center - crossSize}
-          y1={center - crossSize}
-          x2={center + crossSize}
-          y2={center + crossSize}
-          stroke={fillColor}
-          strokeWidth={strokeWidth * 1.5}
-          strokeLinecap="round"
-        />
-        <line
-          x1={center + crossSize}
-          y1={center - crossSize}
-          x2={center - crossSize}
-          y2={center + crossSize}
-          stroke={fillColor}
-          strokeWidth={strokeWidth * 1.5}
-          strokeLinecap="round"
-        />
-      </svg>
+      <FlowFinalShape
+        selected={selected}
+        size={size}
+        fillColor={fillColor}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+      />
     </div>
   );
 }

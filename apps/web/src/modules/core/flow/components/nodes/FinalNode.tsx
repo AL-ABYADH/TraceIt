@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { FinalShape } from "@/modules/features/activity-diagram/components/FinalShape";
 
 interface FinalNodeProps {
   selected?: boolean;
@@ -62,39 +63,13 @@ export function FinalNode({
         }}
       />
 
-      {/* SVG for final node - white background with black circles */}
-      <svg
-        width={size}
-        height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        style={{
-          display: "block",
-          position: "absolute",
-          left: 0,
-          top: 0,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-        focusable={false}
-      >
-        {/* White background circle */}
-        <circle
-          cx={center}
-          cy={center}
-          r={outerRadius}
-          fill="white" // White background
-          stroke={strokeColor} // Black border
-          strokeWidth={strokeWidth}
-        />
-        {/* Inner black circle */}
-        <circle
-          cx={center}
-          cy={center}
-          r={innerRadius}
-          fill={fillColor} // Black inner circle
-          stroke="none" // No stroke on inner circle
-        />
-      </svg>
+      <FinalShape
+        selected={selected}
+        size={size}
+        fillColor={fillColor}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+      />
     </div>
   );
 }

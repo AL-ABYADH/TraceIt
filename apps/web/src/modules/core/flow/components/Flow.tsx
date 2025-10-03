@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ReactFlow,
   Controls,
@@ -9,6 +9,7 @@ import {
   NodeChange,
   EdgeChange,
   Connection,
+  Viewport,
 } from "@xyflow/react";
 import { getEdgeTypesForReactFlow, getNodeTypesForReactFlow } from "@/modules/core/flow/registry";
 import {
@@ -26,19 +27,25 @@ import {
   onEdgesChange,
   selectIsSynced,
   markAsSynced,
+  updateViewport,
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { Undo, Redo, Save } from "lucide-react";
-import { DiagramElementsDto, EdgeDto, NodeDto } from "@repo/shared-schemas";
+import { Undo, Redo, Save, Plus } from "lucide-react";
+import { DiagramElementsDto, DiagramType, EdgeDto, NodeDto, NodeType } from "@repo/shared-schemas";
 import Loading from "@/components/Loading";
+import FlowNodeSelection from "./FlowNodeSelection";
 
 type Props = {
   onConnect: (conn: Connection) => void;
+  onAddNode: (nodeType: NodeType) => void;
   onSave?: (elements: DiagramElementsDto) => void;
   isSaving?: boolean;
+  type: DiagramType;
 };
 
-export default function Flow({ onConnect, onSave, isSaving }: Props) {
+export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: Props) {
+  const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
+
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
   const canUndo = useSelector(selectCanUndo);
@@ -55,13 +62,13 @@ export default function Flow({ onConnect, onSave, isSaving }: Props) {
     if (canUndo) {
       dispatch(undo());
     }
-  }, [dispatch]);
+  }, [dispatch, canUndo]);
 
   const handleRedo = useCallback(() => {
     if (canRedo) {
       dispatch(redo());
     }
-  }, [dispatch]);
+  }, [dispatch, canRedo]);
 
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -132,6 +139,13 @@ export default function Flow({ onConnect, onSave, isSaving }: Props) {
     [nodes, edges, dispatch, canUndo, canRedo, handleSave],
   );
 
+  const handleUpdateViewport = useCallback(
+    (viewport: Viewport) => {
+      dispatch(updateViewport(viewport));
+    },
+    [dispatch],
+  );
+
   useEffect(() => {
     if (!isSynced) {
       onSave?.({
@@ -151,6 +165,13 @@ export default function Flow({ onConnect, onSave, isSaving }: Props) {
 
   return (
     <div style={{ width: "100%", height: "600px" }}>
+      <FlowNodeSelection
+        isOpen={isActorsDialogOpen}
+        onClose={() => setIsActorsDialogOpen(false)}
+        type={type}
+        onClick={onAddNode}
+      />
+
       {isSaving && onSave && <Loading isOpen={isSaving} message="Saving..." />}
 
       <div className="relative top-2 right-2">
@@ -175,6 +196,12 @@ export default function Flow({ onConnect, onSave, isSaving }: Props) {
             <Save />
           </button>
         )}
+        <button
+          onClick={() => setIsActorsDialogOpen(true)}
+          className="p-3 rounded-lg text-foreground"
+        >
+          <Plus />
+        </button>
       </div>
 
       <ReactFlow
@@ -188,6 +215,7 @@ export default function Flow({ onConnect, onSave, isSaving }: Props) {
         connectionLineType={ConnectionLineType.Straight}
         proOptions={{ hideAttribution: true }}
         colorMode="dark"
+        onViewportChange={handleUpdateViewport}
         fitView
       >
         <Controls />

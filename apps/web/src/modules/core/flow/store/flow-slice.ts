@@ -78,7 +78,7 @@ interface SetSelectedElementsPayload {
   edges?: string[];
 }
 
-type AddNodePayload = Omit<MakeOptional<Node, "position">, "id">;
+type AddNodePayload = Omit<MakeOptional<Node, "position" | "data">, "id">;
 type AddEdgeManuallyPayload = Edge & { source: string; target: string };
 
 // ===================
@@ -102,12 +102,26 @@ const statesAreEqual = (state1: FlowSnapshot | null, state2: FlowSnapshot | null
 const mapData = (element: NodeDto | EdgeDto): Node | Edge => {
   return {
     ...element,
-    data: element.data !== null && element.data !== undefined ? element.data! : { id: element.id },
+    data: element.data !== null && element.data !== undefined ? element.data! : {},
   };
 };
 
 const mapNodes = (nodes: NodeDto[]): Node[] => nodes.map((node) => mapData(node) as Node);
 const mapEdges = (edges: EdgeDto[]): Edge[] => edges.map((edge) => mapData(edge) as Edge);
+
+// Calculate the center position of the current viewport
+const getViewportCenter = (viewport: Viewport) => {
+  // Assume a standard viewport size - you might want to make this configurable
+  const viewportWidth = 1000; // Default viewport width
+  const viewportHeight = 600; // Default viewport height
+
+  // Convert viewport coordinates to flow coordinates
+  // The viewport represents the visible area, so we need to account for zoom and pan
+  const centerX = (-viewport.x + viewportWidth / 2) / viewport.zoom;
+  const centerY = (-viewport.y + viewportHeight / 2) / viewport.zoom;
+
+  return { x: centerX, y: centerY };
+};
 
 // ===================
 // INITIAL STATE
@@ -233,11 +247,15 @@ const flow = createSlice({
 
     addNode: (state, action: PayloadAction<AddNodePayload>) => {
       const id = uuidv4();
+
+      // Use viewport center as default position if not provided
+      const defaultPosition = action.payload.position ?? getViewportCenter(state.viewport);
+
       const newNode: Node = {
         id,
         type: action.payload.type,
-        data: action.payload.data ?? { id },
-        position: action.payload.position ?? { x: 0, y: 0 },
+        data: action.payload.data ?? {},
+        position: defaultPosition,
       };
       state.nodes.push(newNode);
       state.isDirty = true;

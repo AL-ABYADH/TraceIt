@@ -13,7 +13,6 @@ interface ActivityShapeProps {
   strokeColor?: string;
   strokeWidth?: number;
   textColor?: string;
-  borderRadius?: number;
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
@@ -32,7 +31,6 @@ export function ActivityShape({
   strokeColor = selected ? "var(--primary)" : "#fff",
   strokeWidth = 2,
   textColor = "#fff",
-  borderRadius, // Remove default to use dynamic calculation
   className,
   style,
   onClick,
