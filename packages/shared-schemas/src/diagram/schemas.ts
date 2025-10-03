@@ -54,6 +54,7 @@ export const nodeSchema = z.object({
       id: uuidFieldDoc,
     })
     .catchall(z.any())
+    .nullable()
     .optional(),
 });
 
@@ -96,6 +97,7 @@ export const edgeSchema = z
         id: uuidFieldDoc,
       })
       .catchall(z.any())
+      .nullable()
       .optional(),
   })
   .openapi({ title: "EdgeDto" });
