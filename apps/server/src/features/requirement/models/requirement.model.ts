@@ -1,6 +1,7 @@
 import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/custom-neogma";
-import { UseCaseAttributes } from "../../use-case/models/use-case.model";
+import { SecondaryUseCaseAttributes } from "src/features/use-case/models/secondary-use-case.model";
 import { ActorAttributes } from "../../actor/models/actor.model";
+import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { RequirementExceptionAttributes } from "./requirement-exception.model";
 
 export type RequirementAttributes = {
@@ -12,11 +13,12 @@ export type RequirementAttributes = {
 };
 
 export interface RequirementRelationships {
-  useCase: UseCaseAttributes;
+  useCase?: UseCaseAttributes;
+  secondaryUseCase?: SecondaryUseCaseAttributes;
   actors?: ActorAttributes[];
   nestedRequirements?: RequirementAttributes[];
   exceptions?: RequirementExceptionAttributes[];
-  exceptionRequirement?: RequirementExceptionAttributes[];
+  requirementException?: RequirementExceptionAttributes;
 }
 
 export type RequirementModelType = NeogmaModel<RequirementAttributes, RequirementRelationships>;
@@ -46,16 +48,22 @@ export const RequirementModel: ModelFactoryDefinition<
       direction: "out",
       cardinality: "one",
     },
+    secondaryUseCase: {
+      model: "SecondaryUseCase",
+      name: "SUB_FLOW_FOR",
+      direction: "in",
+      cardinality: "one",
+    },
     actors: {
       model: "Actor",
-      name: "BELONGS_TO",
+      name: "HAS_ACTOR",
       direction: "out",
       cardinality: "many",
     },
     nestedRequirements: {
       model: "self",
-      name: "BELONGS_TO",
-      direction: "out",
+      name: "DETAILS",
+      direction: "in",
       cardinality: "many",
     },
     exceptions: {
@@ -64,11 +72,11 @@ export const RequirementModel: ModelFactoryDefinition<
       direction: "in",
       cardinality: "many",
     },
-    exceptionRequirement: {
+    requirementException: {
       model: "RequirementException",
       name: "BELONGS_TO",
-      direction: "in",
-      cardinality: "many",
+      direction: "out",
+      cardinality: "one",
     },
   },
 });

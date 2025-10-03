@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
-import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { ProjectService } from "../../../project/services/project/project.service";
-import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
+import { RequirementService } from "../../../requirement/services/requirement.service";
 import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
 import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
-import { RequirementService } from "../../../requirement/services/requirement.service";
+import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
+import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
+import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
 
 /**
  * Service for managing secondary use cases, including their relationships
@@ -47,16 +47,15 @@ export class SecondaryUseCaseService {
       }
 
       // Create the secondary use case
-      const useCase = await this.secondaryUseCaseRepository.create(createDto);
+      const secondaryUseCase = await this.secondaryUseCaseRepository.create(createDto);
 
       // Transfer nested requirements to the secondary use case
-      await this.requirementService.transferNestedRequirementsToSecondaryUseCase(
+      await this.requirementService.setParentRequirementToSecondaryUseCase(
         requirement.id,
-        createDto.primaryUseCaseId,
-        useCase.id,
+        secondaryUseCase.id,
       );
 
-      return useCase;
+      return secondaryUseCase;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new BadRequestException(error.message);

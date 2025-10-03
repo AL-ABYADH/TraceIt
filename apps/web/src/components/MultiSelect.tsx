@@ -1,7 +1,7 @@
 "use client";
 
-import { forwardRef, useState, useEffect } from "react";
 import clsx from "clsx";
+import { forwardRef, useMemo, useState } from "react";
 
 interface MultiSelectOption {
   value: string;
@@ -33,7 +33,10 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
       }
     };
 
-    // Filter options based on search
+    const selectedLabels = useMemo(() => {
+      return options.filter((opt) => value.includes(opt.value)).map((opt) => opt.label);
+    }, [options, value]);
+
     const filteredOptions = options.filter((o) =>
       o.label.toLowerCase().includes(search.toLowerCase()),
     );
@@ -54,8 +57,8 @@ const MultiSelect = forwardRef<HTMLDivElement, MultiSelectProps>(
             className="px-3 py-2 flex justify-between items-center"
             onClick={() => !disabled && setIsOpen(!isOpen)}
           >
-            <span>
-              {value.length === 0 ? placeholder || "Select…" : `${value.length} selected`}
+            <span className="truncate">
+              {selectedLabels.length === 0 ? placeholder || "Select…" : selectedLabels.join(", ")}
             </span>
             <svg
               className={clsx("w-5 h-5 transition-transform", isOpen && "rotate-180")}
