@@ -22,8 +22,8 @@
   --muted-foreground: #a1a1aa;
   --accent: #262626;
   --accent-foreground: #ffffff;
-  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
+  --destructive: #ef4444;
   --ring: #4f9cf9;
   --radius: 0.75rem;
 }
