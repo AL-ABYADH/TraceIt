@@ -6,20 +6,18 @@ import ActorShape from "./ActorShape";
 import { ActorDto } from "@repo/shared-schemas";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
+import { useParams } from "next/navigation";
 
 interface ActorSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string;
   onActorClick: (actor: ActorDto) => void;
 }
 
-export default function ActorSelection({
-  isOpen,
-  onClose,
-  projectId,
-  onActorClick,
-}: ActorSelectionProps) {
+export default function ActorSelection({ isOpen, onClose, onActorClick }: ActorSelectionProps) {
+  const params = useParams<"/projects/[project-id]/use-case-diagram">();
+  const projectId = params["project-id"];
+
   const { data, isError, isLoading, error } = useActors(projectId);
 
   return (

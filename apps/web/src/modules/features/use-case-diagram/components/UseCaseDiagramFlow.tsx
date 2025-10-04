@@ -25,13 +25,7 @@ import Flow from "@/modules/core/flow/components/Flow";
 import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
 import ErrorMessage from "@/components/ErrorMessage";
 
-export default function UseCaseDiagramFlow({
-  diagram,
-  projectId,
-}: {
-  diagram: DiagramDetailDto;
-  projectId: string;
-}) {
+export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetailDto }) {
   const [isUseCasesDialogOpen, setIsUseCasesDialogOpen] = useState(false);
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
   const [isEdgeTypeDialogOpen, setIsEdgeTypeDialogOpen] = useState(false);
@@ -118,13 +112,11 @@ export default function UseCaseDiagramFlow({
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
-        projectId={projectId}
         onUseCaseClick={(useCase) => handleAddUseCase(useCase.id)}
       />
       <ActorSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
-        projectId={projectId}
         onActorClick={(actor) => handleAddActor(actor.id)}
       />
       <UseCaseEdgeTypesSelection

@@ -6,20 +6,22 @@ import { UseCaseListDto } from "@repo/shared-schemas";
 import { UseCaseShape } from "./UseCaseShape";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import { useParams } from "next/navigation";
 
 interface UseCaseSelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string;
   onUseCaseClick: (useCase: UseCaseListDto) => void;
 }
 
 export default function UseCaseSelection({
   isOpen,
   onClose,
-  projectId,
   onUseCaseClick,
 }: UseCaseSelectionProps) {
+  const params = useParams<"/projects/[project-id]/use-case-diagram">();
+  const projectId = params["project-id"];
+
   const { data, isError, isLoading, error } = useUseCases(projectId);
 
   return (

@@ -30,5 +30,5 @@ export default function UseCaseDiagramPage() {
     return <CreateUseCaseDiagram projectId={projectId} />;
   }
 
-  return <UseCaseDiagramFlow diagram={data!} projectId={projectId} />;
+  return <UseCaseDiagramFlow diagram={data!} />;
 }
