@@ -12,7 +12,6 @@ import {
 } from "@/modules/core/flow/store/flow-slice";
 import { useActivityDiagram } from "../hooks/useActivityDiagram";
 import { Connection } from "@xyflow/react";
-import Button from "@/components/Button";
 import { useParams } from "next/navigation";
 import ActivitySelection from "./ActivitySelection";
 import DecisionSelection from "./DecisionSelection";
