@@ -6,23 +6,28 @@ import {
   addNode,
   loadFlowData,
   onConnect,
-  selectDiagramId,
   selectEdges,
   selectNodes,
+  selectDiagramId,
 } from "@/modules/core/flow/store/flow-slice";
-import { useActivityDiagram } from "../hooks/useActivityDiagram";
 import { Connection } from "@xyflow/react";
 import { useParams } from "next/navigation";
 import ActivitySelection from "./ActivitySelection";
 import DecisionSelection from "./DecisionSelection";
 import DecisionEdgeTypesSelection from "./DecisionEdgeTypesSelection";
-import { DiagramType, EdgeType, NodeType } from "@repo/shared-schemas";
+import {
+  DiagramDetailDto,
+  DiagramType,
+  EdgeType,
+  NodeType,
+  DiagramElementsDto,
+} from "@repo/shared-schemas";
 import Flow from "@/modules/core/flow/components/Flow";
-import Loading from "@/components/Loading";
+import { useUpdateDiagram } from "@/modules/features/use-case-diagram/hooks/useUpdateDiagram";
 import ErrorMessage from "@/components/ErrorMessage";
 
-export default function ActivityDiagramFlow() {
-  const params = useParams<"/projects/[project-id]/use-case-diagram">();
+export default function ActivityDiagramFlow({ diagram }: { diagram: DiagramDetailDto }) {
+  const params = useParams<"/projects/[project-id]/activity-diagrams">();
   const projectId = params["project-id"];
 
   const [isActivitiesDialogOpen, setIsActivitiesDialogOpen] = useState(false);
@@ -38,13 +43,14 @@ export default function ActivityDiagramFlow() {
   const edges = useSelector(selectEdges);
   const diagramId = useSelector(selectDiagramId);
 
+  const updateDiagramMutation = useUpdateDiagram({ diagramId: diagramId! });
+
   // Check if initial node already exists
   const hasInitialNode = nodes.some((node) => node.type === NodeType.INITIAL_NODE);
   // Check if final node already exists
   const hasFinalNode = nodes.some((node) => node.type === NodeType.FINAL_NODE);
 
   const handleAddNode = (nodeType: NodeType) => {
-    console.log(nodeType);
     switch (nodeType) {
       case NodeType.ACTIVITY:
         setIsActivitiesDialogOpen(true);
@@ -148,30 +154,33 @@ export default function ActivityDiagramFlow() {
     dispatch(onConnect({ ...conn, type: EdgeType.ACTIVITY_FLOW }));
   };
 
-  const { data, isLoading, isError, error } = useActivityDiagram(projectId);
-
   useEffect(() => {
-    if (data) {
+    if (diagram) {
       dispatch(
         loadFlowData({
-          nodes: data.nodes,
-          edges: data.edges,
-          diagramId: data.id,
+          nodes: diagram.nodes,
+          edges: diagram.edges,
+          diagramId: diagram.id,
         }),
       );
     }
-  }, [data, dispatch]);
+  }, [diagram, dispatch]);
 
-  if (isLoading) {
-    return <Loading isOpen={isLoading} message="Loading activity diagram..." mode="dialog" />;
-  }
-
-  if (isError) {
-    return <ErrorMessage message={`Error loading activity diagram: ${error!.message}`} />;
-  }
+  const handleSave = (elements: DiagramElementsDto) => {
+    if (diagramId === null) return;
+    updateDiagramMutation.mutate(elements);
+  };
 
   return (
     <>
+      {updateDiagramMutation.isError && (
+        <ErrorMessage
+          message={`Failed to save diagram: ${
+            (updateDiagramMutation.error as any)?.message ?? "Unknown error"
+          }`}
+        />
+      )}
+
       <ActivitySelection
         isOpen={isActivitiesDialogOpen}
         onClose={() => setIsActivitiesDialogOpen(false)}
@@ -200,7 +209,13 @@ export default function ActivityDiagramFlow() {
         sourceNodeId={decisionSourceNodeId}
       />
 
-      <Flow onConnect={handleConnect} onAddNode={handleAddNode} type={DiagramType.ACTIVITY} />
+      <Flow
+        onConnect={handleConnect}
+        onAddNode={handleAddNode}
+        onSave={handleSave}
+        isSaving={updateDiagramMutation.isPending}
+        type={DiagramType.ACTIVITY}
+      />
     </>
   );
 }
