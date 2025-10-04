@@ -1,31 +1,25 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, type SelectHTMLAttributes } from "react";
+import type { ReactNode } from "react";
 import { ChevronDownIcon } from "lucide-react";
 
-interface SelectFieldProps {
+interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   placeholder?: string;
   error?: string;
-  disabled?: boolean;
   className?: string;
-  defaultValue?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
-  (
-    { label, placeholder, error, disabled, className = "", defaultValue, children, ...props },
-    ref,
-  ) => {
+  ({ label, placeholder, error, className = "", children, ...props }, ref) => {
     return (
       <div className="space-y-2 my-5">
         {label && <label className="block text-sm font-medium text-foreground">{label}</label>}
         <div className="relative">
           <select
             ref={ref}
-            disabled={disabled}
-            defaultValue={defaultValue} // ✅ Pass the default value
             className={`
               w-full px-4 py-3 rounded-xl appearance-none
               bg-input border border-border
