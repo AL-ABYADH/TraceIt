@@ -11,7 +11,6 @@ import {
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
 import { Connection } from "@xyflow/react";
-import Button from "@/components/Button";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
 import {
