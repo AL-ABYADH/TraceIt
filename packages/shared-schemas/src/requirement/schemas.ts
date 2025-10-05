@@ -102,7 +102,8 @@ export const requirementRelationshipsSchema = z
 
 export const requirementExceptionRelationshipsSchema = z
   .object({
-    requirements: z.array(requirementListSchema),
+    // Use full Requirement detail so exception.requirements include relationships (actors, nested, exceptions, ...)
+    requirements: z.array(z.lazy(() => requirementDetailSchema)),
   })
   .openapi({ title: "RequirementExceptionRelationships" });
 
