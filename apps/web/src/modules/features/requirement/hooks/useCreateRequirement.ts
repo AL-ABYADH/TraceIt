@@ -1,5 +1,6 @@
 import { CreateRequirementDto } from "@repo/shared-schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react"; // <-- Add this line
 import { requirementClient } from "../api/clients/requirement-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
 
@@ -10,15 +11,21 @@ type UseCreateRequirementOptions = {
 
 export function useCreateRequirement(useCaseId: string, opts?: UseCreateRequirementOptions) {
   const qc = useQueryClient();
+  console.log("Using useCreateRequirement with useCaseId:", useCaseId);
 
+  const [isUpdating, setIsUpdating] = useState(false);
   const mutation = useMutation({
-    mutationFn: (requirement: CreateRequirementDto) =>
-      requirementClient.createRequirement(requirement),
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: requirementQueryKeys.useCaseRequirementList(useCaseId) });
+    mutationFn: (requirement: CreateRequirementDto) => {
+      setIsUpdating(true);
+      return requirementClient.createRequirement(requirement);
+    },
+    onSettled: async () => {
+      await qc.invalidateQueries({
+        queryKey: requirementQueryKeys.useCaseRequirementList(useCaseId),
+      });
+      setIsUpdating(false);
     },
     onSuccess: (data, variables) => {
-      qc.invalidateQueries({ queryKey: requirementQueryKeys.useCaseRequirementList(useCaseId) });
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
@@ -29,5 +36,5 @@ export function useCreateRequirement(useCaseId: string, opts?: UseCreateRequirem
   const mutate = (requirement: CreateRequirementDto) => mutation.mutate(requirement);
   const mutateAsync = (requirement: CreateRequirementDto) => mutation.mutateAsync(requirement);
 
-  return { ...mutation, mutate, mutateAsync };
+  return { ...mutation, mutate, mutateAsync, isUpdating };
 }

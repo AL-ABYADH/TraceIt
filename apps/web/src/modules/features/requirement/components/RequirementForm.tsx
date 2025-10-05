@@ -18,6 +18,7 @@ import RequirementPreview from "./RequirementPreview";
 interface RequirementFormProps {
   isOpen: boolean;
   onClose: () => void;
+  validatedUseCaseId: string;
   useCaseId?: string;
   projectId: string;
   parentRequirementId?: string;
@@ -27,6 +28,7 @@ interface RequirementFormProps {
 export default function RequirementForm({
   isOpen,
   onClose,
+  validatedUseCaseId,
   useCaseId,
   projectId,
   parentRequirementId,
@@ -57,7 +59,8 @@ export default function RequirementForm({
 
   const { data: actors = [], isLoading: actorsLoading } = useActors(projectId);
 
-  const createRequirement = useCreateRequirement(useCaseId ?? "", {
+  // Always use validatedUseCaseId for cache invalidation
+  const createRequirement = useCreateRequirement(validatedUseCaseId, {
     onSuccess: () => {
       reset();
       setServerError(null);
@@ -83,7 +86,6 @@ export default function RequirementForm({
     if (!payload.useCaseId) delete payload.useCaseId;
     if (!payload.exceptionId) delete payload.exceptionId;
     if (!payload.parentRequirementId) delete payload.parentRequirementId;
-
     createRequirement.mutate(payload as CreateRequirementDto);
   };
 
@@ -98,10 +100,12 @@ export default function RequirementForm({
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Requirement" className="max-w-2xl">
-      {(createRequirement.isPending || isSubmitting) && (
+      {(createRequirement.isPending || isSubmitting || createRequirement.isUpdating) && (
         <Loading
-          isOpen={createRequirement.isPending || isSubmitting}
-          message="Adding requirement..."
+          isOpen={createRequirement.isPending || isSubmitting || createRequirement.isUpdating}
+          message={
+            createRequirement.isUpdating ? "Updating requirements list..." : "Adding requirement..."
+          }
         />
       )}
       {serverError && <ErrorMessage message={serverError} />}

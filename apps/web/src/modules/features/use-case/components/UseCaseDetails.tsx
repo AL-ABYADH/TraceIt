@@ -8,6 +8,8 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import MainFlowSection from "../../requirement/components/MainFlowSection";
 import RecursiveFlowSection from "../../requirement/components/RecursiveFlowSection";
+import _ from "lodash";
+// If you need types, run: pnpm add -D @types/lodash
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import UseCaseForm from "./UseCaseForm";
 
@@ -38,6 +40,9 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
   const secondaryActors = data.secondaryActors?.map((a) => a.name).join(", ") || "—";
   const description = data.description || "—";
 
+  // Deep clone requirements to force re-render on nested changes
+  const clonedRequirements = _.cloneDeep(requirements);
+
   return (
     <div className="p-6">
       <div className="rounded-lg bg-card text-card-foreground shadow-sm border p-6 max-w-3xl mx-auto">
@@ -59,9 +64,17 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
         </div>
 
         {/* Flows */}
-        <MainFlowSection requirements={requirements} projectId={projectId} />
-        <RecursiveFlowSection requirements={requirements} type="S" projectId={projectId} />
-        <RecursiveFlowSection requirements={requirements} type="E" projectId={projectId} />
+        <MainFlowSection
+          requirements={clonedRequirements}
+          projectId={projectId}
+          validatedUseCaseId={useCaseId}
+        />
+        <RecursiveFlowSection
+          requirements={clonedRequirements}
+          type="S"
+          projectId={projectId}
+          validatedUseCaseId={useCaseId}
+        />
 
         <UseCaseForm
           isOpen={isEditOpen}

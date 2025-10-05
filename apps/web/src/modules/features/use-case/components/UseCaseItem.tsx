@@ -90,6 +90,7 @@ export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemP
         isOpen={isRequirementFormOpen}
         onClose={handleCloseRequirementForm}
         useCaseId={useCase.id}
+        validatedUseCaseId={useCase.id}
         projectId={projectId}
       />
     </div>
