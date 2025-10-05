@@ -4,7 +4,6 @@ import UseCaseNode from "./components/nodes/UseCaseNode";
 import IncludesEdge from "./components/edges/IncludesEdge";
 import ExtendsEdge from "./components/edges/ExtendsEdge";
 import { EdgeType, NodeType } from "@repo/shared-schemas";
-import { register } from "module";
 import ActorNode from "./components/nodes/ActorNode";
 import AssociationEdge from "./components/edges/AssociationEdge";
 import ActivityNode from "./components/nodes/ActivityNode";

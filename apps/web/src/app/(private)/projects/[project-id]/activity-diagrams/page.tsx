@@ -1,0 +1,125 @@
+"use client";
+
+import ErrorMessage from "@/components/ErrorMessage";
+import Loading from "@/components/Loading";
+import ActivityDiagramFlow from "@/modules/features/activity-diagram/components/ActivityDiagramFlow";
+import CreateActivityDiagram from "@/modules/features/activity-diagram/components/CreateActivityDiagram";
+import { useActivityDiagram } from "@/modules/features/activity-diagram/hooks/useActivityDiagram";
+import { useUseCases } from "@/modules/features/use-case/hooks/useUseCases";
+import { ApiError } from "@/services/api/api-errors";
+import { useParams, useRouter } from "next/navigation";
+import SelectField from "@/components/SelectField";
+import Button from "@/components/Button";
+import { useEffect, useMemo, useState } from "react";
+import { route } from "nextjs-routes";
+
+export default function UseCaseDiagramPage() {
+  const params = useParams<"/projects/[project-id]/activity-diagrams">();
+  const router = useRouter();
+  const projectId = params["project-id"];
+
+  const {
+    data: useCases,
+    isError: isUseCasesError,
+    isLoading: isUseCasesLoading,
+    error: useCasesError,
+  } = useUseCases(projectId);
+
+  const [selectedUseCaseId, setSelectedUseCaseId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!useCases || useCases.length === 0) return;
+    if (!selectedUseCaseId) {
+      const def = useCases[0];
+      setSelectedUseCaseId(def?.id);
+    }
+  }, [useCases, selectedUseCaseId]);
+
+  const selectedUseCase = useMemo(
+    () => useCases?.find((u) => u.id === selectedUseCaseId),
+    [useCases, selectedUseCaseId],
+  );
+
+  const {
+    data: activityDiagram,
+    isLoading: isActivityDiagramLoading,
+    isError: isActivityDiagramError,
+    error: activityDiagramError,
+  } = useActivityDiagram(selectedUseCaseId);
+
+  if (isUseCasesLoading) {
+    return <Loading isOpen={isUseCasesLoading} message="Loading use cases..." mode="dialog" />;
+  }
+
+  if (isUseCasesError) {
+    return <ErrorMessage message={useCasesError.message} />;
+  }
+
+  // No use cases at all -> show CTA to create one
+  if (!useCases || useCases.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <h2 className="text-xl font-semibold text-gray-200">No use cases found</h2>
+        <p className="text-gray-400 text-center max-w-md">
+          Create a use case first, then you can view and edit its activity diagram.
+        </p>
+        <Button
+          onClick={() =>
+            router.push(
+              route({
+                pathname: "/projects/[project-id]/use-cases",
+                query: { "project-id": projectId },
+              }),
+            )
+          }
+        >
+          Go to Use Cases
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="max-w-md">
+        <SelectField
+          label="Use Case"
+          placeholder="Select a use case"
+          value={selectedUseCaseId ?? ""}
+          onChange={(e) => setSelectedUseCaseId(e.target.value)}
+        >
+          {useCases.map((uc) => (
+            <option key={uc.id} value={uc.id}>
+              {uc.name}
+            </option>
+          ))}
+        </SelectField>
+      </div>
+
+      {isActivityDiagramLoading && selectedUseCase && (
+        <Loading
+          isOpen={isActivityDiagramLoading}
+          message={`Loading activity diagram for use case: ${selectedUseCase.name}...`}
+          mode="dialog"
+        />
+      )}
+
+      {isActivityDiagramError &&
+        (!(activityDiagramError instanceof ApiError) ||
+          (activityDiagramError instanceof ApiError &&
+            activityDiagramError.statusCode !== 404)) && (
+          <ErrorMessage
+            message={`Error loading activity diagram for use case: ${selectedUseCase?.name} : ${activityDiagramError!.message}`}
+          />
+        )}
+
+      {!isActivityDiagramLoading && !activityDiagram && selectedUseCaseId && (
+        <CreateActivityDiagram useCaseId={selectedUseCaseId} projectId={projectId} />
+      )}
+
+      {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
+        <ActivityDiagramFlow diagram={activityDiagram} />
+      )}
+    </div>
+  );
+}

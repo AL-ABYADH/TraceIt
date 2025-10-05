@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { MergeShape } from "@/modules/features/activity-diagram/components/MergeShape";
 
 interface MergeNodeProps {
   selected?: boolean;
@@ -110,33 +111,13 @@ export function MergeNode({
         }}
       />
 
-      {/* SVG diamond shape for merge node */}
-      <svg
-        width={svgWidth}
-        height={svgHeight}
-        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        style={{
-          display: "block",
-          position: "absolute",
-          left: 0,
-          top: 0,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-        focusable={false}
-      >
-        <polygon
-          points={`
-            ${centerX},${strokeWidth / 2}
-            ${svgWidth - strokeWidth / 2},${centerY}
-            ${centerX},${svgHeight - strokeWidth / 2}
-            ${strokeWidth / 2},${centerY}
-          `}
-          fill={fillColor}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-        />
-      </svg>
+      <MergeShape
+        selected={selected}
+        size={size}
+        fillColor={fillColor}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+      />
     </div>
   );
 }

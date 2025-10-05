@@ -4,6 +4,8 @@ import Dialog from "@/components/Dialog";
 import { useActivities } from "../hooks/useActivities";
 import { ActivityListDto } from "@repo/shared-schemas";
 import { DecisionShape } from "./DecisionShape";
+import Loading from "@/components/Loading";
+import ErrorMessage from "@/components/ErrorMessage";
 
 interface DecisionSelectionProps {
   isOpen: boolean;
@@ -27,19 +29,11 @@ export default function DecisionSelection({
       title="Add Decision(condition/Exception)"
       className="max-w-lg"
     >
-      {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-muted-foreground">Loading conditions...</div>
-        </div>
-      ) : null}
-      {isError ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-            Error loading conditions: {error!.message}
-          </div>
-        </div>
-      ) : null}
-      {data !== undefined ? (
+      {isLoading && (
+        <Loading isOpen={isLoading} message="Loading condition nodes..." mode="dialog" />
+      )}
+      {isError && <ErrorMessage message={`Error loading condition nodes: ${error!.message}`} />}
+      {data !== undefined && (
         <div className="grid grid-cols-1 gap-3 p-1 max-h-96 overflow-y-auto">
           {data.toReversed()!.map((activity) => (
             <button
@@ -61,15 +55,15 @@ export default function DecisionSelection({
             </button>
           ))}
         </div>
-      ) : null}
-      {data !== undefined && data.length === 0 ? (
+      )}
+      {data !== undefined && data.length === 0 && (
         <div className="flex items-center justify-center py-8">
           <div className="text-muted-foreground text-center">
             <p>No conditions found for this project.</p>
             <p className="text-sm mt-1">Create conditions first to add them to the diagram.</p>
           </div>
         </div>
-      ) : null}
+      )}
     </Dialog>
   );
 }

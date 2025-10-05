@@ -12,6 +12,7 @@ import {
   diagramListSchema,
   diagramDetailSchema,
   positionSchema,
+  diagramRelationshipsSchema,
 } from "./schemas";
 
 // ----------------------
@@ -25,6 +26,7 @@ export type DiagramListDto = z.infer<typeof diagramListSchema>;
 export type DiagramDetailDto = z.infer<typeof diagramDetailSchema>;
 export type CreateDiagramDto = z.infer<typeof createDiagramSchema>;
 export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
+export type DiagramElementsDto = z.infer<typeof diagramRelationshipsSchema>;
 
 // Node Types
 export type NodeDto = z.infer<typeof nodeSchema>;

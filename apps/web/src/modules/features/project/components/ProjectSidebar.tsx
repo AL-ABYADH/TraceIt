@@ -27,7 +27,7 @@ const pages = [
   },
   {
     title: "Activity Diagram",
-    href: "/projects/[project-id]/activity-diagram",
+    href: "/projects/[project-id]/activity-diagrams",
     icon: Activity,
   },
 ] as const;

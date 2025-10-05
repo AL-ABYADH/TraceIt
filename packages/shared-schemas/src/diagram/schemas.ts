@@ -51,9 +51,10 @@ export const nodeSchema = z.object({
   zIndex: zIndexFieldDoc.default(0).optional(),
   data: z
     .object({
-      id: uuidFieldDoc,
+      id: uuidFieldDoc.optional(),
     })
     .catchall(z.any())
+    .nullable()
     .optional(),
 });
 
@@ -93,9 +94,10 @@ export const edgeSchema = z
     zIndex: zIndexFieldDoc.default(0).optional(),
     data: z
       .object({
-        id: uuidFieldDoc,
+        id: uuidFieldDoc.optional(),
       })
       .catchall(z.any())
+      .nullable()
       .optional(),
   })
   .openapi({ title: "EdgeDto" });

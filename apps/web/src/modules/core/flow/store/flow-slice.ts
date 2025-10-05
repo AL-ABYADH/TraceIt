@@ -1,6 +1,8 @@
 import { RootState } from "@/store/store";
+import { MakeOptional } from "@/types/make-optional";
 import { createSlice, PayloadAction, createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
-import { EdgeType } from "@repo/shared-schemas";
+import { v4 as uuidv4 } from "uuid";
+import { EdgeDto, EdgeType, NodeDto } from "@repo/shared-schemas";
 import {
   Node,
   Edge,
@@ -34,6 +36,7 @@ export interface FlowState {
   // Core flow data
   nodes: Node[];
   edges: Edge[];
+  diagramId: string | null;
 
   // Selection state
   selectedNodes: string[];
@@ -47,6 +50,7 @@ export interface FlowState {
 
   // Change tracking
   isDirty: boolean;
+  isSynced: boolean;
   lastSavedState: FlowSnapshot | null;
 
   // Flag to temporarily disable history tracking (internal use)
@@ -54,8 +58,9 @@ export interface FlowState {
 }
 
 interface LoadFlowDataPayload {
-  nodes: Node[];
-  edges: Edge[];
+  nodes: NodeDto[];
+  edges: EdgeDto[];
+  diagramId: string;
 }
 
 interface UpdateNodePayload {
@@ -72,6 +77,9 @@ interface SetSelectedElementsPayload {
   nodes?: string[];
   edges?: string[];
 }
+
+type AddNodePayload = Omit<MakeOptional<Node, "position" | "data">, "id">;
+type AddEdgeManuallyPayload = Edge & { source: string; target: string };
 
 // ===================
 // HELPER FUNCTIONS
@@ -91,6 +99,30 @@ const statesAreEqual = (state1: FlowSnapshot | null, state2: FlowSnapshot | null
   );
 };
 
+const mapData = (element: NodeDto | EdgeDto): Node | Edge => {
+  return {
+    ...element,
+    data: element.data !== null && element.data !== undefined ? element.data! : {},
+  };
+};
+
+const mapNodes = (nodes: NodeDto[]): Node[] => nodes.map((node) => mapData(node) as Node);
+const mapEdges = (edges: EdgeDto[]): Edge[] => edges.map((edge) => mapData(edge) as Edge);
+
+// Calculate the center position of the current viewport
+const getViewportCenter = (viewport: Viewport) => {
+  // Assume a standard viewport size - you might want to make this configurable
+  const viewportWidth = 1000; // Default viewport width
+  const viewportHeight = 600; // Default viewport height
+
+  // Convert viewport coordinates to flow coordinates
+  // The viewport represents the visible area, so we need to account for zoom and pan
+  const centerX = (-viewport.x + viewportWidth / 2) / viewport.zoom;
+  const centerY = (-viewport.y + viewportHeight / 2) / viewport.zoom;
+
+  return { x: centerX, y: centerY };
+};
+
 // ===================
 // INITIAL STATE
 // ===================
@@ -98,6 +130,7 @@ const statesAreEqual = (state1: FlowSnapshot | null, state2: FlowSnapshot | null
 const initialState: FlowState = {
   nodes: [],
   edges: [],
+  diagramId: null,
   selectedNodes: [],
   selectedEdges: [],
   viewport: { x: 0, y: 0, zoom: 1 },
@@ -108,6 +141,7 @@ const initialState: FlowState = {
     maxHistorySize: 50,
   },
   isDirty: false,
+  isSynced: true,
   lastSavedState: null,
   _skipHistory: false,
 };
@@ -126,19 +160,20 @@ const flow = createSlice({
 
     loadFlowData: (state, action: PayloadAction<LoadFlowDataPayload>) => {
       const { nodes, edges } = action.payload;
-      state.nodes = nodes;
-      state.edges = edges;
+      state.nodes = mapNodes(nodes);
+      state.edges = mapEdges(edges);
+      state.diagramId = action.payload.diagramId;
       state.selectedNodes = [];
       state.selectedEdges = [];
       state.isDirty = false;
 
       // Set as last saved state
-      state.lastSavedState = createSnapshot(nodes, edges);
+      state.lastSavedState = createSnapshot(mapNodes(nodes), mapEdges(edges));
 
       // Clear history and set initial state
       state.history = {
         past: [],
-        present: createSnapshot(nodes, edges),
+        present: createSnapshot(mapNodes(nodes), mapEdges(edges)),
         future: [],
         maxHistorySize: 50,
       };
@@ -149,7 +184,12 @@ const flow = createSlice({
 
     markAsSaved: (state) => {
       state.isDirty = false;
+      state.isSynced = false;
       state.lastSavedState = createSnapshot(state.nodes, state.edges);
+    },
+
+    markAsSynced: (state) => {
+      state.isSynced = true;
     },
 
     // ===================
@@ -189,9 +229,9 @@ const flow = createSlice({
     onConnect: (state, action: PayloadAction<Connection & { type: EdgeType; data?: any }>) => {
       if (action.payload.target === action.payload.source) return;
       const newEdge: Edge = {
-        id: `e${action.payload.source}-${action.payload.target}-${Date.now()}`,
-        source: action.payload.source!,
-        target: action.payload.target!,
+        id: uuidv4(),
+        source: action.payload.source,
+        target: action.payload.target,
         sourceHandle: action.payload.sourceHandle,
         targetHandle: action.payload.targetHandle,
         type: action.payload.type,
@@ -205,12 +245,17 @@ const flow = createSlice({
     // NODE OPERATIONS
     // ===================
 
-    addNode: (state, action: PayloadAction<Partial<Node>>) => {
+    addNode: (state, action: PayloadAction<AddNodePayload>) => {
+      const id = uuidv4();
+
+      // Use viewport center as default position if not provided
+      const defaultPosition = action.payload.position ?? getViewportCenter(state.viewport);
+
       const newNode: Node = {
-        id: action.payload.id || `node-${Date.now()}`,
-        type: action.payload.type || "default",
-        data: action.payload.data as any,
-        position: action.payload.position ?? { x: 0, y: 0 },
+        id,
+        type: action.payload.type,
+        data: action.payload.data ?? {},
+        position: defaultPosition,
       };
       state.nodes.push(newNode);
       state.isDirty = true;
@@ -250,7 +295,7 @@ const flow = createSlice({
 
       const duplicatedNodes: Node[] = nodesToDuplicate.map((node) => ({
         ...node,
-        id: `${node.id}-copy-${Date.now()}`,
+        id: uuidv4(),
         position: {
           x: node.position.x + 50,
           y: node.position.y + 50,
@@ -270,18 +315,15 @@ const flow = createSlice({
     // EDGE OPERATIONS
     // ===================
 
-    addEdgeManually: (
-      state,
-      action: PayloadAction<Partial<Edge> & { source: string; target: string }>,
-    ) => {
+    addEdgeManually: (state, action: PayloadAction<AddEdgeManuallyPayload>) => {
       const newEdge: Edge = {
         ...action.payload,
-        id: action.payload.id || `edge-${Date.now()}`,
+        id: action.payload.id,
         source: action.payload.source,
         target: action.payload.target,
         sourceHandle: action.payload.sourceHandle,
         targetHandle: action.payload.targetHandle,
-        data: { label: "" },
+        data: action.payload.data,
       };
       state.edges.push(newEdge);
       state.isDirty = true;
@@ -500,10 +542,14 @@ flowListenerMiddleware.startListening({
 // EXPORT ACTIONS
 // ===================
 
+// Export actions with explicit type annotations to fix TypeScript inference issues
+const flowActions = flow.actions;
+
 export const {
   // Data loading
   loadFlowData,
   markAsSaved,
+  markAsSynced,
 
   // Core operations
   onNodesChange,
@@ -511,13 +557,11 @@ export const {
   onConnect,
 
   // Node operations
-  addNode,
   updateNode,
   deleteNodes,
   duplicateNodes,
 
   // Edge operations
-  addEdgeManually,
   updateEdge,
   deleteEdges,
 
@@ -536,7 +580,13 @@ export const {
   undo,
   redo,
   clearHistory,
-} = flow.actions;
+} = flowActions;
+
+export const addNode: (payload: AddNodePayload) => PayloadAction<AddNodePayload> =
+  flowActions.addNode;
+export const addEdgeManually: (
+  payload: AddEdgeManuallyPayload,
+) => PayloadAction<AddEdgeManuallyPayload> = flowActions.addEdgeManually;
 
 // Note: _saveToHistory is now internal and handled automatically by the listener middleware
 
@@ -547,10 +597,12 @@ export const {
 // Basic selectors
 export const selectNodes = (state: RootState): Node[] => state.flow.nodes;
 export const selectEdges = (state: RootState): Edge[] => state.flow.edges;
+export const selectDiagramId = (state: RootState): string | null => state.flow.diagramId;
 export const selectSelectedNodes = (state: RootState): string[] => state.flow.selectedNodes;
 export const selectSelectedEdges = (state: RootState): string[] => state.flow.selectedEdges;
 export const selectViewport = (state: RootState): Viewport => state.flow.viewport;
 export const selectIsDirty = (state: RootState): boolean => state.flow.isDirty;
+export const selectIsSynced = (state: RootState): boolean => state.flow.isSynced;
 
 // History selectors
 export const selectCanUndo = (state: RootState): boolean => state.flow.history.past.length > 0;

@@ -1,28 +1,33 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
   onConnect,
+  selectDiagramId,
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
-import { useUseCaseDiagram } from "../hooks/useUseCaseDiagram";
 import { Connection } from "@xyflow/react";
-import Button from "@/components/Button";
-import { useParams } from "next/navigation";
 import UseCaseSelection from "./UseCasesSelection";
 import ActorSelection from "./ActorsSelection";
-import { EdgeType, NodeType } from "@repo/shared-schemas";
+import {
+  DiagramDetailDto,
+  DiagramType,
+  DiagramElementsDto,
+  EdgeType,
+  NodeType,
+  UseCaseListDto,
+  ActorDto,
+} from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
+import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
+import ErrorMessage from "@/components/ErrorMessage";
 
-export default function UseCaseDiagramFlow() {
-  const params = useParams<"/projects/[project-id]/use-case-diagram">();
-  const projectId = params["project-id"];
-
+export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetailDto }) {
   const [isUseCasesDialogOpen, setIsUseCasesDialogOpen] = useState(false);
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
   const [isEdgeTypeDialogOpen, setIsEdgeTypeDialogOpen] = useState(false);
@@ -33,6 +38,32 @@ export default function UseCaseDiagramFlow() {
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
+  const diagramId = useSelector(selectDiagramId);
+
+  const updateDiagramMutation = useUpdateDiagram({ diagramId: diagramId! });
+
+  const handleAddNode = (nodeType: NodeType) => {
+    switch (nodeType) {
+      case NodeType.USE_CASE:
+        setIsUseCasesDialogOpen(true);
+        break;
+
+      case NodeType.ACTOR:
+        setIsActorsDialogOpen(true);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleAddUseCase = (useCase: UseCaseListDto) => {
+    dispatch(addNode({ type: NodeType.USE_CASE, data: useCase }));
+  };
+
+  const handleAddActor = (actor: ActorDto) => {
+    dispatch(addNode({ type: NodeType.ACTOR, data: actor }));
+  };
 
   const handleConnect = (conn: Connection) => {
     const sourceNode = nodes.find((node) => node.id === conn.source);
@@ -55,54 +86,40 @@ export default function UseCaseDiagramFlow() {
     dispatch(onConnect({ ...conn, type: EdgeType.ASSOCIATION }));
   };
 
-  const { data, isLoading, isError, error } = useUseCaseDiagram(projectId);
+  const handleSave = (elements: DiagramElementsDto) => {
+    if (diagramId === null) return;
+    updateDiagramMutation.mutate(elements);
+  };
 
   useEffect(() => {
-    if (data) {
-      dispatch(
-        loadFlowData({
-          nodes: data.nodes,
-          edges: data.edges,
-        }),
-      );
-    }
-  }, [data, dispatch]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-muted-foreground">Loading use cases...</div>
-      </div>
+    dispatch(
+      loadFlowData({
+        nodes: diagram.nodes,
+        edges: diagram.edges,
+        diagramId: diagram.id,
+      }),
     );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="text-destructive bg-destructive/10 border border-destructive/20 p-4 rounded-xl">
-          Error loading use cases: {error.message}
-        </div>
-      </div>
-    );
-  }
+  }, [diagram, dispatch]);
 
   return (
     <>
+      {updateDiagramMutation.isError && (
+        <ErrorMessage
+          message={`Failed to save diagram: ${
+            (updateDiagramMutation.error as any)?.message ?? "Unknown error"
+          }`}
+        />
+      )}
+
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
-        projectId={projectId}
-        onUseCaseClick={(useCase) =>
-          dispatch(addNode({ id: useCase.id, type: NodeType.USE_CASE, data: useCase }))
-        }
+        onUseCaseClick={(useCase) => handleAddUseCase(useCase)}
       />
       <ActorSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
-        projectId={projectId}
-        onActorClick={(actor) =>
-          dispatch(addNode({ id: actor.id, type: NodeType.ACTOR, data: actor }))
-        }
+        onActorClick={(actor) => handleAddActor(actor)}
       />
       <UseCaseEdgeTypesSelection
         onClose={() => setIsEdgeTypeDialogOpen(false)}
@@ -113,15 +130,13 @@ export default function UseCaseDiagramFlow() {
         }}
       />
 
-      <Button onClick={() => setIsUseCasesDialogOpen(true)}>Add Use Case</Button>
-      <Button
-        onClick={() => {
-          setIsActorsDialogOpen(true);
-        }}
-      >
-        Add Use Actor
-      </Button>
-      <Flow onConnect={handleConnect} />
+      <Flow
+        onConnect={handleConnect}
+        onAddNode={handleAddNode}
+        onSave={handleSave}
+        isSaving={updateDiagramMutation.isPending}
+        type={DiagramType.USE_CASE}
+      />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { JoinShape } from "@/modules/features/activity-diagram/components/JoinShape";
 
 interface JoinNodeProps {
   selected?: boolean;
@@ -120,33 +121,15 @@ export function JoinNode({
         }}
       />
 
-      {/* SVG horizontal bar (join) - EXACTLY SAME AS FORK NODE */}
-      <svg
+      <JoinShape
+        selected={selected}
         width={width}
         height={height}
-        viewBox={`0 0 ${width} ${height}`}
-        style={{
-          display: "block",
-          position: "absolute",
-          left: 0,
-          top: 0,
-          pointerEvents: "none",
-        }}
-        aria-hidden
-        focusable={false}
-      >
-        <rect
-          x={centerX - barWidth / 2}
-          y={centerY - barHeight / 2}
-          width={barWidth}
-          height={barHeight}
-          fill={fillColor} // Black background
-          stroke={strokeColor} // Blue border when selected, white when not
-          strokeWidth={strokeWidth}
-          rx={2}
-          ry={2}
-        />
-      </svg>
+        fillColor={fillColor}
+        strokeColor={strokeColor}
+        strokeWidth={strokeWidth}
+        overlay
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ export interface ActorShapeProps {
   labelColor?: string;
   labelGap?: number;
   labelLineHeight?: number;
+  onClick?: () => void;
 }
 
 export default function ActorShape({
@@ -36,6 +37,7 @@ export default function ActorShape({
   labelColor = "#fff",
   labelGap = 6,
   labelLineHeight = 16,
+  onClick,
 }: ActorShapeProps) {
   // Calculate text height based on how many lines will be needed
   const textHeight = useMemo(() => {
@@ -68,6 +70,7 @@ export default function ActorShape({
       }}
       title={name}
       aria-label={name}
+      onClick={onClick}
     >
       {/* Actor body SVG */}
       <svg
