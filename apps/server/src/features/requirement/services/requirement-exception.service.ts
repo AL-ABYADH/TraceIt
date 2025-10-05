@@ -4,6 +4,8 @@ import { CreateRequirementExceptionInterface } from "../interfaces/create-requir
 import { UpdateRequirementExceptionInterface } from "../interfaces/update-requirement.interface";
 import { RequirementException } from "../entities/requirement-exception.entity";
 import { RequirementService } from "./requirement.service";
+import { UseCaseService } from "src/features/use-case/services/use-case/use-case.service";
+import { RequirementRepository } from "../repositories/requirement.repository";
 
 /**
  * Service responsible for managing requirement exceptions, including
@@ -14,6 +16,8 @@ export class RequirementExceptionService {
   constructor(
     private readonly exceptionalRequirementRepository: ExceptionalRequirementRepository,
     private readonly requirementService: RequirementService,
+    private readonly useCaseService: UseCaseService,
+    private readonly requirementRepository: RequirementRepository,
   ) {}
 
   /**
@@ -101,5 +105,38 @@ export class RequirementExceptionService {
     }
 
     return this.exceptionalRequirementRepository.delete(id);
+  }
+
+  /**
+   * Transfers nested requirements from a primary use case to a secondary use case
+   * @param exceptionId ID of the exception
+   * @param secondaryUseCaseId ID of the target use case
+   * @returns True if transfer was successful
+   */
+  async setExceptionToSecondaryUseCase(
+    exceptionId: string,
+    secondaryUseCaseId: string,
+  ): Promise<boolean> {
+    // Verify the parent requirement and use cases exist
+    const exception = await this.findById(exceptionId);
+    await this.useCaseService.findById(secondaryUseCaseId);
+
+    if (!exception.requirements || exception.requirements.length === 0) {
+      throw new BadRequestException(`Exception with ID ${exception.id} has no requirements.`);
+    }
+    await this.exceptionalRequirementRepository.addSecondaryUseCase(
+      exception.id,
+      secondaryUseCaseId,
+    );
+
+    // Extract IDs for nested requirements
+    const requirementsIds = exception.requirements.map((req) => req.id);
+
+    // Transfer each nested requirement from the primary to the secondary use case
+    for (const reqId of requirementsIds) {
+      await this.requirementRepository.addUseCase(reqId, secondaryUseCaseId);
+    }
+
+    return true;
   }
 }

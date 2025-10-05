@@ -30,6 +30,11 @@ export class ExceptionalRequirementRepository {
     try {
       const exception = await this.exceptionalRequirementModel.findOneWithRelations({
         where: { id },
+        include: [
+          "requirements", // requirements under this exception
+          "requirement", // the requirement this exception belongs to
+          "secondaryUseCase",
+        ],
       });
       return exception ?? null;
     } catch (error) {
@@ -98,6 +103,36 @@ export class ExceptionalRequirementRepository {
       return result > 0;
     } catch (error) {
       throw new Error(`Failed to remove requirement from exception: ${error.message}`);
+    }
+  }
+
+  /**
+   * Adds secondary use case relationship
+   * @param exceptionId - ID of the requirement
+   * @param secondaryUseCaseId - ID of the use case to add
+   * @returns Updated requirement
+   */
+  async addSecondaryUseCase(
+    exceptionId: string,
+    secondaryUseCaseId: string,
+  ): Promise<RequirementException> {
+    try {
+      await this.exceptionalRequirementModel.relateTo({
+        alias: "secondaryUseCase",
+        where: {
+          source: { id: exceptionId },
+          target: { id: secondaryUseCaseId },
+        },
+      });
+
+      const updatedException = await this.getById(exceptionId);
+      if (!updatedException) {
+        throw new NotFoundException(`Exception with ID ${exceptionId} not found after update`);
+      }
+
+      return updatedException;
+    } catch (error) {
+      throw new Error(`Failed to add exception: ${error}`);
     }
   }
 }

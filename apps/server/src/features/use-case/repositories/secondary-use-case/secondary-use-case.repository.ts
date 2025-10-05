@@ -26,9 +26,7 @@ export class SecondaryUseCaseRepository {
       parentUseCase: {
         where: [{ params: { id: createDto.primaryUseCaseId } }],
       },
-      requirements: {
-        where: [{ params: { id: createDto.requirementId } }],
-      },
+
       subtype: UseCaseSubtype.SECONDARY,
     });
     return useCase;

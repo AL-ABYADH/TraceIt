@@ -6,6 +6,7 @@ import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-cas
 import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
 import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
+import { RequirementExceptionService } from "src/features/requirement/services/requirement-exception.service";
 
 /**
  * Service for managing secondary use cases, including their relationships
@@ -18,6 +19,7 @@ export class SecondaryUseCaseService {
     private readonly projectService: ProjectService,
     private readonly primaryUseCaseService: PrimaryUseCaseService,
     private readonly requirementService: RequirementService,
+    private readonly requirementExceptionService: RequirementExceptionService,
   ) {}
 
   //====================================
@@ -37,25 +39,43 @@ export class SecondaryUseCaseService {
       await this.primaryUseCaseService.findById(createDto.primaryUseCaseId);
 
       // Verify requirement exists
-      const requirement = await this.requirementService.findById(createDto.requirementId);
+      if (createDto.requirementId) {
+        const requirement = await this.requirementService.findById(createDto.requirementId);
+        // Verify requirement has nested requirements
+        if (!requirement.nestedRequirements || requirement.nestedRequirements.length === 0) {
+          throw new BadRequestException(
+            `Cannot create a secondary use case for requirement ${createDto.requirementId} as it has no nested requirements.`,
+          );
+        }
+        const secondaryUseCase = await this.secondaryUseCaseRepository.create(createDto);
 
-      // Verify requirement has nested requirements
-      if (!requirement.nestedRequirements || requirement.nestedRequirements.length === 0) {
+        // Transfer nested requirements to the secondary use case
+        await this.requirementService.setParentRequirementToSecondaryUseCase(
+          requirement.id,
+          secondaryUseCase.id,
+        );
+        return secondaryUseCase;
+      } else if (createDto.exceptionId) {
+        const exception = await this.requirementExceptionService.findById(createDto.exceptionId);
+        if (!exception.requirements || exception.requirements.length === 0) {
+          throw new BadRequestException(
+            `Cannot create a secondary use case for exception ${createDto.exceptionId} as it has no requirements.`,
+          );
+        }
+
+        const secondaryUseCase = await this.secondaryUseCaseRepository.create(createDto);
+
+        await this.requirementExceptionService.setExceptionToSecondaryUseCase(
+          exception.id,
+          secondaryUseCase.id,
+        );
+
+        return secondaryUseCase;
+      } else {
         throw new BadRequestException(
-          `Cannot create a secondary use case for requirement ${createDto.requirementId} as it has no nested requirements.`,
+          "Either requirementId or exceptionId must be provided to create a secondary use case.",
         );
       }
-
-      // Create the secondary use case
-      const secondaryUseCase = await this.secondaryUseCaseRepository.create(createDto);
-
-      // Transfer nested requirements to the secondary use case
-      await this.requirementService.setParentRequirementToSecondaryUseCase(
-        requirement.id,
-        secondaryUseCase.id,
-      );
-
-      return secondaryUseCase;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new BadRequestException(error.message);
