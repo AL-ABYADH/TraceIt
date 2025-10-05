@@ -19,6 +19,8 @@ import {
   DiagramElementsDto,
   EdgeType,
   NodeType,
+  UseCaseListDto,
+  ActorDto,
 } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
@@ -55,12 +57,12 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
     }
   };
 
-  const handleAddUseCase = (useCaseId: string) => {
-    dispatch(addNode({ type: NodeType.USE_CASE, data: { id: useCaseId } }));
+  const handleAddUseCase = (useCase: UseCaseListDto) => {
+    dispatch(addNode({ type: NodeType.USE_CASE, data: useCase }));
   };
 
-  const handleAddActor = (actorId: string) => {
-    dispatch(addNode({ type: NodeType.ACTOR, data: { id: actorId } }));
+  const handleAddActor = (actor: ActorDto) => {
+    dispatch(addNode({ type: NodeType.ACTOR, data: actor }));
   };
 
   const handleConnect = (conn: Connection) => {
@@ -112,12 +114,12 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
-        onUseCaseClick={(useCase) => handleAddUseCase(useCase.id)}
+        onUseCaseClick={(useCase) => handleAddUseCase(useCase)}
       />
       <ActorSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
-        onActorClick={(actor) => handleAddActor(actor.id)}
+        onActorClick={(actor) => handleAddActor(actor)}
       />
       <UseCaseEdgeTypesSelection
         onClose={() => setIsEdgeTypeDialogOpen(false)}
