@@ -371,4 +371,16 @@ export class RequirementService {
 
     return true;
   }
+
+  async checkRequirementRelationships(
+    requirementId: string,
+  ): Promise<{ hasCondition: boolean; hasActivity: boolean }> {
+    // Optional: validate that the requirement exists first
+    const exists = await this.requirementRepository.getById?.(requirementId);
+    if (!exists) {
+      throw new NotFoundException(`Requirement with ID ${requirementId} not found`);
+    }
+
+    return this.requirementRepository.checkRelationships(requirementId);
+  }
 }

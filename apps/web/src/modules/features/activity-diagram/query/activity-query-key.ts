@@ -1,4 +1,4 @@
 export const activityQueryKeys = {
-  list: ["useCases"],
+  list: ["activities"],
   detail: (id: string) => [...activityQueryKeys.list, "detail", id],
 } as const;

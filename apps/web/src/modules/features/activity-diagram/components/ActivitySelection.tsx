@@ -2,7 +2,7 @@
 
 import Dialog from "@/components/Dialog";
 import { useActivities } from "../hooks/useActivities";
-import { ActivityListDto } from "@repo/shared-schemas";
+import { ActivityDto } from "@repo/shared-schemas";
 import { ActivityShape } from "./ActivityShape";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -10,17 +10,17 @@ import ErrorMessage from "@/components/ErrorMessage";
 interface ActivitySelectionProps {
   isOpen: boolean;
   onClose: () => void;
-  projectId: string;
-  onActivityClick: (activity: ActivityListDto) => void;
+  useCaseId: string;
+  onActivityClick: (activity: ActivityDto) => void;
 }
 
 export default function ActivitySelection({
   isOpen,
   onClose,
-  projectId,
+  useCaseId,
   onActivityClick,
 }: ActivitySelectionProps) {
-  const { data, isError, isLoading, error } = useActivities(projectId);
+  const { data, isError, isLoading, error } = useActivities(useCaseId);
 
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Activity Object" className="max-w-lg">

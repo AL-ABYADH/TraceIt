@@ -11,6 +11,8 @@ import {
   updateRequirementExceptionSchema,
   requirementIdSchema,
   type RequirementIdDto,
+  useCaseIdSchema,
+  type UseCaseIdDto,
 } from "@repo/shared-schemas";
 @Controller("requirement-exceptions")
 export class RequirementExceptionController {
@@ -28,6 +30,13 @@ export class RequirementExceptionController {
     @Param(zodParam(requirementExceptionIdSchema)) params: RequirementExceptionIdDto,
   ): Promise<RequirementExceptionListDto> {
     return this.exceptionService.findById(params.requirementExceptionId);
+  }
+
+  @Get("use-case/:useCaseId")
+  async getByUseCase(
+    @Param(zodParam(useCaseIdSchema)) params: UseCaseIdDto,
+  ): Promise<RequirementExceptionListDto[]> {
+    return this.exceptionService.getByUseCase(params.useCaseId);
   }
 
   @Put(":requirementExceptionId")

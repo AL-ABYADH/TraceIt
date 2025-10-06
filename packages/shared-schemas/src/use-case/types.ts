@@ -53,5 +53,3 @@ export type SecondaryUseCaseListDto = z.infer<typeof secondaryUseCaseListSchema>
 // export type UpdateDiagramDto = z.infer<typeof updateDiagramSchema>;
 export type PrimaryUseCaseIdDto = z.infer<typeof primaryUseCaseIdSchema>;
 export type SecondaryUseCaseIdDto = z.infer<typeof secondaryUseCaseIdSchema>;
-// wrong but for experiment
-export type ActivityListDto = z.infer<typeof primaryUseCaseListSchema>;

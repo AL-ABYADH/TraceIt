@@ -363,4 +363,40 @@ export class RequirementRepository {
   catch(error) {
     throw new Error(`Failed to transfer requirement to new use case: ${error.message}`);
   }
+
+  /**
+   * Checks if a Requirement already has incoming relationships
+   * from Condition or Activity nodes.
+   */
+  async checkRelationships(
+    requirementId: string,
+  ): Promise<{ hasCondition: boolean; hasActivity: boolean }> {
+    try {
+      const query = `
+        MATCH (r:Requirement {id: $requirementId})
+        OPTIONAL MATCH (c:Condition)-[:RELATED_TO]->(r)
+        OPTIONAL MATCH (a:Activity)-[:RELATED_TO]->(r)
+        RETURN 
+          COUNT(DISTINCT c) > 0 AS hasCondition,
+          COUNT(DISTINCT a) > 0 AS hasActivity
+      `;
+
+      const result = await this.neo4jService.getNeogma().queryRunner.run(query, { requirementId });
+
+      // Defensive check — ensure we have records
+      if (!result.records || result.records.length === 0) {
+        return { hasCondition: false, hasActivity: false };
+      }
+
+      // Safely extract and cast values
+      const record = result.records[0];
+      const hasCondition = Boolean(record?.get("hasCondition"));
+      const hasActivity = Boolean(record?.get("hasActivity"));
+
+      return { hasCondition, hasActivity };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to check requirement relationships: ${message}`);
+    }
+  }
 }

@@ -106,9 +106,9 @@ export class AuthService {
         throw new UnauthorizedException("Refresh token has expired.");
       }
 
-      if (token.revoked) {
-        throw new UnauthorizedException("Refresh token has been stopped.");
-      }
+      // if (token.revoked) {
+      //   throw new UnauthorizedException("Refresh token has been stopped.");
+      // }
     }
 
     return token;

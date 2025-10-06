@@ -60,4 +60,3 @@ src/swagger/*/
 
 # explicitly do not ignore .ts files in src/swagger except for index.ts
 src/swagger/index.ts
-!src/swagger/*.ts

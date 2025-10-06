@@ -3,6 +3,8 @@ import { SecondaryUseCaseAttributes } from "src/features/use-case/models/seconda
 import { ActorAttributes } from "../../actor/models/actor.model";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { RequirementExceptionAttributes } from "./requirement-exception.model";
+import { ConditionAttributes } from "src/features/activity/models/Condition.model";
+import { ActivityAttributes } from "src/features/activity/models/activity.model";
 
 export type RequirementAttributes = {
   id: string;
@@ -19,6 +21,8 @@ export interface RequirementRelationships {
   nestedRequirements?: RequirementAttributes[];
   exceptions?: RequirementExceptionAttributes[];
   requirementException?: RequirementExceptionAttributes;
+  relatedCondition: ConditionAttributes;
+  relatedActivity: ActivityAttributes;
 }
 
 export type RequirementModelType = NeogmaModel<RequirementAttributes, RequirementRelationships>;
@@ -76,6 +80,18 @@ export const RequirementModel: ModelFactoryDefinition<
       model: "RequirementException",
       name: "BELONGS_TO",
       direction: "out",
+      cardinality: "one",
+    },
+    relatedCondition: {
+      model: "Condition",
+      name: "RELATED_TO",
+      direction: "in",
+      cardinality: "one",
+    },
+    relatedActivity: {
+      model: "Activity",
+      name: "RELATED_TO",
+      direction: "in",
       cardinality: "one",
     },
   },
