@@ -112,6 +112,8 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
       if (isCtrlOrCmd && key === "s") {
         event.preventDefault();
         event.stopPropagation();
+
+        if (!isDirty) return;
         handleSave();
         return;
       }
@@ -136,7 +138,7 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
         return;
       }
     },
-    [nodes, edges, dispatch, canUndo, canRedo, handleSave],
+    [nodes, edges, dispatch, canUndo, canRedo, handleSave, isDirty],
   );
 
   const handleUpdateViewport = useCallback(
@@ -190,7 +192,7 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
 
         {onSave && (
           <button
-            onClick={handleSave}
+            onClick={isDirty ? handleSave : undefined}
             className={`p-3 rounded-lg ${isDirty ? "text-foreground" : "text-muted-foreground opacity-50"}`}
           >
             <Save />
