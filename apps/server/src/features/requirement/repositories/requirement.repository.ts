@@ -98,6 +98,22 @@ export class RequirementRepository {
         throw new NotFoundException(`Requirement with ID ${id} not found after update`);
       }
 
+      if (updatedRequirement.relatedActivity) {
+        this.neo4jService
+          .getNeogma()
+          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementUpdated = $boolean", {
+            id: updatedRequirement?.relatedActivity?.id,
+            boolean: true,
+          });
+      }
+      if (updatedRequirement.relatedCondition) {
+        this.neo4jService
+          .getNeogma()
+          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementUpdated = $boolean", {
+            id: updatedRequirement?.relatedCondition?.id,
+            boolean: true,
+          });
+      }
       return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
