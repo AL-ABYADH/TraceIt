@@ -7,6 +7,8 @@ import RequirementExceptionForm from "./RequirementExceptionForm";
 import RequirementSection from "./RequirementSection";
 import SecondaryUseCaseForm from "../../use-case/components/SecondaryUseCaseForm";
 import Chip from "@/components/Chip";
+import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 interface RecursiveFlowSectionProps {
   requirements: RequirementDto[];
@@ -42,6 +44,19 @@ export default function RecursiveFlowSection({
   const [openFormParentId, setOpenFormParentId] = useState<string | null>(null);
   const [openExceptionParentId, setOpenExceptionParentId] = useState<string | null>(null);
   const [openExceptionForm, setOpenExceptionForm] = useState<{ exceptionId: string } | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Use the hook with the validated use case id for invalidation
+  const deleteRequirement = useDeleteRequirement(deleteId ?? "", validatedUseCaseId, {
+    onSuccess: () => {
+      setIsDeleteOpen(false);
+      setDeleteId(null);
+    },
+    onError: () => {
+      // Handle error as needed
+    },
+  });
 
   if (!requirements || requirements.length === 0) return null;
 
@@ -194,7 +209,14 @@ export default function RecursiveFlowSection({
                               },
                             }),
                         },
-                        { label: "Delete", onClick: () => console.log("Delete", child.id) },
+                        {
+                          label: "Delete",
+                          onClick: () => {
+                            setDeleteId(child.id);
+                            setIsDeleteOpen(true);
+                          },
+                          danger: true,
+                        },
                         {
                           label: "Add Exception",
                           onClick: () => setOpenExceptionParentId(child.id),
@@ -300,30 +322,36 @@ export default function RecursiveFlowSection({
                           {idx + 1}. {renderRequirementText(child)}
                         </p>
                         <EllipsisMenu
-                          actions={(() => {
-                            const actions: { label: string; onClick: () => void }[] = [];
-                            if (flow.secondaryUseCaseId) {
-                              actions.push({
-                                label: "Edit Secondary Use Case",
-                                onClick: () =>
-                                  setOpenEditSecondary({
-                                    secondaryUseCaseId: flow.secondaryUseCaseId!,
-                                    initialName: flow.secondaryUseCaseName,
-                                  }),
-                              });
-                            } else {
-                              actions.push({
-                                label: "Add Secondary Use Case",
-                                onClick: () =>
-                                  setOpenSecondaryForRequirement({ requirementId: flow.id }),
-                              });
-                            }
-                            actions.push({
+                          actions={[
+                            {
+                              label: "Edit",
+                              onClick: () =>
+                                setOpenEditRequirement({
+                                  id: child.id,
+                                  initial: {
+                                    operation: child.operation,
+                                    condition: child.condition,
+                                    actorIds: (child.actors ?? []).map((a: any) => a.id),
+                                  },
+                                }),
+                            },
+                            {
+                              label: "Delete",
+                              onClick: () => {
+                                setDeleteId(child.id);
+                                setIsDeleteOpen(true);
+                              },
+                              danger: true,
+                            },
+                            {
+                              label: "Add Exception",
+                              onClick: () => setOpenExceptionParentId(child.id),
+                            },
+                            {
                               label: "Add Sub Requirement",
-                              onClick: () => setOpenFormParentId(flow.id),
-                            });
-                            return actions;
-                          })()}
+                              onClick: () => setOpenFormParentId(child.id),
+                            },
+                          ]}
                         />
                       </div>
                     </div>
@@ -422,6 +450,24 @@ export default function RecursiveFlowSection({
             parentRequirementId={openExceptionParentId}
           />
         )}
+
+        {/* Confirmation Dialog for Delete */}
+        <ConfirmationDialog
+          isOpen={isDeleteOpen}
+          title="Delete Requirement"
+          message="Are you sure you want to delete this requirement? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmVariant="danger"
+          onConfirm={() => {
+            if (deleteId) deleteRequirement.mutate();
+          }}
+          onCancel={() => {
+            setIsDeleteOpen(false);
+            setDeleteId(null);
+          }}
+          loading={deleteRequirement.isPending}
+        />
       </>
     );
   }

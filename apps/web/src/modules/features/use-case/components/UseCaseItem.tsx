@@ -79,6 +79,9 @@ export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemP
                   key={requirement.id}
                   requirement={requirement}
                   number={index + 1}
+                  projectId={projectId}
+                  level={1}
+                  validatedUseCaseId={useCase.id}
                 />
               ))}
             </div>

@@ -2,15 +2,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { requirementClient } from "../api/clients/requirement-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
 
-type UseDeletePrimaryUseCaseOptions = {
+type UseDeleteRequirementOptions = {
   onSuccess?: (data: unknown) => void;
   onError?: (error: unknown) => void;
 };
 
-export function useDeletePrimaryUseCase(
+export function useDeleteRequirement(
   requirementId: string,
   useCaseIdToInvalidate: string,
-  opts?: UseDeletePrimaryUseCaseOptions,
+  opts?: UseDeleteRequirementOptions,
 ) {
   const qc = useQueryClient();
 

@@ -9,6 +9,7 @@ import RequirementExceptionForm from "./RequirementExceptionForm";
 import RequirementSection from "./RequirementSection";
 import RequirementForm from "./RequirementForm";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
 
 interface MainFlowSectionProps {
   requirements: RequirementDto[];
@@ -29,6 +30,18 @@ export default function MainFlowSection({
   const [openMainForm, setOpenMainForm] = useState(false);
   const [openExceptionParentId, setOpenExceptionParentId] = useState<string | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Use the hook with the validated use case id for invalidation
+  const deleteRequirement = useDeleteRequirement(deleteId ?? "", validatedUseCaseId, {
+    onSuccess: () => {
+      setIsDeleteOpen(false);
+      setDeleteId(null);
+    },
+    onError: () => {
+      // Handle error as needed
+    },
+  });
 
   if (!requirements) return null;
 
@@ -80,7 +93,14 @@ export default function MainFlowSection({
                       },
                     }),
                 },
-                { label: "Delete", onClick: () => console.log("Delete", req.id) },
+                {
+                  label: "Delete",
+                  onClick: () => {
+                    setDeleteId(req.id);
+                    setIsDeleteOpen(true);
+                  },
+                  danger: true,
+                },
                 { label: "Add Exception", onClick: () => setOpenExceptionParentId(req.id) },
                 {
                   label: "Add Sub Requirement",
@@ -134,17 +154,23 @@ export default function MainFlowSection({
         />
       )}
 
-      {/* <ConfirmationDialog
+      {/* Confirmation Dialog for Delete */}
+      <ConfirmationDialog
         isOpen={isDeleteOpen}
-        title="Delete Project"
-        message={`Are you sure you want to delete "${project.name}"? This action cannot be undone.`}
+        title="Delete Requirement"
+        message="Are you sure you want to delete this requirement? This action cannot be undone."
         confirmText="Delete"
         cancelText="Cancel"
         confirmVariant="danger"
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setIsDeleteOpen(false)}
-        loading={deleteProject.isPending}
-      /> */}
+        onConfirm={() => {
+          if (deleteId) deleteRequirement.mutate();
+        }}
+        onCancel={() => {
+          setIsDeleteOpen(false);
+          setDeleteId(null);
+        }}
+        loading={deleteRequirement.isPending}
+      />
     </>
   );
 }
