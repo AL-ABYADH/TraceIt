@@ -6,12 +6,16 @@ import {
 } from "../models/requirement-exception.model";
 import { CreateRequirementExceptionInterface } from "../interfaces/create-requirement.interface";
 import { RequirementException } from "../entities/requirement-exception.entity";
+import { RequirementRepository } from "./requirement.repository";
 
 @Injectable()
 export class ExceptionalRequirementRepository {
   private exceptionalRequirementModel: RequirementExceptionModelType;
 
-  constructor(private readonly neo4jService: Neo4jService) {
+  constructor(
+    private readonly neo4jService: Neo4jService,
+    private readonly requirementRepository: RequirementRepository,
+  ) {
     this.exceptionalRequirementModel = RequirementExceptionModel(this.neo4jService.getNeogma());
   }
 
@@ -82,6 +86,49 @@ export class ExceptionalRequirementRepository {
       return updatedException;
     } catch (error) {
       throw new Error(`Failed to add requirement to exception: ${error.message}`);
+    }
+  }
+  /**
+   * Get all requirement exceptions for a specific use case - FIXED
+   */
+  async getByUseCase(useCaseId: string): Promise<RequirementException[]> {
+    try {
+      // Use raw query to find exceptions via the correct EXCEPTION_AT relationship direction
+      const result = await this.neo4jService.getNeogma().queryRunner.run(
+        `
+      MATCH (uc:UseCase {id: $useCaseId})<-[:BELONGS_TO]-(req:Requirement)<-[:EXCEPTION_AT]-(ex:RequirementException)
+      RETURN DISTINCT ex
+      ORDER BY ex.createdAt
+    `,
+        { useCaseId },
+      );
+
+      if (!result.records || result.records.length === 0) {
+        return [];
+      }
+
+      // Get the full exception data with relationships
+      const exceptions: RequirementException[] = [];
+
+      for (const record of result.records) {
+        const exceptionId = record.get("ex").properties.id;
+        const fullException = await this.exceptionalRequirementModel.findOneWithRelations({
+          where: { id: exceptionId },
+          include: ["requirements", "secondaryUseCase"],
+        });
+
+        if (fullException) {
+          exceptions.push(fullException);
+        }
+      }
+
+      console.log(`Fetched ${exceptions.length} requirement exceptions for use case ${useCaseId}`);
+
+      return exceptions;
+    } catch (error: any) {
+      throw new Error(
+        `Failed to retrieve requirement exceptions for use case: ${error?.message ?? String(error)}`,
+      );
     }
   }
 

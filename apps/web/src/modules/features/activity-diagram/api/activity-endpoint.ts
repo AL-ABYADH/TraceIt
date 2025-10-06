@@ -1,4 +1,4 @@
-const Activity_PREFIX = "/use-cases";
+const Activity_PREFIX = "/activities";
 
 export const activityEndpoint = {
   list: {

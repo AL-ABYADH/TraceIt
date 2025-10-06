@@ -9,6 +9,10 @@ export const requirementEndpoints = {
     path: `${PREFIX}/:id`,
     isPublic: false,
   },
+  relationships: {
+    path: "requirements/:requirementId/relationships",
+    isPublic: false,
+  },
 } as const;
 
 export const useCaseRequirementsEndpoints = {

@@ -5,6 +5,7 @@ import { UseCaseAttributes } from "src/features/use-case/models/use-case.model";
 export type ActivityAttributes = {
   id: string;
   name: string;
+  requirementUpdated: boolean;
   createdAt: string;
   updatedAt?: string;
 };
@@ -28,6 +29,10 @@ export const ActivityModel: ModelFactoryDefinition<ActivityAttributes, ActivityR
         maxLength: 100,
         allowEmpty: false,
         message: "Activity name must be between 1 and 100 characters",
+      },
+      requirementUpdated: {
+        type: "boolean",
+        required: true,
       },
     },
     relationships: {

@@ -12,22 +12,22 @@ import {
   roleNameField,
 } from "./fields";
 // import { uuidField, dateISOField, createField } from "../common";
-import {
-  createField,
-  dateISOField,
-  ProjectStatus,
-  ProjectStatusField,
-  uuidField,
-} from "../common";
+import { createField, dateISOField, ProjectStatus, ProjectStatusField, uuidField } from "../common";
 
 export const projectNameFieldDoc = projectNameField.openapi({
   example: "Client Website Revamp",
   description: "Name of the project",
 });
 
+// export const projectDescriptionFieldDoc = projectDescriptionField.openapi({
+//   example: "Redesign the client-facing web platform",
+//   description: "Brief summary of the project",
+// });
+
 export const projectDescriptionFieldDoc = projectDescriptionField.openapi({
-  example: "Redesign the client-facing web platform",
-  description: "Brief summary of the project",
+  description:
+    "Optional project description. Only allows letters, numbers, spaces, underscores, and hyphens, with no leading or trailing spaces.",
+  example: "System for managing student assignments",
 });
 
 export const projectUserIdField = uuidField.openapi({
@@ -61,17 +61,11 @@ export const roleIdsField = createField("array", {
   elementType: uuidField,
   description: "List of role IDs to assign to the user",
 }).openapi({
-  example: [
-    "f6e0b4f6-efbb-41c9-9373-12f72bdfcae7",
-    "3c5e4f3c-e3f6-4e88-a86b-e7597b4a8d22",
-  ],
+  example: ["f6e0b4f6-efbb-41c9-9373-12f72bdfcae7", "3c5e4f3c-e3f6-4e88-a86b-e7597b4a8d22"],
 });
 
 export const projectRoleIdsFieldDoc = projectRoleIdsField.openapi({
-  example: [
-    "72c61fcd-c0a4-431e-9b61-f5b8d7c87670",
-    "c0f8aa3d-f50d-4e0e-81c7-89de0f06c5c5",
-  ],
+  example: ["72c61fcd-c0a4-431e-9b61-f5b8d7c87670", "c0f8aa3d-f50d-4e0e-81c7-89de0f06c5c5"],
 });
 
 export const expirationDateField = dateISOField.openapi({
@@ -89,8 +83,7 @@ export const projectStatusFieldDoc = ProjectStatusField.openapi({
   description: "The status of the project",
 });
 
-export const projectInvitationStatusFieldDoc =
-  ProjectInvitationStatusField.openapi({
-    description: "The current status of the project invitation",
-    example: ProjectInvitationStatus.ACCEPTED,
-  });
+export const projectInvitationStatusFieldDoc = ProjectInvitationStatusField.openapi({
+  description: "The current status of the project invitation",
+  example: ProjectInvitationStatus.ACCEPTED,
+});

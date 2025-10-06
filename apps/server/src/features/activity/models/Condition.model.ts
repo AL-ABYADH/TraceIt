@@ -5,6 +5,7 @@ import { UseCaseAttributes } from "src/features/use-case/models/use-case.model";
 export type ConditionAttributes = {
   id: string;
   name: string;
+  requirementUpdated: boolean;
   createdAt: string;
   updatedAt?: string;
 };
@@ -28,6 +29,10 @@ export const ConditionModel: ModelFactoryDefinition<ConditionAttributes, Conditi
         maxLength: 100,
         allowEmpty: false,
         message: "Condition condition must be between 1 and 100 characters",
+      },
+      requirementUpdated: {
+        type: "boolean",
+        default: false,
       },
     },
     relationships: {

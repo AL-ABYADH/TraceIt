@@ -3,6 +3,7 @@ import { RequirementService } from "../services/requirement.service";
 
 import {
   RequirementListDto,
+  RequirementRelationshipStatusDto,
   childIdSchema,
   createRequirementSchema,
   exceptionIdSchema,
@@ -43,7 +44,12 @@ export class RequirementController {
   ): Promise<Requirement> {
     return this.requirementService.findById(params.requirementId);
   }
-
+  @Get(":requirementId/relationships")
+  async checkRelationships(
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
+  ): Promise<RequirementRelationshipStatusDto> {
+    return this.requirementService.checkRequirementRelationships(params.requirementId);
+  }
   @Put(":requirementId")
   async update(
     @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,

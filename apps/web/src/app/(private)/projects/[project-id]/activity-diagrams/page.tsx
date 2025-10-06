@@ -117,8 +117,11 @@ export default function UseCaseDiagramPage() {
         <CreateActivityDiagram useCaseId={selectedUseCaseId} projectId={projectId} />
       )}
 
-      {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
+      {/* {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
         <ActivityDiagramFlow diagram={activityDiagram} />
+      )} */}
+      {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
+        <ActivityDiagramFlow diagram={activityDiagram} useCaseId={selectedUseCaseId} />
       )}
     </div>
   );

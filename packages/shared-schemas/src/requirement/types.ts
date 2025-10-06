@@ -13,6 +13,7 @@ import {
   requirementIdSchema,
   requirementListSchema,
   requirementOptionalIdSchema,
+  requirementRelationshipStatusSchema,
   updateRequirementExceptionSchema,
   updateRequirementSchema,
   useCaseIdSchema,
@@ -44,3 +45,12 @@ export type RequirementDto = z.infer<typeof requirementListSchema> & {
   nestedRequirements?: RequirementDto[];
   exceptions?: any;
 };
+
+export type RequirementExceptionRelationshipsDto = {
+  requirements: z.infer<typeof requirementDetailSchema>[];
+};
+
+export type RequirementExceptionDto = RequirementExceptionListDto &
+  RequirementExceptionRelationshipsDto;
+
+export type RequirementRelationshipStatusDto = z.infer<typeof requirementRelationshipStatusSchema>;

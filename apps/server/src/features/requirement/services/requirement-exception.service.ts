@@ -74,6 +74,26 @@ export class RequirementExceptionService {
   }
 
   /**
+   * Get all requirement exceptions for a specific use case
+   */
+  async getByUseCase(useCaseId: string): Promise<RequirementException[]> {
+    try {
+      if (!useCaseId || useCaseId.trim() === "") {
+        throw new BadRequestException("Use case ID is required");
+      }
+
+      const exceptions = await this.exceptionalRequirementRepository.getByUseCase(useCaseId);
+
+      return exceptions;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new Error(`Failed to retrieve requirement exceptions for use case: ${error.message}`);
+    }
+  }
+
+  /**
    * Adds a requirement to an exception
    * @param exceptionId ID of the exception
    * @param requirementId ID of the requirement to add

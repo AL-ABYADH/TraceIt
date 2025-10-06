@@ -141,3 +141,19 @@ export const childIdSchema = z
     childId: childIdFieldDoc,
   })
   .openapi({ title: "ExceptionId" });
+
+/**
+ * Schema: Response object indicating if a requirement has related condition or activity.
+ */
+export const requirementRelationshipStatusSchema = z
+  .object({
+    hasCondition: z.boolean().openapi({
+      description: "True if this requirement already has a related condition node",
+      example: true,
+    }),
+    hasActivity: z.boolean().openapi({
+      description: "True if this requirement already has a related activity node",
+      example: false,
+    }),
+  })
+  .openapi({ title: "RequirementRelationshipStatusDto" });
