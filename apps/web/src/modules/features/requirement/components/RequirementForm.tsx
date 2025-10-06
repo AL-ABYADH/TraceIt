@@ -14,7 +14,7 @@ import {
   createRequirementSchema,
   updateRequirementSchema,
 } from "@repo/shared-schemas";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useActors } from "../../actor/hooks/useActors";
 import { useCreateRequirement } from "../hooks/useCreateRequirement";
@@ -188,6 +188,15 @@ export default function RequirementForm({
 
   const operation = watch("operation");
   const condition = watch("condition");
+  // Watch for selected actor IDs
+  const actorIds = watch("actorIds");
+  // Get the full actor objects for the selected IDs
+  const selectedActors = actors.filter((a) => (actorIds || []).includes(a.id));
+
+  // Ensure the selected actors are always up to date in the preview
+  useEffect(() => {
+    // No-op, just to trigger re-render when actorIds change
+  }, [actorIds]);
 
   return (
     <Dialog
@@ -251,7 +260,8 @@ export default function RequirementForm({
           )}
         />
 
-        <RequirementPreview operation={operation} condition={condition} />
+        {/* Pass selectedActors to RequirementPreview */}
+        <RequirementPreview operation={operation} condition={condition} actors={selectedActors} />
 
         <div className="flex items-center justify-end gap-3 pt-4">
           <Button

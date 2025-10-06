@@ -1,19 +1,22 @@
 "use client";
 
 import { renderRequirementText } from "@/utils/requirement_utils";
-import { RequirementDto, RequirementListDto } from "@repo/shared-schemas";
+import { RequirementDto, ActorType, ActorSubtype, ActorDto } from "@repo/shared-schemas";
 
 interface RequirementPreviewProps {
   operation?: string;
   condition?: string;
-  actorIds?: string[];
-  actorsMap?: Record<string, string>;
+  actors?: ActorDto[];
 }
 
-export default function RequirementPreview({ operation, condition }: RequirementPreviewProps) {
+export default function RequirementPreview({
+  operation,
+  condition,
+  actors,
+}: RequirementPreviewProps) {
   if (!operation?.trim()) {
     return (
-      <div className="p-4 rounded-lg bg-card border border-border mt-4">
+      <div className="p-4 rounded-lg bg-card border border-border my-4">
         <h4 className="font-medium text-foreground mb-2">Preview</h4>
         <p className="text-sm text-foreground leading-relaxed">
           Start typing to see a live preview...
@@ -22,9 +25,10 @@ export default function RequirementPreview({ operation, condition }: Requirement
     );
   }
 
-  const fakeRequirement: Partial<RequirementListDto> = {
+  const fakeRequirement: Partial<RequirementDto> = {
     operation,
     condition: condition?.trim() || undefined,
+    actors: actors || undefined,
   };
 
   return (
