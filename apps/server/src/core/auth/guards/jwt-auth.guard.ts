@@ -52,12 +52,12 @@ export class JwtAuthGuard implements CanActivate {
       const accessPayload = this.verifyAccessTokenSignatureIgnoreExpiration(accessToken);
 
       // 3. Ensure linkage between access and refresh tokens
-      // const accessTokenFingerprint = this.createFingerprint(accessToken);
-      // if (refreshPayload.fingerprint !== accessTokenFingerprint) {
-      //   throw new UnauthorizedException(
-      //     "Token mismatch - access and refresh tokens are not linked",
-      //   );
-      // }
+      const accessTokenFingerprint = this.createFingerprint(accessToken);
+      if (refreshPayload.fingerprint !== accessTokenFingerprint) {
+        throw new UnauthorizedException(
+          "Token mismatch - access and refresh tokens are not linked",
+        );
+      }
 
       // 4. Ensure user ID matches in both tokens
       if (refreshPayload.sub !== accessPayload.sub) {

@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { Response, Request } from "express";
+import { Request, Response } from "express";
 
 import { ValidateUserOperation } from "../operations/validate-user.operation";
 import { RegisterUserOperation } from "../operations/register-user.operation";
@@ -106,9 +106,9 @@ export class AuthService {
         throw new UnauthorizedException("Refresh token has expired.");
       }
 
-      // if (token.revoked) {
-      //   throw new UnauthorizedException("Refresh token has been stopped.");
-      // }
+      if (token.revoked) {
+        throw new UnauthorizedException("Refresh token has been stopped.");
+      }
     }
 
     return token;
