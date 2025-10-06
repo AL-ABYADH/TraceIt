@@ -1,6 +1,7 @@
 import { actorSchema } from "../actor";
 import {
   dateFieldDoc,
+  exceptionIdField,
   projectIdFieldDoc,
   projectSchema,
   requirementIdField,
@@ -67,7 +68,12 @@ export const createSecondaryUseCaseSchema = z
     name: useCaseNameFieldDoc,
     projectId: projectIdFieldDoc,
     primaryUseCaseId: primaryUseCaseIdFieldDoc,
-    requirementId: requirementIdField,
+    requirementId: requirementIdField.optional(),
+    exceptionId: exceptionIdField.optional(),
+  })
+  .refine((data) => !(data.exceptionId && data.requirementId), {
+    message: "You must provide either requirement or exceptionId, but not both.",
+    path: ["exceptionId", "parentRequirementId"],
   })
   .openapi({ title: "CreateSecondaryUseCaseDto" });
 
@@ -167,8 +173,7 @@ export const primaryUseCaseListSchema = useCaseListSchema
   })
   .openapi({
     title: "PrimaryUseCaseAttributes",
-    description:
-      "Represents attributes of a primary use case, including optional description",
+    description: "Represents attributes of a primary use case, including optional description",
   });
 
 export const secondaryUseCaseListSchema = useCaseListSchema.openapi({
@@ -185,8 +190,7 @@ export const primaryUseCaseRelationshipsSchema = z
   })
   .openapi({
     title: "PrimaryUseCaseRelationships",
-    description:
-      "Relationships of the primary use case with actors and other use cases",
+    description: "Relationships of the primary use case with actors and other use cases",
   });
 
 export const primaryUseCaseDetailSchema = primaryUseCaseListSchema
@@ -221,8 +225,7 @@ export const secondaryUseCaseDetailSchema = secondaryUseCaseListSchema
   .merge(secondaryUseCaseRelationshipSchema)
   .openapi({
     title: "SecondaryUseCaseDetailDto",
-    description:
-      "Detailed view of a secondary use case including its attributes and relationships",
+    description: "Detailed view of a secondary use case including its attributes and relationships",
   });
 
 // export const useCaseDiagramRelationshipsSchema = z

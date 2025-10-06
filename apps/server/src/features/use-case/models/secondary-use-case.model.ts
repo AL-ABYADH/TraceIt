@@ -2,6 +2,7 @@ import { defineModelFactory, ModelFactoryDefinition, NeogmaModel } from "@repo/c
 import { UseCaseAttributes, UseCaseModel, UseCaseRelationships } from "./use-case.model";
 import { UseCase } from "../entities/use-case.entity";
 import { RequirementAttributes } from "src/features/requirement/models/requirement.model";
+import { RequirementExceptionAttributes } from "src/features/requirement/models/requirement-exception.model";
 
 /**
  * SecondaryUseCase shares the same attributes as a base UseCase (id, name).
@@ -15,7 +16,8 @@ export type SecondaryUseCaseAttributes = UseCaseAttributes & {};
 export interface SecondaryUseCaseRelationships extends UseCaseRelationships {
   // primaryUseCase: PrimaryUseCaseModelType;  I updated this for schema sake!!!
   parentUseCase: UseCase;
-  requirement: RequirementAttributes;
+  requirement?: RequirementAttributes;
+  exception?: RequirementExceptionAttributes;
 }
 
 /**

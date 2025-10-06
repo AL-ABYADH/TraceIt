@@ -1,12 +1,13 @@
-const PREFIX = "requirements";
+const REQUIREMENT_PREFIX = "requirements";
+const REQUIREMENT_EXCEPTION_PREFIX = "requirement-exceptions";
 
 export const requirementEndpoints = {
   list: {
-    path: PREFIX,
+    path: REQUIREMENT_PREFIX,
     isPublic: false,
   },
   detail: {
-    path: `${PREFIX}/:id`,
+    path: `${REQUIREMENT_PREFIX}/:id`,
     isPublic: false,
   },
   relationships: {
@@ -17,7 +18,18 @@ export const requirementEndpoints = {
 
 export const useCaseRequirementsEndpoints = {
   list: {
-    path: `${PREFIX}/use-case/:useCaseId`,
+    path: `${REQUIREMENT_PREFIX}/use-case/:useCaseId`,
+    isPublic: false,
+  },
+} as const;
+
+export const requirementExceptionEndpoints = {
+  list: {
+    path: REQUIREMENT_EXCEPTION_PREFIX,
+    isPublic: false,
+  },
+  detail: {
+    path: `${REQUIREMENT_EXCEPTION_PREFIX}/:id`,
     isPublic: false,
   },
 } as const;

@@ -58,7 +58,7 @@ export default function ProjectSidebar({
         className,
       )}
     >
-      <nav className="flex-1 flex-col gap-2 px-3 overflow-y-auto relative max-w-96">
+      <nav className="flex-1 flex-col gap-2 px-3 relative max-w-96">
         {/* Header */}
         <div
           className={clsx(

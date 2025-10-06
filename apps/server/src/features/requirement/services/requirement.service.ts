@@ -7,6 +7,7 @@ import { UpdateRequirementInterface } from "../interfaces/update-requirement.int
 import { RequirementExceptionAttributes } from "../models/requirement-exception.model";
 import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
 import { RequirementRepository } from "../repositories/requirement.repository";
+import { RequirementException } from "../entities/requirement-exception.entity";
 
 /**
  * Service responsible for managing requirements, including their creation,
@@ -33,21 +34,6 @@ export class RequirementService {
    */
   async createRequirement(createDto: CreateRequirementInterface): Promise<Requirement> {
     try {
-      if (createDto.exceptionId && createDto.parentRequirementId) {
-        throw new BadRequestException(
-          "You must provide either parentRequirementId or exceptionId, but not both.",
-        );
-      }
-
-      if (
-        (createDto.useCaseId && createDto.exceptionId) ||
-        (createDto.useCaseId && createDto.parentRequirementId)
-      ) {
-        throw new BadRequestException(
-          "You cannot have both use case and exception or parent requirement.",
-        );
-      }
-
       // Validate use case exists
       if (createDto.useCaseId) {
         await this.useCaseService.findById(createDto.useCaseId);
@@ -81,10 +67,11 @@ export class RequirementService {
           createDto.exceptionId,
           created.id,
         );
+
         if (exceptionRequirement != null && exceptionRequirement.secondaryUseCase) {
           await this.requirementRepository.addUseCase(
-            exceptionRequirement.secondaryUseCase.id,
             created.id,
+            exceptionRequirement.secondaryUseCase.id,
           );
         }
       }
@@ -244,15 +231,41 @@ export class RequirementService {
 
   /**
    * Processes exceptions for a requirement using individual getById calls
+   * and hydrates each exception's requirements to full Requirement objects
    * @param requirement The requirement to process exceptions for
    */
   private async processExceptions(requirement: Requirement): Promise<void> {
-    const detailedExceptions: RequirementExceptionAttributes[] = [];
+    const detailedExceptions: RequirementException[] = [];
 
     for (const exception of requirement.exceptions || []) {
       const detailedException = await this.exceptionalRequirementRepository.getById(exception.id);
 
       if (detailedException) {
+        // Hydrate the requirements under this exception to full Requirement objects
+        if (
+          Array.isArray(detailedException.requirements) &&
+          detailedException.requirements.length > 0
+        ) {
+          const hydratedReqs: Requirement[] = [];
+
+          for (const reqRef of detailedException.requirements) {
+            const fullReq = await this.requirementRepository.getById(reqRef.id);
+            if (fullReq) {
+              // Recursively hydrate nested requirements
+              if (fullReq.nestedRequirements?.length) {
+                await this.processNestedRequirements(fullReq);
+              }
+              // Recursively hydrate exceptions under this requirement
+              if (fullReq.exceptions?.length) {
+                await this.processExceptions(fullReq);
+              }
+              hydratedReqs.push(fullReq);
+            }
+          }
+
+          detailedException.requirements = hydratedReqs;
+        }
+
         detailedExceptions.push(detailedException);
       }
     }
