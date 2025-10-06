@@ -24,6 +24,7 @@ import {
   DiagramElementsDto,
   ActivityDto,
   ConditionDto,
+  RequirementExceptionDto,
 } from "@repo/shared-schemas";
 import Flow from "@/modules/core/flow/components/Flow";
 import { useUpdateDiagram } from "@/modules/features/use-case-diagram/hooks/useUpdateDiagram";
@@ -155,14 +156,7 @@ export default function ActivityDiagramFlow({
       dispatch(
         addNode({
           type: NodeType.DECISION_NODE,
-          data: {
-            name: newCondition.name,
-            label: newCondition.name,
-            conditionType: "condition",
-            sourceId: newCondition.id,
-            sourceName: newCondition.name,
-            requirementId: pendingConditionData.id!,
-          },
+          data: newCondition,
         }),
       );
 
@@ -179,16 +173,11 @@ export default function ActivityDiagramFlow({
     }
   };
 
-  const handleExceptionSelected = (exception: { id: string; name: string }) => {
+  const handleExceptionSelected = (exception: RequirementExceptionDto) => {
     dispatch(
       addNode({
         type: NodeType.DECISION_NODE,
-        data: {
-          id: exception.id,
-          name: exception.name,
-          label: exception.name,
-          conditionType: "exception",
-        },
+        data: exception,
       }),
     );
 
@@ -291,11 +280,7 @@ export default function ActivityDiagramFlow({
       dispatch(
         addNode({
           type: NodeType.ACTIVITY,
-          data: {
-            id: newActivity.id,
-            name: newActivity.name,
-            requirementId: selectedRequirement.id,
-          },
+          data: newActivity,
         }),
       );
 
@@ -357,11 +342,7 @@ export default function ActivityDiagramFlow({
     dispatch(
       addNode({
         type: NodeType.ACTIVITY,
-        data: {
-          id: activity.id,
-          name: activity.name,
-          // requirementId: (activity as any).requirementId ?? undefined,
-        },
+        data: activity,
       }),
     );
   };

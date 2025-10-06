@@ -138,12 +138,13 @@ import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
 import { AlertTriangle, X } from "lucide-react";
 import { useExceptions } from "../hooks/useUseCaseExceptions";
+import { RequirementExceptionDto } from "@repo/shared-schemas";
 
 interface ExceptionSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   useCaseId: string;
-  onExceptionSelect: (exception: { id: string; name: string }) => void;
+  onExceptionSelect: (exception: RequirementExceptionDto) => void;
 }
 
 export default function ExceptionSelection({
@@ -154,7 +155,7 @@ export default function ExceptionSelection({
 }: ExceptionSelectionProps) {
   const { data: exceptions, isError, isLoading, error } = useExceptions(useCaseId);
 
-  const handleExceptionClick = (exception: { id: string; name: string }) => {
+  const handleExceptionClick = (exception: RequirementExceptionDto) => {
     onExceptionSelect(exception);
     onClose();
   };
@@ -190,12 +191,7 @@ export default function ExceptionSelection({
             {exceptions.map((exception) => (
               <button
                 key={exception.id}
-                onClick={() =>
-                  handleExceptionClick({
-                    id: exception.id,
-                    name: exception.name,
-                  })
-                }
+                onClick={() => handleExceptionClick(exception)}
                 className="w-full flex items-center justify-between p-4 border border-border rounded-lg hover:border-red-300 hover:bg-red-50 transition-all duration-200 group"
               >
                 <div className="flex items-center gap-3">

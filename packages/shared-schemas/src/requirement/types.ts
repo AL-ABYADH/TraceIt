@@ -39,13 +39,6 @@ export type ExceptionIdDto = z.infer<typeof exceptionIdSchema>;
 
 export type ChildIdDto = z.infer<typeof childIdSchema>;
 
-export type RequirementExceptionRelationshipsDto = {
-  requirements: z.infer<typeof requirementDetailSchema>[];
-};
-
-export type RequirementExceptionDto = RequirementExceptionListDto &
-  RequirementExceptionRelationshipsDto;
-
 export type RequirementDto = z.infer<typeof requirementListSchema> & {
   useCase: z.infer<typeof useCaseDetailSchema>;
   actors?: z.infer<typeof actorSchema>[];
