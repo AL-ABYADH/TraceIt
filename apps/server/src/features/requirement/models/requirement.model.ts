@@ -3,7 +3,7 @@ import { SecondaryUseCaseAttributes } from "src/features/use-case/models/seconda
 import { ActorAttributes } from "../../actor/models/actor.model";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { RequirementExceptionAttributes } from "./requirement-exception.model";
-import { ConditionAttributes } from "src/features/activity/models/Condition.model";
+import { ConditionAttributes } from "src/features/activity/models/condition.model";
 import { ActivityAttributes } from "src/features/activity/models/activity.model";
 
 export type RequirementAttributes = {

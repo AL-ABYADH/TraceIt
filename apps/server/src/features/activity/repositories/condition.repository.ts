@@ -4,7 +4,7 @@ import { Neo4jService } from "src/core/neo4j/neo4j.service";
 import { Condition } from "../entities/condition.entity";
 import { CreateConditionInterface } from "../interfaces/create-condition.interface";
 import { UpdateConditionInterface } from "../interfaces/update-condition.interface";
-import { ConditionModel, ConditionModelType } from "../models/Condition.model";
+import { ConditionModel, ConditionModelType } from "../models/condition.model";
 
 @Injectable()
 export class ConditionRepository {
