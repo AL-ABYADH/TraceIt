@@ -6,6 +6,7 @@ import RequirementForm from "./RequirementForm";
 import RequirementExceptionForm from "./RequirementExceptionForm";
 import RequirementSection from "./RequirementSection";
 import SecondaryUseCaseForm from "../../use-case/components/SecondaryUseCaseForm";
+import Chip from "@/components/Chip";
 
 interface RecursiveFlowSectionProps {
   requirements: RequirementDto[];
@@ -24,6 +25,10 @@ export default function RecursiveFlowSection({
   parentIndex = "",
   isRoot = true,
 }: RecursiveFlowSectionProps) {
+  const [openEditRequirement, setOpenEditRequirement] = useState<null | {
+    id: string;
+    initial: { operation: string; condition?: string; actorIds: string[] };
+  }>(null);
   const [openSecondaryForRequirement, setOpenSecondaryForRequirement] = useState<{
     requirementId: string;
   } | null>(null);
@@ -122,41 +127,47 @@ export default function RecursiveFlowSection({
         <RequirementSection
           key={exception.id || label}
           title={
-            <div className="flex items-center gap-2">
-              <span>{`${label} (${exception.name}${(() => {
-                const s = (exception as any)?.secondaryUseCase;
-                const x = Array.isArray(s) ? s[0] : s;
-                return x?.name ? ` • ${x.name}` : "";
-              })()}):`}</span>
-              <EllipsisMenu
-                actions={(() => {
-                  const actions: { label: string; onClick: () => void }[] = [];
-                  const rawSec = (exception as any)?.secondaryUseCase;
-                  const normSec = Array.isArray(rawSec) ? rawSec[0] : rawSec;
-                  const hasSecondary = Boolean(normSec?.id);
-                  if (hasSecondary) {
-                    actions.push({
-                      label: "Edit Secondary Use Case",
-                      onClick: () =>
-                        setOpenEditSecondary({
-                          secondaryUseCaseId: normSec.id,
-                          initialName: normSec.name,
-                        }),
-                    });
-                  } else {
-                    actions.push({
-                      label: "Add Secondary Use Case",
-                      onClick: () => setOpenSecondaryForException({ exceptionId: exception.id }),
-                    });
-                  }
-                  actions.push({
-                    label: "Add Requirement",
-                    onClick: () => setOpenExceptionForm({ exceptionId: exception.id }),
-                  });
-                  return actions;
+            <>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center px-2 rounded-md bg-muted text-muted-foreground text-xs font-mono">
+                  {label}
+                </span>
+                <Chip label="Exception" value={exception.name} color="amber" />
+                {(() => {
+                  const s = (exception as any)?.secondaryUseCase;
+                  const x = Array.isArray(s) ? s[0] : s;
+                  return x?.name ? <Chip label="Secondary" value={x.name} color="indigo" /> : null;
                 })()}
-              />
-            </div>
+                <EllipsisMenu
+                  actions={(() => {
+                    const actions: { label: string; onClick: () => void }[] = [];
+                    const rawSec = (exception as any)?.secondaryUseCase;
+                    const normSec = Array.isArray(rawSec) ? rawSec[0] : rawSec;
+                    const hasSecondary = Boolean(normSec?.id);
+                    if (hasSecondary) {
+                      actions.push({
+                        label: "Edit Secondary Use Case",
+                        onClick: () =>
+                          setOpenEditSecondary({
+                            secondaryUseCaseId: normSec.id,
+                            initialName: normSec.name,
+                          }),
+                      });
+                    } else {
+                      actions.push({
+                        label: "Add Secondary Use Case",
+                        onClick: () => setOpenSecondaryForException({ exceptionId: exception.id }),
+                      });
+                    }
+                    actions.push({
+                      label: "Add Requirement",
+                      onClick: () => setOpenExceptionForm({ exceptionId: exception.id }),
+                    });
+                    return actions;
+                  })()}
+                />
+              </div>
+            </>
           }
         >
           {exceptionReqs.length > 0 ? (
@@ -164,14 +175,25 @@ export default function RecursiveFlowSection({
               const childNumericS = baseIndex ? `${baseIndex}-${idx + 1}` : `${idx + 1}`;
               const childSRef = `S${childNumericS}`;
               return (
-                <div key={child.id} className="flex flex-col gap-2">
-                  <div className="flex items-start justify-between">
+                <div key={child.id} className="flex flex-col">
+                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2 ">
                     <p>
                       {idx + 1}. {renderRequirementText(child)}
                     </p>
                     <EllipsisMenu
                       actions={[
-                        { label: "Edit", onClick: () => console.log("Edit", child.id) },
+                        {
+                          label: "Edit",
+                          onClick: () =>
+                            setOpenEditRequirement({
+                              id: child.id,
+                              initial: {
+                                operation: child.operation,
+                                condition: child.condition,
+                                actorIds: (child.actors ?? []).map((a: any) => a.id),
+                              },
+                            }),
+                        },
                         { label: "Delete", onClick: () => console.log("Delete", child.id) },
                         {
                           label: "Add Exception",
@@ -199,7 +221,7 @@ export default function RecursiveFlowSection({
 
                   {/* Inline render E (exceptions) for this child, using E(E...) naming based on parent exception label */}
                   {Array.isArray(child.exceptions) && child.exceptions.length > 0 && (
-                    <div className="mt-2">
+                    <div>
                       {child.exceptions.map((cEx: any, cEIdx: number) => {
                         const base = `E(${label})`;
                         const nestedLabel = cEIdx === 0 ? base : `${base}-${cEIdx}`;
@@ -223,89 +245,104 @@ export default function RecursiveFlowSection({
       <>
         {/* Sub Flow sections */}
         {flows.length > 0 && (
-          <RequirementSection title={isRoot ? "Sub Flow" : ""}>
-            {flows.map((flow) => (
-              <RequirementSection
-                key={flow.sectionId}
-                title={
-                  <div className="flex items-center gap-2">
-                    <span>{`S${flow.sectionId}${flow.secondaryUseCaseName ? ` (${flow.secondaryUseCaseName})` : ""}:`}</span>
-                    <EllipsisMenu
-                      actions={(() => {
-                        const actions: { label: string; onClick: () => void }[] = [];
-                        if (flow.secondaryUseCaseId) {
-                          actions.push({
-                            label: "Edit Secondary Use Case",
-                            onClick: () =>
-                              setOpenEditSecondary({
-                                secondaryUseCaseId: flow.secondaryUseCaseId!,
-                                initialName: flow.secondaryUseCaseName,
-                              }),
-                          });
-                        } else {
-                          actions.push({
-                            label: "Add Secondary Use Case",
-                            onClick: () =>
-                              setOpenSecondaryForRequirement({ requirementId: flow.id }),
-                          });
-                        }
-                        actions.push({
-                          label: "Add Sub Requirement",
-                          onClick: () => setOpenFormParentId(flow.id),
-                        });
-                        return actions;
-                      })()}
-                    />
-                  </div>
-                }
-              >
-                {flow.requirements.map((child, idx) => (
-                  <div key={child.id} className="flex flex-col gap-2">
-                    <div className="flex items-start justify-between">
-                      <p>
-                        {idx + 1}. {renderRequirementText(child)}
-                      </p>
-                      <EllipsisMenu
-                        actions={(() => {
-                          const actions: { label: string; onClick: () => void }[] = [];
-                          if (flow.secondaryUseCaseId) {
+          <div className=" mb-6">
+            <RequirementSection title={isRoot ? "Sub Flow" : ""}>
+              {flows.map((flow) => (
+                <RequirementSection
+                  key={flow.sectionId}
+                  title={
+                    <>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-mono">
+                          S{flow.sectionId}
+                        </span>
+                        {flow.secondaryUseCaseName && (
+                          <Chip
+                            label="Secondary"
+                            value={flow.secondaryUseCaseName}
+                            color="indigo"
+                          />
+                        )}
+                        <EllipsisMenu
+                          actions={(() => {
+                            const actions: { label: string; onClick: () => void }[] = [];
+                            if (flow.secondaryUseCaseId) {
+                              actions.push({
+                                label: "Edit Secondary Use Case",
+                                onClick: () =>
+                                  setOpenEditSecondary({
+                                    secondaryUseCaseId: flow.secondaryUseCaseId!,
+                                    initialName: flow.secondaryUseCaseName,
+                                  }),
+                              });
+                            } else {
+                              actions.push({
+                                label: "Add Secondary Use Case",
+                                onClick: () =>
+                                  setOpenSecondaryForRequirement({ requirementId: flow.id }),
+                              });
+                            }
                             actions.push({
-                              label: "Edit Secondary Use Case",
-                              onClick: () =>
-                                setOpenEditSecondary({
-                                  secondaryUseCaseId: flow.secondaryUseCaseId!,
-                                  initialName: flow.secondaryUseCaseName,
-                                }),
+                              label: "Add Sub Requirement",
+                              onClick: () => setOpenFormParentId(flow.id),
                             });
-                          } else {
+                            return actions;
+                          })()}
+                        />
+                      </div>
+                    </>
+                  }
+                >
+                  {flow.requirements.map((child, idx) => (
+                    <div key={child.id} className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                        <p>
+                          {idx + 1}. {renderRequirementText(child)}
+                        </p>
+                        <EllipsisMenu
+                          actions={(() => {
+                            const actions: { label: string; onClick: () => void }[] = [];
+                            if (flow.secondaryUseCaseId) {
+                              actions.push({
+                                label: "Edit Secondary Use Case",
+                                onClick: () =>
+                                  setOpenEditSecondary({
+                                    secondaryUseCaseId: flow.secondaryUseCaseId!,
+                                    initialName: flow.secondaryUseCaseName,
+                                  }),
+                              });
+                            } else {
+                              actions.push({
+                                label: "Add Secondary Use Case",
+                                onClick: () =>
+                                  setOpenSecondaryForRequirement({ requirementId: flow.id }),
+                              });
+                            }
                             actions.push({
-                              label: "Add Secondary Use Case",
-                              onClick: () =>
-                                setOpenSecondaryForRequirement({ requirementId: flow.id }),
+                              label: "Add Sub Requirement",
+                              onClick: () => setOpenFormParentId(flow.id),
                             });
-                          }
-                          actions.push({
-                            label: "Add Sub Requirement",
-                            onClick: () => setOpenFormParentId(flow.id),
-                          });
-                          return actions;
-                        })()}
-                      />
+                            return actions;
+                          })()}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </RequirementSection>
-            ))}
-          </RequirementSection>
+                  ))}
+                </RequirementSection>
+              ))}
+            </RequirementSection>
+          </div>
         )}
 
         {/* Single Exceptional Flow section */}
         {isRoot && aggregated.length > 0 && (
-          <RequirementSection title="Exceptional Flow">
-            {aggregated.map(({ exception, label, baseSRef }) =>
-              renderExceptionSection(exception, label, baseSRef),
-            )}
-          </RequirementSection>
+          <div>
+            <RequirementSection title="Exceptional Flow">
+              {aggregated.map(({ exception, label, baseSRef }) =>
+                renderExceptionSection(exception, label, baseSRef),
+              )}
+            </RequirementSection>
+          </div>
         )}
 
         {openFormParentId && (
@@ -362,6 +399,18 @@ export default function RecursiveFlowSection({
             secondaryUseCaseId={openEditSecondary.secondaryUseCaseId}
             initialName={openEditSecondary.initialName}
             invalidateUseCaseId={validatedUseCaseId}
+          />
+        )}
+
+        {openEditRequirement && (
+          <RequirementForm
+            isOpen={!!openEditRequirement}
+            onClose={() => setOpenEditRequirement(null)}
+            projectId={projectId}
+            validatedUseCaseId={validatedUseCaseId}
+            mode="edit"
+            requirementId={openEditRequirement.id}
+            initialData={openEditRequirement.initial}
           />
         )}
 

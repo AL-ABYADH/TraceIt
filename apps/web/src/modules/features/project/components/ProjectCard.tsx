@@ -22,7 +22,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ project }: ProjectCardProps) {
   const [timeAgo, setTimeAgo] = useState("");
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false); // NEW
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const deleteProject = useDeleteProject(project.id, {
