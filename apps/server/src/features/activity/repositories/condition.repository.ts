@@ -5,6 +5,7 @@ import { Condition } from "../entities/condition.entity";
 import { CreateConditionInterface } from "../interfaces/create-condition.interface";
 import { UpdateConditionInterface } from "../interfaces/update-condition.interface";
 import { ConditionModel, ConditionModelType } from "../models/condition.model";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 @Injectable()
 export class ConditionRepository {
@@ -12,6 +13,33 @@ export class ConditionRepository {
 
   constructor(private readonly neo4jService: Neo4jService) {
     this.conditionModel = ConditionModel(this.neo4jService.getNeogma());
+  }
+
+  // In ConditionRepository - add this method
+  /**
+   * Retrieves the related requirement for a condition
+   * Returns null if requirement has been deleted or doesn't exist
+   * @param conditionId - The ID of the condition
+   * @returns A promise resolving to the requirement or null
+   */
+  async getRelatedRequirement(conditionId: string): Promise<RequirementListDto | null> {
+    try {
+      const condition = await this.conditionModel.findOneWithRelations({
+        where: { id: conditionId },
+        include: ["requirement"],
+      });
+
+      if (!condition) {
+        throw new NotFoundException(`Condition with ID ${conditionId} not found`);
+      }
+
+      return (condition.requirement as RequirementListDto) || null;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to retrieve related requirement: ${error.message}`);
+    }
   }
 
   /**

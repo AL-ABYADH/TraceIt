@@ -3,6 +3,9 @@ import React, { useMemo } from "react";
 interface ActivityShapeProps {
   name: string;
   selected?: boolean;
+  // Optional explicit dimensions to keep canvas container and shape perfectly aligned
+  width?: number;
+  height?: number;
   maxWidth?: number;
   minWidth?: number;
   paddingX?: number;
@@ -21,12 +24,14 @@ interface ActivityShapeProps {
 export function ActivityShape({
   name,
   selected = false,
+  width,
+  height,
   maxWidth = 200,
   minWidth = 120,
   paddingX = 32,
   paddingY = 20,
-  fontSize = 14,
-  lineHeight = 20,
+  fontSize = 11,
+  lineHeight = 16,
   fillColor = "#000",
   strokeColor = selected ? "var(--primary)" : "#fff",
   strokeWidth = 2,
@@ -35,8 +40,11 @@ export function ActivityShape({
   style,
   onClick,
 }: ActivityShapeProps) {
-  // Calculate dimensions based on text content
+  // Calculate dimensions based on text content unless explicit width/height are provided
   const { svgWidth, svgHeight } = useMemo(() => {
+    if (typeof width === "number" && typeof height === "number") {
+      return { svgWidth: width, svgHeight: height };
+    }
     // Rough character width estimation for the font size
     const avgCharWidth = fontSize * 0.6;
     const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
@@ -46,17 +54,17 @@ export function ActivityShape({
 
     // Calculate width needed (but don't exceed maxWidth)
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
-    const width = Math.max(minWidth, textWidth);
+    const computedWidth = Math.max(minWidth, textWidth);
 
     // Calculate height based on number of lines with minimum height
     const calculatedHeight = lines * lineHeight + paddingY * 2;
-    const height = Math.max(60, calculatedHeight);
+    const computedHeight = Math.max(60, calculatedHeight);
 
     return {
-      svgWidth: width,
-      svgHeight: height,
+      svgWidth: computedWidth,
+      svgHeight: computedHeight,
     };
-  }, [name, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
+  }, [name, width, height, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
 
   // Calculate stadium/oval-like border radius (pill shape)
   const stadiumBorderRadius = useMemo(() => {

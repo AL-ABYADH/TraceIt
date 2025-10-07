@@ -9,27 +9,40 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
   // hover state (controls handle visibility)
   const [hovered, setHovered] = useState(false);
 
-  // Calculate dimensions to position handles correctly (same logic as ActivityShape)
+  // Tighter padding for more compact activity text (keep in sync with ActivityShape usage)
+  const PADDING_X = 16;
+  const PADDING_Y = 10;
+
   const { svgWidth, svgHeight } = useMemo(() => {
     const maxWidth = 200;
     const minWidth = 120;
-    const paddingX = 32;
-    const paddingY = 20;
-    const fontSize = 14;
-    const lineHeight = 20;
+    const fontSize = 11;
+    const lineHeight = 16;
 
     const avgCharWidth = fontSize * 0.6;
-    const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
+    const maxCharsPerLine = Math.floor((maxWidth - PADDING_X * 2) / avgCharWidth);
     const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
-    const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
+    const textWidth = Math.min(name.length * avgCharWidth + PADDING_X * 2, maxWidth);
     const width = Math.max(minWidth, textWidth);
-    const height = Math.max(60, lines * lineHeight + paddingY * 2); // Minimum height for activity node
+    const height = Math.max(52, lines * lineHeight + PADDING_Y * 2);
 
     return { svgWidth: width, svgHeight: height };
   }, [name]);
 
-  // handles are visible only when hovered
+  // handles are visible only when hovered or node selected
   const handlesVisible = hovered || selected;
+
+  // Styling geometry for handles (match DecisionNode approach so connectors snap to visible border)
+  const HANDLE_SIZE = 12;
+  const HANDLE_VIS_OFFSET = -6; // same value DecisionNode uses (-6 when visible), centers handle on border
+  const HANDLE_STYLE_BASE: React.CSSProperties = {
+    width: HANDLE_SIZE,
+    height: HANDLE_SIZE,
+    background: "white",
+    border: "2px solid #94a3b8",
+    borderRadius: "50%",
+    transition: "all 0.2s ease",
+  };
 
   return (
     <div
@@ -37,6 +50,8 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position: "relative",
         width: svgWidth,
         height: svgHeight,
+        boxSizing: "content-box",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -49,13 +64,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Left}
         id="left-target"
         style={{
-          left: handlesVisible ? -5 : 0,
+          left: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           top: svgHeight / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateY(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
       <Handle
@@ -63,13 +77,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Left}
         id="left-source"
         style={{
-          left: handlesVisible ? -5 : 0,
+          left: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           top: svgHeight / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateY(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
 
@@ -79,13 +92,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Right}
         id="right-target"
         style={{
-          right: handlesVisible ? -5 : 0,
+          right: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           top: svgHeight / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateY(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
       <Handle
@@ -93,13 +105,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Right}
         id="right-source"
         style={{
-          right: handlesVisible ? -5 : 0,
+          right: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           top: svgHeight / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateY(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
 
@@ -109,13 +120,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Top}
         id="top-target"
         style={{
-          top: handlesVisible ? -5 : 0,
+          top: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           left: svgWidth / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateX(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
       <Handle
@@ -123,13 +133,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Top}
         id="top-source"
         style={{
-          top: handlesVisible ? -5 : 0,
+          top: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           left: svgWidth / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateX(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
 
@@ -139,13 +148,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Bottom}
         id="bottom-target"
         style={{
-          bottom: handlesVisible ? -5 : 0,
+          bottom: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           left: svgWidth / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateX(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
       <Handle
@@ -153,17 +161,23 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         position={Position.Bottom}
         id="bottom-source"
         style={{
-          bottom: handlesVisible ? -5 : 0,
+          bottom: handlesVisible ? HANDLE_VIS_OFFSET : 0,
           left: svgWidth / 2,
-          background: "white",
-          border: "none",
           opacity: handlesVisible ? 1 : 0,
           pointerEvents: handlesVisible ? "auto" : "none",
           transform: "translateX(-50%)",
+          ...HANDLE_STYLE_BASE,
         }}
       />
 
-      <ActivityShape name={name} selected={selected} />
+      <ActivityShape
+        name={name}
+        selected={selected}
+        width={svgWidth}
+        height={svgHeight}
+        paddingX={PADDING_X}
+        paddingY={PADDING_Y}
+      />
     </div>
   );
 }

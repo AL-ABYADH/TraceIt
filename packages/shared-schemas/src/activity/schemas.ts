@@ -1,5 +1,6 @@
 import { booleanFieldDoc, dateFieldDoc, requirementIdFieldDoc, uuidFieldDoc } from "../common";
-import { useCaseIdFieldDoc } from "../requirement";
+import { requirementDetailSchema, requirementListSchema, useCaseIdFieldDoc } from "../requirement";
+import { useCaseDetailSchema, useCaseListSchema } from "../use-case";
 import { z } from "../zod-openapi-init";
 import { activityNameFieldDoc, conditionNameFieldDoc } from "./openapi-fields";
 
@@ -31,6 +32,8 @@ export const activitySchema = z
     requirementUpdated: booleanFieldDoc,
     createdAt: dateFieldDoc,
     updatedAt: dateFieldDoc.optional(),
+    requirement: requirementListSchema.optional(),
+    useCase: useCaseListSchema.optional(),
   })
   .openapi({ title: "ActivityAttributes" });
 
@@ -66,8 +69,9 @@ export const conditionSchema = z
     id: uuidFieldDoc,
     name: conditionNameFieldDoc,
     requirementUpdated: booleanFieldDoc,
-
     createdAt: dateFieldDoc,
     updatedAt: dateFieldDoc.optional(),
+    useCase: useCaseListSchema.optional(),
+    requirement: requirementListSchema.optional(),
   })
   .openapi({ title: "ConditionAttributes" });

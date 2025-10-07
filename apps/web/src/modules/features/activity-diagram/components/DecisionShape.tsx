@@ -3,6 +3,11 @@ import React, { useMemo } from "react";
 interface DecisionShapeProps {
   name: string;
   selected?: boolean;
+  showLabel?: boolean; // if true, always show label; canvas will override to false
+  // Optional explicit dimensions to avoid re-computation mismatch with canvas node container
+  selectedColor?: string; //
+  width?: number;
+  height?: number;
   maxWidth?: number;
   minWidth?: number;
   paddingX?: number;
@@ -21,12 +26,16 @@ interface DecisionShapeProps {
 export function DecisionShape({
   name,
   selected = false,
-  maxWidth = 160,
-  minWidth = 100,
-  paddingX = 24,
-  paddingY = 16,
-  fontSize = 13,
-  lineHeight = 18,
+  showLabel = true,
+  width,
+  height,
+  selectedColor,
+  maxWidth = 140,
+  minWidth = 90,
+  paddingX = 16,
+  paddingY = 12,
+  fontSize = 11,
+  lineHeight = 16,
   fillColor = "#000",
   strokeColor = selected ? "var(--primary)" : "#fff",
   strokeWidth = 2,
@@ -35,20 +44,23 @@ export function DecisionShape({
   style,
   onClick,
 }: DecisionShapeProps) {
-  // Calculate dimensions based on text content
+  // Calculate dimensions based on text content unless explicit width/height provided
   const { svgWidth, svgHeight } = useMemo(() => {
+    if (typeof width === "number" && typeof height === "number") {
+      return { svgWidth: width, svgHeight: height };
+    }
     const avgCharWidth = fontSize * 0.6;
     const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
     const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
-    const width = Math.max(minWidth, textWidth);
-    const height = Math.max(80, lines * lineHeight + paddingY * 2);
+    const computedWidth = Math.max(minWidth, textWidth);
+    const computedHeight = Math.max(56, lines * lineHeight + paddingY * 2);
 
     return {
-      svgWidth: width,
-      svgHeight: height,
+      svgWidth: computedWidth,
+      svgHeight: computedHeight,
     };
-  }, [name, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
+  }, [name, width, height, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
 
   const centerX = svgWidth / 2;
   const centerY = svgHeight / 2;
@@ -97,42 +109,45 @@ export function DecisionShape({
       </svg>
 
       {/* Label wrapper */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: svgWidth,
-          height: svgHeight,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: `${paddingY}px ${paddingX}px`,
-          boxSizing: "border-box",
-          color: textColor,
-          fontSize: fontSize,
-          fontWeight: "500",
-          lineHeight: `${lineHeight}px`,
-          whiteSpace: "normal",
-          overflow: "hidden",
-          wordBreak: "break-word",
-          pointerEvents: "auto",
-        }}
-      >
+      {(selected || showLabel) && (
         <div
           style={{
-            maxWidth: svgWidth - paddingX * 2,
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: svgWidth,
+            height: svgHeight,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            padding: `${paddingY}px ${paddingX}px`,
+            boxSizing: "border-box",
+            // color: textColor,
+            color: selectedColor,
+            fontSize: fontSize,
+            fontWeight: "500",
+            lineHeight: `${lineHeight}px`,
+            whiteSpace: "normal",
             overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
+            wordBreak: "break-word",
+            pointerEvents: "auto",
           }}
         >
-          {name}
+          <div
+            style={{
+              maxWidth: svgWidth - paddingX * 2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {name}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

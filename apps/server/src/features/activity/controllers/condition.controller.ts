@@ -14,6 +14,7 @@ import {
   requirementOptionalIdSchema,
   type UseCaseOptionalIdDto,
   useCaseOptionalIdSchema,
+  RequirementListDto,
 } from "@repo/shared-schemas";
 
 @Controller("conditions")
@@ -23,6 +24,13 @@ export class ConditionController {
   @Post()
   async add(@Body(zodBody(createConditionSchema)) dto: CreateConditionDto): Promise<ConditionDto> {
     return await this.conditionService.create(dto);
+  }
+
+  @Get(":conditionId/requirement")
+  async getRelatedRequirement(
+    @Param(zodParam(conditionIdSchema)) params: ConditionIdDto,
+  ): Promise<RequirementListDto | null> {
+    return await this.conditionService.getRelatedRequirement(params.conditionId);
   }
 
   @Get()

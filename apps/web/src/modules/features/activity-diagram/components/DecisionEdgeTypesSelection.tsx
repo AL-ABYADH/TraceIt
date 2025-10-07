@@ -3,7 +3,8 @@
 import Dialog from "@/components/Dialog";
 import { useSelector } from "react-redux";
 import { selectEdges, selectNodes } from "@/modules/core/flow/store/flow-slice";
-import { EdgeType, NodeType } from "@repo/shared-schemas";
+import { EdgeType } from "@repo/shared-schemas";
+import { isRequirementExceptionDto } from "@/types/decision-node-types";
 
 export type DecisionEdgeType = "TRUE" | "FALSE";
 
@@ -23,18 +24,36 @@ export default function ConditionEdgeTypesSelection({
   const edges = useSelector(selectEdges);
   const nodes = useSelector(selectNodes);
 
-  // Check if TRUE edge already exists from this condition node
+  // Determine whether the source node is an exception decision or a condition decision
+  const sourceNode = nodes.find((n) => n.id === sourceNodeId);
+  const isExceptionDecision = (() => {
+    const data = sourceNode?.data as any;
+    return data ? isRequirementExceptionDto(data) : false;
+  })();
+
+  // Descriptive labels depending on decision type
+  const trueLabel = isExceptionDecision ? "Exception occurs" : "Condition met";
+  const falseLabel = isExceptionDecision ? "Otherwise" : "Condition not met";
+  const dialogTitle = "Select Decision Outcome";
+  const trueSubtext = isExceptionDecision
+    ? "When the exception applies, follow this path"
+    : "When the condition is satisfied, follow this path";
+  const falseSubtext = isExceptionDecision
+    ? "When the exception does not apply, follow this path"
+    : "When the condition is not satisfied, follow this path";
+
+  // Check if TRUE edge already exists from this decision node
   const hasTrueEdge = edges.some(
     (edge) => edge.source === sourceNodeId && edge.type === EdgeType.TRUE,
   );
 
-  // Check if FALSE edge already exists from this condition node
+  // Check if FALSE edge already exists from this decision node
   const hasFalseEdge = edges.some(
     (edge) => edge.source === sourceNodeId && edge.type === EdgeType.FALSE,
   );
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Select Condition Outcome" className="max-w-md">
+    <Dialog isOpen={isOpen} onClose={onClose} title={dialogTitle} className="max-w-md">
       <div className="space-y-3 p-1">
         <div className="text-sm text-muted-foreground text-center">
           Choose the outcome path for this condition
@@ -57,12 +76,10 @@ export default function ConditionEdgeTypesSelection({
             <div
               className={`font-medium text-sm ${hasTrueEdge ? "text-gray-400" : "text-green-600"}`}
             >
-              TRUE {hasTrueEdge && "(Already Used)"}
+              {trueLabel} {hasTrueEdge && "(already used)"}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {hasTrueEdge
-                ? "TRUE path already exists from this condition"
-                : "Condition is met - follow this path"}
+              {hasTrueEdge ? `${trueLabel} path already exists` : trueSubtext}
             </div>
           </div>
         </button>
@@ -84,23 +101,20 @@ export default function ConditionEdgeTypesSelection({
             <div
               className={`font-medium text-sm ${hasFalseEdge ? "text-gray-400" : "text-red-600"}`}
             >
-              FALSE {hasFalseEdge && "(Already Used)"}
+              {falseLabel} {hasFalseEdge && "(already used)"}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {hasFalseEdge
-                ? "FALSE path already exists from this condition"
-                : "Condition is not met - follow this path"}
+              {hasFalseEdge ? `${falseLabel} path already exists` : falseSubtext}
             </div>
           </div>
         </button>
 
         <div className="text-xs text-muted-foreground text-center border-t pt-3">
-          {
-            hasTrueEdge &&
-              hasFalseEdge &&
-              "Both TRUE and FALSE paths are already defined for this condition"
-            // : "TRUE paths execute when the condition is satisfied, FALSE paths when it's not."
-          }
+          {hasTrueEdge &&
+            hasFalseEdge &&
+            (isExceptionDecision
+              ? "Both outcome paths are already defined for this exception"
+              : "Both outcome paths are already defined for this condition")}
         </div>
       </div>
     </Dialog>

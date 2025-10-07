@@ -5,6 +5,7 @@ import { CreateActivityInterface } from "../interfaces/create-activity.interface
 import { UpdateActivityInterface } from "../interfaces/update-activity.interface";
 import { RequirementService } from "src/features/requirement/services/requirement.service";
 import { UseCaseService } from "../../use-case/services/use-case/use-case.service";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 @Injectable()
 export class ActivityService {
@@ -44,6 +45,20 @@ export class ActivityService {
       }
       throw error;
     }
+  }
+  // In ActivityService - add this method
+  /**
+   * Retrieves the related requirement for an activity
+   * @param activityId - ID of the activity
+   * @returns Promise resolving to the requirement or null if requirement is deleted/not found
+   * @throws NotFoundException if the activity doesn't exist
+   */
+  async getRelatedRequirement(activityId: string): Promise<RequirementListDto | null> {
+    // First verify the activity exists
+    await this.findById(activityId);
+
+    // Then get the related requirement
+    return await this.activityRepository.getRelatedRequirement(activityId);
   }
 
   /**

@@ -8,6 +8,7 @@ import {
   activityIdSchema,
   type CreateActivityDto,
   createActivitySchema,
+  RequirementListDto,
   type RequirementOptionalIdDto,
   requirementOptionalIdSchema,
   type UpdateActivityDto,
@@ -47,6 +48,12 @@ export class ActivityController {
   @Get(":activityId")
   async getById(@Param(zodParam(activityIdSchema)) params: ActivityIdDto): Promise<Activity> {
     return await this.activityService.findById(params.activityId);
+  }
+  @Get(":activityId/requirement")
+  async getRelatedRequirement(
+    @Param(zodParam(activityIdSchema)) params: ActivityIdDto,
+  ): Promise<RequirementListDto | null> {
+    return await this.activityService.getRelatedRequirement(params.activityId);
   }
 
   @Put(":activityId")

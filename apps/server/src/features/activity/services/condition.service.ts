@@ -5,6 +5,7 @@ import { CreateConditionInterface } from "../interfaces/create-condition.interfa
 import { UpdateConditionInterface } from "../interfaces/update-condition.interface";
 import { RequirementService } from "src/features/requirement/services/requirement.service";
 import { UseCaseService } from "../../use-case/services/use-case/use-case.service"; // Add this
+import { RequirementListDto } from "@repo/shared-schemas";
 
 @Injectable()
 export class ConditionService {
@@ -186,6 +187,20 @@ export class ConditionService {
     }
 
     return this.conditionRepository.delete(id);
+  }
+  // In ConditionService - add this method
+  /**
+   * Retrieves the related requirement for a condition
+   * @param conditionId - ID of the condition
+   * @returns Promise resolving to the requirement or null if requirement is deleted/not found
+   * @throws NotFoundException if the condition doesn't exist
+   */
+  async getRelatedRequirement(conditionId: string): Promise<RequirementListDto | null> {
+    // First verify the condition exists
+    await this.findById(conditionId);
+
+    // Then get the related requirement
+    return await this.conditionRepository.getRelatedRequirement(conditionId);
   }
 
   /**

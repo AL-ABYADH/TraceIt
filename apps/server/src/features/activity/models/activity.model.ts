@@ -11,8 +11,8 @@ export type ActivityAttributes = {
 };
 
 export interface ActivityRelationships {
-  requirement: RequirementAttributes;
-  useCase: UseCaseAttributes;
+  requirement?: RequirementAttributes;
+  useCase?: UseCaseAttributes;
 }
 
 export type ActivityModelType = NeogmaModel<ActivityAttributes, ActivityRelationships>;

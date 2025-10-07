@@ -5,6 +5,7 @@ import { Activity } from "../entities/activity.entity";
 import { CreateActivityInterface } from "../interfaces/create-activity.interface";
 import { UpdateActivityInterface } from "../interfaces/update-activity.interface";
 import { ActivityModel, ActivityModelType } from "../models/activity.model";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 @Injectable()
 export class ActivityRepository {
@@ -116,6 +117,33 @@ export class ActivityRepository {
       return activity ? activity : null;
     } catch (error) {
       throw new Error(`Failed to retrieve activity: ${error.message}`);
+    }
+  }
+
+  // In ActivityRepository - add this method
+  /**
+   * Retrieves the related requirement for an activity
+   * Returns null if requirement has been deleted or doesn't exist
+   * @param activityId - The ID of the activity
+   * @returns A promise resolving to the requirement or null
+   */
+  async getRelatedRequirement(activityId: string): Promise<RequirementListDto | null> {
+    try {
+      const activity = await this.activityModel.findOneWithRelations({
+        where: { id: activityId },
+        include: ["requirement"],
+      });
+
+      if (!activity) {
+        throw new NotFoundException(`Activity with ID ${activityId} not found`);
+      }
+
+      return (activity.requirement as RequirementListDto) || null;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to retrieve related requirement: ${error.message}`);
     }
   }
 

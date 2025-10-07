@@ -119,11 +119,7 @@ export default function ActivityDiagramFlow({
     dispatch(
       addNode({
         type: NodeType.DECISION_NODE,
-        data: {
-          id: condition.id,
-          name: condition.name,
-          conditionType: "condition",
-        },
+        data: condition,
       }),
     );
 
