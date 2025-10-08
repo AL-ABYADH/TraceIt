@@ -14,8 +14,8 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
   const updateNodeInternals = useUpdateNodeInternals();
 
   // ✅ You can hardcode or change these directly
-  const BASE_WIDTH = 60;
-  const BASE_HEIGHT = 60;
+  const BASE_WIDTH = 40;
+  const BASE_HEIGHT = 40;
 
   // Determine node type and colors
   const { isException, selectedColor } = useMemo(() => {
