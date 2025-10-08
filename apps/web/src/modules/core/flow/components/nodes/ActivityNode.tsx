@@ -6,7 +6,7 @@ import { ActivityShape } from "@/modules/features/activity-diagram/components/Ac
 export default function ActivityNode({ data, selected }: NodeProps<any>) {
   const name = data?.name ?? "Activity";
 
-  // hover state (controls handle visibility)
+  // hover state (controls handle visibility and overlay)
   const [hovered, setHovered] = useState(false);
 
   // Tighter padding for more compact activity text (keep in sync with ActivityShape usage)
@@ -44,6 +44,10 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
     transition: "all 0.2s ease",
   };
 
+  // whether to show the "Associated requirement has been updated" bubble
+  const showRequirementBubble =
+    (!!data.requirementDeleted || !!data?.requirementUpdated) && (hovered || selected);
+
   return (
     <div
       style={{
@@ -58,6 +62,42 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
       data-id={data?.id ?? undefined}
       title={name}
     >
+      {/* Requirement update bubble (appears on hover if data.requirementUpdated) */}
+      {showRequirementBubble && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: -28, // raise above the activity
+            display: "flex",
+            justifyContent: "center",
+            pointerEvents: "none", // don't block pointer events
+            zIndex: 10,
+          }}
+        >
+          <div
+            style={{
+              padding: "6px 10px",
+              borderRadius: 8,
+              fontSize: 12,
+              background: "rgba(0,0,0,0.75)",
+              color: "white",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+              opacity: 1,
+              transform: "translateY(0)",
+              transition: "opacity 150ms ease, transform 150ms ease",
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Associated requirement has been {!data.requirement ? "deleted" : "updated"}
+          </div>
+        </div>
+      )}
+
       {/* LEFT HANDLES */}
       <Handle
         type="target"
@@ -177,6 +217,9 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         height={svgHeight}
         paddingX={PADDING_X}
         paddingY={PADDING_Y}
+        strokeColor={
+          data?.requirementDeleted ? "red" : data?.requirementUpdated ? "yellow" : undefined
+        }
       />
     </div>
   );
