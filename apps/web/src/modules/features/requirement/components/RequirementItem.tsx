@@ -40,9 +40,23 @@ export default function RequirementItem({
   const isHighlighted = requirement.id === highlightedRequirementId;
 
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+
     if (isHighlighted && itemRef.current) {
       itemRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      itemRef.current.style.outline = "2px solid #4f9cf9";
+      itemRef.current.style.backgroundColor = "rgba(59,130,246,0.15)";
+
+      // remove after 5 seconds
+      timer = setTimeout(() => {
+        itemRef.current?.style.removeProperty("outline");
+        itemRef.current?.style.removeProperty("background-color");
+      }, 5000);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isHighlighted]);
 
   const deleteRequirement = useDeleteRequirement(requirement.id, validatedUseCaseId, {
@@ -79,16 +93,23 @@ export default function RequirementItem({
   ];
 
   return (
-    <div style={{ marginLeft: level * 28 }} ref={itemRef}>
+    <div style={{ marginLeft: level * 28, borderRadius: "2rem" }} ref={itemRef}>
       {/* Requirement Header */}
       <div
         className={cn(
           "flex items-start justify-between rounded-xl bg-muted/40 px-3 py-2 hover:bg-muted/60 transition-all duration-200",
-          isHighlighted && "bg-blue-500/20 animate-pulse",
+          "bg-muted/40 hover:bg-muted/60 rounded-lg",
+          isHighlighted && "bg-blue-500/20 ring-2 ring-blue-400 rounded-xl",
         )}
+        onClick={() => {
+          if (itemRef.current) {
+            itemRef.current.style.outline = "none";
+            itemRef.current.style.backgroundColor = "";
+          }
+        }}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-5 flex justify-center">
+          <div className="w-5 flex justify-center" style={{ borderRadius: "2rem" }}>
             {hasNested || hasExceptions ? (
               <button
                 className="p-1 rounded hover:bg-accent transition-colors"
@@ -105,12 +126,15 @@ export default function RequirementItem({
           </div>
 
           {number !== undefined && (
-            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
+            <span className="flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
               {number}
             </span>
           )}
 
-          <p className="truncate text-sm text-foreground leading-relaxed whitespace-pre-line">
+          <p
+            className="truncate p-2 text-sm text-foreground leading-relaxed flex-1 min-w-0 text-ellipsis"
+            title={renderRequirementText(requirement)}
+          >
             {renderRequirementText(requirement)}
           </p>
         </div>
