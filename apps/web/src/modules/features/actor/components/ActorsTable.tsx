@@ -91,7 +91,13 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
         <Button onClick={() => setIsFormOpen(true)}>Add Actor</Button>
       </div>
 
-      <Table columns={columns} data={data || []} />
+      {data?.length ? (
+        <Table columns={columns} data={data} />
+      ) : (
+        <p className="text-muted-foreground text-sm">
+          No actors found. Click <strong>Add Actor</strong> to create one.
+        </p>
+      )}
 
       <ActorForm isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} projectId={projectId} />
 
@@ -115,9 +121,7 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
 
       {deleteMutation.isError && (
         <ErrorMessage
-          message={`Failed to delete actor: ${
-            (deleteMutation.error as any)?.message ?? "Unknown error"
-          }`}
+          message={`Failed to delete actor: ${deleteMutation.error?.message ?? "Unknown error"}`}
         />
       )}
     </div>

@@ -67,12 +67,12 @@ export default function MainFlowSection({
           </div>
         }
       >
-        {requirements.map((req, idx) => (
+        {requirements.toReversed().map((req, idx) => (
           <div
             key={req.id}
             className="flex items-start justify-between rounded-lg border border-border bg-card/40 px-3 py-2 hover:bg-accent/30 transition-colors"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 p-2">
               <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
                 {idx + 1}
               </span>

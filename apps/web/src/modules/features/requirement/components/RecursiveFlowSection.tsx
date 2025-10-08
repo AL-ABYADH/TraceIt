@@ -69,6 +69,7 @@ export default function RecursiveFlowSection({
     ): {
       id: string;
       sectionId: string;
+      parentRequirement: RequirementDto;
       requirements: RequirementDto[];
       secondaryUseCaseName?: string;
       secondaryUseCaseId?: string;
@@ -76,6 +77,7 @@ export default function RecursiveFlowSection({
       const flows: {
         id: string;
         sectionId: string;
+        parentRequirement: RequirementDto;
         requirements: RequirementDto[];
         secondaryUseCaseName?: string;
         secondaryUseCaseId?: string;
@@ -92,6 +94,7 @@ export default function RecursiveFlowSection({
             requirements: children,
             secondaryUseCaseName: secUC?.name,
             secondaryUseCaseId: secUC?.id,
+            parentRequirement: req,
           });
           flows.push(...flattenFlows(sectionId, children));
         }
@@ -147,7 +150,7 @@ export default function RecursiveFlowSection({
                 <span className="inline-flex items-center px-2 rounded-md bg-muted text-muted-foreground text-xs font-mono">
                   {label}
                 </span>
-                <Chip label="Exception" value={exception.name} color="amber" />
+                <Chip label="Exception" value={exception.name} color="rose" />
                 {(() => {
                   const s = (exception as any)?.secondaryUseCase;
                   const x = Array.isArray(s) ? s[0] : s;
@@ -186,15 +189,19 @@ export default function RecursiveFlowSection({
           }
         >
           {exceptionReqs.length > 0 ? (
-            exceptionReqs.map((child: RequirementDto, idx: number) => {
+            exceptionReqs.toReversed().map((child: RequirementDto, idx: number) => {
               const childNumericS = baseIndex ? `${baseIndex}-${idx + 1}` : `${idx + 1}`;
               const childSRef = `S${childNumericS}`;
               return (
                 <div key={child.id} className="flex flex-col">
                   <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2 ">
-                    <p>
-                      {idx + 1}. {renderRequirementText(child)}
-                    </p>
+                    <div className="flex items-center gap-3 p-2">
+                      <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
+                        {idx + 1}
+                      </span>
+                      <p>{renderRequirementText(child)}</p>
+                    </div>
+
                     <EllipsisMenu
                       actions={[
                         {
@@ -278,6 +285,11 @@ export default function RecursiveFlowSection({
                         <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-mono">
                           S{flow.sectionId}
                         </span>
+                        <Chip
+                          label="Operation"
+                          value={flow.parentRequirement.operation}
+                          color="emerald"
+                        />
                         {flow.secondaryUseCaseName && (
                           <Chip
                             label="Secondary"
@@ -318,9 +330,13 @@ export default function RecursiveFlowSection({
                   {flow.requirements.map((child, idx) => (
                     <div key={child.id} className="flex flex-col gap-2">
                       <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                        <p>
-                          {idx + 1}. {renderRequirementText(child)}
-                        </p>
+                        <div className="flex items-center gap-3 p-2">
+                          <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
+                            {idx + 1}
+                          </span>
+                          <p>{renderRequirementText(child)}</p>
+                        </div>
+
                         <EllipsisMenu
                           actions={[
                             {

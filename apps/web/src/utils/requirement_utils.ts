@@ -17,14 +17,14 @@ export function renderRequirementText(req: RequirementDto): string {
 
   if (actors && actors.length > 0) {
     if (condition && condition.trim().length > 0) {
-      return `If ${condition}, ${actorText} shall ${operation}.`;
+      return `If ${condition.toLowerCase()}, ${actorText} shall ${operation.toLowerCase()}.`;
     }
-    return `${actorText} shall ${operation}.`;
+    return `${actorText} shall ${operation.toLowerCase()}.`;
   }
 
   if (condition && condition.trim().length > 0) {
-    return `If ${condition}, the system shall ${operation}.`;
+    return `If ${condition.toLowerCase()}, the system shall ${operation.toLowerCase()}.`;
   }
 
-  return `The system shall ${operation}.`;
+  return `The system shall ${operation.toLowerCase()}.`;
 }
