@@ -11,7 +11,6 @@ type UseCreateRequirementOptions = {
 
 export function useCreateRequirement(useCaseId: string, opts?: UseCreateRequirementOptions) {
   const qc = useQueryClient();
-  console.log("Using useCreateRequirement with useCaseId:", useCaseId);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const mutation = useMutation({
