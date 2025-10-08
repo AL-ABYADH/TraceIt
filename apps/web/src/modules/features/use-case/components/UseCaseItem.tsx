@@ -1,26 +1,90 @@
 "use client";
 
 import EllipsisMenu from "@/components/EllipsisMenu";
-import { PrimaryUseCaseListDto } from "@repo/shared-schemas";
+import { PrimaryUseCaseListDto, RequirementDto } from "@repo/shared-schemas";
 import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RequirementForm from "../../requirement/components/RequirementForm";
 import RequirementItem from "../../requirement/components/RequirementItem";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
+import { useExpansion } from "../../requirement/contexts/ExpansionContext";
+
+const findRequirementPath = (requirements: RequirementDto[], requirementId: string): string[] => {
+  const path: string[] = [];
+
+  const find = (reqs: RequirementDto[], currentPath: string[]): boolean => {
+    for (const req of reqs) {
+      const newPath = [...currentPath, req.id];
+      if (req.id === requirementId) {
+        path.push(...newPath);
+        return true;
+      }
+      if (req.nestedRequirements && find(req.nestedRequirements, newPath)) {
+        return true;
+      }
+      if (req.exceptions) {
+        for (const ex of req.exceptions) {
+          if (ex.requirements && find(ex.requirements, newPath)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  find(requirements, []);
+  return path;
+};
 
 interface UseCaseItemProps {
   useCase: PrimaryUseCaseListDto;
   projectId: string;
   number: number;
+  highlightedUseCaseId: string | null;
+  highlightedRequirementId: string | null;
 }
 
-export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function UseCaseItem({
+  useCase,
+  projectId,
+  number,
+  highlightedUseCaseId,
+  highlightedRequirementId,
+}: UseCaseItemProps) {
   const [isRequirementFormOpen, setIsRequirementFormOpen] = useState(false);
+  const { expandedItems, toggleItem, expandItems } = useExpansion();
+  const isExpanded = expandedItems.has(useCase.id);
 
-  const { data: requirements = [], isLoading, isError } = useUseCasesRequirements(useCase.id);
+  const {
+    data: requirements = [],
+    isLoading,
+    isError,
+  } = useUseCasesRequirements(useCase.id, {
+    enabled: isExpanded, // Only fetch requirements if the use case is expanded
+  });
 
-  const toggleExpanded = () => setIsExpanded(!isExpanded);
+  useEffect(() => {
+    if (
+      isExpanded &&
+      requirements.length > 0 &&
+      useCase.id === highlightedUseCaseId &&
+      highlightedRequirementId
+    ) {
+      const path = findRequirementPath(requirements, highlightedRequirementId);
+      if (path.length > 0) {
+        expandItems(path);
+      }
+    }
+  }, [
+    isExpanded,
+    requirements,
+    useCase.id,
+    highlightedUseCaseId,
+    highlightedRequirementId,
+    expandItems,
+  ]);
+
   const handleAddRequirement = () => setIsRequirementFormOpen(true);
   const handleCloseRequirementForm = () => setIsRequirementFormOpen(false);
 
@@ -33,7 +97,10 @@ export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemP
       {/* Use Case Header */}
       <div className="flex items-center justify-between p-4 hover:bg-card/30 transition-colors">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <button onClick={toggleExpanded} className="p-1 hover:bg-card rounded transition-colors">
+          <button
+            onClick={() => toggleItem(useCase.id)}
+            className="p-1 hover:bg-card rounded transition-colors"
+          >
             {isExpanded ? (
               <ChevronDownIcon className="w-4 h-4 text-muted-foreground" />
             ) : (
@@ -82,6 +149,7 @@ export default function UseCaseItem({ useCase, projectId, number }: UseCaseItemP
                   projectId={projectId}
                   level={1}
                   validatedUseCaseId={useCase.id}
+                  highlightedRequirementId={highlightedRequirementId}
                 />
               ))}
             </div>

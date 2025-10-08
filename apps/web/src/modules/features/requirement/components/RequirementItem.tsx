@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronRightIcon, Plus } from "lucide-react";
 import EllipsisMenu from "@/components/EllipsisMenu";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -9,6 +9,8 @@ import RequirementForm from "./RequirementForm";
 import RequirementExceptionForm from "./RequirementExceptionForm";
 import { RequirementDto } from "@repo/shared-schemas";
 import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
+import { useExpansion } from "../contexts/ExpansionContext";
+import { cn } from "@/lib/utils";
 
 interface RequirementItemProps {
   requirement: RequirementDto;
@@ -16,6 +18,7 @@ interface RequirementItemProps {
   level?: number;
   projectId: string;
   validatedUseCaseId: string;
+  highlightedRequirementId: string | null;
 }
 
 export default function RequirementItem({
@@ -24,12 +27,23 @@ export default function RequirementItem({
   level = 0,
   projectId,
   validatedUseCaseId,
+  highlightedRequirementId,
 }: RequirementItemProps) {
-  const [expanded, setExpanded] = useState(false);
   const [openForm, setOpenForm] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openExceptionForm, setOpenExceptionForm] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { expandedItems, toggleItem } = useExpansion();
+  const expanded = expandedItems.has(requirement.id);
+  const itemRef = useRef<HTMLDivElement>(null);
+
+  const isHighlighted = requirement.id === highlightedRequirementId;
+
+  useEffect(() => {
+    if (isHighlighted && itemRef.current) {
+      itemRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [isHighlighted]);
 
   const deleteRequirement = useDeleteRequirement(requirement.id, validatedUseCaseId, {
     onSuccess: () => setIsDeleteOpen(false),
@@ -65,15 +79,20 @@ export default function RequirementItem({
   ];
 
   return (
-    <div style={{ marginLeft: level * 28 }}>
+    <div style={{ marginLeft: level * 28 }} ref={itemRef}>
       {/* Requirement Header */}
-      <div className="flex items-start justify-between rounded-xl bg-muted/40 px-3 py-2 hover:bg-muted/60 transition-all duration-200">
+      <div
+        className={cn(
+          "flex items-start justify-between rounded-xl bg-muted/40 px-3 py-2 hover:bg-muted/60 transition-all duration-200",
+          isHighlighted && "bg-blue-500/20 animate-pulse",
+        )}
+      >
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-5 flex justify-center">
             {hasNested || hasExceptions ? (
               <button
                 className="p-1 rounded hover:bg-accent transition-colors"
-                onClick={() => setExpanded((v) => !v)}
+                onClick={() => toggleItem(requirement.id)}
                 aria-label={expanded ? "Collapse" : "Expand"}
               >
                 {expanded ? (
@@ -120,6 +139,7 @@ export default function RequirementItem({
                     level={level + 1}
                     projectId={projectId}
                     validatedUseCaseId={validatedUseCaseId}
+                    highlightedRequirementId={highlightedRequirementId}
                   />
                 ))}
               </div>
@@ -155,6 +175,7 @@ export default function RequirementItem({
                           level={level + 2}
                           projectId={projectId}
                           validatedUseCaseId={validatedUseCaseId}
+                          highlightedRequirementId={highlightedRequirementId}
                         />
                       ))
                     ) : (

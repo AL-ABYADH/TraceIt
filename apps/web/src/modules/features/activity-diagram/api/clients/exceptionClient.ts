@@ -1,11 +1,11 @@
 import { http } from "@/services/api/http";
-import { RequirementExceptionDetailDto } from "@repo/shared-schemas";
+import { RequirementExceptionDto } from "@repo/shared-schemas";
 import { exceptionEndpoint } from "../exception-endpoint";
 
 /**
  * List exceptions for a specific use case
  */
-async function listUseCaseExceptions(useCaseId: string): Promise<RequirementExceptionDetailDto[]> {
+async function listUseCaseExceptions(useCaseId: string): Promise<RequirementExceptionDto[]> {
   // Replace path parameter safely
   const endpoint = {
     ...exceptionEndpoint.listByUseCase,
@@ -13,7 +13,7 @@ async function listUseCaseExceptions(useCaseId: string): Promise<RequirementExce
   };
 
   // Call the typed HTTP client
-  return http.get<RequirementExceptionDetailDto[]>(endpoint);
+  return http.get<RequirementExceptionDto[]>(endpoint);
 }
 
 /**

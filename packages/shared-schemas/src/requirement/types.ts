@@ -47,7 +47,7 @@ export type RequirementDto = z.infer<typeof requirementListSchema> & {
 };
 
 export type RequirementExceptionRelationshipsDto = {
-  requirements: z.infer<typeof requirementDetailSchema>[];
+  requirements: RequirementDto[];
 };
 
 export type RequirementExceptionDto = RequirementExceptionListDto &
