@@ -98,22 +98,6 @@ export class RequirementRepository {
         throw new NotFoundException(`Requirement with ID ${id} not found after update`);
       }
 
-      if (updatedRequirement.relatedActivity) {
-        this.neo4jService
-          .getNeogma()
-          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementUpdated = $boolean", {
-            id: updatedRequirement?.relatedActivity?.id,
-            boolean: true,
-          });
-      }
-      if (updatedRequirement.relatedCondition) {
-        this.neo4jService
-          .getNeogma()
-          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementUpdated = $boolean", {
-            id: updatedRequirement?.relatedCondition?.id,
-            boolean: true,
-          });
-      }
       return updatedRequirement;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -135,26 +119,31 @@ export class RequirementRepository {
         detach: true,
       });
 
-      if (result[0].relatedActivity) {
-        this.neo4jService
-          .getNeogma()
-          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementDeleted = $boolean", {
-            id: result[0]?.relatedActivity?.id,
-            boolean: true,
-          });
-      }
-      if (result[0].relatedCondition) {
-        this.neo4jService
-          .getNeogma()
-          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementDeleted = $boolean", {
-            id: result[0]?.relatedCondition?.id,
-            boolean: true,
-          });
-      }
-
       return result > 0;
     } catch (error) {
       throw new Error(`Failed to delete requirement: ${error.message}`);
+    }
+  }
+
+  async setRelatedFlag(
+    requirement: Requirement,
+    flag: "requirementUpdated" | "requirementDeleted",
+  ) {
+    if (requirement.relatedActivity) {
+      this.neo4jService
+        .getNeogma()
+        .queryRunner.run(`MATCH (n) WHERE n.id = $id SET n.${flag} = $boolean`, {
+          id: requirement?.relatedActivity?.id,
+          boolean: true,
+        });
+    }
+    if (requirement.relatedCondition) {
+      this.neo4jService
+        .getNeogma()
+        .queryRunner.run(`MATCH (n) WHERE n.id = $id SET n.${flag} = $boolean`, {
+          id: requirement?.relatedCondition?.id,
+          boolean: true,
+        });
     }
   }
 
@@ -174,6 +163,8 @@ export class RequirementRepository {
           "nestedRequirements",
           "exceptions",
           "requirementException",
+          "relatedActivity",
+          "relatedCondition",
         ],
       });
 

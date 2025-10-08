@@ -99,6 +99,8 @@ export class RequirementService {
     // Verify requirement exists
     const requirement = await this.findById(id);
 
+    await this.requirementRepository.setRelatedFlag(requirement, "requirementUpdated");
+
     // Validate all actor IDs exist
     if (updateDto.actorIds && updateDto.actorIds.length > 0) {
       for (const actorId of updateDto.actorIds) {
@@ -116,6 +118,8 @@ export class RequirementService {
    */
   async removeRequirement(id: string): Promise<boolean> {
     const data = await this.findById(id);
+
+    await this.requirementRepository.setRelatedFlag(data, "requirementDeleted");
 
     // Delete all nested requirements
     if (data.nestedRequirements) {
