@@ -7,7 +7,7 @@ export function renderRequirementText(req: RequirementDto): string {
   if (actors && actors.length > 0) {
     const names = actors.map((a) => a.name);
     if (names.length === 1) {
-      actorText = names[0];
+      actorText = names[0]!;
     } else if (names.length === 2) {
       actorText = `${names[0]} and ${names[1]}`;
     } else {
