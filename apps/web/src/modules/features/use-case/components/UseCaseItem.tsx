@@ -8,6 +8,8 @@ import RequirementForm from "../../requirement/components/RequirementForm";
 import RequirementItem from "../../requirement/components/RequirementItem";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import { useExpansion } from "../../requirement/contexts/ExpansionContext";
+import { useRouter } from "next/navigation";
+import { route } from "nextjs-routes";
 
 const findRequirementPath = (requirements: RequirementDto[], requirementId: string): string[] => {
   const path: string[] = [];
@@ -55,6 +57,7 @@ export default function UseCaseItem({
   const [isRequirementFormOpen, setIsRequirementFormOpen] = useState(false);
   const { expandedItems, toggleItem, expandItems } = useExpansion();
   const isExpanded = expandedItems.has(useCase.id);
+  const router = useRouter();
 
   const {
     data: requirements = [],
@@ -88,6 +91,18 @@ export default function UseCaseItem({
   const handleAddRequirement = () => setIsRequirementFormOpen(true);
   const handleCloseRequirementForm = () => setIsRequirementFormOpen(false);
 
+  const handleViewDescription = () => {
+    router.push(
+      route({
+        pathname: "/projects/[project-id]/use-cases/[use-case-id]/details",
+        query: {
+          "project-id": projectId,
+          "use-case-id": useCase.id,
+        },
+      }),
+    );
+  };
+
   const sortedRequirements = [...requirements].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
@@ -119,6 +134,10 @@ export default function UseCaseItem({
         {/* Ellipsis Menu for actions */}
         <EllipsisMenu
           actions={[
+            {
+              label: "View Use Case Description",
+              onClick: handleViewDescription,
+            },
             {
               label: "Add Requirement",
               onClick: handleAddRequirement,
