@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDownIcon, ChevronRightIcon, Plus } from "lucide-react";
-import EllipsisMenu from "@/components/EllipsisMenu";
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { renderRequirementText } from "@/utils/requirement_utils";
 import RequirementForm from "./RequirementForm";
@@ -11,6 +10,7 @@ import { RequirementDto } from "@repo/shared-schemas";
 import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
 import { useExpansion } from "../contexts/ExpansionContext";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; // adjust import path
 
 interface RequirementItemProps {
   requirement: RequirementDto;
@@ -35,22 +35,23 @@ export default function RequirementItem({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { expandedItems, toggleItem } = useExpansion();
   const expanded = expandedItems.has(requirement.id);
-  const itemRef = useRef<HTMLDivElement>(null);
 
+  // Highlight & scroll ref
+  const headerRef = useRef<HTMLDivElement>(null);
+  const itemRef = useRef<HTMLDivElement>(null);
   const isHighlighted = requirement.id === highlightedRequirementId;
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
 
-    if (isHighlighted && itemRef.current) {
-      itemRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      itemRef.current.style.outline = "2px solid #4f9cf9";
-      itemRef.current.style.backgroundColor = "rgba(59,130,246,0.15)";
+    if (isHighlighted && headerRef.current) {
+      headerRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      headerRef.current.style.outline = "2px solid #4f9cf9";
+      headerRef.current.style.backgroundColor = "rgba(59,130,246,0.15)";
 
-      // remove after 5 seconds
       timer = setTimeout(() => {
-        itemRef.current?.style.removeProperty("outline");
-        itemRef.current?.style.removeProperty("background-color");
+        headerRef.current?.style.removeProperty("outline");
+        headerRef.current?.style.removeProperty("background-color");
       }, 5000);
     }
 
@@ -63,50 +64,52 @@ export default function RequirementItem({
     onSuccess: () => setIsDeleteOpen(false),
   });
 
-  let hasNested = false;
-  let hasExceptions = false;
+  const hasNested = requirement.nestedRequirements
+    ? requirement.nestedRequirements.length > 0
+    : false;
+  const hasExceptions = requirement.exceptions?.length ? requirement.exceptions.length > 0 : false;
 
-  if (requirement.nestedRequirements) {
-    hasNested = requirement.nestedRequirements?.length > 0;
-  }
-  if (requirement.exceptions) {
-    hasExceptions = requirement.exceptions?.length > 0;
-  }
   const actions = [
-    {
-      label: "Edit",
-      onClick: () => setOpenEdit(true),
-    },
-    {
-      label: "Delete",
-      onClick: () => setIsDeleteOpen(true),
-      danger: true,
-    },
-    {
-      label: "Add Exception",
-      onClick: () => setOpenExceptionForm(true),
-    },
-    {
-      label: "Add Sub Requirement",
-      onClick: () => setOpenForm(true),
-    },
+    { label: "Edit", onClick: () => setOpenEdit(true) },
+    { label: "Delete", onClick: () => setIsDeleteOpen(true), danger: true },
+    { label: "Add Exception", onClick: () => setOpenExceptionForm(true) },
+    { label: "Add Sub Requirement", onClick: () => setOpenForm(true) },
   ];
 
+  // Right-click context menu state
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // prevent parent menu
+    setMenuPosition({ x: e.clientX, y: e.clientY });
+  };
+
+  const closeMenu = () => setMenuPosition(null);
+
   return (
-    <div style={{ marginLeft: level * 28, borderRadius: "2rem" }} ref={itemRef}>
+    <div
+      style={{ marginLeft: level * 28, borderRadius: "2rem" }}
+      ref={itemRef} // outer wrapper, just for margin
+    >
       {/* Requirement Header */}
       <div
         className={cn(
-          "flex items-start justify-between rounded-xl bg-muted/40 px-3 py-2 hover:bg-muted/60 transition-all duration-200",
-          "bg-muted/40 hover:bg-muted/60 rounded-lg",
+          "flex items-start justify-between rounded-xl px-3 py-2 transition-all duration-200 cursor-pointer",
+          "bg-muted/40 hover:bg-muted/60",
           isHighlighted && "bg-blue-500/20 ring-2 ring-blue-400 rounded-xl",
         )}
-        onClick={() => {
-          if (itemRef.current) {
-            itemRef.current.style.outline = "none";
-            itemRef.current.style.backgroundColor = "";
-          }
+        ref={headerRef} // header-specific ref
+        onMouseEnter={(e) => {
+          if (!isHighlighted) e.currentTarget.style.backgroundColor = "rgba(107,114,128,0.1)";
         }}
+        onMouseLeave={(e) => {
+          if (!isHighlighted) e.currentTarget.style.backgroundColor = "";
+        }}
+        onClick={() => {
+          if (headerRef.current) headerRef.current.style.outline = "none";
+        }}
+        onContextMenu={handleContextMenu}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-5 flex justify-center" style={{ borderRadius: "2rem" }}>
@@ -126,7 +129,7 @@ export default function RequirementItem({
           </div>
 
           {number !== undefined && (
-            <span className="flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
+            <span className="flex items-center justify-center w-2 h-6 text-xs font-semibold rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
               {number}
             </span>
           )}
@@ -138,14 +141,11 @@ export default function RequirementItem({
             {renderRequirementText(requirement)}
           </p>
         </div>
-
-        <EllipsisMenu actions={actions} />
       </div>
 
       {/* Nested content */}
       {expanded && (
         <div className="mt-2 space-y-3">
-          {/* Sub Flow */}
           {hasNested && (
             <div className="relative ml-8 border-l border-indigo-300/50 pl-3">
               <div className="flex items-center gap-1 mb-1">
@@ -155,22 +155,23 @@ export default function RequirementItem({
                 </span>
               </div>
               <div className="space-y-2">
-                {requirement.nestedRequirements?.map((nested, idx) => (
-                  <RequirementItem
-                    key={nested.id}
-                    requirement={nested}
-                    number={idx + 1}
-                    level={level + 1}
-                    projectId={projectId}
-                    validatedUseCaseId={validatedUseCaseId}
-                    highlightedRequirementId={highlightedRequirementId}
-                  />
-                ))}
+                {requirement.nestedRequirements
+                  ?.toReversed()
+                  .map((nested, idx) => (
+                    <RequirementItem
+                      key={nested.id}
+                      requirement={nested}
+                      number={idx + 1}
+                      level={level + 1}
+                      projectId={projectId}
+                      validatedUseCaseId={validatedUseCaseId}
+                      highlightedRequirementId={highlightedRequirementId}
+                    />
+                  ))}
               </div>
             </div>
           )}
 
-          {/* Exceptional Flow */}
           {hasExceptions && (
             <div className="relative ml-8 border-l border-border pl-3">
               <div className="flex items-center gap-1 mb-1">
@@ -184,26 +185,31 @@ export default function RequirementItem({
                   <div key={exception.id}>
                     <div className="flex items-center gap-2 mb-1">
                       <div style={{ marginLeft: 84 }} />
-                      <span className="inline-flex items-center py-3 px-2 rounded-md bg-muted text-muted-foreground text-xs font-mono">
+                      <span className="inline-flex items-center py-3 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
                         E{eIdx + 1}
                       </span>
-                      <span className="text-xs text-foreground/80">{exception.name}</span>
+                      <span className="text-sm text-foreground/80">{exception.name}</span>
                     </div>
 
                     {exception.requirements?.length ? (
-                      exception.requirements.map((exReq, exIdx) => (
-                        <RequirementItem
-                          key={exReq.id}
-                          requirement={exReq as any}
-                          number={exIdx + 1}
-                          level={level + 2}
-                          projectId={projectId}
-                          validatedUseCaseId={validatedUseCaseId}
-                          highlightedRequirementId={highlightedRequirementId}
-                        />
-                      ))
+                      exception.requirements
+                        .toReversed()
+                        .map((exReq, exIdx) => (
+                          <RequirementItem
+                            key={exReq.id}
+                            requirement={exReq as any}
+                            number={exIdx + 1}
+                            level={level + 2}
+                            projectId={projectId}
+                            validatedUseCaseId={validatedUseCaseId}
+                            highlightedRequirementId={highlightedRequirementId}
+                          />
+                        ))
                     ) : (
-                      <div className="ml-6 text-xs text-muted-foreground italic">
+                      <div
+                        className="ml-6 text-xs text-muted-foreground italic"
+                        style={{ marginLeft: 132 }}
+                      >
                         No requirements in this exception yet.
                       </div>
                     )}
@@ -215,7 +221,7 @@ export default function RequirementItem({
         </div>
       )}
 
-      {/* Forms and dialogs stay the same */}
+      {/* Forms */}
       {openForm && (
         <RequirementForm
           isOpen={openForm}
@@ -249,6 +255,29 @@ export default function RequirementItem({
           useCaseId={validatedUseCaseId}
           parentRequirementId={requirement.id}
         />
+      )}
+
+      {/* Right-click dropdown */}
+      {menuPosition && (
+        <DropdownMenu open onOpenChange={(open) => !open && closeMenu()}>
+          <DropdownMenuContent
+            sideOffset={0}
+            className="bg-card"
+            style={{ position: "fixed", top: menuPosition.y, left: menuPosition.x }}
+          >
+            {actions.map((action, idx) => (
+              <DropdownMenuItem
+                key={idx}
+                onSelect={() => {
+                  action.onClick();
+                  closeMenu();
+                }}
+              >
+                {action.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       <ConfirmationDialog

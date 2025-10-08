@@ -127,7 +127,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
       {data?.length ? (
         <Table
           columns={columns}
-          data={data}
+          data={data.toReversed()}
           onRowClick={(useCase) =>
             router.push(
               route({
