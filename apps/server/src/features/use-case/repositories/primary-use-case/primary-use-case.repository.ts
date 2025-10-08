@@ -6,6 +6,7 @@ import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
 import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
+import { UseCaseImportanceLevel } from "../../enums/use-case-importance-level.enum";
 
 @Injectable()
 export class PrimaryUseCaseRepository {
@@ -65,6 +66,10 @@ export class PrimaryUseCaseRepository {
         updateData.description = updateDto.description;
       }
 
+      if (updateDto.importanceLevel !== undefined) {
+        updateData.importanceLevel = updateDto.importanceLevel;
+      }
+
       if (updateDto.primaryActorIds !== undefined) {
         updateRelation.primaryActorIds = updateDto.primaryActorIds;
       } else {
@@ -82,12 +87,13 @@ export class PrimaryUseCaseRepository {
       });
 
       // Handle actor relationships if provided
+      // Handle actor relationships if provided
       if (
-        updateRelation.primaryActorIds?.length > 0 ||
-        updateRelation.secondaryActorIds?.length > 0
+        updateRelation.primaryActorIds !== undefined ||
+        updateRelation.secondaryActorIds !== undefined
       ) {
-        // Delete existing actor relationships if we're updating actors
-        if (updateRelation.primaryActorIds?.length > 0) {
+        // Always clear old relationships if the field was provided
+        if (updateRelation.primaryActorIds !== undefined) {
           await this.primaryUseCaseModel.deleteRelationships({
             alias: "primaryActors",
             where: {
@@ -95,7 +101,7 @@ export class PrimaryUseCaseRepository {
             },
           });
 
-          // Create new relationships
+          // Recreate new relationships if any
           for (const actorId of updateRelation.primaryActorIds) {
             await this.primaryUseCaseModel.relateTo({
               alias: "primaryActors",
@@ -107,7 +113,7 @@ export class PrimaryUseCaseRepository {
           }
         }
 
-        if (updateRelation.secondaryActorIds?.length > 0) {
+        if (updateRelation.secondaryActorIds !== undefined) {
           await this.primaryUseCaseModel.deleteRelationships({
             alias: "secondaryActors",
             where: {
@@ -115,7 +121,7 @@ export class PrimaryUseCaseRepository {
             },
           });
 
-          // Create new relationships
+          // Recreate new relationships if any
           for (const actorId of updateRelation.secondaryActorIds) {
             await this.primaryUseCaseModel.relateTo({
               alias: "secondaryActors",

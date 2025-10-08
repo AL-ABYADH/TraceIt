@@ -1,5 +1,8 @@
+import { UseCaseImportanceLevel } from "@repo/shared-schemas";
+
 export interface UpdatePrimaryUseCaseInterface {
   name?: string;
+  importanceLevel?: UseCaseImportanceLevel;
   description?: string;
   primaryActorIds?: string[];
   secondaryActorIds?: string[];
