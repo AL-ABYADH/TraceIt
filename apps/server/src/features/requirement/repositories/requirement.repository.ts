@@ -60,9 +60,7 @@ export class RequirementRepository {
         updateData.operation = updateDto.operation;
       }
 
-      if (updateDto.condition !== undefined) {
-        updateData.condition = updateDto.condition;
-      }
+      updateData.condition = updateDto.condition ?? "";
 
       await this.requirementModel.updateOneOrThrow(updateData, {
         where: { id },
