@@ -32,7 +32,7 @@ export const ConditionModel: ModelFactoryDefinition<ConditionAttributes, Conditi
       },
       requirementUpdated: {
         type: "boolean",
-        default: false,
+        required: true,
       },
     },
     relationships: {
