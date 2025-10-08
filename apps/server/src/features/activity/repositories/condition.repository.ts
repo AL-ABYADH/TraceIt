@@ -52,6 +52,7 @@ export class ConditionRepository {
       const conditionData: any = {
         name: createDto.name,
         requirementUpdated: false,
+        requirementDeleted: false,
         useCase: {
           where: [{ params: { id: createDto.useCaseId } }],
         },

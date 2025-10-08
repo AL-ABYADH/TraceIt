@@ -6,6 +6,7 @@ export type ActivityAttributes = {
   id: string;
   name: string;
   requirementUpdated: boolean;
+  requirementDeleted: boolean;
   createdAt: string;
   updatedAt?: string;
 };
@@ -31,6 +32,10 @@ export const ActivityModel: ModelFactoryDefinition<ActivityAttributes, ActivityR
         message: "Activity name must be between 1 and 100 characters",
       },
       requirementUpdated: {
+        type: "boolean",
+        required: true,
+      },
+      requirementDeleted: {
         type: "boolean",
         required: true,
       },

@@ -25,6 +25,7 @@ export class ActivityRepository {
       const activityData: any = {
         name: createDto.name,
         requirementUpdated: false,
+        requirementDeleted: false,
         useCase: {
           // Add useCase relationship
           where: [{ params: { id: createDto.useCaseId } }],

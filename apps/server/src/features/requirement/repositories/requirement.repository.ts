@@ -135,6 +135,23 @@ export class RequirementRepository {
         detach: true,
       });
 
+      if (result[0].relatedActivity) {
+        this.neo4jService
+          .getNeogma()
+          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementDeleted = $boolean", {
+            id: result[0]?.relatedActivity?.id,
+            boolean: true,
+          });
+      }
+      if (result[0].relatedCondition) {
+        this.neo4jService
+          .getNeogma()
+          .queryRunner.run("MATCH (n) WHERE n.id = $id SET n.requirementDeleted = $boolean", {
+            id: result[0]?.relatedCondition?.id,
+            boolean: true,
+          });
+      }
+
       return result > 0;
     } catch (error) {
       throw new Error(`Failed to delete requirement: ${error.message}`);
