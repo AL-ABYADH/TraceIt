@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { RequirementExceptionService } from "src/features/requirement/services/requirement-exception.service";
 import { ProjectService } from "../../../project/services/project/project.service";
 import { RequirementService } from "../../../requirement/services/requirement.service";
 import { SecondaryUseCase } from "../../entities/secondary-use-case.entity";
@@ -6,7 +7,6 @@ import { CreateSecondaryUseCaseInterface } from "../../interfaces/create-use-cas
 import { UpdateSecondaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { SecondaryUseCaseRepository } from "../../repositories/secondary-use-case/secondary-use-case.repository";
 import { PrimaryUseCaseService } from "../primary-use-case/primary-use-case.service";
-import { RequirementExceptionService } from "src/features/requirement/services/requirement-exception.service";
 
 /**
  * Service for managing secondary use cases, including their relationships
