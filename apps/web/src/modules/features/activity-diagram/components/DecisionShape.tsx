@@ -5,7 +5,8 @@ interface DecisionShapeProps {
   selected?: boolean;
   showLabel?: boolean; // if true, always show label; canvas will override to false
   // Optional explicit dimensions to avoid re-computation mismatch with canvas node container
-  selectedColor?: string; //
+  selectedColor?: string; // Add this
+  isCanvasMode?: boolean; // hide label in canvas
   width?: number;
   height?: number;
   maxWidth?: number;
@@ -27,11 +28,12 @@ export function DecisionShape({
   name,
   selected = false,
   showLabel = true,
+  isCanvasMode,
   width,
   height,
   selectedColor,
   maxWidth = 140,
-  minWidth = 90,
+  minWidth = 100,
   paddingX = 16,
   paddingY = 12,
   fontSize = 11,
@@ -54,7 +56,7 @@ export function DecisionShape({
     const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
     const computedWidth = Math.max(minWidth, textWidth);
-    const computedHeight = Math.max(56, lines * lineHeight + paddingY * 2);
+    const computedHeight = Math.max(56, lines * lineHeight + paddingY * 4); //2
 
     return {
       svgWidth: computedWidth,
@@ -109,7 +111,7 @@ export function DecisionShape({
       </svg>
 
       {/* Label wrapper */}
-      {(selected || showLabel) && (
+      {!isCanvasMode && (
         <div
           style={{
             position: "absolute",

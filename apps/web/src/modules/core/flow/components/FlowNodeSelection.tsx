@@ -36,7 +36,7 @@ export default function FlowNodeSelection({
   const Component = diagramNodesMap[type]!;
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Add Diagram Object" className="max-w-lg">
+    <Dialog isOpen={isOpen} onClose={onClose} title="Add Diagram Object" className="max-w-4xl">
       <Component onClose={onClose} onClick={onClick} />
     </Dialog>
   );

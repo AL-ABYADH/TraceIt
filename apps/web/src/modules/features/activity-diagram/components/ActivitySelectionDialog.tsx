@@ -48,7 +48,7 @@ export default function ActivitySelectionDialog({
               Create New Activity
             </h3>
             <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-              Design a custom activity with your own parameters and requirements
+              Create a custom activity from requirements and name it
             </p>
           </div>
         </button>

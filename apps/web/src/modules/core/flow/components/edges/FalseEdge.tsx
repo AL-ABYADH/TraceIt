@@ -21,30 +21,29 @@ export default function FalseEdge(props: EdgeProps) {
     style = {},
     markerEnd,
     selected,
+    source,
   } = props;
 
-  const { getNodes } = useReactFlow();
-  const sourceNode = props.source ? getNodes().find((n) => n.id === props.source) : undefined;
+  const { getNode } = useReactFlow();
+  const sourceNode = getNode(source);
 
   // Determine color mapping for FALSE edge
-  // Defaults: treat as condition
   let baseColor = "#ffc107"; // CONDITION FALSE -> yellow
   if (sourceNode?.data) {
     try {
       const nodeData = sourceNode.data as DecisionNodeData;
       if (isRequirementExceptionDto(nodeData)) {
-        // EXCEPTION FALSE -> green
-        baseColor = "#28a745";
+        baseColor = "#28a745"; // EXCEPTION FALSE -> green
       } else if (isConditionDto(nodeData)) {
-        // CONDITION FALSE -> yellow
-        baseColor = "#ffc107";
+        baseColor = "#ffc107"; // CONDITION FALSE -> yellow
       }
     } catch (e) {
       // ignore and use default
     }
   }
 
-  const [edgePath, labelX, labelY] = getBezierPath({
+  // Calculate edge path
+  const [edgePath, pathLabelX, pathLabelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -52,6 +51,11 @@ export default function FalseEdge(props: EdgeProps) {
     targetY,
     targetPosition,
   });
+
+  // Position FALSE label along FALSE edge path (30% from source)
+  const edgeProgress = 0.3;
+  const labelX = sourceX + (pathLabelX - sourceX) * edgeProgress;
+  const labelY = sourceY + (pathLabelY - sourceY) * edgeProgress - 15; // 15px above the path
 
   const stroke = selected ? "#3b82f6" : baseColor;
   const strokeWidth = selected ? 2.5 : 2;
@@ -66,32 +70,46 @@ export default function FalseEdge(props: EdgeProps) {
           ...style,
           stroke,
           strokeWidth,
-          // Removed strokeDasharray to make it a straight solid line
         }}
       />
       <EdgeLabelRenderer>
         <div
           style={{
             position: "absolute",
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            fontSize: 11,
-            fontWeight: 500,
-            fontFamily: "system-ui, sans-serif",
-            color: "#fff", // White text
+            transform: `translate(-100%, -50%) translate(${labelX}px, ${labelY}px)`,
             pointerEvents: "all",
+            zIndex: 1000,
           }}
           className="nodrag nopan"
         >
           <div
             style={{
-              background: "#000", // Black background
+              fontSize: "9px",
+              fontWeight: 500,
+              fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+              // color: "#1a1a1a",
+              // background: "#ffffff",
+              color: "#ffffff",
+              background: "#000000",
               padding: "1px 6px",
-              borderRadius: "4px",
-              border: `1px solid #fff`, // White border
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              borderRadius: "3px",
+              border: "1px solid #d0d0d0",
+              boxShadow: selected
+                ? "0 2px 8px rgba(59, 130, 246, 0.3), 0 0 0 2px rgba(59, 130, 246, 0.2)"
+                : "0 1px 3px rgba(0, 0, 0, 0.12)",
+              display: "inline-block",
+              maxWidth: "200px",
+              textAlign: "left",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              cursor: "default",
+              userSelect: "none",
+              transition: "all 0.15s ease",
             }}
+            title="FALSE"
           >
-            FALSE
+            [FALSE]
           </div>
         </div>
       </EdgeLabelRenderer>

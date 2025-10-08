@@ -1,10 +1,9 @@
 import type { NodeProps } from "@xyflow/react";
-import { Handle, Position } from "@xyflow/react";
-import { useMemo, useState } from "react";
+import { Handle, Position, useUpdateNodeInternals } from "@xyflow/react";
+import { useMemo, useState, useEffect } from "react";
 import { DecisionShape } from "@/modules/features/activity-diagram/components/DecisionShape";
 import {
   DecisionNodeData,
-  getDecisionNodeName,
   isConditionNode,
   isRequirementExceptionDto,
 } from "@/types/decision-node-types";
@@ -12,49 +11,47 @@ import {
 export default function DecisionNode({ data, selected }: NodeProps<any>) {
   const name = data?.name ?? "Condition";
   const [hovered, setHovered] = useState(false);
+  const updateNodeInternals = useUpdateNodeInternals();
+
+  // ✅ You can hardcode or change these directly
+  const BASE_WIDTH = 60;
+  const BASE_HEIGHT = 60;
 
   // Determine node type and colors
-  const { isCondition, isException, selectedColor } = useMemo(() => {
-    let isCondition = true;
+  const { isException, selectedColor } = useMemo(() => {
     let isException = false;
 
     if (data) {
       try {
         const nodeData = data as DecisionNodeData;
         isException = isRequirementExceptionDto(nodeData);
-        isCondition = isConditionNode(nodeData) || !isException;
       } catch (error) {
         console.warn("Failed to process decision node data:", error);
-        // Fallback to condition type
-        isCondition = true;
-        isException = false;
       }
     }
 
-    // Selected colors: green for condition, red for exception
     const selectedColor = isException ? "#dc3545" : "#28a745";
-
-    return { isCondition, isException, selectedColor };
+    return { isException, selectedColor };
   }, [data]);
 
-  // Calculate dimensions to position handles correctly
+  // ✅ Adjustable width/height logic
   const { svgWidth, svgHeight } = useMemo(() => {
-    const maxWidth = 140;
-    const minWidth = 90;
     const paddingX = 16;
-    const paddingY = 12;
     const fontSize = 11;
-    const lineHeight = 16;
-
     const avgCharWidth = fontSize * 0.6;
-    const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
-    const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
-    const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
-    const width = Math.max(minWidth, textWidth);
-    const height = Math.max(56, lines * lineHeight + paddingY * 2);
+
+    const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, BASE_WIDTH);
+
+    const width = Math.max(40, textWidth);
+    const height = BASE_HEIGHT; // 👈 you can control this freely now
 
     return { svgWidth: width, svgHeight: height };
   }, [name]);
+
+  // Ensure React Flow recalculates the node layout when height changes
+  useEffect(() => {
+    if (data?.id) updateNodeInternals(data.id);
+  }, [svgHeight, data?.id, updateNodeInternals]);
 
   const handlesVisible = hovered || selected;
 
@@ -72,8 +69,9 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
     <div
       style={{
         position: "relative",
-        width: svgWidth,
-        height: svgHeight,
+        width: `${svgWidth}px`,
+        height: `${svgHeight}px`,
+        minHeight: `${svgHeight}px`,
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
       onMouseEnter={() => setHovered(true)}
@@ -153,35 +151,11 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
         }}
       />
 
-      {/* BOTTOM HANDLES - commented out as in original */}
-      {/* <Handle
-        type="target"
-        position={Position.Bottom}
-        id="bottom-target"
-        style={{
-          ...handleStyle,
-          bottom: handlesVisible ? -6 : 0,
-          left: svgWidth / 2,
-          transform: "translateX(-50%)",
-        }}
-      />
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="bottom-source"
-        style={{
-          ...handleStyle,
-          bottom: handlesVisible ? -6 : 0,
-          left: svgWidth / 2,
-          transform: "translateX(-50%)",
-        }}
-      /> */}
-
       <DecisionShape
         name={name}
         selected={selected}
+        isCanvasMode={true} // hide label in canvas
         selectedColor={selectedColor}
-        showLabel={false}
         width={svgWidth}
         height={svgHeight}
       />

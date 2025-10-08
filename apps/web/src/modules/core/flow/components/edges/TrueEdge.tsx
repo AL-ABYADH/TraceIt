@@ -25,39 +25,33 @@ export default function TrueEdge(props: EdgeProps) {
     source,
   } = props;
 
-  const { getNodes } = useReactFlow();
+  const { getNode } = useReactFlow();
 
   // Get the source node to access its data
-  const sourceNode = getNodes().find((node) => node.id === source);
+  const sourceNode = getNode(source);
 
-  // Determine label and color based on source node data and TRUE mapping
+  // Determine label and color based on source node data
   let label = "TRUE";
-  // Defaults in case of missing data: treat as condition
   let baseColor = "#28a745"; // CONDITION TRUE -> green
-  let isException = false;
 
   if (sourceNode?.data) {
     try {
       const nodeData = sourceNode.data as DecisionNodeData;
-      label = getDecisionNodeName(nodeData);
+      label = getDecisionNodeName(nodeData); // Gets the actual condition/exception text
 
       // Color mapping for TRUE edge
       if (isRequirementExceptionDto(nodeData)) {
-        // EXCEPTION TRUE -> red
-        baseColor = "#dc3545";
-        isException = true;
+        baseColor = "#dc3545"; // EXCEPTION TRUE -> red
       } else if (isConditionDto(nodeData)) {
-        // CONDITION TRUE -> green
-        baseColor = "#28a745";
-        isException = false;
+        baseColor = "#28a745"; // CONDITION TRUE -> green
       }
     } catch (error) {
-      // Fallback to default if there's any error processing the node data
       console.warn("Failed to process decision node data:", error);
     }
   }
 
-  const [edgePath, labelX, labelY] = getBezierPath({
+  // Calculate edge path
+  const [edgePath, pathLabelX, pathLabelY] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -65,6 +59,11 @@ export default function TrueEdge(props: EdgeProps) {
     targetY,
     targetPosition,
   });
+
+  // Position condition/exception label along TRUE edge path (30% from source)
+  const edgeProgress = 0.3;
+  const labelX = sourceX + (pathLabelX - sourceX) * edgeProgress;
+  const labelY = sourceY + (pathLabelY - sourceY) * edgeProgress - 15; // 15px above the path
 
   const stroke = selected ? "#3b82f6" : baseColor;
   const strokeWidth = selected ? 2.5 : 2;
@@ -85,32 +84,38 @@ export default function TrueEdge(props: EdgeProps) {
         <div
           style={{
             position: "absolute",
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            fontSize: 11,
-            fontWeight: 500,
-            fontFamily: "system-ui, sans-serif",
-            color: "#fff", // White text
+            transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             pointerEvents: "all",
+            zIndex: 1000,
           }}
           className="nodrag nopan"
         >
           <div
             style={{
-              background: "#000", // Black background
+              fontSize: "9px",
+              fontWeight: 500,
+              fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+              color: "#ffffff",
+              background: "#000000",
               padding: "1px 6px",
-              borderRadius: "4px",
-              border: `1px solid #fff`, // White border
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+              borderRadius: "3px",
+              border: "1px solid #d0d0d0",
+              boxShadow: selected
+                ? "0 2px 8px rgba(59, 130, 246, 0.3), 0 0 0 2px rgba(59, 130, 246, 0.2)"
+                : "0 1px 3px rgba(0, 0, 0, 0.12)",
               display: "inline-block",
-              maxWidth: "360px",
+              maxWidth: "200px",
               textAlign: "left",
-              overflow: "visible",
-              textOverflow: "clip",
-              whiteSpace: "normal",
-              wordBreak: "break-word",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              cursor: "default",
+              userSelect: "none",
+              transition: "all 0.15s ease",
             }}
+            title={label}
           >
-            {label}
+            [{label}]
           </div>
         </div>
       </EdgeLabelRenderer>

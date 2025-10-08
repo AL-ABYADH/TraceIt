@@ -13,7 +13,7 @@ interface MergeShapeProps {
 
 export function MergeShape({
   selected = false,
-  size = 100,
+  size = 60, // Changed from 100 to 60 to match DecisionNode base size
   fillColor = "#000",
   strokeColor = selected ? "var(--primary)" : "#fff",
   strokeWidth = 2,
@@ -22,8 +22,9 @@ export function MergeShape({
   onClick,
 }: MergeShapeProps) {
   const { svgWidth, svgHeight } = useMemo(() => {
-    const width = Math.max(80, size);
-    const height = Math.max(80, size);
+    // Use the same sizing logic as DecisionNode
+    const width = Math.max(40, size);
+    const height = Math.max(40, size);
     return { svgWidth: width, svgHeight: height };
   }, [size]);
 
