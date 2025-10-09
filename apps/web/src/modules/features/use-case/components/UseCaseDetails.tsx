@@ -13,6 +13,9 @@ import _ from "lodash";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import UseCaseForm from "./UseCaseForm";
 
+import { useRouter } from "next/navigation";
+import { route } from "nextjs-routes";
+
 interface UseCaseDetailsProps {
   projectId: string;
   useCaseId: string;
@@ -27,6 +30,7 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
     error: reqErrorMessage,
   } = useUseCasesRequirements(useCaseId);
   const [isEditOpen, setEditOpen] = useState(false);
+  const router = useRouter();
 
   // Keep showing loading until both use case and requirements are loaded
   if (isLoading || reqLoading)
@@ -51,9 +55,24 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
             Use Case: {data.name}{" "}
             <span className="text-muted-foreground text-base">({data.subtype})</span>
           </h1>
-          <Button variant="ghost" onClick={() => setEditOpen(true)}>
-            <Pencil className="w-5 h-5 text-muted-foreground" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                router.push(
+                  route({
+                    pathname: "/projects/[project-id]/activity-diagrams",
+                    query: { "project-id": projectId, useCaseId: useCaseId },
+                  }),
+                )
+              }
+            >
+              View Activity Diagram
+            </Button>
+            <Button variant="ghost" onClick={() => setEditOpen(true)}>
+              <Pencil className="w-5 h-5 text-muted-foreground" />
+            </Button>
+          </div>
         </div>
 
         <div className="mt-6 space-y-4">

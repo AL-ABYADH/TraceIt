@@ -92,28 +92,44 @@ export default function UseCaseDiagramPage() {
 
   return (
     <div className="space-y-4">
-      <div className="max-w-md">
-        <SelectField
-          label="Use Case"
-          placeholder="Select a use case"
-          value={selectedUseCaseId ?? ""}
-          onChange={(e) => {
-            const newUseCaseId = e.target.value;
-            setSelectedUseCaseId(newUseCaseId);
-            router.push(
-              route({
-                pathname: "/projects/[project-id]/activity-diagrams",
-                query: { "project-id": projectId, useCaseId: newUseCaseId },
-              }),
-            );
-          }}
-        >
-          {useCases.map((uc) => (
-            <option key={uc.id} value={uc.id}>
-              {uc.name}
-            </option>
-          ))}
-        </SelectField>
+      <div className="flex w-full items-center justify-between">
+        <div className="max-w-md">
+          <SelectField
+            label="Use Case"
+            placeholder="Select a use case"
+            value={selectedUseCaseId ?? ""}
+            onChange={(e) => {
+              const newUseCaseId = e.target.value;
+              setSelectedUseCaseId(newUseCaseId);
+              router.push(
+                route({
+                  pathname: "/projects/[project-id]/activity-diagrams",
+                  query: { "project-id": projectId, useCaseId: newUseCaseId },
+                }),
+              );
+            }}
+          >
+            {useCases.map((uc) => (
+              <option key={uc.id} value={uc.id}>
+                {uc.name}
+              </option>
+            ))}
+          </SelectField>
+        </div>
+        {selectedUseCaseId && (
+          <Button
+            onClick={() =>
+              router.push(
+                route({
+                  pathname: "/projects/[project-id]/use-cases/[use-case-id]/details",
+                  query: { "project-id": projectId, "use-case-id": selectedUseCaseId },
+                }),
+              )
+            }
+          >
+            View Use Case Description
+          </Button>
+        )}
       </div>
 
       {isActivityDiagramLoading && selectedUseCase && (

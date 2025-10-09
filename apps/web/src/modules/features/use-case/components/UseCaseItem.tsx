@@ -103,6 +103,18 @@ export default function UseCaseItem({
     );
   };
 
+  const handleViewActivityDiagram = () => {
+    router.push(
+      route({
+        pathname: "/projects/[project-id]/activity-diagrams",
+        query: {
+          "project-id": projectId,
+          useCaseId: useCase.id,
+        },
+      }),
+    );
+  };
+
   const sortedRequirements = [...requirements].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
@@ -137,6 +149,10 @@ export default function UseCaseItem({
             {
               label: "View Use Case Description",
               onClick: handleViewDescription,
+            },
+            {
+              label: "View Activity Diagram",
+              onClick: handleViewActivityDiagram,
             },
             {
               label: "Add Requirement",
