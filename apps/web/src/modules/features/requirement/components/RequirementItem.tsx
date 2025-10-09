@@ -269,7 +269,7 @@ export default function RequirementItem({
         <DropdownMenu open onOpenChange={(open) => !open && closeMenu()}>
           <DropdownMenuContent
             sideOffset={0}
-            className="bg-card"
+            className="min-w-48 bg-card text-popover-foreground border border-border shadow-lg rounded-xl p-1"
             style={{ position: "fixed", top: menuPosition.y, left: menuPosition.x }}
           >
             {actions.map((action, idx) => (
@@ -279,6 +279,7 @@ export default function RequirementItem({
                   action.onClick();
                   closeMenu();
                 }}
+                danger={action.danger}
               >
                 {action.label}
               </DropdownMenuItem>
