@@ -35,6 +35,9 @@ import { DiagramElementsDto, DiagramType, EdgeDto, NodeDto, NodeType } from "@re
 import Loading from "@/components/Loading";
 import FlowNodeSelection from "./FlowNodeSelection";
 
+import { useBeforeUnloadWarning } from "@/hooks/useBeforeUnloadWarning";
+import { useLatest } from "@/hooks/useLatest";
+
 type Props = {
   onConnect: (conn: Connection) => void;
   onAddNode: (nodeType: NodeType) => void;
@@ -57,6 +60,26 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
   const edgeTypes = useMemo(() => getEdgeTypesForReactFlow(), []);
 
   const dispatch = useDispatch();
+
+  // Show browser confirmation before leaving the page if there are unsaved changes.
+  useBeforeUnloadWarning(isDirty);
+
+  const latestIsDirty = useLatest(isDirty);
+  const latestOnSave = useLatest(onSave);
+  const latestNodes = useLatest(nodes);
+  const latestEdges = useLatest(edges);
+
+  // Save on unmount if there are unsaved changes.
+  useEffect(() => {
+    return () => {
+      if (latestIsDirty.current) {
+        latestOnSave.current?.({
+          nodes: latestNodes.current as NodeDto[],
+          edges: latestEdges.current as EdgeDto[],
+        });
+      }
+    };
+  }, []);
 
   const handleUndo = useCallback(() => {
     if (canUndo) {
