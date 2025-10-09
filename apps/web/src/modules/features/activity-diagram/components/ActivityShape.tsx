@@ -35,7 +35,7 @@ export function ActivityShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : isDeleted ? "#ff4444" : "#fff",
+  strokeColor = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
   strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
   textColor = "#fff",
   className,
