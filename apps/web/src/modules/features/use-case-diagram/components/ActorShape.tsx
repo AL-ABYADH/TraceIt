@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 export interface ActorShapeProps {
   name: string;
   selected?: boolean;
+  isDeleted?: boolean;
   actorBodyWidth?: number;
   actorBodyHeight?: number;
   headR?: number;
@@ -23,12 +24,14 @@ export interface ActorShapeProps {
 export default function ActorShape({
   name,
   selected = false,
+  isDeleted = false,
   actorBodyWidth = 60,
   actorBodyHeight = 86,
   headR = 12,
   headPaddingTop = 6,
   bodyLength = 22,
-  stroke = selected ? "var(--primary)" : "#fff",
+  // stroke = selected ? "var(--primary)" : isDeleted ? "#ff4444" : "#fff",
+  stroke = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
   strokeWidth = 2,
   className,
   style,

@@ -31,7 +31,7 @@ export function UseCaseShape({
   lineHeight = 20,
   fillColor = "#000",
   strokeColor = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
-  strokeWidth = isDeleted ? 3 : 2,
+  strokeWidth = 2,
   textColor = "#fff",
   className,
   style,

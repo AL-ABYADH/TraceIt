@@ -6,7 +6,8 @@ import { Handle, Position } from "@xyflow/react";
 import ActorShape from "@/modules/features/use-case-diagram/components/ActorShape";
 
 export default function ActorNode({ data, selected }: NodeProps<any>) {
-  const name = data?.name ?? "Deleted";
+  const name = data.name ?? "Actor was deleted";
+  const isDeleted = !data.name;
 
   // hover state for handles
   const [hovered, setHovered] = useState(false);
@@ -94,7 +95,7 @@ export default function ActorNode({ data, selected }: NodeProps<any>) {
         }}
       />
 
-      <ActorShape name={name} selected={selected} />
+      <ActorShape name={name} selected={selected} isDeleted={isDeleted} />
     </div>
   );
 }
