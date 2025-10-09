@@ -28,14 +28,14 @@ export default function FalseEdge(props: EdgeProps) {
   const sourceNode = getNode(source);
 
   // Determine color mapping for FALSE edge
-  let baseColor = "#ffc107"; // CONDITION FALSE -> yellow
+  let baseColor = "#fff"; // CONDITION FALSE -> yellow
   if (sourceNode?.data) {
     try {
       const nodeData = sourceNode.data as DecisionNodeData;
       if (isRequirementExceptionDto(nodeData)) {
-        baseColor = "#28a745"; // EXCEPTION FALSE -> green
+        baseColor = "#fff"; // EXCEPTION FALSE -> green
       } else if (isConditionDto(nodeData)) {
-        baseColor = "#ffc107"; // CONDITION FALSE -> yellow
+        baseColor = "#fff"; // CONDITION FALSE -> yellow
       }
     } catch (e) {
       // ignore and use default
@@ -58,20 +58,47 @@ export default function FalseEdge(props: EdgeProps) {
   const labelY = sourceY + (pathLabelY - sourceY) * edgeProgress - 15; // 15px above the path
 
   const stroke = selected ? "#3b82f6" : baseColor;
-  const strokeWidth = selected ? 2.5 : 2;
+  const strokeWidth = 2.5;
 
   return (
     <>
       <BaseEdge
         id={id}
         path={edgePath}
-        markerEnd={markerEnd}
+        markerEnd={"url(#arrowhead-activity-default)"}
         style={{
           ...style,
           stroke,
           strokeWidth,
         }}
       />
+      {/* Arrowhead definitions */}
+      <svg style={{ position: "absolute", width: 0, height: 0 }}>
+        <defs>
+          <marker
+            id="arrowhead-activity-default"
+            markerUnits="strokeWidth"
+            orient="auto"
+            refX={8}
+            refY={5}
+            markerWidth={6}
+            markerHeight={6}
+            viewBox="0 0 10 10"
+          >
+            {/* Outer arrow (fill follows currentColor, slight outline for contrast) */}
+            <path
+              d="M1,1 L9,5 L1,9 L3,5 Z"
+              fill="currentColor"
+              stroke="rgba(0,0,0,0.12)"
+              strokeWidth="0.4"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            {/* small inner highlight to give a subtle 3D feel (optional) */}
+            <path d="M2.2,4.6 L6.2,5 L2.2,5.4 L3.2,5 Z" fill="rgba(255,255,255,0.12)" />
+          </marker>
+        </defs>
+      </svg>
       <EdgeLabelRenderer>
         <div
           style={{

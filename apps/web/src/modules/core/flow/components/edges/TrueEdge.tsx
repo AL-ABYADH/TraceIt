@@ -32,7 +32,7 @@ export default function TrueEdge(props: EdgeProps) {
 
   // Determine label and color based on source node data
   let label = "TRUE";
-  let baseColor = "#28a745"; // CONDITION TRUE -> green
+  let baseColor = "#fff"; // CONDITION TRUE -> green
 
   if (sourceNode?.data) {
     try {
@@ -41,9 +41,9 @@ export default function TrueEdge(props: EdgeProps) {
 
       // Color mapping for TRUE edge
       if (isRequirementExceptionDto(nodeData)) {
-        baseColor = "#dc3545"; // EXCEPTION TRUE -> red
+        baseColor = "#fff"; // EXCEPTION TRUE -> red
       } else if (isConditionDto(nodeData)) {
-        baseColor = "#28a745"; // CONDITION TRUE -> green
+        baseColor = "#fff"; // CONDITION TRUE -> green
       }
     } catch (error) {
       console.warn("Failed to process decision node data:", error);
@@ -66,20 +66,47 @@ export default function TrueEdge(props: EdgeProps) {
   const labelY = sourceY + (pathLabelY - sourceY) * edgeProgress - 15; // 15px above the path
 
   const stroke = selected ? "#3b82f6" : baseColor;
-  const strokeWidth = selected ? 2.5 : 2;
+  const strokeWidth = 2.5;
 
   return (
     <>
       <BaseEdge
         id={id}
         path={edgePath}
-        markerEnd={markerEnd}
+        markerEnd={"url(#arrowhead-activity-default)"}
         style={{
           ...style,
           stroke,
           strokeWidth,
         }}
       />
+      {/* Arrowhead definitions */}
+      <svg style={{ position: "absolute", width: 0, height: 0 }}>
+        <defs>
+          <marker
+            id="arrowhead-activity-default"
+            markerUnits="strokeWidth"
+            orient="auto"
+            refX={8}
+            refY={5}
+            markerWidth={6}
+            markerHeight={6}
+            viewBox="0 0 10 10"
+          >
+            {/* Outer arrow (fill follows currentColor, slight outline for contrast) */}
+            <path
+              d="M1,1 L9,5 L1,9 L3,5 Z"
+              fill="currentColor"
+              stroke="rgba(0,0,0,0.12)"
+              strokeWidth="0.4"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            {/* small inner highlight to give a subtle 3D feel (optional) */}
+            <path d="M2.2,4.6 L6.2,5 L2.2,5.4 L3.2,5 Z" fill="rgba(255,255,255,0.12)" />
+          </marker>
+        </defs>
+      </svg>
       <EdgeLabelRenderer>
         <div
           style={{
