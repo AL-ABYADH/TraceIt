@@ -234,8 +234,8 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         <ActivityShape
           name={name}
           selected={selected}
-          // width={svgWidth}
-          // height={svgHeight}
+          width={svgWidth}
+          height={svgHeight}
           paddingX={PADDING_X}
           paddingY={PADDING_Y}
           isDeleted={isDeleted}
