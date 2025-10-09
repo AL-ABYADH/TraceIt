@@ -3,17 +3,18 @@ import { useEffect, useMemo, useState } from "react";
 import Dialog from "@/components/Dialog";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
-import { RequirementDto } from "@repo/shared-schemas";
+import { RequirementDto, RequirementListDto } from "@repo/shared-schemas";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import { requirementClient } from "../../requirement/api/clients/requirement-client";
+import { useAllRequirementsUnderUseCase } from "../../requirement/hooks/useAllUseCaseRequirements";
 
 interface RequirementSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   useCaseId: string;
   isConditionMode?: boolean; // true when selecting requirement for creating a CONDITION
-  onRequirementSelect: (requirement: RequirementDto) => void;
-  availableRequirements?: RequirementDto[];
+  onRequirementSelect: (requirement: RequirementListDto) => void;
+  availableRequirements?: RequirementListDto[];
   checkingRequirements?: Set<string>; // Track which requirements are being verified
 }
 
@@ -28,7 +29,12 @@ export default function RequirementSelection({
   availableRequirements,
   checkingRequirements = new Set(),
 }: RequirementSelectionProps) {
-  const { data: allRequirements, isError, isLoading, error } = useUseCasesRequirements(useCaseId);
+  const {
+    data: allRequirements,
+    isError,
+    isLoading,
+    error,
+  } = useAllRequirementsUnderUseCase(useCaseId);
 
   // Use provided availableRequirements or fall back to all requirements
   const requirementsToShow = availableRequirements || allRequirements || [];

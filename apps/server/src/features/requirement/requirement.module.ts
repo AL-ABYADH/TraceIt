@@ -8,6 +8,7 @@ import { ExceptionalRequirementRepository } from "./repositories/exceptional-req
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
 import { UseCaseModule } from "../use-case/use-case.module";
+import { PrimaryUseCaseRepository } from "../use-case/repositories/primary-use-case/primary-use-case.repository";
 
 @Module({
   imports: [ProjectModule, ActorModule, forwardRef(() => UseCaseModule)],
@@ -17,6 +18,7 @@ import { UseCaseModule } from "../use-case/use-case.module";
     RequirementExceptionService,
     RequirementRepository,
     ExceptionalRequirementRepository,
+    PrimaryUseCaseRepository,
   ],
   exports: [RequirementService, RequirementExceptionService],
 })

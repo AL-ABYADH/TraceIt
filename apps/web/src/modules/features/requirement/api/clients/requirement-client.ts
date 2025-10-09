@@ -6,11 +6,15 @@ import {
   UpdateRequirementDto,
   RequirementIdDto,
   RequirementRelationshipStatusDto,
+  RequirementListDto,
 } from "@repo/shared-schemas";
 import { requirementEndpoints, useCaseRequirementsEndpoints } from "../requirement-endpoints";
 
 async function listUseCaseRequirements(useCaseId: string): Promise<RequirementDto[]> {
   return http.get(useCaseRequirementsEndpoints.list, { pathParams: { useCaseId } });
+}
+async function listAllRequirementsUnderUseCase(useCaseId: string): Promise<RequirementListDto[]> {
+  return http.get(useCaseRequirementsEndpoints.allRequirements, { pathParams: { useCaseId } });
 }
 
 async function createRequirement(requirement: CreateRequirementDto): Promise<RequirementDetailDto> {
@@ -42,6 +46,7 @@ async function updateRequirement(
 export const requirementClient = {
   createRequirement,
   listUseCaseRequirements,
+  listAllRequirementsUnderUseCase,
   getRequirement,
   updateRequirement,
   removeRequirement,

@@ -99,12 +99,12 @@ export class ActivityService {
 
       // Since both PrimaryUseCase and SecondaryUseCase extend UseCase,
       // we can simply check if the requirement's useCase matches
-      if (requirement.useCase?.id !== useCaseId) {
-        throw new BadRequestException(
-          `Requirement ${requirementId} does not belong to use case ${useCaseId}. ` +
-            `It belongs to use case ${requirement.useCase?.id || "none"}.`,
-        );
-      }
+      // if (requirement.useCase?.id !== useCaseId) {
+      //   throw new BadRequestException(
+      //     `Requirement ${requirementId} does not belong to use case ${useCaseId}. ` +
+      //       `It belongs to use case ${requirement.useCase?.id || "none"}.`,
+      //   );
+      // }
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new BadRequestException(`Requirement with ID ${requirementId} not found`);

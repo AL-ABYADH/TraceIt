@@ -38,6 +38,13 @@ export class RequirementController {
     return this.requirementService.findByUseCase(useCaseId.useCaseId);
   }
 
+  @Get("use-case/:useCaseId/all-requirements")
+  async getAllRequirementsUnderUseCase(
+    @Param(zodParam(useCaseIdSchema)) param: UseCaseIdDto,
+  ): Promise<RequirementListDto[]> {
+    return this.requirementService.getAllRequirementsUnderPrimaryUseCase(param.useCaseId);
+  }
+
   @Get(":requirementId")
   async getById(
     @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,

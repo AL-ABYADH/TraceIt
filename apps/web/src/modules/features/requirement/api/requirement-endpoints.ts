@@ -21,6 +21,10 @@ export const useCaseRequirementsEndpoints = {
     path: `${REQUIREMENT_PREFIX}/use-case/:useCaseId`,
     isPublic: false,
   },
+  allRequirements: {
+    path: `${REQUIREMENT_PREFIX}/use-case/:useCaseId/all-requirements`,
+    isPublic: false,
+  },
 } as const;
 
 export const requirementExceptionEndpoints = {

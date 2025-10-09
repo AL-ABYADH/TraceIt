@@ -5,6 +5,7 @@ import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { RequirementModel, RequirementModelType } from "../models/requirement.model";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 /**
  * Repository for managing requirement entities in Neo4j database
@@ -46,6 +47,34 @@ export class RequirementRepository {
     }
   }
 
+  async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
+    try {
+      const query = `
+      MATCH (uc:UseCase {id: $useCaseId})
+      MATCH (uc)-[:BELONGS_TO|HAS_REQUIREMENT|EXCEPTION_AT|DETAILS|SUB_FLOW_FOR*0..10]-(req:Requirement)
+      RETURN DISTINCT req.id as id, req.operation as operation, req.condition as condition, 
+             req.createdAt as createdAt, req.updatedAt as updatedAt
+    `;
+
+      const result = await this.neo4jService.getNeogma().queryRunner.run(query, { useCaseId });
+
+      const requirements: RequirementListDto[] = [];
+      for (const record of result.records) {
+        requirements.push({
+          id: record.get("id"),
+          operation: record.get("operation"),
+          condition: record.get("condition"),
+          createdAt: record.get("createdAt"),
+          updatedAt: record.get("updatedAt"),
+        });
+      }
+
+      console.log(`Found ${requirements.length} total requirements under use case ${useCaseId}`);
+      return requirements;
+    } catch (error) {
+      throw new Error(`Failed to retrieve all requirements under use case: ${error.message}`);
+    }
+  }
   /**
    * Updates an existing requirement
    * @param id - ID of the requirement to update

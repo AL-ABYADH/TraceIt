@@ -8,6 +8,8 @@ import { RequirementExceptionAttributes } from "../models/requirement-exception.
 import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
 import { RequirementRepository } from "../repositories/requirement.repository";
 import { RequirementException } from "../entities/requirement-exception.entity";
+import { PrimaryUseCaseRepository } from "src/features/use-case/repositories/primary-use-case/primary-use-case.repository";
+import { RequirementListDto } from "@repo/shared-schemas";
 
 /**
  * Service responsible for managing requirements, including their creation,
@@ -19,6 +21,7 @@ export class RequirementService {
     private readonly requirementRepository: RequirementRepository,
     private readonly exceptionalRequirementRepository: ExceptionalRequirementRepository,
     private readonly useCaseService: UseCaseService,
+    private readonly primaryUseCaseRepository: PrimaryUseCaseRepository,
     private readonly actorService: ActorService,
   ) {}
 
@@ -156,6 +159,14 @@ export class RequirementService {
   // Hierarchical Requirements Management
   //====================================
 
+  async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
+    const useCase = await this.useCaseService.findById(useCaseId);
+    if (!useCase) {
+      throw new NotFoundException(`Primary use case with ID ${useCaseId} not found`);
+    }
+
+    return this.requirementRepository.getAllRequirementsUnderPrimaryUseCase(useCaseId);
+  }
   /**
    * Retrieves requirements for a use case in a hierarchical structure
    * using individual getById calls for each nested requirement and exception
