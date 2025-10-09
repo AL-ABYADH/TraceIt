@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { requirementClient } from "../api/clients/requirement-exception-client";
+import { requirementExceptionClient } from "../api/clients/requirement-exception-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
 import { CreateRequirementExceptionDto } from "@repo/shared-schemas";
 
@@ -14,7 +14,7 @@ export function useCreateRequirementException(
 
   return useMutation({
     mutationFn: (exception: CreateRequirementExceptionDto) =>
-      requirementClient.createRequirementException(exception),
+      requirementExceptionClient.createRequirementException(exception),
     onSettled: () => {
       qc.invalidateQueries({ queryKey: requirementQueryKeys.useCaseRequirementList(useCaseId) });
     },

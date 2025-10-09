@@ -3,6 +3,7 @@ import {
   CreateRequirementExceptionDto,
   RequirementExceptionDetailDto,
   RequirementExceptionListDto,
+  UpdateRequirementExceptionDto,
 } from "@repo/shared-schemas";
 import { requirementExceptionEndpoints } from "../requirement-endpoints";
 
@@ -16,7 +17,20 @@ async function getRequirementException(id: string): Promise<RequirementException
   return http.get(requirementExceptionEndpoints.detail, { pathParams: { id } });
 }
 
-export const requirementClient = {
+async function removeRequirementException(id: string): Promise<boolean> {
+  return http.del(requirementExceptionEndpoints.detail, { pathParams: { id } });
+}
+
+async function updateRequirementException(
+  id: string,
+  payload: UpdateRequirementExceptionDto,
+): Promise<RequirementExceptionListDto> {
+  return http.put(requirementExceptionEndpoints.detail, { pathParams: { id }, body: payload });
+}
+
+export const requirementExceptionClient = {
   createRequirementException,
   getRequirementException,
+  removeRequirementException,
+  updateRequirementException,
 };

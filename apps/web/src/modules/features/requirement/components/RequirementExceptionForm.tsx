@@ -12,14 +12,19 @@ import { useCreateRequirementException } from "../hooks/useCreateRequirementExce
 import {
   CreateRequirementExceptionDto,
   createRequirementExceptionSchema,
+  UpdateRequirementExceptionDto,
+  updateRequirementExceptionSchema,
 } from "@repo/shared-schemas";
+import { useUpdateRequirementException } from "../hooks/useUpdateRequirementException";
 
 interface RequirementExceptionFormProps {
   isOpen: boolean;
   onClose: () => void;
   useCaseId: string;
-  parentRequirementId: string;
-  initialData?: Partial<CreateRequirementExceptionDto>;
+  parentRequirementId?: string;
+  initialData?: Partial<CreateRequirementExceptionDto> | Partial<UpdateRequirementExceptionDto>;
+  mode?: "create" | "edit";
+  exceptionId?: string;
 }
 
 export default function RequirementExceptionForm({
@@ -28,25 +33,25 @@ export default function RequirementExceptionForm({
   useCaseId,
   parentRequirementId,
   initialData,
+  mode = "create",
+  exceptionId,
 }: RequirementExceptionFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateRequirementExceptionDto>({
-    resolver: zodResolver(createRequirementExceptionSchema),
+  const isEditMode = mode === "edit";
+
+  const form = useForm<CreateRequirementExceptionDto | UpdateRequirementExceptionDto>({
+    resolver: zodResolver(
+      isEditMode ? updateRequirementExceptionSchema : createRequirementExceptionSchema,
+    ),
     mode: "onSubmit",
-    defaultValues: {
-      name: initialData?.name || "",
-      requirementId: parentRequirementId,
-    },
+    defaultValues: isEditMode
+      ? { name: initialData?.name || "" }
+      : { name: initialData?.name || "", requirementId: parentRequirementId },
   });
 
   const createException = useCreateRequirementException(useCaseId, {
     onSuccess: () => {
-      reset();
+      form.reset();
       setServerError(null);
       onClose();
     },
@@ -56,46 +61,67 @@ export default function RequirementExceptionForm({
     },
   });
 
-  const onSubmit = (values: CreateRequirementExceptionDto) => {
+  const updateException = useUpdateRequirementException(exceptionId ?? "", useCaseId, {
+    onSuccess: () => {
+      form.reset();
+      setServerError(null);
+      onClose();
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message ?? err?.message ?? "Update exception failed";
+      setServerError(msg);
+    },
+  });
+
+  const onSubmit = (values: CreateRequirementExceptionDto | UpdateRequirementExceptionDto) => {
     setServerError(null);
-    createException.mutate(values);
+    if (isEditMode) {
+      updateException.mutate(values as UpdateRequirementExceptionDto);
+    } else {
+      createException.mutate(values as CreateRequirementExceptionDto);
+    }
   };
 
   const handleCancel = () => {
-    reset();
+    form.reset();
     setServerError(null);
     onClose();
   };
 
+  const isLoading =
+    createException.isPending || updateException.isPending || form.formState.isSubmitting;
+
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Add Exception" className="max-w-lg">
-      {(createException.isPending || isSubmitting) && (
-        <Loading isOpen message="Adding exception..." />
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditMode ? "Edit Exception" : "Add Exception"}
+      className="max-w-lg"
+    >
+      {isLoading && (
+        <Loading isOpen message={isEditMode ? "Updating exception..." : "Adding exception..."} />
       )}
       {serverError && <ErrorMessage message={serverError} />}
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-6">
         <InputField
-          {...register("name")}
+          {...form.register("name")}
           label="Exception Name"
           placeholder="Describe the exception"
-          error={errors.name?.message}
-          disabled={createException.isPending || isSubmitting}
+          error={form.formState.errors.name?.message}
+          disabled={isLoading}
         />
         <div className="flex items-center justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleCancel}
-            disabled={createException.isPending || isSubmitting}
-          >
+          <Button type="button" variant="ghost" onClick={handleCancel} disabled={isLoading}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={createException.isPending || isSubmitting}
-            className="px-6"
-          >
-            {createException.isPending || isSubmitting ? "Adding..." : "Add Exception"}
+          <Button type="submit" disabled={isLoading} className="px-6">
+            {isLoading
+              ? isEditMode
+                ? "Updating..."
+                : "Adding..."
+              : isEditMode
+                ? "Update Exception"
+                : "Add Exception"}
           </Button>
         </div>
       </form>

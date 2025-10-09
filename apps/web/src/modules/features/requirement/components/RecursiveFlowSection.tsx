@@ -9,6 +9,8 @@ import SecondaryUseCaseForm from "../../use-case/components/SecondaryUseCaseForm
 import Chip from "@/components/Chip";
 import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { useDeleteRequirementException } from "../hooks/useDeleteRequirementException";
+import * as React from "react";
 
 interface RecursiveFlowSectionProps {
   requirements: RequirementDto[];
@@ -17,6 +19,7 @@ interface RecursiveFlowSectionProps {
   validatedUseCaseId: string;
   parentIndex?: string; // numeric S path without the leading "S" (e.g., "5-1")
   isRoot?: boolean;
+  parentContextLabel?: string;
 }
 
 export default function RecursiveFlowSection({
@@ -24,6 +27,7 @@ export default function RecursiveFlowSection({
   type,
   projectId,
   validatedUseCaseId,
+  parentContextLabel = "",
   parentIndex = "",
   isRoot = true,
 }: RecursiveFlowSectionProps) {
@@ -46,6 +50,12 @@ export default function RecursiveFlowSection({
   const [openExceptionForm, setOpenExceptionForm] = useState<{ exceptionId: string } | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleteExceptionOpen, setIsDeleteExceptionOpen] = useState(false);
+  const [deleteExceptionId, setDeleteExceptionId] = useState<string | null>(null);
+  const [openEditException, setOpenEditException] = useState<null | {
+    id: string;
+    initial: { name: string };
+  }>(null);
 
   // Use the hook with the validated use case id for invalidation
   const deleteRequirement = useDeleteRequirement(deleteId ?? "", validatedUseCaseId, {
@@ -57,6 +67,30 @@ export default function RecursiveFlowSection({
       // Handle error as needed
     },
   });
+
+  const deleteException = useDeleteRequirementException(
+    deleteExceptionId ?? "",
+    validatedUseCaseId,
+    {
+      onSuccess: () => {
+        setIsDeleteExceptionOpen(false);
+        setDeleteExceptionId(null);
+      },
+      onError: () => {
+        // Handle error as needed
+      },
+    },
+  );
+
+  // helper to build S display label; respects exception context if present
+  // REPLACE existing buildSDisplayLabel with this
+  function buildSDisplayLabel(sectionId: string, parentCtx?: string) {
+    if (parentCtx) {
+      const lastSegment = String(sectionId).split("-").slice(-1)[0];
+      return `S(${parentCtx}-${lastSegment})`;
+    }
+    return `S${sectionId}`;
+  }
 
   if (!requirements || requirements.length === 0) return null;
 
@@ -102,7 +136,37 @@ export default function RecursiveFlowSection({
       return flows;
     };
 
-    const flows = flattenFlows(parentIndex, requirements);
+    const rawFlows = flattenFlows(parentIndex, requirements);
+
+    // Deduplicate flows by sectionId + parentRequirement.id
+    const flowsMap = new Map<string, (typeof rawFlows)[number]>();
+    rawFlows.forEach((f) => {
+      const key = `${f.sectionId}::${f.parentRequirement.id}`;
+      if (!flowsMap.has(key)) flowsMap.set(key, f);
+    });
+    const flows = Array.from(flowsMap.values());
+    flows.sort((fa, fb) => compareSectionIdStrings(fa.sectionId, fb.sectionId));
+
+    // --- sort helpers (compare numeric segments of sectionId like "1-5-2")
+    function sectionIdToNumbers(id: string) {
+      return String(id)
+        .split("-")
+        .map((s) => {
+          const n = parseInt(s, 10);
+          return Number.isFinite(n) ? n : -1;
+        });
+    }
+    function compareSectionIdStrings(a: string, b: string) {
+      const an = sectionIdToNumbers(a);
+      const bn = sectionIdToNumbers(b);
+      const len = Math.max(an.length, bn.length);
+      for (let i = 0; i < len; i++) {
+        const av = an[i] ?? -1;
+        const bv = bn[i] ?? -1;
+        if (av !== bv) return av - bv;
+      }
+      return 0;
+    }
 
     // Aggregate ALL exceptions (main + sub + deeper) into a single list with proper labels
     type AggregatedException = { exception: any; label: string; baseSRef: string };
@@ -135,15 +199,71 @@ export default function RecursiveFlowSection({
       });
     });
 
+    // --------------------
+    // Build exceptionFlows: flows coming from requirements that are inside exceptions
+    // (so nested requirements of an exception appear in Sub Flow as S(E...))
+    // --------------------
+    type FlowWithContext = {
+      id: string;
+      sectionId: string;
+      parentRequirement: RequirementDto;
+      requirements: RequirementDto[];
+      secondaryUseCaseName?: string;
+      secondaryUseCaseId?: string;
+      contextLabel?: string; // <-- exception label like 'E1' or 'E(S5-1)'
+    };
+
+    const exceptionFlows: FlowWithContext[] = [];
+
+    // For every aggregated exception, check its requirements and collect nestedRequirements as flows.
+    // Use flattenFlows to get deeper nested flows and mark them with the exception label (context).
+    aggregated.forEach(({ exception, label, baseSRef }) => {
+      const exReqs = exception.requirements ?? [];
+      const baseIndex = baseSRef.startsWith("S") ? baseSRef.slice(1) : baseSRef;
+
+      exReqs.forEach((child: RequirementDto, childIdx: number) => {
+        const childNumericS = baseIndex ? `${baseIndex}-${childIdx + 1}` : `${childIdx + 1}`;
+        // if this child has nested requirements, add it as a flow under the exception context
+        if (child.nestedRequirements && child.nestedRequirements.length > 0) {
+          const rawSecUC = (child as any)?.secondaryUseCase;
+          const secUC = Array.isArray(rawSecUC) ? rawSecUC[0] : rawSecUC;
+          exceptionFlows.push({
+            id: child.id,
+            sectionId: childNumericS,
+            parentRequirement: child,
+            requirements: child.nestedRequirements,
+            secondaryUseCaseName: secUC?.name,
+            secondaryUseCaseId: secUC?.id,
+            contextLabel: label,
+          });
+
+          // also flatten deeper nested flows and tag them with the same context
+          const deeper = flattenFlows(childNumericS, child.nestedRequirements).map((f) => ({
+            ...f,
+            contextLabel: label,
+          }));
+          exceptionFlows.push(...deeper);
+        }
+      });
+    });
+
     // Helper to render a single exception block with its requirements and nested flows
     function renderExceptionSection(exception: any, label: string, baseSRef: string) {
       const exceptionReqs = exception.requirements ?? [];
-      // Normalize numeric S path (drop leading 'S' if present) for computing child S refs
       const baseIndex = baseSRef.startsWith("S") ? baseSRef.slice(1) : baseSRef;
+
+      // collect exceptions that belong to requirements inside this exception
+      type CollectedChildException = {
+        exception: any;
+        childSRef: string;
+        childNumber: number;
+        childExceptionIndex: number;
+      };
+      const collectedChildExceptions: CollectedChildException[] = [];
 
       return (
         <RequirementSection
-          key={exception.id || label}
+          key={`${exception.id ?? label}::${baseSRef}`}
           title={
             <>
               <div className="flex items-center gap-2">
@@ -158,10 +278,20 @@ export default function RecursiveFlowSection({
                 })()}
                 <EllipsisMenu
                   actions={(() => {
-                    const actions: { label: string; onClick: () => void }[] = [];
+                    const actions: { label: string; onClick: () => void; danger?: boolean }[] = [];
                     const rawSec = (exception as any)?.secondaryUseCase;
                     const normSec = Array.isArray(rawSec) ? rawSec[0] : rawSec;
                     const hasSecondary = Boolean(normSec?.id);
+
+                    actions.push({
+                      label: "Edit",
+                      onClick: () =>
+                        setOpenEditException({
+                          id: exception.id,
+                          initial: { name: exception.name },
+                        }),
+                    });
+
                     if (hasSecondary) {
                       actions.push({
                         label: "Edit Secondary Use Case",
@@ -181,6 +311,16 @@ export default function RecursiveFlowSection({
                       label: "Add Requirement",
                       onClick: () => setOpenExceptionForm({ exceptionId: exception.id }),
                     });
+
+                    actions.push({
+                      label: "Delete",
+                      onClick: () => {
+                        setDeleteExceptionId(exception.id);
+                        setIsDeleteExceptionOpen(true);
+                      },
+                      danger: true,
+                    });
+
                     return actions;
                   })()}
                 />
@@ -189,78 +329,86 @@ export default function RecursiveFlowSection({
           }
         >
           {exceptionReqs.length > 0 ? (
-            exceptionReqs.toReversed().map((child: RequirementDto, idx: number) => {
-              const childNumericS = baseIndex ? `${baseIndex}-${idx + 1}` : `${idx + 1}`;
-              const childSRef = `S${childNumericS}`;
-              return (
-                <div key={child.id} className="flex flex-col">
-                  <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2 ">
-                    <div className="flex items-center gap-3 p-2">
-                      <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
-                        {idx + 1}
-                      </span>
-                      <p>{renderRequirementText(child)}</p>
-                    </div>
+            <>
+              {exceptionReqs.toReversed().map((child: RequirementDto, idx: number) => {
+                const childNumericS = baseIndex ? `${baseIndex}-${idx + 1}` : `${idx + 1}`;
+                const childSRef = `S${childNumericS}`;
 
-                    <EllipsisMenu
-                      actions={[
-                        {
-                          label: "Edit",
-                          onClick: () =>
-                            setOpenEditRequirement({
-                              id: child.id,
-                              initial: {
-                                operation: child.operation,
-                                condition: child.condition,
-                                actorIds: (child.actors ?? []).map((a: any) => a.id),
-                              },
-                            }),
-                        },
-                        {
-                          label: "Delete",
-                          onClick: () => {
-                            setDeleteId(child.id);
-                            setIsDeleteOpen(true);
+                // collect child's exceptions to render AFTER this exception's requirements
+                // include childNumber and childExceptionIndex so we can form E(E1-<req#>)-<exIdx>
+                if (Array.isArray(child.exceptions) && child.exceptions.length > 0) {
+                  child.exceptions.forEach((ce: any, ceIdx: number) => {
+                    collectedChildExceptions.push({
+                      exception: ce,
+                      childSRef,
+                      childNumber: idx + 1,
+                      childExceptionIndex: ceIdx,
+                    } as any);
+                  });
+                }
+
+                return (
+                  <div key={child.id} className="flex flex-col">
+                    <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2 ">
+                      <div className="flex items-center gap-3 p-2">
+                        <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
+                          {idx + 1}
+                        </span>
+                        <p>{renderRequirementText(child)}</p>
+                      </div>
+
+                      <EllipsisMenu
+                        actions={[
+                          {
+                            label: "Edit",
+                            onClick: () =>
+                              setOpenEditRequirement({
+                                id: child.id,
+                                initial: {
+                                  operation: child.operation,
+                                  condition: child.condition,
+                                  actorIds: (child.actors ?? []).map((a: any) => a.id),
+                                },
+                              }),
                           },
-                          danger: true,
-                        },
-                        {
-                          label: "Add Exception",
-                          onClick: () => setOpenExceptionParentId(child.id),
-                        },
-                        {
-                          label: "Add Sub Requirement",
-                          onClick: () => setOpenFormParentId(child.id),
-                        },
-                      ]}
-                    />
-                  </div>
-
-                  {/* Render S (sub flow) for this child */}
-                  {child.nestedRequirements && child.nestedRequirements.length > 0 && (
-                    <RecursiveFlowSection
-                      requirements={[child]}
-                      type="S"
-                      projectId={projectId}
-                      validatedUseCaseId={validatedUseCaseId}
-                      parentIndex={childNumericS}
-                      isRoot={false}
-                    />
-                  )}
-
-                  {/* Inline render E (exceptions) for this child, using E(E...) naming based on parent exception label */}
-                  {Array.isArray(child.exceptions) && child.exceptions.length > 0 && (
-                    <div>
-                      {child.exceptions.map((cEx: any, cEIdx: number) => {
-                        const base = `E(${label})`;
-                        const nestedLabel = cEIdx === 0 ? base : `${base}-${cEIdx}`;
-                        return renderExceptionSection(cEx, nestedLabel, childSRef);
-                      })}
+                          {
+                            label: "Delete",
+                            onClick: () => {
+                              setDeleteId(child.id);
+                              setIsDeleteOpen(true);
+                            },
+                            danger: true,
+                          },
+                          {
+                            label: "Add Exception",
+                            onClick: () => setOpenExceptionParentId(child.id),
+                          },
+                          {
+                            label: "Add Sub Requirement",
+                            onClick: () => setOpenFormParentId(child.id),
+                          },
+                        ]}
+                      />
                     </div>
-                  )}
-                </div>
-              );
-            })
+
+                    {/* NOTE: DO NOT render child's nestedRequirements inline here.
+              Those nested requirements are moved to `exceptionFlows` above and
+              will appear in Sub Flow as S(<exception>-<path>) */}
+                  </div>
+                );
+              })}
+
+              {/* Render collected child exceptions AFTER all parent-exception requirements.
+        We built collectedChildExceptions with both childNumber and childExceptionIndex so
+        the naming becomes: E(<parentLabel>-<childNumber>) and E(<parentLabel>-<childNumber>)-1 ... */}
+              {collectedChildExceptions.length > 0 &&
+                collectedChildExceptions.map((col: any) => {
+                  const base = `E(${label}-${col.childNumber})`;
+                  const nestedLabel =
+                    col.childExceptionIndex === 0 ? base : `${base}-${col.childExceptionIndex}`;
+                  return renderExceptionSection(col.exception, nestedLabel, col.childSRef);
+                })}
+            </>
           ) : (
             <div className="text-sm text-muted-foreground italic px-2 py-1">
               No requirements in this exception. Add requirements to this exception.
@@ -269,6 +417,7 @@ export default function RecursiveFlowSection({
         </RequirementSection>
       );
     }
+    const allFlows: FlowWithContext[] = [...flows, ...exceptionFlows];
 
     return (
       <>
@@ -276,104 +425,121 @@ export default function RecursiveFlowSection({
         {flows.length > 0 && (
           <div className=" mb-6">
             <RequirementSection title={isRoot ? "Sub Flow" : ""}>
-              {flows.map((flow) => (
-                <RequirementSection
-                  key={flow.sectionId}
-                  title={
-                    <>
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-mono">
-                          S{flow.sectionId}
-                        </span>
-                        <Chip
-                          label="Operation"
-                          value={flow.parentRequirement.operation}
-                          color="emerald"
-                        />
-                        {flow.secondaryUseCaseName && (
-                          <Chip
-                            label="Secondary"
-                            value={flow.secondaryUseCaseName}
-                            color="indigo"
-                          />
-                        )}
-                        <EllipsisMenu
-                          actions={(() => {
-                            const actions: { label: string; onClick: () => void }[] = [];
-                            if (flow.secondaryUseCaseId) {
-                              actions.push({
-                                label: "Edit Secondary Use Case",
-                                onClick: () =>
-                                  setOpenEditSecondary({
-                                    secondaryUseCaseId: flow.secondaryUseCaseId!,
-                                    initialName: flow.secondaryUseCaseName,
-                                  }),
-                              });
-                            } else {
-                              actions.push({
-                                label: "Add Secondary Use Case",
-                                onClick: () =>
-                                  setOpenSecondaryForRequirement({ requirementId: flow.id }),
-                              });
-                            }
-                            actions.push({
-                              label: "Add Sub Requirement",
-                              onClick: () => setOpenFormParentId(flow.id),
-                            });
-                            return actions;
-                          })()}
-                        />
-                      </div>
-                    </>
-                  }
-                >
-                  {flow.requirements.map((child, idx) => (
-                    <div key={child.id} className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
-                        <div className="flex items-center gap-3 p-2">
-                          <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
-                            {idx + 1}
+              {allFlows.map((flow) => {
+                // composite key includes context so exception-derived flows don't collide
+                const uniqueKey = `${flow.sectionId}::${flow.parentRequirement.id}::${flow.contextLabel ?? ""}`;
+                // prefer flow.contextLabel (comes from exceptionFlows) and fallback to parentContextLabel
+                const ctx = flow.contextLabel ?? parentContextLabel;
+                const displaySLabel = buildSDisplayLabel(flow.sectionId, ctx);
+
+                return (
+                  <RequirementSection
+                    key={uniqueKey}
+                    title={
+                      <>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-muted text-muted-foreground text-xs font-mono">
+                            {displaySLabel}
                           </span>
-                          <p>{renderRequirementText(child)}</p>
+
+                          <Chip
+                            label="Operation"
+                            value={flow.parentRequirement.operation}
+                            color="emerald"
+                          />
+                          {flow.secondaryUseCaseName && (
+                            <Chip
+                              label="Secondary"
+                              value={flow.secondaryUseCaseName}
+                              color="indigo"
+                            />
+                          )}
+                          <EllipsisMenu
+                            actions={(() => {
+                              const actions: { label: string; onClick: () => void }[] = [];
+                              if (flow.secondaryUseCaseId) {
+                                actions.push({
+                                  label: "Edit Secondary Use Case",
+                                  onClick: () =>
+                                    setOpenEditSecondary({
+                                      secondaryUseCaseId: flow.secondaryUseCaseId!,
+                                      initialName: flow.secondaryUseCaseName,
+                                    }),
+                                });
+                              } else {
+                                actions.push({
+                                  label: "Add Secondary Use Case",
+                                  onClick: () =>
+                                    setOpenSecondaryForRequirement({ requirementId: flow.id }),
+                                });
+                              }
+                              actions.push({
+                                label: "Add Sub Requirement",
+                                onClick: () => setOpenFormParentId(flow.id),
+                              });
+                              return actions;
+                            })()}
+                          />
+                        </div>
+                      </>
+                    }
+                  >
+                    {flow.requirements.map((child, idx) => (
+                      <div
+                        key={`${child.id}::${flow.sectionId}::${idx}`}
+                        className="flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
+                          <div className="flex items-center gap-3 p-2">
+                            <span className="inline-flex items-center justify-center w-6 h-6 text-xs rounded-full bg-muted text-muted-foreground">
+                              {idx + 1}
+                            </span>
+                            <p>{renderRequirementText(child)}</p>
+                          </div>
+
+                          <EllipsisMenu
+                            actions={[
+                              {
+                                label: "Edit",
+                                onClick: () =>
+                                  setOpenEditRequirement({
+                                    id: child.id,
+                                    initial: {
+                                      operation: child.operation,
+                                      condition: child.condition,
+                                      actorIds: (child.actors ?? []).map((a: any) => a.id),
+                                    },
+                                  }),
+                              },
+                              {
+                                label: "Delete",
+                                onClick: () => {
+                                  setDeleteId(child.id);
+                                  setIsDeleteOpen(true);
+                                },
+                                danger: true,
+                              },
+                              {
+                                label: "Add Exception",
+                                onClick: () => setOpenExceptionParentId(child.id),
+                              },
+                              {
+                                label: "Add Sub Requirement",
+                                onClick: () => setOpenFormParentId(child.id),
+                              },
+                            ]}
+                          />
                         </div>
 
-                        <EllipsisMenu
-                          actions={[
-                            {
-                              label: "Edit",
-                              onClick: () =>
-                                setOpenEditRequirement({
-                                  id: child.id,
-                                  initial: {
-                                    operation: child.operation,
-                                    condition: child.condition,
-                                    actorIds: (child.actors ?? []).map((a: any) => a.id),
-                                  },
-                                }),
-                            },
-                            {
-                              label: "Delete",
-                              onClick: () => {
-                                setDeleteId(child.id);
-                                setIsDeleteOpen(true);
-                              },
-                              danger: true,
-                            },
-                            {
-                              label: "Add Exception",
-                              onClick: () => setOpenExceptionParentId(child.id),
-                            },
-                            {
-                              label: "Add Sub Requirement",
-                              onClick: () => setOpenFormParentId(child.id),
-                            },
-                          ]}
-                        />
+                        {/* NOTE: DO NOT render child's nestedRequirements inline here.
+                    Nested sub-flows are rendered as their own entries in `flows`. */}
+
+                        {/* DO NOT render inline child.exceptions here — Exceptional Flow section handles them. */}
                       </div>
-                    </div>
-                  ))}
-                </RequirementSection>
-              ))}
+                    ))}
+                  </RequirementSection>
+                );
+              })}
             </RequirementSection>
           </div>
         )}
@@ -458,6 +624,17 @@ export default function RecursiveFlowSection({
           />
         )}
 
+        {openEditException && (
+          <RequirementExceptionForm
+            isOpen={!!openEditException}
+            onClose={() => setOpenEditException(null)}
+            useCaseId={validatedUseCaseId}
+            mode="edit"
+            exceptionId={openEditException.id}
+            initialData={openEditException.initial}
+          />
+        )}
+
         {openExceptionParentId && (
           <RequirementExceptionForm
             isOpen={!!openExceptionParentId}
@@ -483,6 +660,24 @@ export default function RecursiveFlowSection({
             setDeleteId(null);
           }}
           loading={deleteRequirement.isPending}
+        />
+
+        {/* Confirmation Dialog for Delete Exception */}
+        <ConfirmationDialog
+          isOpen={isDeleteExceptionOpen}
+          title="Delete Exception"
+          message="Are you sure you want to delete this exception? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          confirmVariant="danger"
+          onConfirm={() => {
+            if (deleteExceptionId) deleteException.mutate();
+          }}
+          onCancel={() => {
+            setIsDeleteExceptionOpen(false);
+            setDeleteExceptionId(null);
+          }}
+          loading={deleteException.isPending}
         />
       </>
     );

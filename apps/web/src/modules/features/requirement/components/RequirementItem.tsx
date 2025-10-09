@@ -162,19 +162,17 @@ export default function RequirementItem({
                 </span>
               </div>
               <div className="space-y-2">
-                {requirement.nestedRequirements
-                  ?.toReversed()
-                  .map((nested, idx) => (
-                    <RequirementItem
-                      key={nested.id}
-                      requirement={nested}
-                      number={idx + 1}
-                      level={level + 1}
-                      projectId={projectId}
-                      validatedUseCaseId={validatedUseCaseId}
-                      highlightedRequirementId={highlightedRequirementId}
-                    />
-                  ))}
+                {requirement.nestedRequirements?.map((nested, idx) => (
+                  <RequirementItem
+                    key={nested.id}
+                    requirement={nested}
+                    number={idx + 1}
+                    level={level + 1}
+                    projectId={projectId}
+                    validatedUseCaseId={validatedUseCaseId}
+                    highlightedRequirementId={highlightedRequirementId}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -199,19 +197,17 @@ export default function RequirementItem({
                     </div>
 
                     {exception.requirements?.length ? (
-                      exception.requirements
-                        .toReversed()
-                        .map((exReq, exIdx) => (
-                          <RequirementItem
-                            key={exReq.id}
-                            requirement={exReq as any}
-                            number={exIdx + 1}
-                            level={level + 2}
-                            projectId={projectId}
-                            validatedUseCaseId={validatedUseCaseId}
-                            highlightedRequirementId={highlightedRequirementId}
-                          />
-                        ))
+                      exception.requirements.map((exReq, exIdx) => (
+                        <RequirementItem
+                          key={exReq.id}
+                          requirement={exReq as any}
+                          number={exIdx + 1}
+                          level={level + 2}
+                          projectId={projectId}
+                          validatedUseCaseId={validatedUseCaseId}
+                          highlightedRequirementId={highlightedRequirementId}
+                        />
+                      ))
                     ) : (
                       <div
                         className="ml-6 text-xs text-muted-foreground italic"

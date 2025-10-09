@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { requirementClient as requirementExceptionClient } from "../api/clients/requirement-exception-client";
+import { requirementExceptionClient as requirementExceptionClient } from "../api/clients/requirement-exception-client";
 
 export function useRequirementExceptionDetail(exceptionId?: string, enabled = true) {
   return useQuery({

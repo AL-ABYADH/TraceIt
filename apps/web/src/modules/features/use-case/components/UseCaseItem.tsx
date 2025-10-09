@@ -10,6 +10,7 @@ import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequi
 import { useExpansion } from "../../requirement/contexts/ExpansionContext";
 import { useRouter } from "next/navigation";
 import { route } from "nextjs-routes";
+import _ from "lodash";
 
 const findRequirementPath = (requirements: RequirementDto[], requirementId: string): string[] => {
   const path: string[] = [];
@@ -115,9 +116,32 @@ export default function UseCaseItem({
     );
   };
 
-  const sortedRequirements = [...requirements].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
+  function sortRequirementsByCreatedAt(requirements: any[]): any[] {
+    if (!Array.isArray(requirements)) return [];
+
+    // Sort current level
+    const sorted = _.orderBy(requirements, ["createdAt"], ["asc"]);
+
+    // Recursively sort all nested levels
+    return sorted.map((req) => {
+      const cloned = { ...req };
+
+      // If this requirement has nested lists, sort them too
+      if (Array.isArray(cloned.nestedRequirements)) {
+        cloned.nestedRequirements = sortRequirementsByCreatedAt(cloned.nestedRequirements);
+      }
+      if (Array.isArray(cloned.exceptions)) {
+        cloned.exceptions = sortRequirementsByCreatedAt(cloned.exceptions);
+      }
+      if (Array.isArray(cloned.requirementException)) {
+        cloned.requirementException = sortRequirementsByCreatedAt(cloned.requirementException);
+      }
+
+      return cloned;
+    });
+  }
+
+  const sortedRequirements = sortRequirementsByCreatedAt(requirements);
 
   return (
     <div className="p-2 border border-border rounded-lg bg-surface/50">

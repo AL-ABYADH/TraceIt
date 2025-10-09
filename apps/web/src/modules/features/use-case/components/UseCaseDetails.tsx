@@ -44,8 +44,33 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
   const secondaryActors = data.secondaryActors?.map((a) => a.name).join(", ") || "—";
   const description = data.description || "—";
 
-  // Deep clone requirements to force re-render on nested changes
+  function sortRequirementsByCreatedAt(requirements: any[]): any[] {
+    if (!Array.isArray(requirements)) return [];
+
+    // Sort current level
+    const sorted = _.orderBy(requirements, ["createdAt"], ["asc"]);
+
+    // Recursively sort all nested levels
+    return sorted.map((req) => {
+      const cloned = { ...req };
+
+      // If this requirement has nested lists, sort them too
+      if (Array.isArray(cloned.nestedRequirements)) {
+        cloned.nestedRequirements = sortRequirementsByCreatedAt(cloned.nestedRequirements);
+      }
+      if (Array.isArray(cloned.exceptions)) {
+        cloned.exceptions = sortRequirementsByCreatedAt(cloned.exceptions);
+      }
+      if (Array.isArray(cloned.requirementException)) {
+        cloned.requirementException = sortRequirementsByCreatedAt(cloned.requirementException);
+      }
+
+      return cloned;
+    });
+  }
+
   const clonedRequirements = _.cloneDeep(requirements);
+  const orderedRequirements = sortRequirementsByCreatedAt(clonedRequirements);
 
   return (
     <div className="p-6">
@@ -84,12 +109,12 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
 
         {/* Flows */}
         <MainFlowSection
-          requirements={clonedRequirements}
+          requirements={orderedRequirements}
           projectId={projectId}
           validatedUseCaseId={useCaseId}
         />
         <RecursiveFlowSection
-          requirements={clonedRequirements}
+          requirements={orderedRequirements}
           type="S"
           projectId={projectId}
           validatedUseCaseId={useCaseId}
