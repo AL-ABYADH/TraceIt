@@ -22,6 +22,7 @@ export const updateActivitySchema = z
   .object({
     name: activityNameFieldDoc.optional(),
     requirementUpdated: booleanFieldDoc,
+    requirementDeleted: booleanFieldDoc,
   })
   .openapi({ title: "UpdateActivityDto" });
 
@@ -62,6 +63,7 @@ export const updateConditionSchema = z
   .object({
     name: conditionNameFieldDoc.optional(),
     requirementUpdated: booleanFieldDoc,
+    requirementDeleted: booleanFieldDoc,
   })
   .openapi({ title: "UpdateConditionDto" });
 
