@@ -2,8 +2,8 @@ import type { DefaultOptions } from "@tanstack/react-query";
 
 export const defaultReactQueryOptions: DefaultOptions = {
   queries: {
-    staleTime: 1000 * 60,
-    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
+    gcTime: 0,
     refetchOnWindowFocus: false,
     retry: 1,
   },
@@ -15,5 +15,5 @@ export const defaultReactQueryOptions: DefaultOptions = {
 export const makeListQueryOptions = (enabled = true) => ({
   enabled,
   keepPreviousData: true,
-  staleTime: 1000 * 60,
+  staleTime: 0,
 });
