@@ -39,7 +39,11 @@ export default function RequirementItem({
   // Highlight & scroll ref
   const headerRef = useRef<HTMLDivElement>(null);
   const itemRef = useRef<HTMLDivElement>(null);
-  const isHighlighted = requirement.id === highlightedRequirementId;
+  const [isHighlighted, setHighlightedRequirementId] = useState<boolean>(false);
+
+  useEffect(() => {
+    setHighlightedRequirementId(requirement.id === highlightedRequirementId);
+  }, [highlightedRequirementId, requirement.id]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -52,13 +56,15 @@ export default function RequirementItem({
       timer = setTimeout(() => {
         headerRef.current?.style.removeProperty("outline");
         headerRef.current?.style.removeProperty("background-color");
+
+        setHighlightedRequirementId(false);
       }, 5000);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isHighlighted]);
+  }, [isHighlighted, setHighlightedRequirementId]);
 
   const deleteRequirement = useDeleteRequirement(requirement.id, validatedUseCaseId, {
     onSuccess: () => setIsDeleteOpen(false),
@@ -108,6 +114,7 @@ export default function RequirementItem({
         }}
         onClick={() => {
           if (headerRef.current) headerRef.current.style.outline = "none";
+          setHighlightedRequirementId(false);
         }}
         onContextMenu={handleContextMenu}
       >
