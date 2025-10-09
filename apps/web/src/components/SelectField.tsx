@@ -21,7 +21,7 @@ const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
           <select
             ref={ref}
             className={`
-              w-100 pr-10 px-4 py-3 rounded-xl appearance-none
+              w-full pr-10 px-4 py-3 rounded-xl appearance-none
               bg-input border border-border
               text-foreground truncate text-ellipsis
               focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary
