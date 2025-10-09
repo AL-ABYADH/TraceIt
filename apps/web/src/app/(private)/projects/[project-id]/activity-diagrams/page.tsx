@@ -7,7 +7,7 @@ import CreateActivityDiagram from "@/modules/features/activity-diagram/component
 import { useActivityDiagram } from "@/modules/features/activity-diagram/hooks/useActivityDiagram";
 import { useUseCases } from "@/modules/features/use-case/hooks/useUseCases";
 import { ApiError } from "@/services/api/api-errors";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import SelectField from "@/components/SelectField";
 import Button from "@/components/Button";
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +16,14 @@ import { route } from "nextjs-routes";
 export default function UseCaseDiagramPage() {
   const params = useParams<"/projects/[project-id]/activity-diagrams">();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const useCaseId = searchParams.get("useCaseId");
+
   const projectId = params["project-id"];
+
+  const [selectedUseCaseId, setSelectedUseCaseId] = useState<string | undefined>(
+    useCaseId ?? undefined,
+  );
 
   const {
     data: useCases,
@@ -25,15 +32,19 @@ export default function UseCaseDiagramPage() {
     error: useCasesError,
   } = useUseCases(projectId);
 
-  const [selectedUseCaseId, setSelectedUseCaseId] = useState<string | undefined>(undefined);
-
   useEffect(() => {
     if (!useCases || useCases.length === 0) return;
     if (!selectedUseCaseId) {
       const def = useCases[0];
       setSelectedUseCaseId(def?.id);
+      router.push(
+        route({
+          pathname: "/projects/[project-id]/activity-diagrams",
+          query: { "project-id": projectId, useCaseId: def?.id },
+        }),
+      );
     }
-  }, [useCases, selectedUseCaseId]);
+  }, [useCases, selectedUseCaseId, projectId, router]);
 
   const selectedUseCase = useMemo(
     () => useCases?.find((u) => u.id === selectedUseCaseId),
@@ -86,7 +97,16 @@ export default function UseCaseDiagramPage() {
           label="Use Case"
           placeholder="Select a use case"
           value={selectedUseCaseId ?? ""}
-          onChange={(e) => setSelectedUseCaseId(e.target.value)}
+          onChange={(e) => {
+            const newUseCaseId = e.target.value;
+            setSelectedUseCaseId(newUseCaseId);
+            router.push(
+              route({
+                pathname: "/projects/[project-id]/activity-diagrams",
+                query: { "project-id": projectId, useCaseId: newUseCaseId },
+              }),
+            );
+          }}
         >
           {useCases.map((uc) => (
             <option key={uc.id} value={uc.id}>
@@ -117,9 +137,6 @@ export default function UseCaseDiagramPage() {
         <CreateActivityDiagram useCaseId={selectedUseCaseId} projectId={projectId} />
       )}
 
-      {/* {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
-        <ActivityDiagramFlow diagram={activityDiagram} />
-      )} */}
       {!isActivityDiagramLoading && activityDiagram && selectedUseCaseId && (
         <ActivityDiagramFlow diagram={activityDiagram} useCaseId={selectedUseCaseId} />
       )}
