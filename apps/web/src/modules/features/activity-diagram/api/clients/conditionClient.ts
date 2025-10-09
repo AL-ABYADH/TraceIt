@@ -12,7 +12,12 @@ async function createCondition(condition: CreateConditionDto): Promise<Condition
   return http.post(conditionEndpoint.list, { body: condition });
 }
 
+async function removeCondition(id: string) {
+  return http.del(conditionEndpoint.detail, { pathParams: { id } });
+}
+
 export const conditionClient = {
   listConditions,
   createCondition,
+  removeCondition,
 };

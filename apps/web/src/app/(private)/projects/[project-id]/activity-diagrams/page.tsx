@@ -12,6 +12,7 @@ import SelectField from "@/components/SelectField";
 import Button from "@/components/Button";
 import { useEffect, useMemo, useState } from "react";
 import { route } from "nextjs-routes";
+import { UseCaseSubtype } from "@repo/shared-schemas";
 
 export default function UseCaseDiagramPage() {
   const params = useParams<"/projects/[project-id]/activity-diagrams">();
@@ -30,7 +31,7 @@ export default function UseCaseDiagramPage() {
     isError: isUseCasesError,
     isLoading: isUseCasesLoading,
     error: useCasesError,
-  } = useUseCases(projectId);
+  } = useUseCases(projectId, UseCaseSubtype.PRIMARY);
 
   useEffect(() => {
     if (!useCases || useCases.length === 0) return;
@@ -95,7 +96,7 @@ export default function UseCaseDiagramPage() {
       <div className="flex w-full items-center justify-between">
         <div className="max-w-md">
           <SelectField
-            label="Use Case"
+            label="Primary Use Case"
             placeholder="Select a use case"
             value={selectedUseCaseId ?? ""}
             onChange={(e) => {

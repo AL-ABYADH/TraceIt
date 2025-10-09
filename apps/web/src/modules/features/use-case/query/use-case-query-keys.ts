@@ -1,4 +1,8 @@
 export const useCaseQueryKeys = {
-  list: ["useCases"],
-  detail: (id: string) => [...useCaseQueryKeys.list, "detail", id],
+  list: () => ["useCases"],
+  primaryList: () => ["primaryUseCases"],
+  secondaryList: () => ["secondaryUseCases"],
+  detail: (id: string) => ["useCases", "detail", id],
+  primaryDetail: (id: string) => ["primaryUseCases", "detail", id],
+  secondaryDetail: (id: string) => ["secondaryUseCases", "detail", id],
 } as const;

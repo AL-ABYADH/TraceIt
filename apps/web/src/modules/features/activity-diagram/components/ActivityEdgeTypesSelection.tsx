@@ -3,7 +3,7 @@
 import Dialog from "@/components/Dialog";
 import { EdgeType } from "@repo/shared-schemas";
 
-export type ActivityEdgeType = EdgeType.ACTIVITY_FLOW;
+export type ActivityEdgeType = EdgeType.CONTROL_FLOW;
 
 interface ActivityEdgeTypesSelectionProps {
   isOpen: boolean;
@@ -30,13 +30,13 @@ export default function ActivityEdgeTypesSelection({
 
         <button
           onClick={() => {
-            onActivityEdgeTypesClick(EdgeType.ACTIVITY_FLOW);
+            onActivityEdgeTypesClick(EdgeType.CONTROL_FLOW);
             onClose();
           }}
           className="w-full flex flex-col items-center justify-center p-6 border border-border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           <div className="text-center">
-            <div className="font-medium text-sm">{EdgeType.ACTIVITY_FLOW}</div>
+            <div className="font-medium text-sm">{EdgeType.CONTROL_FLOW}</div>
             <div className="text-xs text-muted-foreground mt-1">
               Represents the sequence and flow between activities
             </div>

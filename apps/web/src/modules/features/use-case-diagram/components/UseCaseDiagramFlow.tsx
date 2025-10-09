@@ -1,7 +1,7 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   addNode,
   loadFlowData,
@@ -31,11 +31,9 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
   const [isUseCasesDialogOpen, setIsUseCasesDialogOpen] = useState(false);
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
   const [isEdgeTypeDialogOpen, setIsEdgeTypeDialogOpen] = useState(false);
-
   const [newConnection, setNewConnection] = useState<Connection | null>(null);
 
   const dispatch = useDispatch();
-
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
   const diagramId = useSelector(selectDiagramId);
@@ -47,11 +45,9 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
       case NodeType.USE_CASE:
         setIsUseCasesDialogOpen(true);
         break;
-
       case NodeType.ACTOR:
         setIsActorsDialogOpen(true);
         break;
-
       default:
         break;
     }
@@ -102,7 +98,15 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
   }, [diagram, dispatch]);
 
   return (
-    <>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {updateDiagramMutation.isError && (
         <ErrorMessage
           message={`Failed to save diagram: ${
@@ -111,6 +115,7 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
         />
       )}
 
+      {/* Dialogs */}
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
         onClose={() => setIsUseCasesDialogOpen(false)}
@@ -130,13 +135,16 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
         }}
       />
 
-      <Flow
-        onConnect={handleConnect}
-        onAddNode={handleAddNode}
-        onSave={handleSave}
-        isSaving={updateDiagramMutation.isPending}
-        type={DiagramType.USE_CASE}
-      />
-    </>
+      {/* The Flow itself fills remaining height */}
+      <div style={{ flex: 1, overflow: "hidden" }}>
+        <Flow
+          onConnect={handleConnect}
+          onAddNode={handleAddNode}
+          onSave={handleSave}
+          isSaving={updateDiagramMutation.isPending}
+          type={DiagramType.USE_CASE}
+        />
+      </div>
+    </div>
   );
 }

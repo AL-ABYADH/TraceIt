@@ -4,7 +4,7 @@ import React from "react";
 import type { EdgeProps } from "@xyflow/react";
 import { BaseEdge, getBezierPath } from "@xyflow/react";
 
-export default function ActivityFlowEdge(props: EdgeProps) {
+export default function ControlFlow(props: EdgeProps) {
   const {
     id,
     sourceX,

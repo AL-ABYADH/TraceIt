@@ -155,33 +155,39 @@ export default function TrueEdge(props: EdgeProps) {
   // Get the source node to access its data
   const sourceNode = getNode(source);
 
-  // Determine label and color based on source node data
+  // Determine label based on source node data
   let label = "TRUE";
-  let baseColor = "#fff";
   let isDeleted = false;
 
   if (sourceNode?.data) {
     try {
       const nodeData = sourceNode.data as DecisionNodeData;
 
-      // Color mapping for TRUE edge
-      if (isRequirementExceptionDto(nodeData)) {
-        baseColor = "#fff"; // EXCEPTION TRUE -> red
-      } else if (isConditionDto(nodeData)) {
-        baseColor = "#fff"; // CONDITION TRUE -> green
+      // Check if the node is deleted (no name)
+      isDeleted = !sourceNode.data.name;
+
+      if (isDeleted) {
+        // Set appropriate deletion message based on node type
+        if (isRequirementExceptionDto(nodeData)) {
+          label = "Exception was deleted";
+        } else if (isConditionDto(nodeData)) {
+          label = "Condition was deleted";
+        } else {
+          label = "Decision was deleted";
+        }
+      } else {
+        label = getDecisionNodeName(nodeData); // Gets the actual condition/exception text
       }
     } catch (error) {
       console.warn("Failed to process decision node data:", error);
       // If data processing fails, consider it deleted
       isDeleted = true;
       label = "Node was deleted";
-      baseColor = "#dc3545";
     }
   } else {
     // If no data at all, consider it deleted
     isDeleted = true;
     label = "Node was deleted";
-    baseColor = "#dc3545";
   }
 
   // Calculate edge path
@@ -199,8 +205,9 @@ export default function TrueEdge(props: EdgeProps) {
   const labelX = sourceX + (pathLabelX - sourceX) * edgeProgress;
   const labelY = sourceY + (pathLabelY - sourceY) * edgeProgress - 15; // 15px above the path
 
-  const stroke = selected ? "#3b82f6" : baseColor;
-  const strokeWidth = 2.5;
+  // All edges are white with consistent stroke width
+  const stroke = "#ffffff";
+  const strokeWidth = 2;
 
   return (
     <>
@@ -227,17 +234,15 @@ export default function TrueEdge(props: EdgeProps) {
             markerHeight={6}
             viewBox="0 0 10 10"
           >
-            {/* Outer arrow (fill follows currentColor, slight outline for contrast) */}
+            {/* White arrowhead */}
             <path
               d="M1,1 L9,5 L1,9 L3,5 Z"
-              fill="currentColor"
-              stroke="rgba(0,0,0,0.12)"
+              fill="#ffffff"
+              stroke="rgba(255,255,255,0.8)"
               strokeWidth="0.4"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
-            {/* small inner highlight to give a subtle 3D feel (optional) */}
-            <path d="M2.2,4.6 L6.2,5 L2.2,5.4 L3.2,5 Z" fill="rgba(255,255,255,0.12)" />
           </marker>
         </defs>
       </svg>
@@ -260,12 +265,8 @@ export default function TrueEdge(props: EdgeProps) {
               background: isDeleted ? "#dc3545" : "#000000", // Red background for deleted edges
               padding: "1px 6px",
               borderRadius: "3px",
-              border: isDeleted ? "1px solid #ff6b6b" : "1px solid #d0d0d0",
-              boxShadow: selected
-                ? "0 2px 8px rgba(59, 130, 246, 0.3), 0 0 0 2px rgba(59, 130, 246, 0.2)"
-                : isDeleted
-                  ? "0 1px 3px rgba(220, 53, 69, 0.3)"
-                  : "0 1px 3px rgba(0, 0, 0, 0.12)",
+              border: isDeleted ? "1px solid #dc3545" : "1px solid #ffffff",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.12)",
               display: "inline-block",
               maxWidth: "200px",
               textAlign: "left",

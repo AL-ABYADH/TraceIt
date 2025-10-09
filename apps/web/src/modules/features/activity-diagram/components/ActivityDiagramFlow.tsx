@@ -367,7 +367,7 @@ export default function ActivityDiagramFlow({
       return;
     }
 
-    dispatch(onConnect({ ...conn, type: EdgeType.ACTIVITY_FLOW }));
+    dispatch(onConnect({ ...conn, type: EdgeType.CONTROL_FLOW }));
   };
 
   const handleSave = (elements: DiagramElementsDto) => {

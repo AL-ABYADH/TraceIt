@@ -11,6 +11,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
   const projectId = params["project-id"];
   const router = useRouter();
 
+  // const name = data?.name ?? "Activity";
   const name = data.name ?? "Activity was deleted";
   const isDeleted = !data.name;
 
@@ -245,7 +246,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         />
       </div>
 
-      {menuPosition && (
+      {menuPosition && !isDeleted && (
         <DropdownMenu open onOpenChange={(open) => !open && closeMenu()}>
           <DropdownMenuContent
             sideOffset={0}

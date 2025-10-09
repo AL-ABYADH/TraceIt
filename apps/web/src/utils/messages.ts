@@ -28,7 +28,6 @@ const edgeLabels: Record<EdgeType, string> = {
   [EdgeType.TRUE]: "True branch",
   [EdgeType.FALSE]: "False branch",
   [EdgeType.ASSOCIATION]: "Association",
-  [EdgeType.ACTIVITY_FLOW]: "Activity flow",
 };
 
 export function getCreationMessage(

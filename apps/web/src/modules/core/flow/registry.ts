@@ -16,7 +16,7 @@ import { FlowFinalNode } from "./components/nodes/FlowFinalNode";
 import { JoinNode } from "./components/nodes/JoinNode";
 import { MergeNode } from "./components/nodes/MergeNode";
 import DecisionNode from "./components/nodes/DecisionNode";
-import ActivityFlowEdge from "./components/edges/CustomFlow";
+import ControlFlow from "./components/edges/ControlFlow";
 
 export type NodeComponent = React.ComponentType<NodeProps<any>>;
 export type EdgeComponent = React.ComponentType<EdgeProps<any>>;
@@ -77,4 +77,4 @@ registerEdge(EdgeType.INCLUDES, IncludesEdge);
 registerEdge(EdgeType.ASSOCIATION, AssociationEdge);
 registerEdge(EdgeType.TRUE, TrueEdge);
 registerEdge(EdgeType.FALSE, FalseEdge);
-registerEdge(EdgeType.ACTIVITY_FLOW, ActivityFlowEdge);
+registerEdge(EdgeType.CONTROL_FLOW, ControlFlow);

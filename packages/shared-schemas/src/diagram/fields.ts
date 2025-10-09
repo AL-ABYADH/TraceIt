@@ -45,7 +45,6 @@ export enum EdgeType {
   TRUE = "TRUE", //
   FALSE = "FALSE", //
   ASSOCIATION = "ASSOCIATION",
-  ACTIVITY_FLOW = "ACTIVITY_FLOW",
 }
 
 // Diagram-specific fields
