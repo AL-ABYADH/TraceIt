@@ -114,7 +114,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
                 whiteSpace: "nowrap",
               }}
             >
-              Associated requirement has been {!data.requirement ? "deleted" : "updated"}
+              Associated requirement has been {data.requirementDeleted ? "deleted" : "updated"}
             </div>
           </div>
         )}
@@ -232,13 +232,13 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         />
 
         <ActivityShape
-        name={name}
-        selected={selected}
-        // width={svgWidth}
-        // height={svgHeight}
-        paddingX={PADDING_X}
-        paddingY={PADDING_Y}
-        isDeleted={isDeleted}
+          name={name}
+          selected={selected}
+          // width={svgWidth}
+          // height={svgHeight}
+          paddingX={PADDING_X}
+          paddingY={PADDING_Y}
+          isDeleted={isDeleted}
           strokeColor={
             data?.requirementDeleted ? "red" : data?.requirementUpdated ? "yellow" : undefined
           }
