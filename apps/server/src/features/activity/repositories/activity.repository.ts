@@ -26,6 +26,8 @@ export class ActivityRepository {
         name: createDto.name,
         requirementUpdated: false,
         requirementDeleted: false,
+        requirementId: createDto.requirementId,
+        useCaseId: createDto.useCaseId,
         useCase: {
           // Add useCase relationship
           where: [{ params: { id: createDto.useCaseId } }],

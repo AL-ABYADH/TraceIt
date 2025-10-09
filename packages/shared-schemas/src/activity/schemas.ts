@@ -32,6 +32,8 @@ export const activitySchema = z
     name: activityNameFieldDoc,
     requirementUpdated: booleanFieldDoc,
     requirementDeleted: booleanFieldDoc,
+    requirementId: uuidFieldDoc,
+    useCaseId: uuidFieldDoc,
     createdAt: dateFieldDoc,
     updatedAt: dateFieldDoc.optional(),
     requirement: requirementListSchema.optional(),
