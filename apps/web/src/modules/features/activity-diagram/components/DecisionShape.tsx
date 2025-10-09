@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 interface DecisionShapeProps {
   name: string;
   selected?: boolean;
+  isDeleted?: boolean;
   showLabel?: boolean; // if true, always show label; canvas will override to false
   // Optional explicit dimensions to avoid re-computation mismatch with canvas node container
   selectedColor?: string; // Add this
@@ -28,6 +29,7 @@ export function DecisionShape({
   name,
   selected = false,
   showLabel = true,
+  isDeleted,
   isCanvasMode,
   width,
   height,
@@ -39,8 +41,8 @@ export function DecisionShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : "#fff",
-  strokeWidth = 2,
+  strokeColor = selected ? "var(--primary)" : isDeleted ? "#ff4444" : "#fff",
+  strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
   textColor = "#fff",
   className,
   style,

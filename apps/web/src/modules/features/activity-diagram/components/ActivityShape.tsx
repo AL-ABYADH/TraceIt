@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 interface ActivityShapeProps {
   name: string;
   selected?: boolean;
+  isDeleted?: boolean;
   // Optional explicit dimensions to keep canvas container and shape perfectly aligned
   width?: number;
   height?: number;
@@ -24,6 +25,7 @@ interface ActivityShapeProps {
 export function ActivityShape({
   name,
   selected = false,
+  isDeleted = false,
   width,
   height,
   maxWidth = 200,
@@ -33,8 +35,8 @@ export function ActivityShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : "#fff",
-  strokeWidth = 2,
+  strokeColor = selected ? "var(--primary)" : isDeleted ? "#ff4444" : "#fff",
+  strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
   textColor = "#fff",
   className,
   style,

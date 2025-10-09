@@ -3,6 +3,7 @@ import React, { useMemo } from "react";
 interface UseCaseShapeProps {
   name: string;
   selected?: boolean;
+  isDeleted?: boolean;
   maxWidth?: number;
   minWidth?: number;
   paddingX?: number;
@@ -21,6 +22,7 @@ interface UseCaseShapeProps {
 export function UseCaseShape({
   name,
   selected = false,
+  isDeleted = false,
   maxWidth = 200,
   minWidth = 100,
   paddingX = 28,
@@ -28,8 +30,8 @@ export function UseCaseShape({
   fontSize = 14,
   lineHeight = 20,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : "#fff",
-  strokeWidth = 2,
+  strokeColor = selected ? "var(--primary)" : isDeleted ? "#ff4444" : "#fff",
+  strokeWidth = isDeleted ? 3 : 2,
   textColor = "#fff",
   className,
   style,

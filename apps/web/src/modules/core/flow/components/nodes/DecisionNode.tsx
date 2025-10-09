@@ -2,14 +2,9 @@ import type { NodeProps } from "@xyflow/react";
 import { Handle, Position, useUpdateNodeInternals } from "@xyflow/react";
 import { useMemo, useState, useEffect } from "react";
 import { DecisionShape } from "@/modules/features/activity-diagram/components/DecisionShape";
-import {
-  DecisionNodeData,
-  isConditionNode,
-  isRequirementExceptionDto,
-} from "@/types/decision-node-types";
+import { DecisionNodeData, isRequirementExceptionDto } from "@/types/decision-node-types";
 
 export default function DecisionNode({ data, selected }: NodeProps<any>) {
-  const name = data?.name ?? "Condition";
   const [hovered, setHovered] = useState(false);
   const updateNodeInternals = useUpdateNodeInternals();
 
@@ -17,21 +12,40 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
   const BASE_WIDTH = 40;
   const BASE_HEIGHT = 40;
 
-  // Determine node type and colors
-  const { isException, selectedColor } = useMemo(() => {
+  // Determine node type, deletion status, and name
+  const { isException, isDeleted, name, selectedColor } = useMemo(() => {
     let isException = false;
+    let isDeleted = false;
+    let displayName = "Condition";
 
     if (data) {
       try {
         const nodeData = data as DecisionNodeData;
         isException = isRequirementExceptionDto(nodeData);
+
+        // Check if the node is deleted (no name)
+        isDeleted = !data.name;
+
+        // Set appropriate display name based on type and deletion status
+        if (isDeleted) {
+          displayName = isException ? "Exception was deleted" : "Condition was deleted";
+        } else {
+          displayName = data.name;
+        }
       } catch (error) {
         console.warn("Failed to process decision node data:", error);
+        // If data processing fails, consider it deleted
+        isDeleted = true;
+        displayName = "Node was deleted";
       }
+    } else {
+      // If no data at all, consider it deleted
+      isDeleted = true;
+      displayName = "Node was deleted";
     }
 
     const selectedColor = isException ? "#dc3545" : "#28a745";
-    return { isException, selectedColor };
+    return { isException, isDeleted, name: displayName, selectedColor };
   }, [data]);
 
   // ✅ Adjustable width/height logic
@@ -53,7 +67,8 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
     if (data?.id) updateNodeInternals(data.id);
   }, [svgHeight, data?.id, updateNodeInternals]);
 
-  const handlesVisible = hovered || selected;
+  // handles are visible only when hovered, selected, AND not deleted
+  const handlesVisible = (hovered || selected) && !isDeleted;
 
   const handleStyle = {
     background: "white" as const,
@@ -73,9 +88,10 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
         height: `${svgHeight}px`,
         minHeight: `${svgHeight}px`,
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        pointerEvents: isDeleted ? "none" : "all", // Disable all interactions when deleted
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => !isDeleted && setHovered(true)} // Only set hover if not deleted
+      onMouseLeave={() => !isDeleted && setHovered(false)} // Only set hover if not deleted
       data-id={data?.id ?? undefined}
       title={name}
     >
@@ -90,6 +106,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           top: svgHeight / 2,
           transform: "translateY(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
       <Handle
         type="source"
@@ -101,6 +118,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           top: svgHeight / 2,
           transform: "translateY(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
 
       {/* RIGHT HANDLES */}
@@ -114,6 +132,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           top: svgHeight / 2,
           transform: "translateY(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
       <Handle
         type="source"
@@ -125,6 +144,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           top: svgHeight / 2,
           transform: "translateY(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
 
       {/* TOP HANDLES */}
@@ -138,6 +158,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           left: svgWidth / 2,
           transform: "translateX(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
       <Handle
         type="source"
@@ -149,11 +170,13 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
           left: svgWidth / 2,
           transform: "translateX(-50%)",
         }}
+        isConnectable={!isDeleted} // Disable connections when deleted
       />
 
       <DecisionShape
         name={name}
         selected={selected}
+        isDeleted={isDeleted}
         isCanvasMode={true} // hide label in canvas
         selectedColor={selectedColor}
         width={svgWidth}

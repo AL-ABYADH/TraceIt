@@ -11,7 +11,8 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
   const projectId = params["project-id"];
   const router = useRouter();
 
-  const name = data?.name ?? "Activity";
+  const name = data.name ?? "Activity was deleted";
+  const isDeleted = !data.name;
 
   // hover state (controls handle visibility and overlay)
   const [hovered, setHovered] = useState(false);
@@ -231,12 +232,13 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         />
 
         <ActivityShape
-          name={name}
-          selected={selected}
-          width={svgWidth}
-          height={svgHeight}
-          paddingX={PADDING_X}
-          paddingY={PADDING_Y}
+        name={name}
+        selected={selected}
+        // width={svgWidth}
+        // height={svgHeight}
+        paddingX={PADDING_X}
+        paddingY={PADDING_Y}
+        isDeleted={isDeleted}
           strokeColor={
             data?.requirementDeleted ? "red" : data?.requirementUpdated ? "yellow" : undefined
           }
