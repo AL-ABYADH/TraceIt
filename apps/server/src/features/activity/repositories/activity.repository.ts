@@ -55,14 +55,7 @@ export class ActivityRepository {
    */
   async update(id: string, updateDto: UpdateActivityInterface): Promise<Activity> {
     try {
-      // Update basic properties
-      const updateData: Record<string, any> = {};
-
-      if (updateDto.name !== undefined) {
-        updateData.name = updateDto.name;
-      }
-
-      await this.activityModel.updateOneOrThrow(updateData, {
+      await this.activityModel.updateOneOrThrow(updateDto, {
         where: { id },
       });
 

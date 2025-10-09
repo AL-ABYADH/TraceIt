@@ -80,14 +80,7 @@ export class ConditionRepository {
    */
   async update(id: string, updateDto: UpdateConditionInterface): Promise<Condition> {
     try {
-      // Update basic properties
-      const updateData: Record<string, any> = {};
-
-      if (updateDto.name !== undefined) {
-        updateData.name = updateDto.name;
-      }
-
-      await this.conditionModel.updateOneOrThrow(updateData, {
+      await this.conditionModel.updateOneOrThrow(updateDto, {
         where: { id },
       });
 
