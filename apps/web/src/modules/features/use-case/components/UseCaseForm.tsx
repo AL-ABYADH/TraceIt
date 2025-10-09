@@ -113,10 +113,14 @@ export default function UseCaseForm({
     setServerError(null);
   }, [mode, initialData, detail, projectId, reset]);
 
-  const onSubmit = (values: CreatePrimaryUseCaseDto) => {
+  const onSubmit = (values: any) => {
     setServerError(null);
-    if (mode === "create") createMutation.mutate(values);
-    else updateMutation.mutate(values);
+    if (mode === "create") {
+      createMutation.mutate(values);
+    } else {
+      const { projectId, ...rest } = values;
+      updateMutation.mutate(rest);
+    }
   };
 
   const handleSuccess = (action: string) => {
@@ -147,20 +151,6 @@ export default function UseCaseForm({
     setServerError(null);
     onClose();
   };
-
-  useEffect(() => {
-    if (mode === "edit" && (initialData || detail)) {
-      reset({
-        ...(initialData ?? detail),
-        primaryActorIds: (initialData?.primaryActors ?? detail?.primaryActors ?? []).map(
-          (a) => a.id,
-        ),
-        secondaryActorIds: (initialData?.secondaryActors ?? detail?.secondaryActors ?? []).map(
-          (a) => a.id,
-        ),
-      });
-    }
-  }, [mode, initialData, detail, reset]);
 
   const isPending =
     createMutation.isPending ||

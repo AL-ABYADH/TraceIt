@@ -82,14 +82,6 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
           projectId={projectId}
           mode="edit"
           useCaseId={useCaseId}
-          initialData={{
-            name: data.name,
-            description: data.description,
-            importanceLevel: data.importanceLevel,
-            projectId,
-            primaryActorIds: data.primaryActors?.map((a) => a.id) ?? [],
-            secondaryActorIds: data.secondaryActors?.map((a) => a.id) ?? [],
-          }}
         />
       </div>
     </div>

@@ -263,7 +263,7 @@ export default function RequirementForm({
         {/* Pass selectedActors to RequirementPreview */}
         <RequirementPreview operation={operation} condition={condition} actors={selectedActors} />
 
-        <div className="flex items-center justify-end gap-3 pt-4">
+        <div className="flex items-center justify-end gap-3 mt-4">
           <Button
             type="button"
             variant="ghost"
