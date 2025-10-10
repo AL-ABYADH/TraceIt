@@ -164,7 +164,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
                 query: {
                   "project-id": projectId,
                   "use-case-id": useCase.id,
-                  type: useCase.subtype, // ✅ added type here
+                  type: useCase.subtype,
                 },
               }),
             )

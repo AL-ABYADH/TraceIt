@@ -23,8 +23,8 @@ export default function DataTable<T>({
   onRowClick,
 }: DataTableProps<T>) {
   return (
-    <div className={`rounded-lg border border-border overflow-hidden ${className}`}>
-      <table className="w-full">
+    <div className={`rounded-lg border border-border overflow-auto ${className}`}>
+      <table className="w-full overflow-auto">
         {/* Header */}
         <thead>
           <tr className="border-b border-border bg-surface">

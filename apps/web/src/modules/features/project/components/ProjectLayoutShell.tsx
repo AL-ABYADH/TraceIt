@@ -23,8 +23,8 @@ export default function ProjectLayoutShell({
   const sidebarWidth = isCollapsed ? 80 : 250;
 
   return (
-    <div className="flex h-screen w-screen bg-background text-foreground">
-      <div className="h-screen flex-shrink-0 sticky top-0" style={{ width: sidebarWidth }}>
+    <div className="flex h-full w-full bg-background text-foreground">
+      <div className="h-full flex-shrink-0 sticky top-0" style={{ width: sidebarWidth }}>
         <ProjectSidebar
           projectId={projectId}
           isCollapsed={isCollapsed}
@@ -34,9 +34,7 @@ export default function ProjectLayoutShell({
       </div>
 
       {/* Main scrolls only */}
-      <main className="flex-1 overflow-auto p-4" style={{ maxHeight: "100vh" }}>
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto p-4">{children}</main>
     </div>
   );
 }
