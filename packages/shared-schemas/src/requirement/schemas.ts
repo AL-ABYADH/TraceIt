@@ -88,8 +88,8 @@ export const requirementListSchema = z
     condition: conditionFieldDoc.optional(),
     activityLabel: nameFieldDoc.optional(),
     conditionLabel: conditionFieldDoc.optional(),
-    isActivityStale: booleanFieldDoc.optional(),
-    isConditionStale: booleanFieldDoc.optional(),
+    isActivityStale: booleanFieldDoc,
+    isConditionStale: booleanFieldDoc,
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })
