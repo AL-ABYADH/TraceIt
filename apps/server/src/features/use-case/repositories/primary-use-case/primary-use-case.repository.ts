@@ -6,7 +6,6 @@ import { PrimaryUseCase } from "../../entities/primary-use-case.entity";
 import { CreatePrimaryUseCaseInterface } from "../../interfaces/create-use-case.interface";
 import { UpdatePrimaryUseCaseInterface } from "../../interfaces/update-use-case.interface";
 import { PrimaryUseCaseModel, PrimaryUseCaseModelType } from "../../models/primary-use-case.model";
-import { UseCaseImportanceLevel } from "../../enums/use-case-importance-level.enum";
 
 @Injectable()
 export class PrimaryUseCaseRepository {
