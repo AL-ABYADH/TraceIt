@@ -1,15 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { tokenService } from "../services/token-service";
-
-export interface User {
-  id: string;
-  username: string;
-  displayName: string;
-  email: string;
-}
+import { UserDto } from "@repo/shared-schemas";
 
 export interface AuthState {
-  user: User | null;
+  user: UserDto | null;
   token: string | null;
   loading: boolean;
 }
@@ -27,7 +21,7 @@ const authSlice = createSlice({
     setToken(state, action: PayloadAction<string | null>) {
       state.token = action.payload;
     },
-    setUser(state, action: PayloadAction<User | null>) {
+    setUser(state, action: PayloadAction<UserDto | null>) {
       state.user = action.payload;
     },
     logout(state) {
