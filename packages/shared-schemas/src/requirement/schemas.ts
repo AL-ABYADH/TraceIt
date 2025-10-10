@@ -1,6 +1,7 @@
 import z from "zod";
 import { actorSchema } from "../actor";
 import {
+  booleanFieldDoc,
   childIdFieldDoc,
   dateISOFieldDoc,
   exceptionIdFieldDoc,
@@ -85,6 +86,10 @@ export const requirementListSchema = z
     id: requirementIdFieldDoc,
     operation: operationFieldDoc,
     condition: conditionFieldDoc.optional(),
+    activityLabel: nameFieldDoc.optional(),
+    conditionLabel: conditionFieldDoc.optional(),
+    isActivityStale: booleanFieldDoc.optional(),
+    isConditionStale: booleanFieldDoc.optional(),
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })
