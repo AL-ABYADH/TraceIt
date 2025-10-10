@@ -17,6 +17,7 @@ function RequirementsPageContent() {
   const projectId = params["project-id"];
   const useCaseId = searchParams.get("useCaseId");
   const requirementId = searchParams.get("requirementId");
+  const exceptionId = searchParams.get("exceptionId");
 
   const { data: useCases = [], isLoading, isError, error } = usePrimaryUseCases(projectId);
   const { expandItems } = useExpansion();
@@ -59,6 +60,7 @@ function RequirementsPageContent() {
           number={index + 1}
           highlightedUseCaseId={useCaseId}
           highlightedRequirementId={requirementId}
+          highlightedExceptionId={exceptionId}
         />
       ))}
     </div>

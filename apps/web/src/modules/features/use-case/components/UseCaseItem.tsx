@@ -12,31 +12,35 @@ import { useRouter } from "next/navigation";
 import { route } from "nextjs-routes";
 import _ from "lodash";
 
-const findRequirementPath = (requirements: RequirementDto[], requirementId: string): string[] => {
+const findPath = (items: any[], id: string, type: "requirement" | "exception"): string[] => {
   const path: string[] = [];
 
-  const find = (reqs: RequirementDto[], currentPath: string[]): boolean => {
+  const find = (reqs: any[], currentPath: string[]): boolean => {
     for (const req of reqs) {
       const newPath = [...currentPath, req.id];
-      if (req.id === requirementId) {
+      if (type === "requirement" && req.id === id) {
         path.push(...newPath);
         return true;
       }
-      if (req.nestedRequirements && find(req.nestedRequirements, newPath)) {
-        return true;
-      }
-      if (req.exceptions) {
+      if (type === "exception" && req.exceptions) {
         for (const ex of req.exceptions) {
-          if (ex.requirements && find(ex.requirements, newPath)) {
+          if (ex.id === id) {
+            path.push(...newPath, ex.id);
+            return true;
+          }
+          if (ex.requirements && find(ex.requirements, [...newPath, ex.id])) {
             return true;
           }
         }
+      }
+      if (req.nestedRequirements && find(req.nestedRequirements, newPath)) {
+        return true;
       }
     }
     return false;
   };
 
-  find(requirements, []);
+  find(items, []);
   return path;
 };
 
@@ -46,6 +50,7 @@ interface UseCaseItemProps {
   number: number;
   highlightedUseCaseId: string | null;
   highlightedRequirementId: string | null;
+  highlightedExceptionId: string | null;
 }
 
 export default function UseCaseItem({
@@ -54,6 +59,7 @@ export default function UseCaseItem({
   number,
   highlightedUseCaseId,
   highlightedRequirementId,
+  highlightedExceptionId,
 }: UseCaseItemProps) {
   const [isRequirementFormOpen, setIsRequirementFormOpen] = useState(false);
   const { expandedItems, toggleItem, expandItems } = useExpansion();
@@ -69,15 +75,18 @@ export default function UseCaseItem({
   });
 
   useEffect(() => {
-    if (
-      isExpanded &&
-      requirements.length > 0 &&
-      useCase.id === highlightedUseCaseId &&
-      highlightedRequirementId
-    ) {
-      const path = findRequirementPath(requirements, highlightedRequirementId);
-      if (path.length > 0) {
-        expandItems(path);
+    if (isExpanded && requirements.length > 0 && useCase.id === highlightedUseCaseId) {
+      if (highlightedRequirementId) {
+        const path = findPath(requirements, highlightedRequirementId, "requirement");
+        if (path.length > 0) {
+          expandItems(path);
+        }
+      }
+      if (highlightedExceptionId) {
+        const path = findPath(requirements, highlightedExceptionId, "exception");
+        if (path.length > 0) {
+          expandItems(path);
+        }
       }
     }
   }, [
@@ -86,6 +95,7 @@ export default function UseCaseItem({
     useCase.id,
     highlightedUseCaseId,
     highlightedRequirementId,
+    highlightedExceptionId,
     expandItems,
   ]);
 
@@ -209,6 +219,7 @@ export default function UseCaseItem({
                   level={1}
                   validatedUseCaseId={useCase.id}
                   highlightedRequirementId={highlightedRequirementId}
+                  highlightedExceptionId={highlightedExceptionId}
                 />
               ))}
             </div>

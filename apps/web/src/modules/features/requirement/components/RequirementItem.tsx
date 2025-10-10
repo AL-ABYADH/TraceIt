@@ -21,6 +21,7 @@ interface RequirementItemProps {
   projectId: string;
   validatedUseCaseId: string;
   highlightedRequirementId: string | null;
+  highlightedExceptionId: string | null;
 }
 
 export default function RequirementItem({
@@ -30,6 +31,7 @@ export default function RequirementItem({
   projectId,
   validatedUseCaseId,
   highlightedRequirementId,
+  highlightedExceptionId,
 }: RequirementItemProps) {
   const [openForm, setOpenForm] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -45,6 +47,7 @@ export default function RequirementItem({
     id: string;
     initial: { name: string };
   }>(null);
+  const exceptionRef = useRef<HTMLDivElement>(null);
 
   const expanded = expandedItems.has(requirement.id);
 
@@ -77,6 +80,24 @@ export default function RequirementItem({
       if (timer) clearTimeout(timer);
     };
   }, [isHighlighted, setHighlightedRequirementId]);
+
+  useEffect(() => {
+    if (highlightedExceptionId && exceptionRef.current) {
+      const exception = requirement.exceptions?.find((e) => e.id === highlightedExceptionId);
+      if (exception) {
+        exceptionRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        exceptionRef.current.style.outline = "2px solid #4f9cf9";
+        exceptionRef.current.style.backgroundColor = "rgba(59,130,246,0.15)";
+
+        const timer = setTimeout(() => {
+          exceptionRef.current?.style.removeProperty("outline");
+          exceptionRef.current?.style.removeProperty("background-color");
+        }, 5000);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [highlightedExceptionId, requirement.exceptions]);
 
   const deleteRequirement = useDeleteRequirement(requirement.id, validatedUseCaseId, {
     onSuccess: () => setIsDeleteOpen(false),
@@ -201,6 +222,7 @@ export default function RequirementItem({
                     projectId={projectId}
                     validatedUseCaseId={validatedUseCaseId}
                     highlightedRequirementId={highlightedRequirementId}
+                    highlightedExceptionId={highlightedExceptionId}
                   />
                 ))}
               </div>
@@ -220,7 +242,10 @@ export default function RequirementItem({
               {/* Exceptions */}
               <div className="space-y-2">
                 {requirement.exceptions?.map((exception, eIdx) => (
-                  <div key={exception.id}>
+                  <div
+                    key={exception.id}
+                    ref={exception.id === highlightedExceptionId ? exceptionRef : null}
+                  >
                     {/* Exception Title */}
                     <div className="flex items-center gap-2 my-1" style={{ marginLeft: 48 }}>
                       <span className="inline-flex items-center py-1 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
@@ -278,6 +303,7 @@ export default function RequirementItem({
                               projectId={projectId}
                               validatedUseCaseId={validatedUseCaseId}
                               highlightedRequirementId={highlightedRequirementId}
+                              highlightedExceptionId={highlightedExceptionId}
                             />
                           ))
                       ) : (
