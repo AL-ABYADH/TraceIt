@@ -6,7 +6,6 @@ import {
   onConnect,
   selectEdges,
   selectNodes,
-  selectDiagramId,
 } from "@/modules/core/flow/store/flow-slice";
 import { Connection } from "@xyflow/react";
 import ActivitySelection from "./ActivitySelection";
@@ -19,14 +18,11 @@ import {
   DiagramType,
   EdgeType,
   NodeType,
-  DiagramElementsDto,
   ActivityDto,
   ConditionDto,
   RequirementExceptionDto,
 } from "@repo/shared-schemas";
 import Flow from "@/modules/core/flow/components/Flow";
-import { useUpdateDiagram } from "@/modules/core/flow/hooks/useUpdateDiagram";
-import ErrorMessage from "@/components/ErrorMessage";
 import { useCreateActivity } from "../hooks/useCreateActivity";
 import { useCreateCondition } from "../hooks/useCreateCondition";
 import { SuccessNotification } from "@/components/SuccessNotification";
@@ -49,9 +45,7 @@ export default function ActivityDiagramFlow({
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
-  const diagramId = useSelector(selectDiagramId);
 
-  const updateDiagramMutation = useUpdateDiagram();
   const createActivityMutation = useCreateActivity();
   const createConditionMutation = useCreateCondition();
 
@@ -368,11 +362,6 @@ export default function ActivityDiagramFlow({
     dispatch(onConnect({ ...conn, type: EdgeType.CONTROL_FLOW }));
   };
 
-  const handleSave = (elements: DiagramElementsDto) => {
-    if (!diagramId) return;
-    updateDiagramMutation.mutate({ diagramId, diagram: elements });
-  };
-
   // ------------------------
   // JSX return
   // ------------------------
@@ -384,12 +373,6 @@ export default function ActivityDiagramFlow({
 
       {notification?.type === "error" && (
         <ErrorNotification message={notification.message} onClose={() => setNotification(null)} />
-      )}
-
-      {updateDiagramMutation.isError && (
-        <ErrorMessage
-          message={`Failed to save diagram: ${(updateDiagramMutation.error as any)?.message ?? "Unknown error"}`}
-        />
       )}
 
       <DecisionTypeSelection
@@ -497,13 +480,7 @@ export default function ActivityDiagramFlow({
         }}
       />
 
-      <Flow
-        onConnect={handleConnect}
-        onAddNode={handleAddNode}
-        onSave={handleSave}
-        isSaving={updateDiagramMutation.isPending}
-        type={DiagramType.ACTIVITY}
-      />
+      <Flow onConnect={handleConnect} onAddNode={handleAddNode} type={DiagramType.ACTIVITY} />
     </>
   );
 }
