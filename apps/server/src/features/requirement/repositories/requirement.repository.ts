@@ -47,13 +47,94 @@ export class RequirementRepository {
     }
   }
 
+  // async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
+  //   try {
+  //     const query = `
+  //     MATCH (uc:UseCase {id: $useCaseId})
+  //     MATCH (uc)-[:BELONGS_TO|HAS_REQUIREMENT|EXCEPTION_AT|DETAILS|SUB_FLOW_FOR*0..10]-(req:Requirement)
+  //     RETURN DISTINCT req.id as id, req.operation as operation, req.condition as condition,
+  //            req.createdAt as createdAt, req.updatedAt as updatedAt
+  //   `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { useCaseId });
+
+  //     const requirements: RequirementListDto[] = [];
+  //     for (const record of result.records) {
+  //       requirements.push({
+  //         id: record.get("id"),
+  //         operation: record.get("operation"),
+  //         condition: record.get("condition"),
+  //         createdAt: record.get("createdAt"),
+  //         updatedAt: record.get("updatedAt"),
+  //       });
+  //     }
+
+  //     console.log(`Found ${requirements.length} total requirements under use case ${useCaseId}`);
+  //     return requirements;
+  //   } catch (error) {
+  //     throw new Error(`Failed to retrieve all requirements under use case: ${error.message}`);
+  //   }
+  // }
+  //   async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
+  //   try {
+  //     const query = `
+  //       MATCH (uc:UseCase {id: $useCaseId})
+  //       OPTIONAL MATCH (uc)<-[:BELONGS_TO]-(directReq:Requirement)
+  //       OPTIONAL MATCH (uc)<-[:BELONGS_TO]-(parent:Requirement)<-[:DETAILS*0..10]-(nestedReq:Requirement)
+  //       WHERE nestedReq IS NOT NULL
+  //       OPTIONAL MATCH (uc)<-[:BELONGS_TO]-(parentReq:Requirement)<-[:EXCEPTION_AT]-(ex:RequirementException)
+  //       OPTIONAL MATCH (reqFromEx:Requirement)-[:BELONGS_TO]->(ex)
+  //       OPTIONAL MATCH (reqFromEx)<-[:DETAILS*0..10]-(nestedExReq:Requirement)
+  //       WITH COLLECT(directReq) + COLLECT(nestedReq) + COLLECT(reqFromEx) + COLLECT(nestedExReq) AS allReqs
+  //       UNWIND allReqs AS r
+  //       WITH DISTINCT r
+  //       WHERE r IS NOT NULL
+  //       RETURN
+  //           r.id AS id,
+  //           r.operation AS operation,
+  //           COALESCE(r.condition, '') AS condition,
+  //           r.createdAt AS createdAt,
+  //           COALESCE(r.updatedAt, r.createdAt) AS updatedAt
+  //       ORDER BY r.createdAt
+  //     `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { useCaseId });
+
+  //     const requirements: RequirementListDto[] = [];
+  //     for (const record of result.records) {
+  //       requirements.push({
+  //         id: record.get('id'),
+  //         operation: record.get('operation'),
+  //         condition: record.get('condition'),
+  //         createdAt: record.get('createdAt'),
+  //         updatedAt: record.get('updatedAt')
+  //       });
+  //     }
+
+  //     console.log(`✅ Found ${requirements.length} requirements under use case ${useCaseId}`);
+  //     return requirements;
+
+  //   } catch (error) {
+  //     throw new Error(`Failed to retrieve all requirements under use case: ${error.message}`);
+  //   }
+  // }
   async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
     try {
       const query = `
       MATCH (uc:UseCase {id: $useCaseId})
-      MATCH (uc)-[:BELONGS_TO|HAS_REQUIREMENT|EXCEPTION_AT|DETAILS|SUB_FLOW_FOR*0..10]-(req:Requirement)
-      RETURN DISTINCT req.id as id, req.operation as operation, req.condition as condition, 
-             req.createdAt as createdAt, req.updatedAt as updatedAt
+      MATCH path = (uc)<-[:BELONGS_TO*1..1]-(req:Requirement)
+                      <-[:DETAILS|EXCEPTION_AT|BELONGS_TO*0..10]-(nested:Requirement)
+      WITH COLLECT(DISTINCT req) + COLLECT(DISTINCT nested) AS allReqs
+      UNWIND allReqs AS r
+      WITH DISTINCT r
+      WHERE r IS NOT NULL
+      RETURN
+          r.id AS id,
+          r.operation AS operation,
+          COALESCE(r.condition, '') AS condition,
+          r.createdAt AS createdAt,
+          COALESCE(r.updatedAt, r.createdAt) AS updatedAt
+      ORDER BY r.createdAt
     `;
 
       const result = await this.neo4jService.getNeogma().queryRunner.run(query, { useCaseId });
@@ -69,7 +150,7 @@ export class RequirementRepository {
         });
       }
 
-      console.log(`Found ${requirements.length} total requirements under use case ${useCaseId}`);
+      console.log(`✅ Found ${requirements.length} requirements under use case ${useCaseId}`);
       return requirements;
     } catch (error) {
       throw new Error(`Failed to retrieve all requirements under use case: ${error.message}`);
