@@ -7,11 +7,13 @@ export function usePrimaryUseCaseDetail<T = PrimaryUseCaseDetailDto>(
   primaryUseCaseId: string,
   select?: (data: PrimaryUseCaseDetailDto) => T,
   options?: Omit<UseQueryOptions<PrimaryUseCaseDetailDto, Error, T>, "queryKey" | "queryFn">,
+  enabled: boolean = true,
 ): UseQueryResult<T, Error> {
   return useQuery<PrimaryUseCaseDetailDto, Error, T>({
     queryKey: primaryUseCaseQueryKeys.detail(primaryUseCaseId),
     queryFn: () => primaryUseCaseClient.getPrimaryUseCase(primaryUseCaseId),
     select,
+    enabled, // use it here
     ...options,
   });
 }

@@ -16,10 +16,10 @@ export function useUpdatePrimaryUseCase(useCaseId: string, opts?: UseUpdatePrima
     mutationFn: (useCase: UpdatePrimaryUseCaseDto) =>
       primaryUseCaseClient.updatePrimaryUseCase(useCaseId, useCase),
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list });
+      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
     },
     onSuccess: (data, variables) => {
-      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list });
+      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
       qc.invalidateQueries({ queryKey: primaryUseCaseQueryKeys.detail(useCaseId) });
       opts?.onSuccess?.(data, variables);
     },

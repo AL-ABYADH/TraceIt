@@ -9,68 +9,65 @@ import { useState } from "react";
 import MainFlowSection from "../../requirement/components/MainFlowSection";
 import RecursiveFlowSection from "../../requirement/components/RecursiveFlowSection";
 import _ from "lodash";
-// If you need types, run: pnpm add -D @types/lodash
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import UseCaseForm from "./UseCaseForm";
 
 import { useRouter } from "next/navigation";
 import { route } from "nextjs-routes";
+import { PrimaryUseCaseDetailDto, UseCaseSubtype } from "@repo/shared-schemas";
+import { useSecondaryUseCaseDetail } from "../hooks/useSecondaryUseCaseDetail";
+import SecondaryUseCaseForm from "./SecondaryUseCaseForm";
 
 interface UseCaseDetailsProps {
   projectId: string;
   useCaseId: string;
+  useCaseSubType: UseCaseSubtype;
 }
 
-export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsProps) {
-  const { data, isLoading, isError, error } = usePrimaryUseCaseDetail(useCaseId);
+export default function UseCaseDetails({
+  projectId,
+  useCaseId,
+  useCaseSubType,
+}: UseCaseDetailsProps) {
+  const router = useRouter();
+  const [isEditOpen, setEditOpen] = useState(false);
+  const [editingSecondaryId, setEditingSecondaryId] = useState<string | null>(null);
+  const [isSecondaryFormOpen, setSecondaryFormOpen] = useState(false);
+
+  const isPrimary = useCaseSubType === "PRIMARY";
+
+  const primary = usePrimaryUseCaseDetail(useCaseId, undefined, {}, isPrimary);
+  const secondary = useSecondaryUseCaseDetail(useCaseId, undefined, {}, !isPrimary);
+
+  const { data, isLoading, isError, error } = isPrimary ? primary : secondary;
+
   const {
     data: requirements,
     isLoading: reqLoading,
     isError: reqError,
     error: reqErrorMessage,
   } = useUseCasesRequirements(useCaseId);
-  const [isEditOpen, setEditOpen] = useState(false);
-  const router = useRouter();
 
-  // Keep showing loading until both use case and requirements are loaded
   if (isLoading || reqLoading)
     return <Loading isOpen message="Loading use case and requirements..." />;
+
   if (isError) return <ErrorMessage message={error?.message ?? "Failed to load use case"} />;
   if (reqError)
     return <ErrorMessage message={reqErrorMessage?.message ?? "Failed to load requirements"} />;
   if (!data || !requirements) return <ErrorMessage message="Use case or requirements not found" />;
 
-  const primaryActors = data.primaryActors?.map((a) => a.name).join(", ") || "—";
-  const secondaryActors = data.secondaryActors?.map((a) => a.name).join(", ") || "—";
-  const description = data.description || "—";
+  const orderedRequirements = sortRequirementsByCreatedAt(_.cloneDeep(requirements));
 
   function sortRequirementsByCreatedAt(requirements: any[]): any[] {
     if (!Array.isArray(requirements)) return [];
-
-    // Sort current level
     const sorted = _.orderBy(requirements, ["createdAt"], ["asc"]);
-
-    // Recursively sort all nested levels
-    return sorted.map((req) => {
-      const cloned = { ...req };
-
-      // If this requirement has nested lists, sort them too
-      if (Array.isArray(cloned.nestedRequirements)) {
-        cloned.nestedRequirements = sortRequirementsByCreatedAt(cloned.nestedRequirements);
-      }
-      if (Array.isArray(cloned.exceptions)) {
-        cloned.exceptions = sortRequirementsByCreatedAt(cloned.exceptions);
-      }
-      if (Array.isArray(cloned.requirementException)) {
-        cloned.requirementException = sortRequirementsByCreatedAt(cloned.requirementException);
-      }
-
-      return cloned;
-    });
+    return sorted.map((req) => ({
+      ...req,
+      nestedRequirements: sortRequirementsByCreatedAt(req.nestedRequirements || []),
+      exceptions: sortRequirementsByCreatedAt(req.exceptions || []),
+      requirementException: sortRequirementsByCreatedAt(req.requirementException || []),
+    }));
   }
-
-  const clonedRequirements = _.cloneDeep(requirements);
-  const orderedRequirements = sortRequirementsByCreatedAt(clonedRequirements);
 
   return (
     <div className="p-6">
@@ -78,34 +75,61 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">
             Use Case: {data.name}{" "}
-            <span className="text-muted-foreground text-base">({data.subtype})</span>
+            <span className="text-muted-foreground text-base">({useCaseSubType})</span>
           </h1>
           <div className="flex items-center gap-2">
+            {isPrimary && (
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  router.push(
+                    route({
+                      pathname: "/projects/[project-id]/activity-diagrams",
+                      query: { "project-id": projectId, useCaseId },
+                    }),
+                  )
+                }
+              >
+                View Activity Diagram
+              </Button>
+            )}
             <Button
-              variant="outline"
-              onClick={() =>
-                router.push(
-                  route({
-                    pathname: "/projects/[project-id]/activity-diagrams",
-                    query: { "project-id": projectId, useCaseId: useCaseId },
-                  }),
-                )
-              }
+              variant="ghost"
+              onClick={() => {
+                if (isPrimary) {
+                  setEditOpen(true); // open primary form
+                } else {
+                  setEditingSecondaryId(useCaseId); // for secondary, use this ID
+                  setSecondaryFormOpen(true); // open secondary form
+                }
+              }}
             >
-              View Activity Diagram
-            </Button>
-            <Button variant="ghost" onClick={() => setEditOpen(true)}>
               <Pencil className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
         </div>
 
-        <div className="mt-6 space-y-4">
-          <Section title="Primary Actors">{primaryActors}</Section>
-          <Section title="Actors">{secondaryActors}</Section>
-          <Section title="Importance Level">{data.importanceLevel}</Section>
-          <Section title="Description">{description}</Section>
-        </div>
+        {/* Only show details for primary use case */}
+        {isPrimary && (
+          <div className="mt-6 space-y-4">
+            <Section title="Primary Actors">
+              {(data as PrimaryUseCaseDetailDto).primaryActors
+                ?.map((a: any) => a.name)
+                .join(", ") || "—"}
+            </Section>
+            <Section title="Actors">
+              {(data as PrimaryUseCaseDetailDto).secondaryActors
+                ?.map((a: any) => a.name)
+                .join(", ") || "—"}
+            </Section>
+            <Section title="Importance Level">
+              {(data as PrimaryUseCaseDetailDto).importanceLevel}
+            </Section>
+            <Section title="Description">
+              {(data as PrimaryUseCaseDetailDto).description || "—"}
+            </Section>
+          </div>
+        )}
 
         {/* Flows */}
         <MainFlowSection
@@ -120,13 +144,28 @@ export default function UseCaseDetails({ projectId, useCaseId }: UseCaseDetailsP
           validatedUseCaseId={useCaseId}
         />
 
-        <UseCaseForm
-          isOpen={isEditOpen}
-          onClose={() => setEditOpen(false)}
-          projectId={projectId}
-          mode="edit"
-          useCaseId={useCaseId}
-        />
+        {/* Forms */}
+        {isPrimary && (
+          <UseCaseForm
+            isOpen={isEditOpen}
+            onClose={() => setEditOpen(false)}
+            projectId={projectId}
+            mode="edit"
+            useCaseId={useCaseId}
+          />
+        )}
+        {!isPrimary && (
+          <SecondaryUseCaseForm
+            isOpen={isSecondaryFormOpen}
+            onClose={() => setSecondaryFormOpen(false)}
+            mode="edit"
+            projectId={projectId}
+            primaryUseCaseId={useCaseId}
+            secondaryUseCaseId={editingSecondaryId ?? undefined}
+            initialName={data.name} // pass secondary name here
+            invalidateUseCaseId={useCaseId}
+          />
+        )}
       </div>
     </div>
   );

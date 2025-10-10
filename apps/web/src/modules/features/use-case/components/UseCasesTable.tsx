@@ -13,13 +13,16 @@ import { useEffect, useState } from "react";
 import { useDeletePrimaryUseCase } from "../hooks/useDeletePrimaryUseCase";
 import { useUseCases } from "../hooks/useUseCases";
 import UseCaseForm from "./UseCaseForm";
+import SecondaryUseCaseForm from "./SecondaryUseCaseForm";
+import { useDeleteSecondaryUseCase } from "../hooks/useDeleteSecondaryUseCase";
 
 interface UseCasesTableProps {
   projectId: string;
 }
 
 export default function UseCasesTable({ projectId }: UseCasesTableProps) {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isPrimaryFormOpen, setIsPrimaryFormOpen] = useState(false);
+  const [isSecondaryFormOpen, setIsSecondaryFormOpen] = useState(false);
   const [editUseCase, setEditUseCase] = useState<UseCaseListDto | null>(null);
   const [serverError, setServerError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -34,38 +37,64 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
     }
   }, [isError, error, serverError]);
 
-  const deleteMutation = useDeletePrimaryUseCase(selectedUseCase?.id ?? "", {
-    onSuccess: () => {
-      notifications.show({
-        title: "Deleted",
-        message: `Use Case deleted successfully`,
-        color: "green",
-      });
-      resetDeleteState();
-    },
-    onError: (err: any) => {
-      const msg =
-        err?.response?.data?.message ??
-        err?.message ??
-        "Failed to delete use case. Please try again.";
-      setServerError(msg);
-      resetDeleteState();
-    },
+  // --- DELETE HOOKS ---
+  const deletePrimaryMutation = useDeletePrimaryUseCase(selectedUseCase?.id ?? "", {
+    onSuccess: () => handleDeleteSuccess(),
+    onError: (err: any) => handleDeleteError(err),
   });
+
+  const deleteSecondaryMutation = useDeleteSecondaryUseCase(selectedUseCase?.id ?? "", {
+    onSuccess: () => handleDeleteSuccess(),
+    onError: (err: any) => handleDeleteError(err),
+  });
+
+  const handleDeleteSuccess = () => {
+    notifications.show({
+      title: "Deleted",
+      message: "Use case deleted successfully",
+      color: "green",
+    });
+    resetDeleteState();
+  };
+
+  const handleDeleteError = (err: any) => {
+    const msg =
+      err?.response?.data?.message ??
+      err?.message ??
+      "Failed to delete use case. Please try again.";
+    setServerError(msg);
+    resetDeleteState();
+  };
 
   const resetDeleteState = () => {
     setConfirmOpen(false);
     setSelectedUseCase(null);
   };
 
+  // --- EDIT HANDLER ---
   const handleEdit = (useCase: UseCaseListDto) => {
     setEditUseCase(useCase);
-    setIsFormOpen(true);
+    if (useCase.subtype === "PRIMARY") {
+      setIsPrimaryFormOpen(true);
+    } else if (useCase.subtype === "SECONDARY") {
+      setIsSecondaryFormOpen(true);
+    }
   };
 
+  // --- DELETE HANDLER ---
   const requestDelete = (useCase: UseCaseListDto) => {
     setSelectedUseCase(useCase);
     setConfirmOpen(true);
+  };
+
+  // --- CONFIRM DELETE ---
+  const confirmDelete = () => {
+    if (!selectedUseCase) return;
+    if (selectedUseCase.subtype === "PRIMARY") {
+      deletePrimaryMutation.mutate();
+    } else if (selectedUseCase.subtype === "SECONDARY") {
+      deleteSecondaryMutation.mutate();
+    }
   };
 
   const columns: Column<UseCaseListDto>[] = [
@@ -79,12 +108,12 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
       key: "subtype",
       title: "Type",
       width: "20%",
-      render: (_, useCase) => <h2>{useCase.subtype}</h2>,
+      render: (_, useCase) => <span className="capitalize">{useCase.subtype}</span>,
     },
     {
       key: "id",
       title: "Actions",
-      width: "10%",
+      width: "20%",
       render: (_, useCase) => (
         <div className="flex items-center gap-2">
           <button
@@ -121,7 +150,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
 
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-foreground">Use Cases</h2>
-        <Button onClick={() => setIsFormOpen(true)}>Add Use Case</Button>
+        <Button onClick={() => setIsPrimaryFormOpen(true)}>Add Use Case</Button>
       </div>
 
       {data?.length ? (
@@ -135,6 +164,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
                 query: {
                   "project-id": projectId,
                   "use-case-id": useCase.id,
+                  type: useCase.subtype, // ✅ added type here
                 },
               }),
             )
@@ -146,17 +176,36 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         </p>
       )}
 
+      {/* --- PRIMARY FORM --- */}
       <UseCaseForm
-        isOpen={isFormOpen}
+        isOpen={isPrimaryFormOpen}
         onClose={() => {
-          setIsFormOpen(false);
+          setIsPrimaryFormOpen(false);
           setEditUseCase(null);
         }}
         projectId={projectId}
-        mode={editUseCase ? "edit" : "create"}
+        mode={editUseCase && editUseCase.subtype === "PRIMARY" ? "edit" : "create"}
         useCaseId={editUseCase?.id ?? undefined}
       />
 
+      {/* --- SECONDARY FORM --- */}
+      {editUseCase && editUseCase.subtype === "SECONDARY" && (
+        <SecondaryUseCaseForm
+          isOpen={isSecondaryFormOpen}
+          onClose={() => {
+            setIsSecondaryFormOpen(false);
+            setEditUseCase(null);
+          }}
+          mode="edit"
+          projectId={projectId}
+          primaryUseCaseId={editUseCase.id ?? ""}
+          secondaryUseCaseId={editUseCase.id}
+          initialName={editUseCase.name}
+          invalidateUseCaseId={editUseCase.id ?? ""}
+        />
+      )}
+
+      {/* --- DELETE CONFIRMATION --- */}
       <ConfirmationDialog
         isOpen={confirmOpen}
         title="Delete Use Case"
@@ -164,9 +213,9 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
         confirmText="Delete"
         cancelText="Cancel"
         confirmVariant="danger"
-        onConfirm={() => deleteMutation.mutate()}
+        onConfirm={confirmDelete}
         onCancel={resetDeleteState}
-        loading={deleteMutation.isPending}
+        loading={deletePrimaryMutation.isPending || deleteSecondaryMutation.isPending}
       />
     </div>
   );

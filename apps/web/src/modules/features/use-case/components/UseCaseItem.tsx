@@ -144,7 +144,7 @@ export default function UseCaseItem({
   const sortedRequirements = sortRequirementsByCreatedAt(requirements);
 
   return (
-    <div className="p-2 border border-border rounded-lg bg-surface/50">
+    <div className="p-2 border border-border rounded-lg bg-surface/50 overflow-auto">
       {/* Use Case Header */}
       <div className="flex items-center justify-between p-4 hover:bg-card/30 transition-colors">
         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -159,8 +159,8 @@ export default function UseCaseItem({
             )}
           </button>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-muted-foreground bg-surface px-2 py-1 rounded">
+          <div className="flex items-center gap-2 ">
+            <span className="text-xs font-medium text-muted-foreground bg-surface px-2 rounded">
               {number}.
             </span>
             <h3 className="font-medium text-foreground truncate">{useCase.name}</h3>
