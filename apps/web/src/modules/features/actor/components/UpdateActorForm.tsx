@@ -36,11 +36,6 @@ export default function UpdateActorForm({ isOpen, onClose, actor }: UpdateActorF
 
   const updateActor = useUpdateActor(actor.id, {
     onSuccess: () => {
-      notifications.show({
-        title: "Updated",
-        message: `Actor updated successfully`,
-        color: "green",
-      });
       setErrorMsg(null);
       onClose();
     },

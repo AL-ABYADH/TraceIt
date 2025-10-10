@@ -124,11 +124,6 @@ export default function UseCaseForm({
   };
 
   const handleSuccess = (action: string) => {
-    notifications.show({
-      title: "Success",
-      message: `Use case ${action} successfully`,
-      color: "green",
-    });
     reset();
     onClose();
   };

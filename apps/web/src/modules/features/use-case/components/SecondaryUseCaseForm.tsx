@@ -110,11 +110,6 @@ export default function SecondaryUseCaseForm({
   };
 
   const handleSuccess = (action: string) => {
-    notifications.show({
-      title: "Success",
-      message: `Secondary use case ${action} successfully`,
-      color: "green",
-    });
     reset();
     onClose();
   };

@@ -17,13 +17,7 @@ export default function Projects() {
   const { data, isLoading, isError, error } = useProjects();
 
   const createProject = useCreateProject({
-    onSuccess: (_data, variables) => {
-      notifications.show({
-        title: "Created",
-        message: `Project "${variables.name}" created successfully!`,
-        color: "green",
-        autoClose: 3000,
-      });
+    onSuccess: () => {
       setShowForm(false);
     },
     onError: (err) => {

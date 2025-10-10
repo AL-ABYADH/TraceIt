@@ -27,11 +27,6 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
 
   const deleteMutation = useDeleteActor(deleteTarget?.id ?? "", {
     onSuccess: () => {
-      notifications.show({
-        title: "Deleted",
-        message: "Actor deleted successfully",
-        color: "green",
-      });
       setIsDeleteOpen(false);
       setDeleteTarget(null);
     },

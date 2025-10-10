@@ -2,6 +2,7 @@ import { CreateDiagramDto, DiagramType, DiagramListDto } from "@repo/shared-sche
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { diagramClient } from "../../../core/flow/api/clients/diagram-client";
 import { diagramQueryKeys } from "../../use-case-diagram/query/diagram-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type CreateActivityDiagramInput = {
   useCaseId: string;
@@ -27,6 +28,7 @@ export function useCreateActivityDiagram(opts?: UseCreateActivityDiagramOptions)
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: diagramQueryKeys.byRelation(variables.useCaseId) });
+      showSuccessNotification("Activity diagram created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreatePrimaryUseCaseDto } from "@repo/shared-schemas";
 import { primaryUseCaseClient } from "../api/clients/primary-use-case-client";
 import { useCaseQueryKeys } from "../query/use-case-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseCreatePrimaryUseCaseOptions = {
   onSuccess?: (data: unknown, variables: CreatePrimaryUseCaseDto) => void;
@@ -19,6 +20,7 @@ export function useCreatePrimaryUseCase(opts?: UseCreatePrimaryUseCaseOptions) {
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
+      showSuccessNotification("Use case created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

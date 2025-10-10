@@ -49,11 +49,6 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   });
 
   const handleDeleteSuccess = () => {
-    notifications.show({
-      title: "Deleted",
-      message: "Use case deleted successfully",
-      color: "green",
-    });
     resetDeleteState();
   };
 
