@@ -5,6 +5,7 @@ import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { RepositoryUpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { UpdateRequirementStaleInterface } from "../interfaces/update-requirement-stale.interface";
+import { UpdateRequirementLabelsInterface } from "../interfaces/update-requirement-labels.interface";
 import { RequirementModel, RequirementModelType } from "../models/requirement.model";
 import { RequirementListDto } from "@repo/shared-schemas";
 
@@ -218,6 +219,32 @@ export class RequirementRepository {
   async updateRequirementStale(
     id: string,
     updateDto: UpdateRequirementStaleInterface,
+  ): Promise<Requirement> {
+    try {
+      await this.requirementModel.updateOneOrThrow(updateDto, {
+        where: { id },
+      });
+
+      const updatedRequirement = await this.requirementModel.findOneWithRelations({
+        where: { id },
+      });
+
+      if (!updatedRequirement) {
+        throw new NotFoundException(`Requirement with ID ${id} not found after update`);
+      }
+
+      return updatedRequirement;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Failed to update requirement: ${error.message}`);
+    }
+  }
+
+  async updateRequirementLabels(
+    id: string,
+    updateDto: UpdateRequirementLabelsInterface,
   ): Promise<Requirement> {
     try {
       await this.requirementModel.updateOneOrThrow(updateDto, {

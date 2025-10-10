@@ -10,6 +10,7 @@ import {
   requirementIdSchema,
   updateRequirementSchema,
   updateRequirementStaleSchema,
+  updateRequirementLabelsSchema,
   useCaseIdSchema,
   type ChildIdDto,
   type CreateRequirementDto,
@@ -17,6 +18,7 @@ import {
   type RequirementIdDto,
   type UpdateRequirementDto,
   type UpdateRequirementStaleDto,
+  type UpdateRequirementLabelsDto,
   type UseCaseIdDto,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
@@ -73,6 +75,14 @@ export class RequirementController {
     @Body(zodBody(updateRequirementStaleSchema)) dto: UpdateRequirementStaleDto,
   ): Promise<RequirementListDto> {
     return this.requirementService.updateRequirementStale(params.requirementId, dto);
+  }
+
+  @Patch(":requirementId/labels")
+  async updateLabels(
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
+    @Body(zodBody(updateRequirementLabelsSchema)) dto: UpdateRequirementLabelsDto,
+  ): Promise<RequirementListDto> {
+    return this.requirementService.updateRequirementLabels(params.requirementId, dto);
   }
 
   @Delete(":requirementId")

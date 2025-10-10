@@ -73,6 +73,11 @@ export const updateRequirementStaleSchema = z.object({
   isConditionStale: booleanFieldDoc.optional(),
 });
 
+export const updateRequirementLabelsSchema = z.object({
+  activityLabel: nameFieldDoc.optional(),
+  conditionLabel: nameFieldDoc.optional(),
+});
+
 export const updateRequirementExceptionSchema = z.object({
   name: nameFieldDoc.optional(),
 });
