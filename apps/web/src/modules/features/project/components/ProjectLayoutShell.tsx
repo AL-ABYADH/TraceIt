@@ -13,6 +13,8 @@ export default function ProjectLayoutShell({
   children: React.ReactNode;
   projectId: string;
 }) {
+  const { isMaximized } = useMaximization();
+
   const { isLoading, isError, error } = useProjectDetail(projectId!);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -22,8 +24,6 @@ export default function ProjectLayoutShell({
   if (isError) return <ErrorMessage message={error?.message} />;
 
   const sidebarWidth = isCollapsed ? 80 : 250;
-
-  const { isMaximized } = useMaximization();
 
   return (
     <div className="flex h-full w-full bg-background text-foreground">
