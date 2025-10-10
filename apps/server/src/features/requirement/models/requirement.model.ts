@@ -3,13 +3,16 @@ import { SecondaryUseCaseAttributes } from "src/features/use-case/models/seconda
 import { ActorAttributes } from "../../actor/models/actor.model";
 import { UseCaseAttributes } from "../../use-case/models/use-case.model";
 import { RequirementExceptionAttributes } from "./requirement-exception.model";
-import { ConditionAttributes } from "src/features/activity/models/condition.model";
-import { ActivityAttributes } from "src/features/activity/models/activity.model";
+import { NodeAttributes } from "src/features/diagram/models/node.model";
 
 export type RequirementAttributes = {
   id: string;
   operation: string;
   condition?: string;
+  activityLabel?: string;
+  conditionLabel?: string;
+  isActivityStale: boolean;
+  isConditionStale: boolean;
   createdAt: string;
   updatedAt?: string;
 };
@@ -21,8 +24,7 @@ export interface RequirementRelationships {
   nestedRequirements?: RequirementAttributes[];
   exceptions?: RequirementExceptionAttributes[];
   requirementException?: RequirementExceptionAttributes;
-  relatedCondition: ConditionAttributes;
-  relatedActivity: ActivityAttributes;
+  nodes?: NodeAttributes[];
 }
 
 export type RequirementModelType = NeogmaModel<RequirementAttributes, RequirementRelationships>;
@@ -43,6 +45,24 @@ export const RequirementModel: ModelFactoryDefinition<
       type: "string",
       required: false,
       allowEmpty: false,
+    },
+    activityLabel: {
+      type: "string",
+      required: false,
+      allowEmpty: false,
+    },
+    conditionLabel: {
+      type: "string",
+      required: false,
+      allowEmpty: false,
+    },
+    isActivityStale: {
+      type: "boolean",
+      required: true,
+    },
+    isConditionStale: {
+      type: "boolean",
+      required: true,
     },
   },
   relationships: {
@@ -82,17 +102,11 @@ export const RequirementModel: ModelFactoryDefinition<
       direction: "out",
       cardinality: "one",
     },
-    relatedCondition: {
-      model: "Condition",
-      name: "RELATED_TO",
+    nodes: {
+      model: "Node",
+      name: "HAS_DATA",
       direction: "in",
-      cardinality: "one",
-    },
-    relatedActivity: {
-      model: "Activity",
-      name: "RELATED_TO",
-      direction: "in",
-      cardinality: "one",
+      cardinality: "many",
     },
   },
 });

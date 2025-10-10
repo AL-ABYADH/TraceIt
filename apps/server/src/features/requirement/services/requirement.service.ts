@@ -9,7 +9,7 @@ import { ExceptionalRequirementRepository } from "../repositories/exceptional-re
 import { RequirementRepository } from "../repositories/requirement.repository";
 import { RequirementException } from "../entities/requirement-exception.entity";
 import { PrimaryUseCaseRepository } from "src/features/use-case/repositories/primary-use-case/primary-use-case.repository";
-import { RequirementListDto } from "@repo/shared-schemas";
+import { NodeType, RequirementListDto } from "@repo/shared-schemas";
 
 /**
  * Service responsible for managing requirements, including their creation,
@@ -102,8 +102,6 @@ export class RequirementService {
     // Verify requirement exists
     const requirement = await this.findById(id);
 
-    await this.requirementRepository.setRelatedFlag(requirement, "requirementUpdated");
-
     // Validate all actor IDs exist
     if (updateDto.actorIds && updateDto.actorIds.length > 0) {
       for (const actorId of updateDto.actorIds) {
@@ -111,7 +109,13 @@ export class RequirementService {
       }
     }
 
-    return this.requirementRepository.update(id, updateDto);
+    return this.requirementRepository.update(id, {
+      ...updateDto,
+      isActivityStale:
+        requirement.nodes?.filter((node) => node.type === NodeType.ACTIVITY).length !== 0,
+      isConditionStale:
+        requirement.nodes?.filter((node) => node.type === NodeType.DECISION_NODE).length !== 0,
+    });
   }
 
   /**
@@ -121,8 +125,6 @@ export class RequirementService {
    */
   async removeRequirement(id: string): Promise<boolean> {
     const data = await this.findById(id);
-
-    await this.requirementRepository.setRelatedFlag(data, "requirementDeleted");
 
     // Delete all nested requirements
     if (data.nestedRequirements) {

@@ -3,7 +3,7 @@ import { Op } from "@repo/custom-neogma";
 import { Neo4jService } from "../../../core/neo4j/neo4j.service";
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
-import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
+import { RepositoryUpdateRequirementInterface } from "../interfaces/update-requirement.interface";
 import { RequirementModel, RequirementModelType } from "../models/requirement.model";
 import { RequirementListDto } from "@repo/shared-schemas";
 
@@ -36,6 +36,8 @@ export class RequirementRepository {
         useCase: createDto.useCaseId
           ? { where: [{ params: { id: createDto.useCaseId } }] }
           : undefined,
+        isActivityStale: false,
+        isConditionStale: false,
         actors: {
           where: createDto.actorIds ? [{ params: { id: { [Op.in]: createDto.actorIds } } }] : [],
         },
@@ -145,6 +147,10 @@ export class RequirementRepository {
           id: record.get("id"),
           operation: record.get("operation"),
           condition: record.get("condition"),
+          activityLabel: record.get("activityLabel"),
+          conditionLabel: record.get("conditionLabel"),
+          isActivityStale: record.get("isActivityStale"),
+          isConditionStale: record.get("isConditionStale"),
           createdAt: record.get("createdAt"),
           updatedAt: record.get("updatedAt"),
         });
@@ -162,17 +168,10 @@ export class RequirementRepository {
    * @param updateDto - Data for updating the requirement
    * @returns Updated requirement with relationships
    */
-  async update(id: string, updateDto: UpdateRequirementInterface): Promise<Requirement> {
+  async update(id: string, updateDto: RepositoryUpdateRequirementInterface): Promise<Requirement> {
     try {
-      const updateData: Record<string, any> = {};
-
-      if (updateDto.operation !== undefined) {
-        updateData.operation = updateDto.operation;
-      }
-
-      updateData.condition = updateDto.condition ?? "";
-
-      await this.requirementModel.updateOneOrThrow(updateData, {
+      const { actorIds, ...updateDtoWithoutActorIds } = updateDto;
+      await this.requirementModel.updateOneOrThrow(updateDtoWithoutActorIds, {
         where: { id },
       });
 
@@ -233,28 +232,6 @@ export class RequirementRepository {
     }
   }
 
-  async setRelatedFlag(
-    requirement: Requirement,
-    flag: "requirementUpdated" | "requirementDeleted",
-  ) {
-    if (requirement.relatedActivity) {
-      this.neo4jService
-        .getNeogma()
-        .queryRunner.run(`MATCH (n) WHERE n.id = $id SET n.${flag} = $boolean`, {
-          id: requirement?.relatedActivity?.id,
-          boolean: true,
-        });
-    }
-    if (requirement.relatedCondition) {
-      this.neo4jService
-        .getNeogma()
-        .queryRunner.run(`MATCH (n) WHERE n.id = $id SET n.${flag} = $boolean`, {
-          id: requirement?.relatedCondition?.id,
-          boolean: true,
-        });
-    }
-  }
-
   /**
    * Retrieves a requirement by its ID with all relationships
    * @param id - ID of the requirement to retrieve
@@ -271,8 +248,7 @@ export class RequirementRepository {
           "nestedRequirements",
           "exceptions",
           "requirementException",
-          "relatedActivity",
-          "relatedCondition",
+          "nodes",
         ],
       });
 
