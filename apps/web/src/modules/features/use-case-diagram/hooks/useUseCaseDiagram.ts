@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { diagramClient } from "../api/clients/diagram-client";
+import { diagramClient } from "../../../core/flow/api/clients/diagram-client";
 import { diagramQueryKeys } from "../query/diagram-query-keys";
 import { DiagramType } from "@repo/shared-schemas";
 

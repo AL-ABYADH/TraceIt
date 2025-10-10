@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { diagramQueryKeys } from "../../use-case-diagram/query/diagram-query-keys";
-import { diagramClient } from "../../use-case-diagram/api/clients/diagram-client";
+import { diagramClient } from "../../../core/flow/api/clients/diagram-client";
 import { DiagramType } from "@repo/shared-schemas";
 
 export const useActivityDiagram = (useCaseId?: string) => {

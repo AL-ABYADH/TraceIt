@@ -6,7 +6,6 @@ import {
   addNode,
   loadFlowData,
   onConnect,
-  selectDiagramId,
   selectEdges,
   selectNodes,
 } from "@/modules/core/flow/store/flow-slice";
@@ -16,7 +15,6 @@ import ActorSelection from "./ActorsSelection";
 import {
   DiagramDetailDto,
   DiagramType,
-  DiagramElementsDto,
   EdgeType,
   NodeType,
   UseCaseListDto,
@@ -24,8 +22,6 @@ import {
 } from "@repo/shared-schemas";
 import UseCaseEdgeTypesSelection from "./UseCaseEdgeTypesSelection";
 import Flow from "@/modules/core/flow/components/Flow";
-import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
-import ErrorMessage from "@/components/ErrorMessage";
 
 export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetailDto }) {
   const [isUseCasesDialogOpen, setIsUseCasesDialogOpen] = useState(false);
@@ -36,9 +32,6 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
   const dispatch = useDispatch();
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
-  const diagramId = useSelector(selectDiagramId);
-
-  const updateDiagramMutation = useUpdateDiagram({ diagramId: diagramId! });
 
   const handleAddNode = (nodeType: NodeType) => {
     switch (nodeType) {
@@ -82,11 +75,6 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
     dispatch(onConnect({ ...conn, type: EdgeType.ASSOCIATION }));
   };
 
-  const handleSave = (elements: DiagramElementsDto) => {
-    if (diagramId === null) return;
-    updateDiagramMutation.mutate(elements);
-  };
-
   useEffect(() => {
     dispatch(
       loadFlowData({
@@ -107,14 +95,6 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
         flexDirection: "column",
       }}
     >
-      {updateDiagramMutation.isError && (
-        <ErrorMessage
-          message={`Failed to save diagram: ${
-            (updateDiagramMutation.error as any)?.message ?? "Unknown error"
-          }`}
-        />
-      )}
-
       {/* Dialogs */}
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
@@ -137,13 +117,7 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
 
       {/* The Flow itself fills remaining height */}
       <div style={{ flex: 1, overflow: "hidden" }}>
-        <Flow
-          onConnect={handleConnect}
-          onAddNode={handleAddNode}
-          onSave={handleSave}
-          isSaving={updateDiagramMutation.isPending}
-          type={DiagramType.USE_CASE}
-        />
+        <Flow onConnect={handleConnect} onAddNode={handleAddNode} type={DiagramType.USE_CASE} />
       </div>
     </div>
   );

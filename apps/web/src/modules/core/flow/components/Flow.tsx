@@ -28,6 +28,7 @@ import {
   selectIsSynced,
   markAsSynced,
   updateViewport,
+  selectDiagramId,
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { Undo, Redo, Save, Plus } from "lucide-react";
@@ -37,16 +38,16 @@ import FlowNodeSelection from "./FlowNodeSelection";
 
 import { useBeforeUnloadWarning } from "@/hooks/useBeforeUnloadWarning";
 import { useLatest } from "@/hooks/useLatest";
+import ErrorMessage from "@/components/ErrorMessage";
+import { useUpdateDiagram } from "../hooks/useUpdateDiagram";
 
 type Props = {
   onConnect: (conn: Connection) => void;
   onAddNode: (nodeType: NodeType) => void;
-  onSave?: (elements: DiagramElementsDto) => void;
-  isSaving?: boolean;
   type: DiagramType;
 };
 
-export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: Props) {
+export default function Flow({ onConnect, onAddNode, type }: Props) {
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
 
   const nodes = useSelector(selectNodes);
@@ -60,22 +61,29 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
   const edgeTypes = useMemo(() => getEdgeTypesForReactFlow(), []);
 
   const dispatch = useDispatch();
+  const diagramId = useSelector(selectDiagramId);
+
+  const updateDiagramMutation = useUpdateDiagram();
 
   // Show browser confirmation before leaving the page if there are unsaved changes.
   useBeforeUnloadWarning(isDirty);
 
   const latestIsDirty = useLatest(isDirty);
-  const latestOnSave = useLatest(onSave);
   const latestNodes = useLatest(nodes);
   const latestEdges = useLatest(edges);
+  const latestDiagramId = useLatest(diagramId);
 
   // Save on unmount if there are unsaved changes.
   useEffect(() => {
     return () => {
       if (latestIsDirty.current) {
-        latestOnSave.current?.({
-          nodes: latestNodes.current as NodeDto[],
-          edges: latestEdges.current as EdgeDto[],
+        if (latestDiagramId.current === null) return;
+        updateDiagramMutation.mutate({
+          diagramId: latestDiagramId.current as string,
+          diagram: {
+            nodes: latestNodes.current as NodeDto[],
+            edges: latestEdges.current as EdgeDto[],
+          },
         });
       }
     };
@@ -173,9 +181,13 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
 
   useEffect(() => {
     if (!isSynced) {
-      onSave?.({
-        nodes: nodes as NodeDto[],
-        edges: edges as EdgeDto[],
+      if (diagramId === null) return;
+      updateDiagramMutation.mutate({
+        diagramId: diagramId!,
+        diagram: {
+          nodes: nodes as NodeDto[],
+          edges: edges as EdgeDto[],
+        },
       });
       dispatch(markAsSynced());
     }
@@ -197,7 +209,17 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
         onClick={onAddNode}
       />
 
-      {isSaving && onSave && <Loading isOpen={isSaving} message="Saving..." />}
+      {updateDiagramMutation.isPending && (
+        <Loading isOpen={updateDiagramMutation.isPending} message="Saving..." />
+      )}
+
+      {updateDiagramMutation.isError && (
+        <ErrorMessage
+          message={`Failed to save diagram: ${
+            (updateDiagramMutation.error as any)?.message ?? "Unknown error"
+          }`}
+        />
+      )}
 
       <div className="relative top-2 right-2">
         <button
@@ -213,14 +235,13 @@ export default function Flow({ onConnect, onAddNode, onSave, isSaving, type }: P
           <Redo />
         </button>
 
-        {onSave && (
-          <button
-            onClick={isDirty ? handleSave : undefined}
-            className={`p-3 rounded-lg ${isDirty ? "text-foreground" : "text-muted-foreground opacity-50"}`}
-          >
-            <Save />
-          </button>
-        )}
+        <button
+          onClick={isDirty ? handleSave : undefined}
+          className={`p-3 rounded-lg ${isDirty ? "text-foreground" : "text-muted-foreground opacity-50"}`}
+        >
+          <Save />
+        </button>
+
         <button
           onClick={() => setIsActorsDialogOpen(true)}
           className="p-3 rounded-lg text-foreground"

@@ -1,6 +1,6 @@
 import { CreateDiagramDto, DiagramType, DiagramListDto } from "@repo/shared-schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { diagramClient } from "../../use-case-diagram/api/clients/diagram-client";
+import { diagramClient } from "../../../core/flow/api/clients/diagram-client";
 import { diagramQueryKeys } from "../../use-case-diagram/query/diagram-query-keys";
 
 type CreateActivityDiagramInput = {
