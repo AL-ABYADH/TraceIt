@@ -4,6 +4,7 @@ interface ActivityShapeProps {
   name: string;
   selected?: boolean;
   isDeleted?: boolean;
+  isUpdated?: boolean;
   // Optional explicit dimensions to keep canvas container and shape perfectly aligned
   width?: number;
   height?: number;
@@ -26,6 +27,7 @@ export function ActivityShape({
   name,
   selected = false,
   isDeleted = false,
+  isUpdated = false,
   width,
   height,
   maxWidth = 200,
@@ -35,7 +37,13 @@ export function ActivityShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
+  strokeColor = selected
+    ? "var(--primary)"
+    : isDeleted
+      ? "var(--destructive)"
+      : isUpdated
+        ? "yellow"
+        : "#fff",
   strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
   textColor = "#fff",
   className,

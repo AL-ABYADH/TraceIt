@@ -239,10 +239,8 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
           height={svgHeight}
           paddingX={PADDING_X}
           paddingY={PADDING_Y}
-          isDeleted={isDeleted}
-          strokeColor={
-            data?.requirementDeleted ? "red" : data?.requirementUpdated ? "yellow" : undefined
-          }
+          isDeleted={isDeleted || data.requirementDeleted}
+          isUpdated={data.requirementUpdated}
         />
       </div>
 
@@ -268,7 +266,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
                 closeMenu();
               }}
             >
-              Navigate to Requirement
+              Navigate to {data.requirementDeleted ? "Use Case" : "Requirement"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
