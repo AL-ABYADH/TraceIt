@@ -4,6 +4,7 @@ import { UseCaseService } from "../../use-case/services/use-case/use-case.servic
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
+import { UpdateRequirementStaleInterface } from "../interfaces/update-requirement-stale.interface";
 import { RequirementExceptionAttributes } from "../models/requirement-exception.model";
 import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
 import { RequirementRepository } from "../repositories/requirement.repository";
@@ -116,6 +117,14 @@ export class RequirementService {
       isConditionStale:
         requirement.nodes?.filter((node) => node.type === NodeType.DECISION_NODE).length !== 0,
     });
+  }
+
+  async updateRequirementStale(
+    id: string,
+    updateDto: UpdateRequirementStaleInterface,
+  ): Promise<Requirement> {
+    await this.findById(id);
+    return this.requirementRepository.updateRequirementStale(id, updateDto);
   }
 
   /**

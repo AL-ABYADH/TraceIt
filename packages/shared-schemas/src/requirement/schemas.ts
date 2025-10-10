@@ -68,6 +68,11 @@ export const updateRequirementSchema = z.object({
   actorIds: actorIdsFieldDoc.optional(),
 });
 
+export const updateRequirementStaleSchema = z.object({
+  isActivityStale: booleanFieldDoc.optional(),
+  isConditionStale: booleanFieldDoc.optional(),
+});
+
 export const updateRequirementExceptionSchema = z.object({
   name: nameFieldDoc.optional(),
 });
