@@ -64,6 +64,8 @@ export class PrimaryUseCaseRepository {
 
       if (updateDto.description !== undefined) {
         updateData.description = updateDto.description;
+      } else {
+        updateData.description = "";
       }
 
       if (updateDto.importanceLevel !== undefined) {
