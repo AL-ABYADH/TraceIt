@@ -5,9 +5,8 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
 import Table, { Column } from "@/components/Table";
-import { notifications } from "@mantine/notifications";
 import { ActorDto } from "@repo/shared-schemas";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useActors } from "../hooks/useActors";
 import { useDeleteActor } from "../hooks/useDeleteActor";
 import ActorForm from "./ActorForm";
@@ -15,15 +14,20 @@ import UpdateActorForm from "./UpdateActorForm";
 
 interface ActorsTableProps {
   projectId: string;
+  highlightedActorId?: string | null;
 }
 
-export default function ActorsTable({ projectId }: ActorsTableProps) {
+export default function ActorsTable({ projectId, highlightedActorId }: ActorsTableProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isError, isLoading, error } = useActors(projectId);
 
   const [editingActor, setEditingActor] = useState<ActorDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ActorDto | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(
+    highlightedActorId ?? null,
+  );
 
   const deleteMutation = useDeleteActor(deleteTarget?.id ?? "", {
     onSuccess: () => {
@@ -42,6 +46,14 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     if (!deleteTarget) return;
     deleteMutation.mutate();
   };
+
+  // Clear the highlight after 5 seconds
+  useEffect(() => {
+    if (!activeHighlightId) return;
+
+    const timer = setTimeout(() => setActiveHighlightId(null), 5000);
+    return () => clearTimeout(timer);
+  }, [activeHighlightId]);
 
   const columns: Column<ActorDto>[] = [
     { key: "name", title: "Actor Name", width: "30%" },
@@ -71,13 +83,8 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
     },
   ];
 
-  if (isLoading) {
-    return <Loading isOpen={isLoading} message="Loading actors..." />;
-  }
-
-  if (isError) {
-    return <ErrorMessage message={`Error loading actors: ${error.message}`} />;
-  }
+  if (isLoading) return <Loading isOpen={true} message="Loading actors..." />;
+  if (isError) return <ErrorMessage message={`Error loading actors: ${error.message}`} />;
 
   return (
     <div className="space-y-4">
@@ -87,7 +94,7 @@ export default function ActorsTable({ projectId }: ActorsTableProps) {
       </div>
 
       {data?.length ? (
-        <Table columns={columns} data={data} />
+        <Table columns={columns} data={data} highlightedId={activeHighlightId} />
       ) : (
         <p className="text-muted-foreground text-sm">
           No actors found. Click <strong>Add Actor</strong> to create one.
