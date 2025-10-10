@@ -32,7 +32,7 @@ import {
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { Undo, Redo, Save, Plus } from "lucide-react";
-import { DiagramElementsDto, DiagramType, EdgeDto, NodeDto, NodeType } from "@repo/shared-schemas";
+import { DiagramType, EdgeDto, NodeDto, NodeType } from "@repo/shared-schemas";
 import Loading from "@/components/Loading";
 import FlowNodeSelection from "./FlowNodeSelection";
 
