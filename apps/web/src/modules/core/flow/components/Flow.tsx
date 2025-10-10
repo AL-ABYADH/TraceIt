@@ -75,10 +75,16 @@ export default function Flow({ onConnect, onAddNode, type }: Props) {
   const latestNodes = useLatest(nodes);
   const latestEdges = useLatest(edges);
   const latestDiagramId = useLatest(diagramId);
+  const latestIsMaximized = useLatest(isMaximized);
+  const latestToggleMaximize = useLatest(toggleMaximize);
 
   // Save on unmount if there are unsaved changes.
   useEffect(() => {
     return () => {
+      if (latestIsMaximized.current) {
+        latestToggleMaximize.current?.();
+      }
+
       if (latestIsDirty.current) {
         if (latestDiagramId.current === null) return;
         updateDiagramMutation.mutate({
