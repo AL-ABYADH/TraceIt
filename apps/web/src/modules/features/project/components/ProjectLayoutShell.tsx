@@ -4,6 +4,7 @@ import Loading from "@/components/Loading";
 import React, { useState } from "react";
 import { useProjectDetail } from "../hooks/useProjectDetail";
 import ProjectSidebar from "./ProjectSidebar";
+import { useMaximization } from "@/contexts/MaximizationContext";
 
 export default function ProjectLayoutShell({
   children,
@@ -22,16 +23,20 @@ export default function ProjectLayoutShell({
 
   const sidebarWidth = isCollapsed ? 80 : 250;
 
+  const { isMaximized } = useMaximization();
+
   return (
     <div className="flex h-full w-full bg-background text-foreground">
-      <div className="h-full flex-shrink-0 sticky top-0" style={{ width: sidebarWidth }}>
-        <ProjectSidebar
-          projectId={projectId}
-          isCollapsed={isCollapsed}
-          toggleCollapse={toggleCollapse}
-          className="h-full"
-        />
-      </div>
+      {!isMaximized && (
+        <div className="h-full flex-shrink-0 sticky top-0" style={{ width: sidebarWidth }}>
+          <ProjectSidebar
+            projectId={projectId}
+            isCollapsed={isCollapsed}
+            toggleCollapse={toggleCollapse}
+            className="h-full"
+          />
+        </div>
+      )}
 
       {/* Main scrolls only */}
       <main className="flex-1 overflow-auto p-4">{children}</main>

@@ -31,7 +31,7 @@ import {
   selectDiagramId,
 } from "@/modules/core/flow/store/flow-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { Undo, Redo, Save, Plus } from "lucide-react";
+import { Undo, Redo, Save, Plus, Maximize, Minimize } from "lucide-react";
 import { DiagramType, EdgeDto, NodeDto, NodeType } from "@repo/shared-schemas";
 import Loading from "@/components/Loading";
 import FlowNodeSelection from "./FlowNodeSelection";
@@ -47,8 +47,11 @@ type Props = {
   type: DiagramType;
 };
 
+import { useMaximization } from "@/contexts/MaximizationContext";
+
 export default function Flow({ onConnect, onAddNode, type }: Props) {
   const [isActorsDialogOpen, setIsActorsDialogOpen] = useState(false);
+  const { isMaximized, toggleMaximize } = useMaximization();
 
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
@@ -201,7 +204,7 @@ export default function Flow({ onConnect, onAddNode, type }: Props) {
   }, [handleKeyDown]);
 
   return (
-    <div style={{ width: "100%", height: "600px" }}>
+    <div style={{ width: "100%", height: isMaximized ? "calc(100vh - 64px)" : "600px" }}>
       <FlowNodeSelection
         isOpen={isActorsDialogOpen}
         onClose={() => setIsActorsDialogOpen(false)}
@@ -247,6 +250,9 @@ export default function Flow({ onConnect, onAddNode, type }: Props) {
           className="p-3 rounded-lg text-foreground"
         >
           <Plus />
+        </button>
+        <button onClick={toggleMaximize} className="p-3 rounded-lg text-foreground">
+          {isMaximized ? <Minimize /> : <Maximize />}
         </button>
       </div>
 

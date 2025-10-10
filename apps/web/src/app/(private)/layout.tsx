@@ -1,7 +1,12 @@
+"use client";
+
 import Navbar from "@/components/Navbar";
 import ClientAuthGate from "@/modules/core/auth/components/ClientAuthGate";
+import { MaximizationProvider, useMaximization } from "@/contexts/MaximizationContext";
 
-export default function PrivateLayout({ children }: { children: React.ReactNode }) {
+function Layout({ children }: { children: React.ReactNode }) {
+  const { isMaximized } = useMaximization();
+
   return (
     <div
       id="private-root"
@@ -11,10 +16,18 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       <ClientAuthGate />
 
       {/* Navbar stays fixed at the top */}
-      <Navbar />
+      {!isMaximized && <Navbar />}
 
       {/* Main scrolls only */}
-      <main className="flex-1 overflow-auto p-4">{children}</main>
+      <main className={`flex-1 ${isMaximized ? "" : "overflow-auto p-4"}`}>{children}</main>
     </div>
+  );
+}
+
+export default function PrivateLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <MaximizationProvider>
+      <Layout>{children}</Layout>
+    </MaximizationProvider>
   );
 }
