@@ -11,6 +11,8 @@ import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
 import { useExpansion } from "../contexts/ExpansionContext";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; // adjust import path
+import { useDeleteRequirementException } from "../hooks/useDeleteRequirementException";
+import EllipsisMenu from "@/components/EllipsisMenu";
 
 interface RequirementItemProps {
   requirement: RequirementDto;
@@ -34,6 +36,16 @@ export default function RequirementItem({
   const [openExceptionForm, setOpenExceptionForm] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { expandedItems, toggleItem } = useExpansion();
+  const [isDeleteExceptionOpen, setIsDeleteExceptionOpen] = useState(false);
+  const [deleteExceptionId, setDeleteExceptionId] = useState<string | null>(null);
+  const [openRequirementExceptionForm, setOpenRequirementExceptionForm] = useState<{
+    exceptionId: string;
+  } | null>(null);
+  const [openEditException, setOpenEditException] = useState<null | {
+    id: string;
+    initial: { name: string };
+  }>(null);
+
   const expanded = expandedItems.has(requirement.id);
 
   // Highlight & scroll ref
@@ -70,6 +82,20 @@ export default function RequirementItem({
     onSuccess: () => setIsDeleteOpen(false),
   });
 
+  const deleteException = useDeleteRequirementException(
+    deleteExceptionId ?? "",
+    validatedUseCaseId,
+    {
+      onSuccess: () => {
+        setIsDeleteExceptionOpen(false);
+        setDeleteExceptionId(null);
+      },
+      onError: () => {
+        // Handle error as needed
+      },
+    },
+  );
+
   const hasNested = requirement.nestedRequirements
     ? requirement.nestedRequirements.length > 0
     : false;
@@ -93,32 +119,20 @@ export default function RequirementItem({
 
   const closeMenu = () => setMenuPosition(null);
 
+  const baseIndent = 28; // base indentation step
+  const nestedIndent = 1 * baseIndent;
+
   return (
-    <div
-      style={{ marginLeft: level * 28, borderRadius: "2rem" }}
-      ref={itemRef} // outer wrapper, just for margin
-    >
+    <div style={{ marginLeft: nestedIndent, borderRadius: "2rem" }} ref={itemRef}>
       {/* Requirement Header */}
       <div
         className={cn(
-          "flex items-start justify-between rounded-xl px-3 py-2 transition-all duration-200 cursor-pointer",
+          "flex items-start justify-between rounded-xl px-3  transition-all duration-200 cursor-pointer",
           "bg-muted/40 hover:bg-muted/60",
           isHighlighted && "bg-blue-500/20 ring-2 ring-blue-400 rounded-xl",
         )}
-        ref={headerRef} // header-specific ref
-        onMouseEnter={(e) => {
-          if (!isHighlighted) e.currentTarget.style.backgroundColor = "rgba(107,114,128,0.1)";
-        }}
-        onMouseLeave={(e) => {
-          if (!isHighlighted) e.currentTarget.style.backgroundColor = "";
-        }}
-        onClick={() => {
-          if (headerRef.current) headerRef.current.style.outline = "none";
-          setHighlightedRequirementId(false);
-        }}
-        onContextMenu={handleContextMenu}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0">
           <div className="w-5 flex justify-center" style={{ borderRadius: "2rem" }}>
             {hasNested || hasExceptions ? (
               <button
@@ -142,8 +156,21 @@ export default function RequirementItem({
           )}
 
           <p
-            className="truncate p-2 text-sm text-foreground leading-relaxed flex-1 min-w-0 text-ellipsis"
+            className="truncate text-sm text-foreground leading-relaxed flex-1 min-w-0"
             title={renderRequirementText(requirement)}
+            style={{ overflowX: "auto", borderRadius: "2rem", padding: 10 }}
+            ref={headerRef}
+            onMouseEnter={(e) => {
+              if (!isHighlighted) e.currentTarget.style.backgroundColor = "rgba(107,114,128,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              if (!isHighlighted) e.currentTarget.style.backgroundColor = "";
+            }}
+            onClick={() => {
+              if (headerRef.current) headerRef.current.style.outline = "none";
+              setHighlightedRequirementId(false);
+            }}
+            onContextMenu={handleContextMenu}
           >
             {renderRequirementText(requirement)}
           </p>
@@ -153,14 +180,17 @@ export default function RequirementItem({
       {/* Nested content */}
       {expanded && (
         <div className="mt-2 space-y-3">
+          {/* Sub Flow */}
           {hasNested && (
-            <div className="relative ml-8 border-l border-indigo-300/50 pl-3">
-              <div className="flex items-center gap-1 mb-1">
-                <div style={{ marginLeft: 56 }} />
-                <span className="m-6 text-[11px] tracking-wide font-medium text-indigo-500/90">
+            <div className="relative border-l border-indigo-300/50">
+              {/* Sub Flow Title */}
+              <div className="mb-1" style={{ marginLeft: 36 }}>
+                <span className="block text-[11px] tracking-wide font-medium text-indigo-500/90">
                   Sub Flow
                 </span>
               </div>
+
+              {/* Requirements under Sub Flow */}
               <div className="space-y-2">
                 {requirement.nestedRequirements?.map((nested, idx) => (
                   <RequirementItem
@@ -177,45 +207,88 @@ export default function RequirementItem({
             </div>
           )}
 
+          {/* Exceptional Flow */}
           {hasExceptions && (
-            <div className="relative ml-8 border-l border-border pl-3">
-              <div className="flex items-center gap-1 mb-1">
-                <div style={{ marginLeft: 56 }} />
-                <span className="pl-2xl text-[11px] tracking-wide font-medium text-foreground/70">
+            <div className="relative border-l border-border">
+              {/* Exceptional Flow Title */}
+              <div className="mb-1" style={{ marginLeft: 36 }}>
+                <span className="block text-[11px] tracking-wide font-medium text-foreground/70">
                   Exceptional Flow
                 </span>
               </div>
+
+              {/* Exceptions */}
               <div className="space-y-2">
                 {requirement.exceptions?.map((exception, eIdx) => (
                   <div key={exception.id}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div style={{ marginLeft: 84 }} />
-                      <span className="inline-flex items-center py-3 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
+                    {/* Exception Title */}
+                    <div className="flex items-center gap-2 my-1" style={{ marginLeft: 48 }}>
+                      <span className="inline-flex items-center py-1 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
                         E{eIdx + 1}
                       </span>
-                      <span className="text-sm text-foreground/80">{exception.name}</span>
+                      <span className="text-lg text-foreground/80">{exception.name}</span>
+                      <EllipsisMenu
+                        actions={(() => {
+                          const actions: {
+                            label: string;
+                            onClick: () => void;
+                            danger?: boolean;
+                          }[] = [];
+
+                          actions.push({
+                            label: "Edit",
+                            onClick: () =>
+                              setOpenEditException({
+                                id: exception.id,
+                                initial: { name: exception.name },
+                              }),
+                          });
+
+                          actions.push({
+                            label: "Add Requirement",
+                            onClick: () =>
+                              setOpenRequirementExceptionForm({ exceptionId: exception.id }),
+                          });
+
+                          actions.push({
+                            label: "Delete",
+                            onClick: () => {
+                              setDeleteExceptionId(exception.id);
+                              setIsDeleteExceptionOpen(true);
+                            },
+                            danger: true,
+                          });
+
+                          return actions;
+                        })()}
+                      />
                     </div>
 
-                    {exception.requirements?.length ? (
-                      exception.requirements.map((exReq, exIdx) => (
-                        <RequirementItem
-                          key={exReq.id}
-                          requirement={exReq as any}
-                          number={exIdx + 1}
-                          level={level + 2}
-                          projectId={projectId}
-                          validatedUseCaseId={validatedUseCaseId}
-                          highlightedRequirementId={highlightedRequirementId}
-                        />
-                      ))
-                    ) : (
-                      <div
-                        className="ml-6 text-xs text-muted-foreground italic"
-                        style={{ marginLeft: 132 }}
-                      >
-                        No requirements in this exception yet.
-                      </div>
-                    )}
+                    {/* Exception Requirements */}
+                    <div style={{ marginLeft: 64 }}>
+                      {exception.requirements?.length ? (
+                        exception.requirements
+                          .toReversed()
+                          .map((exReq, exIdx) => (
+                            <RequirementItem
+                              key={exReq.id}
+                              requirement={exReq as any}
+                              number={exIdx + 1}
+                              level={level + 2}
+                              projectId={projectId}
+                              validatedUseCaseId={validatedUseCaseId}
+                              highlightedRequirementId={highlightedRequirementId}
+                            />
+                          ))
+                      ) : (
+                        <div
+                          className="text-xs text-muted-foreground italic"
+                          style={{ marginLeft: 23 }}
+                        >
+                          No requirements in this exception yet.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -294,6 +367,44 @@ export default function RequirementItem({
         onConfirm={() => deleteRequirement.mutate()}
         onCancel={() => setIsDeleteOpen(false)}
         loading={deleteRequirement.isPending}
+      />
+
+      {openEditException && (
+        <RequirementExceptionForm
+          isOpen={!!openEditException}
+          onClose={() => setOpenEditException(null)}
+          useCaseId={validatedUseCaseId}
+          mode="edit"
+          exceptionId={openEditException.id}
+          initialData={openEditException.initial}
+        />
+      )}
+
+      {openRequirementExceptionForm && (
+        <RequirementForm
+          isOpen={!!openRequirementExceptionForm}
+          onClose={() => setOpenRequirementExceptionForm(null)}
+          projectId={projectId}
+          validatedUseCaseId={validatedUseCaseId}
+          exceptionId={openRequirementExceptionForm.exceptionId}
+        />
+      )}
+
+      <ConfirmationDialog
+        isOpen={isDeleteExceptionOpen}
+        title="Delete Exception"
+        message="Are you sure you want to delete this exception? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        confirmVariant="danger"
+        onConfirm={() => {
+          if (deleteExceptionId) deleteException.mutate();
+        }}
+        onCancel={() => {
+          setIsDeleteExceptionOpen(false);
+          setDeleteExceptionId(null);
+        }}
+        loading={deleteException.isPending}
       />
     </div>
   );

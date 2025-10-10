@@ -15,10 +15,10 @@ export function useCreatePrimaryUseCase(opts?: UseCreatePrimaryUseCaseOptions) {
     mutationFn: (useCase: CreatePrimaryUseCaseDto) =>
       primaryUseCaseClient.createPrimaryUseCase(useCase),
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list });
+      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
     },
     onSuccess: (data, variables) => {
-      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list });
+      qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
