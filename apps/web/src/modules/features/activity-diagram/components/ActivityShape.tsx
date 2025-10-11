@@ -21,6 +21,8 @@ interface ActivityShapeProps {
   className?: string;
   style?: React.CSSProperties;
   onClick?: () => void;
+  // Add this prop to prevent independent size calculation
+  isCanvasMode?: boolean;
 }
 
 export function ActivityShape({
@@ -37,24 +39,23 @@ export function ActivityShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected
-    ? "var(--primary)"
-    : isDeleted
-      ? "var(--destructive)"
-      : isUpdated
-        ? "yellow"
-        : "#fff",
-  strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
+  strokeColor, // Allow override
+  strokeWidth = isDeleted ? 3 : 2,
   textColor = "#fff",
   className,
   style,
   onClick,
+  isCanvasMode = false, // New prop to indicate we're in canvas mode
 }: ActivityShapeProps) {
-  // Calculate dimensions based on text content unless explicit width/height are provided
+  // FIX: When in canvas mode and explicit dimensions are provided, use them directly
+  // without recalculating based on text content
   const { svgWidth, svgHeight } = useMemo(() => {
+    // If explicit dimensions are provided (especially in canvas mode), use them directly
     if (typeof width === "number" && typeof height === "number") {
       return { svgWidth: width, svgHeight: height };
     }
+
+    // Only calculate dimensions based on text if no explicit dimensions are provided
     // Rough character width estimation for the font size
     const avgCharWidth = fontSize * 0.6;
     const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
@@ -82,6 +83,17 @@ export function ActivityShape({
     // This creates the oval/pill shape characteristic of certain activity nodes
     return svgHeight / 2;
   }, [svgHeight]);
+
+  // Fix the stroke color logic - priority: deleted > updated > selected > default
+  const computedStrokeColor =
+    strokeColor ||
+    (isDeleted
+      ? "var(--destructive)"
+      : isUpdated
+        ? "#fbbf24" // Use a better yellow color
+        : selected
+          ? "var(--primary)"
+          : "#fff");
 
   return (
     <div
@@ -121,7 +133,7 @@ export function ActivityShape({
           rx={stadiumBorderRadius}
           ry={stadiumBorderRadius}
           fill={fillColor}
-          stroke={strokeColor}
+          stroke={computedStrokeColor}
           strokeWidth={strokeWidth}
         />
       </svg>

@@ -1,17 +1,17 @@
 "use client";
 
 import Dialog from "@/components/Dialog";
-import { useUseCaseConditions } from "../hooks/useUseCaseConditions";
+import { useAllRequirementsUnderUseCase } from "../../requirement/hooks/useAllUseCaseRequirements";
+import { RequirementListDto } from "@repo/shared-schemas";
 import { DecisionShape } from "./DecisionShape";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
-import { ConditionDto } from "@repo/shared-schemas";
 
 interface ConditionSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   useCaseId: string;
-  onConditionSelect: (condition: ConditionDto) => void;
+  onConditionSelect: (requirement: RequirementListDto) => void;
 }
 
 export default function ConditionSelection({
@@ -20,10 +20,21 @@ export default function ConditionSelection({
   useCaseId,
   onConditionSelect,
 }: ConditionSelectionProps) {
-  const { data: conditions, isError, isLoading, error } = useUseCaseConditions(useCaseId);
+  const {
+    data: requirements,
+    isError,
+    isLoading,
+    error,
+  } = useAllRequirementsUnderUseCase(useCaseId, {
+    enabled: isOpen && !!useCaseId,
+  });
+
+  // Filter requirements that have conditions
+  const requirementsWithConditions =
+    requirements?.filter((req) => req.condition && req.condition.trim().length > 0) || [];
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Select Existing Condition">
+    <Dialog isOpen={isOpen} onClose={onClose} title="Select Condition">
       {isLoading && <Loading isOpen={true} />}
 
       {isError && (
@@ -32,24 +43,24 @@ export default function ConditionSelection({
         />
       )}
 
-      {conditions !== undefined && (
+      {requirementsWithConditions.length > 0 ? (
         <div className="grid grid-cols-1 gap-3 mt-4">
-          {conditions.map((condition) => (
+          {requirementsWithConditions.map((requirement) => (
             <button
-              key={condition.id}
+              key={requirement.id}
               onClick={() => {
-                onConditionSelect(condition);
+                onConditionSelect(requirement);
                 onClose();
               }}
               className="flex items-center justify-center p-4 hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 border border-gray-200"
             >
-              <DecisionShape name={condition.name} />
+              <DecisionShape
+                name={requirement.conditionLabel || requirement.condition || requirement.operation}
+              />
             </button>
           ))}
         </div>
-      )}
-
-      {conditions !== undefined && conditions.length === 0 && (
+      ) : (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <div className="text-muted-foreground mb-2">
             <svg
@@ -66,9 +77,9 @@ export default function ConditionSelection({
               />
             </svg>
           </div>
-          <p className="text-sm font-medium mb-1">No conditions found for this use case.</p>
+          <p className="text-sm font-medium mb-1">No requirements with conditions found.</p>
           <p className="text-xs text-muted-foreground">
-            Create conditions first to add them to the diagram.
+            Create requirements with conditions first to add them as decision nodes.
           </p>
         </div>
       )}

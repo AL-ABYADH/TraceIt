@@ -4,6 +4,7 @@ interface DecisionShapeProps {
   name: string;
   selected?: boolean;
   isDeleted?: boolean;
+  isUpdated?: boolean;
   showLabel?: boolean; // if true, always show label; canvas will override to false
   // Optional explicit dimensions to avoid re-computation mismatch with canvas node container
   selectedColor?: string; // Add this
@@ -29,7 +30,8 @@ export function DecisionShape({
   name,
   selected = false,
   showLabel = true,
-  isDeleted,
+  isDeleted = false,
+  isUpdated = false,
   isCanvasMode,
   width,
   height,
@@ -41,8 +43,8 @@ export function DecisionShape({
   fontSize = 11,
   lineHeight = 16,
   fillColor = "#000",
-  strokeColor = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
-  strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
+  strokeColor, // Allow override
+  strokeWidth = isDeleted ? 3 : 2,
   textColor = "#fff",
   className,
   style,
@@ -58,13 +60,24 @@ export function DecisionShape({
     const lines = Math.max(1, Math.ceil(name.length / maxCharsPerLine));
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
     const computedWidth = Math.max(minWidth, textWidth);
-    const computedHeight = Math.max(56, lines * lineHeight + paddingY * 4); //2
+    const computedHeight = Math.max(56, lines * lineHeight + paddingY * 4);
 
     return {
       svgWidth: computedWidth,
       svgHeight: computedHeight,
     };
   }, [name, width, height, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
+
+  // Fix the stroke color logic - priority: deleted > updated > selected > default
+  const computedStrokeColor =
+    strokeColor ||
+    (isDeleted
+      ? "var(--destructive)"
+      : isUpdated
+        ? "#fbbf24" // Yellow for updated/stale conditions
+        : selected
+          ? selectedColor || "var(--primary)"
+          : "#fff");
 
   const centerX = svgWidth / 2;
   const centerY = svgHeight / 2;
@@ -107,7 +120,7 @@ export function DecisionShape({
             ${strokeWidth / 2},${centerY}
           `}
           fill={fillColor}
-          stroke={strokeColor}
+          stroke={computedStrokeColor}
           strokeWidth={strokeWidth}
         />
       </svg>
@@ -127,8 +140,7 @@ export function DecisionShape({
             textAlign: "center",
             padding: `${paddingY}px ${paddingX}px`,
             boxSizing: "border-box",
-            // color: textColor,
-            color: selectedColor,
+            color: textColor,
             fontSize: fontSize,
             fontWeight: "500",
             lineHeight: `${lineHeight}px`,

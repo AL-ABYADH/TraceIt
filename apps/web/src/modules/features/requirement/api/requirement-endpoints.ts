@@ -14,6 +14,14 @@ export const requirementEndpoints = {
     path: "requirements/:requirementId/relationships",
     isPublic: false,
   },
+  stale: {
+    path: "requirements/:requirementId/stale",
+    isPublic: false,
+  },
+  labels: {
+    path: "requirements/:requirementId/labels",
+    isPublic: false,
+  },
 } as const;
 
 export const useCaseRequirementsEndpoints = {

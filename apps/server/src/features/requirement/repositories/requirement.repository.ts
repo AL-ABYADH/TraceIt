@@ -125,20 +125,24 @@ export class RequirementRepository {
   async getAllRequirementsUnderPrimaryUseCase(useCaseId: string): Promise<RequirementListDto[]> {
     try {
       const query = `
-      MATCH (uc:UseCase {id: $useCaseId})
-      MATCH path = (uc)<-[:BELONGS_TO*1..1]-(req:Requirement)
-                      <-[:DETAILS|EXCEPTION_AT|BELONGS_TO*0..10]-(nested:Requirement)
-      WITH COLLECT(DISTINCT req) + COLLECT(DISTINCT nested) AS allReqs
-      UNWIND allReqs AS r
-      WITH DISTINCT r
-      WHERE r IS NOT NULL
-      RETURN
-          r.id AS id,
-          r.operation AS operation,
-          COALESCE(r.condition, '') AS condition,
-          r.createdAt AS createdAt,
-          COALESCE(r.updatedAt, r.createdAt) AS updatedAt
-      ORDER BY r.createdAt
+    MATCH (uc:UseCase {id: $useCaseId})
+    MATCH path = (uc)<-[:BELONGS_TO*1..1]-(req:Requirement)
+                    <-[:DETAILS|EXCEPTION_AT|BELONGS_TO*0..10]-(nested:Requirement)
+    WITH COLLECT(DISTINCT req) + COLLECT(DISTINCT nested) AS allReqs
+    UNWIND allReqs AS r
+    WITH DISTINCT r
+    WHERE r IS NOT NULL
+    RETURN
+        r.id AS id,
+        r.operation AS operation,
+        COALESCE(r.condition, '') AS condition,
+        r.createdAt AS createdAt,
+        COALESCE(r.updatedAt, r.createdAt) AS updatedAt,
+        COALESCE(r.activityLabel, '') AS activityLabel,
+        COALESCE(r.conditionLabel, '') AS conditionLabel,
+        COALESCE(r.isActivityStale, false) AS isActivityStale,
+        COALESCE(r.isConditionStale, false) AS isConditionStale
+    ORDER BY r.createdAt
     `;
 
       const result = await this.neo4jService.getNeogma().queryRunner.run(query, { useCaseId });
@@ -273,19 +277,205 @@ export class RequirementRepository {
    * @param id - ID of the requirement to delete
    * @returns True if deletion was successful
    */
+  // async delete(id: string): Promise<boolean> {
+  //   try {
+  //     const result = await this.requirementModel.delete({
+  //       where: { id },
+  //       detach: true,
+  //     });
+
+  //     return result > 0;
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete requirement: ${error.message}`);
+  //   }
+  // }
+  /**
+   * Deletes a requirement and all its nested children, exceptions, and relationships
+   * @param id - ID of the requirement to delete
+   * @returns True if deletion was successful
+   */
+  // async delete(id: string): Promise<boolean> {
+  //   try {
+  //     // Use a Cypher query to handle cascade deletion properly
+  //     const query = `
+  //     MATCH (r:Requirement {id: $id})
+  //     OPTIONAL MATCH (r)-[:DETAILS*0..]->(child:Requirement)
+  //     OPTIONAL MATCH (r)-[:EXCEPTION_AT]->(exception:RequirementException)
+  //     OPTIONAL MATCH (exception)-[:BELONGS_TO]->(exceptionReq:Requirement)
+  //     OPTIONAL MATCH (exceptionReq)-[:DETAILS*0..]->(exceptionChild:Requirement)
+
+  //     WITH COLLECT(DISTINCT r) +
+  //          COLLECT(DISTINCT child) +
+  //          COLLECT(DISTINCT exception) +
+  //          COLLECT(DISTINCT exceptionReq) +
+  //          COLLECT(DISTINCT exceptionChild) AS nodesToDelete
+
+  //     UNWIND nodesToDelete AS node
+  //     DETACH DELETE node
+
+  //     RETURN COUNT(node) as deletedCount
+  //   `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
+
+  //     const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+  //     return deletedCount > 0;
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete requirement: ${error.message}`);
+  //   }
+  // }
+  /**
+   * Deletes a requirement and all its nested children, exceptions, and relationships
+   * @param id - ID of the requirement to delete
+   * @returns True if deletion was successful
+   */
+  // async delete(id: string): Promise<boolean> {
+  //   try {
+  //     const query = `
+  //     MATCH (r:Requirement {id: $id})
+
+  //     MATCH path = (r)<-[:DETAILS|EXCEPTION_AT|BELONGS_TO*0..10]-(connected)
+  //     WHERE connected:Requirement OR connected:RequirementException
+
+  //     WITH COLLECT(DISTINCT r) + COLLECT(DISTINCT connected) AS nodesToDelete
+
+  //     UNWIND nodesToDelete AS node
+  //     WITH DISTINCT node
+  //     WHERE node IS NOT NULL
+  //     DETACH DELETE node
+
+  //     RETURN COUNT(node) as deletedCount
+  //   `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
+  //     const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+  //     return deletedCount > 0;
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete requirement: ${error.message}`);
+  //   }
+  // }
+  // async delete(id: string): Promise<boolean> {
+  //   try {
+  //     const query = `
+  //     MATCH (r:Requirement {id: $id})
+
+  //     OPTIONAL MATCH (r)<-[:DETAILS*0..10]-(nestedReq:Requirement)
+  //     OPTIONAL MATCH (r)<-[:EXCEPTION_AT]-(exception:RequirementException)
+
+  //     OPTIONAL MATCH (exception)-[:BELONGS_TO]->(exceptionReq:Requirement)
+
+  //     OPTIONAL MATCH (exceptionReq)<-[:DETAILS*0..10]-(exceptionNestedReq:Requirement)
+
+  //     OPTIONAL MATCH (nestedReq)<-[:EXCEPTION_AT]-(nestedException:RequirementException)
+  //     OPTIONAL MATCH (nestedException)-[:BELONGS_TO]->(nestedExceptionReq:Requirement)
+  //     OPTIONAL MATCH (nestedExceptionReq)<-[:DETAILS*0..10]-(nestedExceptionNestedReq:Requirement)
+
+  //     OPTIONAL MATCH (exceptionReq)<-[:EXCEPTION_AT]-(exceptionReqException:RequirementException)
+  //     OPTIONAL MATCH (exceptionReqException)-[:BELONGS_TO]->(exceptionReqExceptionReq:Requirement)
+  //     OPTIONAL MATCH (exceptionReqExceptionReq)<-[:DETAILS*0..10]-(exceptionReqExceptionNestedReq:Requirement)
+
+  //     WITH COLLECT(DISTINCT r) +
+  //          COLLECT(DISTINCT nestedReq) +
+  //          COLLECT(DISTINCT exception) +
+  //          COLLECT(DISTINCT exceptionReq) +
+  //          COLLECT(DISTINCT exceptionNestedReq) +
+  //          COLLECT(DISTINCT nestedException) +
+  //          COLLECT(DISTINCT nestedExceptionReq) +
+  //          COLLECT(DISTINCT nestedExceptionNestedReq) +
+  //          COLLECT(DISTINCT exceptionReqException) +
+  //          COLLECT(DISTINCT exceptionReqExceptionReq) +
+  //          COLLECT(DISTINCT exceptionReqExceptionNestedReq) AS nodesToDelete
+
+  //     UNWIND nodesToDelete AS node
+  //     WITH DISTINCT node
+  //     WHERE node IS NOT NULL
+  //     DETACH DELETE node
+
+  //     RETURN COUNT(node) as deletedCount
+  //   `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
+  //     const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+  //     return deletedCount > 0;
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete requirement: ${error.message}`);
+  //   }
+  // }
+
   async delete(id: string): Promise<boolean> {
     try {
-      const result = await this.requirementModel.delete({
-        where: { id },
-        detach: true,
-      });
+      const query = `
+      MATCH (r:Requirement {id: $id})
+      
+      OPTIONAL MATCH (r)<-[:DETAILS*0..10]-(nestedReq:Requirement)
+      OPTIONAL MATCH (r)<-[:EXCEPTION_AT]-(exception:RequirementException)
+      
+      OPTIONAL MATCH (exception)-[:BELONGS_TO]->(exceptionReq:Requirement)
+      OPTIONAL MATCH (exceptionReq)<-[:DETAILS*0..10]-(exceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (nestedReq)<-[:EXCEPTION_AT]-(nestedException:RequirementException)
+      OPTIONAL MATCH (nestedException)-[:BELONGS_TO]->(nestedExceptionReq:Requirement)
+      OPTIONAL MATCH (nestedExceptionReq)<-[:DETAILS*0..10]-(nestedExceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (exceptionReq)<-[:EXCEPTION_AT]-(exceptionReqException:RequirementException)
+      OPTIONAL MATCH (exceptionReqException)-[:BELONGS_TO]->(exceptionReqExceptionReq:Requirement)
+      OPTIONAL MATCH (exceptionReqExceptionReq)<-[:DETAILS*0..10]-(exceptionReqExceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (nestedExceptionReq)<-[:EXCEPTION_AT]-(nestedExceptionReqException:RequirementException)
+      OPTIONAL MATCH (nestedExceptionReqException)-[:BELONGS_TO]->(nestedExceptionReqExceptionReq:Requirement)
+      OPTIONAL MATCH (nestedExceptionReqExceptionReq)<-[:DETAILS*0..10]-(nestedExceptionReqExceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (exceptionNestedReq)<-[:EXCEPTION_AT]-(exceptionNestedReqException:RequirementException)
+      OPTIONAL MATCH (exceptionNestedReqException)-[:BELONGS_TO]->(exceptionNestedReqExceptionReq:Requirement)
+      OPTIONAL MATCH (exceptionNestedReqExceptionReq)<-[:DETAILS*0..10]-(exceptionNestedReqExceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (nestedExceptionNestedReq)<-[:EXCEPTION_AT]-(nestedExceptionNestedReqException:RequirementException)
+      OPTIONAL MATCH (nestedExceptionNestedReqException)-[:BELONGS_TO]->(nestedExceptionNestedReqExceptionReq:Requirement)
+      OPTIONAL MATCH (nestedExceptionNestedReqExceptionReq)<-[:DETAILS*0..10]-(nestedExceptionNestedReqExceptionNestedReq:Requirement)
+      
+      OPTIONAL MATCH (exceptionReqExceptionReq)<-[:EXCEPTION_AT]-(exceptionReqExceptionReqException:RequirementException)
+      OPTIONAL MATCH (exceptionReqExceptionReqException)-[:BELONGS_TO]->(exceptionReqExceptionReqExceptionReq:Requirement)
+      OPTIONAL MATCH (exceptionReqExceptionReqExceptionReq)<-[:DETAILS*0..10]-(exceptionReqExceptionReqExceptionNestedReq:Requirement)
+      
+      WITH COLLECT(DISTINCT r) + 
+           COLLECT(DISTINCT nestedReq) + 
+           COLLECT(DISTINCT exception) + 
+           COLLECT(DISTINCT exceptionReq) + 
+           COLLECT(DISTINCT exceptionNestedReq) +
+           COLLECT(DISTINCT nestedException) +
+           COLLECT(DISTINCT nestedExceptionReq) +
+           COLLECT(DISTINCT nestedExceptionNestedReq) +
+           COLLECT(DISTINCT exceptionReqException) +
+           COLLECT(DISTINCT exceptionReqExceptionReq) +
+           COLLECT(DISTINCT exceptionReqExceptionNestedReq) +
+           COLLECT(DISTINCT nestedExceptionReqException) +
+           COLLECT(DISTINCT nestedExceptionReqExceptionReq) +
+           COLLECT(DISTINCT nestedExceptionReqExceptionNestedReq) +
+           COLLECT(DISTINCT exceptionNestedReqException) +
+           COLLECT(DISTINCT exceptionNestedReqExceptionReq) +
+           COLLECT(DISTINCT exceptionNestedReqExceptionNestedReq) +
+           COLLECT(DISTINCT nestedExceptionNestedReqException) +
+           COLLECT(DISTINCT nestedExceptionNestedReqExceptionReq) +
+           COLLECT(DISTINCT nestedExceptionNestedReqExceptionNestedReq) +
+           COLLECT(DISTINCT exceptionReqExceptionReqException) +
+           COLLECT(DISTINCT exceptionReqExceptionReqExceptionReq) +
+           COLLECT(DISTINCT exceptionReqExceptionReqExceptionNestedReq) AS nodesToDelete
+      
+      UNWIND nodesToDelete AS node
+      WITH DISTINCT node
+      WHERE node IS NOT NULL
+      DETACH DELETE node
+      
+      RETURN COUNT(node) as deletedCount
+    `;
 
-      return result > 0;
+      const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
+      const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+      return deletedCount > 0;
     } catch (error) {
       throw new Error(`Failed to delete requirement: ${error.message}`);
     }
   }
-
   /**
    * Retrieves a requirement by its ID with all relationships
    * @param id - ID of the requirement to retrieve
