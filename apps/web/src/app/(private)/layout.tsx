@@ -6,9 +6,11 @@ import { useCurrentUser } from "@/modules/features/user/hooks/useCurrentUser";
 import { UserProvider } from "@/contexts/UserContext";
 import Loading from "@/components/Loading";
 import ErrorMessage from "@/components/ErrorMessage";
+import { useMaximization } from "@/contexts/MaximizationContext";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, isError, error } = useCurrentUser();
+  const { isMaximized } = useMaximization();
 
   if (isLoading) {
     return <Loading isOpen={isLoading} message="Initializing..." />;
@@ -27,11 +29,10 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
       >
         <ClientAuthGate />
 
-        {/* Navbar stays fixed at the top */}
-        <Navbar />
+        {!isMaximized && <Navbar />}
 
         {/* Main scrolls only */}
-        <main className="flex-1 overflow-auto p-4">{children}</main>
+        <main className={`flex-1 ${isMaximized ? "" : "overflow-auto p-4"}`}>{children}</main>
       </div>
     </UserProvider>
   );
