@@ -3,7 +3,7 @@
 import EllipsisMenu from "@/components/EllipsisMenu";
 import { PrimaryUseCaseListDto, RequirementDto } from "@repo/shared-schemas";
 import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import RequirementForm from "../../requirement/components/RequirementForm";
 import RequirementItem from "../../requirement/components/RequirementItem";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
@@ -181,6 +181,10 @@ export default function UseCaseItem({
         <EllipsisMenu
           actions={[
             {
+              label: "Add Requirement",
+              onClick: handleAddRequirement,
+            },
+            {
               label: "View Use Case Description",
               onClick: handleViewDescription,
             },
@@ -189,8 +193,18 @@ export default function UseCaseItem({
               onClick: handleViewActivityDiagram,
             },
             {
-              label: "Add Requirement",
-              onClick: handleAddRequirement,
+              label: "Navigate to Use Case",
+              onClick: () => {
+                router.push(
+                  route({
+                    pathname: "/projects/[project-id]/use-cases",
+                    query: {
+                      "project-id": projectId,
+                      useCaseId: useCase.id,
+                    },
+                  }),
+                );
+              },
             },
           ]}
           className="text-xs"

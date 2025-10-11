@@ -27,7 +27,7 @@ export default function ActivitySelection({
       {isLoading && <Loading isOpen={isLoading} message="Loading activities..." mode="dialog" />}
       {isError && <ErrorMessage message={`Error loading activities: ${error!.message}`} />}
       {data !== undefined && (
-        <div className="grid grid-cols-1 gap-3 p-1 max-h-96 overflow-y-auto">
+        <div className="flex flex-col item-center gap-3 p-1 max-h-96 overflow-y-auto">
           {data.toReversed()!.map((activity) => (
             <button
               key={activity.id}
@@ -35,7 +35,7 @@ export default function ActivitySelection({
                 onActivityClick(activity);
                 onClose();
               }}
-              className="flex items-center justify-center p-2 hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="flex items-center justify-center p-2  hover:text-accent-foreground rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
             >
               <ActivityShape
                 key={activity.id}

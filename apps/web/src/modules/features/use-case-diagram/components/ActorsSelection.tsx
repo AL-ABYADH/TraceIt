@@ -24,18 +24,25 @@ export default function ActorSelection({ isOpen, onClose, onActorClick }: ActorS
     <Dialog isOpen={isOpen} onClose={onClose} title="Add Use Case Object" className="max-w-lg">
       {isLoading && <Loading isOpen={isLoading} message="Loading actors..." mode="dialog" />}
       {isError && <ErrorMessage message={`Error loading actors: ${error!.message}`} />}
-      {data !== undefined &&
-        data!.map((actor) => (
-          <button
-            key={actor.id}
-            onClick={() => {
-              onActorClick(actor);
-              onClose();
-            }}
-          >
-            <ActorShape name={actor.name} />
-          </button>
-        ))}
+      {data !== undefined && (
+        <div className="flex flex-col item-center gap-3 p-1 max-h-96 overflow-y-auto">
+          {data!.map((actor) => (
+            <button
+              key={actor.id}
+              onClick={() => {
+                onActorClick(actor);
+                onClose();
+              }}
+              className="flex items-center justify-center p-2  hover:text-accent-foreground rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              <ActorShape
+                name={actor.name}
+                style={{ cursor: "pointer", transition: "all 0.2s ease" }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </Dialog>
   );
 }

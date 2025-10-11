@@ -291,7 +291,7 @@ export default function RequirementItem({
 
                   return (
                     <div key={exception.id}>
-                      <div className="flex items-center gap-2 my-1" style={{ marginLeft: 56 }}>
+                      <div className="flex items-center gap-2 my-1" style={{ marginLeft: 70 }}>
                         <span className="inline-flex items-center py-1 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
                           E{eIdx + 1}
                         </span>

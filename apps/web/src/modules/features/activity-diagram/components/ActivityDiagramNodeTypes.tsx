@@ -7,6 +7,7 @@ import { FlowFinalShape } from "./FlowFinalShape";
 import { MergeShape } from "./MergeShape";
 import { ForkShape } from "./ForkShape";
 import { JoinShape } from "./JoinShape";
+import React from "react";
 
 interface NodeOptionProps {
   icon: React.ReactNode;
@@ -16,19 +17,78 @@ interface NodeOptionProps {
 }
 
 function NodeOption({ icon, label, description, onClick }: NodeOptionProps) {
+  const buttonStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    padding: "16px",
+    borderRadius: "12px",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#2a2a2a",
+    width: "100%",
+    transition: "all 0.25s ease",
+    cursor: "pointer",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+  };
+
+  const hoverStyle: React.CSSProperties = {
+    borderColor: "#4f9cf9",
+    boxShadow: "0 4px 10px rgba(59, 130, 246, 0.15)",
+  };
+
+  const iconContainer: React.CSSProperties = {
+    flexShrink: 0,
+    width: "60px",
+    height: "60px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "10px",
+    transition: "all 0.25s ease",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontWeight: 600,
+    color: "#ffffff",
+    fontSize: "16px",
+    marginBottom: "4px",
+    transition: "color 0.25s ease",
+  };
+
+  const descriptionStyle: React.CSSProperties = {
+    color: "#ffffff",
+    fontSize: "14px",
+    lineHeight: 1.5,
+  };
+
+  const [hover, setHover] = React.useState(false);
+
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 w-full group"
+      style={hover ? { ...buttonStyle, ...hoverStyle } : buttonStyle}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center bg-white rounded-lg border border-gray-200 group-hover:border-blue-400 transition-colors">
+      <div
+        style={{
+          ...iconContainer,
+          borderColor: hover ? "#4f9cf9" : "#2a2a2a",
+        }}
+      >
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <h3
+          style={{
+            ...labelStyle,
+            color: hover ? "#4f9cf9" : "#ffffff",
+          }}
+        >
           {label}
         </h3>
-        <p className="text-sm text-gray-600 mt-1 leading-relaxed">{description}</p>
+        <p style={descriptionStyle}>{description}</p>
       </div>
     </button>
   );
@@ -41,7 +101,7 @@ export default function ActivityDiagramNodeTypes({
   onClose: () => void;
   onClick: (nodeType: NodeType) => void;
 }) {
-  const ICON_SIZE = 36; // consistent icon size
+  const ICON_SIZE = 36;
 
   const nodeOptions = [
     {
@@ -94,22 +154,49 @@ export default function ActivityDiagramNodeTypes({
     },
   ];
 
+  const containerStyle: React.CSSProperties = {
+    padding: "15px",
+  };
+
+  const headerStyle: React.CSSProperties = {
+    marginBottom: "24px",
+  };
+
+  const titleStyle: React.CSSProperties = {
+    fontSize: "20px",
+    fontWeight: 600,
+    color: "#ffffff",
+    marginBottom: "6px",
+  };
+
+  const subtitleStyle: React.CSSProperties = {
+    color: "#ffffff",
+    fontSize: "15px",
+    lineHeight: 1.5,
+  };
+
+  const gridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+    gap: "16px",
+  };
+
   const handleNodeClick = (nodeType: NodeType) => {
     onClick(nodeType);
     onClose();
   };
 
   return (
-    <div className="p-2">
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Activity Diagram Elements</h2>
-        <p className="text-gray-600 text-sm">
+    <div style={containerStyle}>
+      <div style={headerStyle}>
+        <h2 style={titleStyle}>Activity Diagram Elements</h2>
+        <p style={subtitleStyle}>
           Select an element to add to your diagram. Each element represents a specific activity or
           control flow.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div style={gridStyle}>
         {nodeOptions.map((option) => (
           <NodeOption
             key={option.type}
