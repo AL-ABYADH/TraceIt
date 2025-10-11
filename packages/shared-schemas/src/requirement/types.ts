@@ -15,7 +15,9 @@ import {
   requirementOptionalIdSchema,
   requirementRelationshipStatusSchema,
   updateRequirementExceptionSchema,
+  updateRequirementLabelsSchema,
   updateRequirementSchema,
+  updateRequirementStaleSchema,
   useCaseIdSchema,
 } from "./schemas";
 
@@ -24,6 +26,8 @@ export type CreateRequirementDto = z.infer<typeof createRequirementSchema>;
 export type CreateRequirementExceptionDto = z.infer<typeof createRequirementExceptionSchema>;
 
 export type UpdateRequirementDto = z.infer<typeof updateRequirementSchema>;
+export type UpdateRequirementStaleDto = z.infer<typeof updateRequirementStaleSchema>;
+export type UpdateRequirementLabelsDto = z.infer<typeof updateRequirementLabelsSchema>;
 
 export type UpdateRequirementExceptionDto = z.infer<typeof updateRequirementExceptionSchema>;
 export type RequirementDetailDto = z.infer<typeof requirementDetailSchema>;

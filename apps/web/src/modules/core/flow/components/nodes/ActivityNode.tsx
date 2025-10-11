@@ -1,25 +1,73 @@
 import type { NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { ActivityShape } from "@/modules/features/activity-diagram/components/ActivityShape";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"; // Changed import
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { route } from "nextjs-routes";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useUpdateRequirementStale } from "@/modules/features/requirement/hooks/useUpdateRequirementStale";
+import { useUpdateRequirementLabels } from "@/modules/features/requirement/hooks/useUpdateRequirementLabels"; // Updated import
 
 export default function ActivityNode({ data, selected }: NodeProps<any>) {
   const params = useParams<"/projects/[project-id]/activity-diagrams">();
   const projectId = params["project-id"];
+  const searchParams = useSearchParams();
+  const useCaseId = searchParams.get("useCaseId");
   const router = useRouter();
 
-  // const name = data?.name ?? "Activity";
-  const name = data.name ?? "Activity was deleted";
-  const isDeleted = !data.name;
+  // Editing state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedLabel, setEditedLabel] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get name from requirement data - use activityLabel if available, otherwise operation
+  const name = data?.activityLabel || data?.operation || "Activity was deleted";
+  const isDeleted = !data?.operation; // Check if the requirement operation exists
+  const isStale = data?.isActivityStale; // Check if the requirement has been updated
 
   // hover state (controls handle visibility and overlay)
   const [hovered, setHovered] = useState(false);
 
   // Right-click context menu state
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+
+  // Use the update stale hook
+  const updateStaleMutation = useUpdateRequirementStale(data?.id, data?.useCaseId, {
+    onSuccess: () => {
+      console.log("Requirement stale status updated successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to update requirement stale status:", error);
+    },
+  });
+
+  // Use the update requirement LABELS hook for activity label
+  const updateRequirementLabelsMutation = useUpdateRequirementLabels(data?.id, data?.useCaseId, {
+    onSuccess: () => {
+      console.log("Activity label updated successfully");
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      console.error("Failed to update activity label:", error);
+      // Revert to original name on error
+      setEditedLabel(name);
+    },
+  });
+
+  // Initialize edited label when name changes or editing starts
+  useEffect(() => {
+    if (isEditing) {
+      setEditedLabel(name);
+    }
+  }, [isEditing, name]);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -28,6 +76,47 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
   };
 
   const closeMenu = () => setMenuPosition(null);
+
+  const handleResolveStale = () => {
+    if (data?.id) {
+      updateStaleMutation.mutate({
+        isActivityStale: false, // Set to false to resolve the stale status
+      });
+    }
+    closeMenu();
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isDeleted) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleLabelSave = () => {
+    if (editedLabel.trim() && editedLabel !== name) {
+      updateRequirementLabelsMutation.mutate({
+        activityLabel: editedLabel.trim(),
+      });
+    } else {
+      // If no changes or empty, just cancel editing
+      setEditedLabel(name);
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleLabelSave();
+    } else if (e.key === "Escape") {
+      setEditedLabel(name);
+      setIsEditing(false);
+    }
+  };
+
+  const handleInputBlur = () => {
+    handleLabelSave();
+  };
 
   // Tighter padding for more compact activity text (keep in sync with ActivityShape usage)
   const PADDING_X = 16;
@@ -65,8 +154,72 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
   };
 
   // whether to show the "Associated requirement has been updated" bubble
-  const showRequirementBubble =
-    (!!data.requirementDeleted || !!data?.requirementUpdated) && (hovered || selected);
+  const showRequirementBubble = isStale && (hovered || selected);
+
+  // If editing, show input field
+  if (isEditing && !isDeleted) {
+    return (
+      <div
+        style={{
+          position: "relative",
+          width: svgWidth,
+          height: svgHeight,
+          boxSizing: "content-box",
+        }}
+      >
+        <ActivityShape
+          name="" // Empty name since we're showing input
+          selected={selected}
+          width={svgWidth}
+          height={svgHeight}
+          paddingX={PADDING_X}
+          paddingY={PADDING_Y}
+          isDeleted={false}
+          isUpdated={false}
+        />
+        <input
+          ref={inputRef}
+          type="text"
+          value={editedLabel}
+          onChange={(e) => setEditedLabel(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleInputBlur}
+          disabled={updateRequirementLabelsMutation.isPending}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: `calc(100% - ${PADDING_X * 2}px)`,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            textAlign: "center",
+            fontSize: "11px",
+            fontFamily: "inherit",
+            color: "inherit",
+            zIndex: 10,
+          }}
+          placeholder="Enter activity label..."
+        />
+        {updateRequirementLabelsMutation.isPending && (
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              fontSize: "10px",
+              color: "#666",
+              marginTop: "4px",
+            }}
+          >
+            Saving...
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -80,11 +233,12 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onContextMenu={handleContextMenu} // Added context menu handler
+        onContextMenu={handleContextMenu}
+        onDoubleClick={handleDoubleClick}
         data-id={data?.id ?? undefined}
         title={name}
       >
-        {/* Requirement update bubble (appears on hover if data.requirementUpdated) */}
+        {/* Requirement update bubble (appears on hover if requirement is stale) */}
         {showRequirementBubble && (
           <div
             role="status"
@@ -115,7 +269,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
                 whiteSpace: "nowrap",
               }}
             >
-              Associated requirement has been {data.requirementDeleted ? "deleted" : "updated"}
+              Associated requirement has been updated
             </div>
           </div>
         )}
@@ -240,9 +394,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
           paddingX={PADDING_X}
           paddingY={PADDING_Y}
           isDeleted={isDeleted}
-          strokeColor={
-            data?.requirementDeleted ? "red" : data?.requirementUpdated ? "yellow" : undefined
-          }
+          isUpdated={isStale}
         />
       </div>
 
@@ -260,8 +412,8 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
                     pathname: "/projects/[project-id]/requirements",
                     query: {
                       "project-id": projectId,
-                      useCaseId: data.useCaseId,
-                      requirementId: data.requirementId,
+                      useCaseId: useCaseId!,
+                      requirementId: data.id,
                     },
                   }),
                 );
@@ -270,6 +422,26 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
             >
               Navigate to Requirement
             </DropdownMenuItem>
+
+            {/* Edit Activity Label option */}
+            <DropdownMenuItem
+              onSelect={() => {
+                setIsEditing(true);
+                closeMenu();
+              }}
+            >
+              Edit Activity Label
+            </DropdownMenuItem>
+
+            {/* Add Resolve option when the activity is stale */}
+            {isStale && (
+              <DropdownMenuItem
+                onSelect={handleResolveStale}
+                disabled={updateStaleMutation.isPending}
+              >
+                {updateStaleMutation.isPending ? "Resolving..." : "Resolve"}
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       )}

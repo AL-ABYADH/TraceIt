@@ -7,12 +7,14 @@ import {
   RequirementIdDto,
   RequirementRelationshipStatusDto,
   RequirementListDto,
+  UpdateRequirementStaleDto,
 } from "@repo/shared-schemas";
 import { requirementEndpoints, useCaseRequirementsEndpoints } from "../requirement-endpoints";
 
 async function listUseCaseRequirements(useCaseId: string): Promise<RequirementDto[]> {
   return http.get(useCaseRequirementsEndpoints.list, { pathParams: { useCaseId } });
 }
+
 async function listAllRequirementsUnderUseCase(useCaseId: string): Promise<RequirementListDto[]> {
   return http.get(useCaseRequirementsEndpoints.allRequirements, { pathParams: { useCaseId } });
 }
@@ -20,6 +22,7 @@ async function listAllRequirementsUnderUseCase(useCaseId: string): Promise<Requi
 async function createRequirement(requirement: CreateRequirementDto): Promise<RequirementDetailDto> {
   return http.post(requirementEndpoints.list, { body: requirement });
 }
+
 async function getRequirementRelationships({
   requirementId,
 }: RequirementIdDto): Promise<RequirementRelationshipStatusDto> {
@@ -43,12 +46,35 @@ async function updateRequirement(
   return http.put(requirementEndpoints.detail, { pathParams: { id }, body: payload });
 }
 
+async function updateRequirementStale(
+  id: string,
+  payload: UpdateRequirementStaleDto,
+): Promise<RequirementDetailDto> {
+  return http.patch(requirementEndpoints.stale, {
+    pathParams: { requirementId: id },
+    body: payload,
+  });
+}
+
+// Add the updateRequirementLabels method
+async function updateRequirementLabels(
+  id: string,
+  payload: { activityLabel?: string; conditionLabel?: string },
+): Promise<RequirementListDto> {
+  return http.patch(requirementEndpoints.labels, {
+    pathParams: { requirementId: id },
+    body: payload,
+  });
+}
+
 export const requirementClient = {
   createRequirement,
   listUseCaseRequirements,
   listAllRequirementsUnderUseCase,
   getRequirement,
   updateRequirement,
+  updateRequirementStale,
+  updateRequirementLabels,
   removeRequirement,
   getRequirementRelationships,
 };

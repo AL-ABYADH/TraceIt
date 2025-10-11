@@ -1,6 +1,7 @@
 import z from "zod";
 import { actorSchema } from "../actor";
 import {
+  booleanFieldDoc,
   childIdFieldDoc,
   dateISOFieldDoc,
   exceptionIdFieldDoc,
@@ -67,6 +68,16 @@ export const updateRequirementSchema = z.object({
   actorIds: actorIdsFieldDoc.optional(),
 });
 
+export const updateRequirementStaleSchema = z.object({
+  isActivityStale: booleanFieldDoc.optional(),
+  isConditionStale: booleanFieldDoc.optional(),
+});
+
+export const updateRequirementLabelsSchema = z.object({
+  activityLabel: nameFieldDoc.optional(),
+  conditionLabel: nameFieldDoc.optional(),
+});
+
 export const updateRequirementExceptionSchema = z.object({
   name: nameFieldDoc.optional(),
 });
@@ -85,6 +96,10 @@ export const requirementListSchema = z
     id: requirementIdFieldDoc,
     operation: operationFieldDoc,
     condition: conditionFieldDoc.optional(),
+    activityLabel: nameFieldDoc.optional(),
+    conditionLabel: conditionFieldDoc.optional(),
+    isActivityStale: booleanFieldDoc,
+    isConditionStale: booleanFieldDoc,
     createdAt: dateISOFieldDoc,
     updatedAt: dateISOFieldDoc.optional(),
   })

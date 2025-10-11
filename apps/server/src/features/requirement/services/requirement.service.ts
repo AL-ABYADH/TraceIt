@@ -4,12 +4,14 @@ import { UseCaseService } from "../../use-case/services/use-case/use-case.servic
 import { Requirement } from "../entities/requirement.entity";
 import { CreateRequirementInterface } from "../interfaces/create-requirement.interface";
 import { UpdateRequirementInterface } from "../interfaces/update-requirement.interface";
+import { UpdateRequirementStaleInterface } from "../interfaces/update-requirement-stale.interface";
+import { UpdateRequirementLabelsInterface } from "../interfaces/update-requirement-labels.interface";
 import { RequirementExceptionAttributes } from "../models/requirement-exception.model";
 import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
 import { RequirementRepository } from "../repositories/requirement.repository";
 import { RequirementException } from "../entities/requirement-exception.entity";
 import { PrimaryUseCaseRepository } from "src/features/use-case/repositories/primary-use-case/primary-use-case.repository";
-import { RequirementListDto } from "@repo/shared-schemas";
+import { NodeType, RequirementListDto } from "@repo/shared-schemas";
 
 /**
  * Service responsible for managing requirements, including their creation,
@@ -102,8 +104,6 @@ export class RequirementService {
     // Verify requirement exists
     const requirement = await this.findById(id);
 
-    await this.requirementRepository.setRelatedFlag(requirement, "requirementUpdated");
-
     // Validate all actor IDs exist
     if (updateDto.actorIds && updateDto.actorIds.length > 0) {
       for (const actorId of updateDto.actorIds) {
@@ -111,7 +111,29 @@ export class RequirementService {
       }
     }
 
-    return this.requirementRepository.update(id, updateDto);
+    return this.requirementRepository.update(id, {
+      ...updateDto,
+      isActivityStale:
+        requirement.nodes?.filter((node) => node.type === NodeType.ACTIVITY).length !== 0,
+      isConditionStale:
+        requirement.nodes?.filter((node) => node.type === NodeType.DECISION_NODE).length !== 0,
+    });
+  }
+
+  async updateRequirementStale(
+    id: string,
+    updateDto: UpdateRequirementStaleInterface,
+  ): Promise<Requirement> {
+    await this.findById(id);
+    return this.requirementRepository.updateRequirementStale(id, updateDto);
+  }
+
+  async updateRequirementLabels(
+    id: string,
+    updateDto: UpdateRequirementLabelsInterface,
+  ): Promise<Requirement> {
+    await this.findById(id);
+    return this.requirementRepository.updateRequirementLabels(id, updateDto);
   }
 
   /**
@@ -121,8 +143,6 @@ export class RequirementService {
    */
   async removeRequirement(id: string): Promise<boolean> {
     const data = await this.findById(id);
-
-    await this.requirementRepository.setRelatedFlag(data, "requirementDeleted");
 
     // Delete all nested requirements
     if (data.nestedRequirements) {

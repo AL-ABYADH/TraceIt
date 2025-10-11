@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Patch } from "@nestjs/common";
 import { RequirementService } from "../services/requirement.service";
 
 import {
@@ -9,12 +9,16 @@ import {
   exceptionIdSchema,
   requirementIdSchema,
   updateRequirementSchema,
+  updateRequirementStaleSchema,
+  updateRequirementLabelsSchema,
   useCaseIdSchema,
   type ChildIdDto,
   type CreateRequirementDto,
   type ExceptionIdDto,
   type RequirementIdDto,
   type UpdateRequirementDto,
+  type UpdateRequirementStaleDto,
+  type UpdateRequirementLabelsDto,
   type UseCaseIdDto,
 } from "@repo/shared-schemas";
 import { zodBody, zodParam } from "src/common/pipes/zod";
@@ -63,6 +67,22 @@ export class RequirementController {
     @Body(zodBody(updateRequirementSchema)) dto: UpdateRequirementDto,
   ): Promise<RequirementListDto> {
     return this.requirementService.updateRequirement(params.requirementId, dto);
+  }
+
+  @Patch(":requirementId/stale")
+  async updateStale(
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
+    @Body(zodBody(updateRequirementStaleSchema)) dto: UpdateRequirementStaleDto,
+  ): Promise<RequirementListDto> {
+    return this.requirementService.updateRequirementStale(params.requirementId, dto);
+  }
+
+  @Patch(":requirementId/labels")
+  async updateLabels(
+    @Param(zodParam(requirementIdSchema)) params: RequirementIdDto,
+    @Body(zodBody(updateRequirementLabelsSchema)) dto: UpdateRequirementLabelsDto,
+  ): Promise<RequirementListDto> {
+    return this.requirementService.updateRequirementLabels(params.requirementId, dto);
   }
 
   @Delete(":requirementId")

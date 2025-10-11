@@ -8,7 +8,7 @@ import { route } from "nextjs-routes";
 import { useMemo, useState } from "react";
 
 export default function UseCaseNode({ data, selected }: NodeProps<any>) {
-  const name = data.name ?? "UseCase was deleted";
+  const name = data.name ?? "Use case was deleted";
   const isDeleted = !data.name;
 
   const params = useParams<"/projects/[project-id]/use-case-diagram">();

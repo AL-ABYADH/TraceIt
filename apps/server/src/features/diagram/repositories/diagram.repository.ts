@@ -305,7 +305,7 @@ export class DiagramRepository {
       });
 
       // Handle data relationship if provided
-      if (data) {
+      if (data && data.id) {
         const dataValue = await this.nodeModel.findOneWithRelations({
           where: { id: updateDto.id },
           dynamicRelations: [
