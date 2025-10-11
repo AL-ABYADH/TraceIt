@@ -18,16 +18,28 @@ interface RequirementItemProps {
   requirement: RequirementDto;
   number?: number;
   level?: number;
+  parentNumber?: string;
   projectId: string;
   validatedUseCaseId: string;
   highlightedRequirementId: string | null;
   highlightedExceptionId: string | null;
 }
 
+function isDescendant(requirement: RequirementDto, highlightedId: string): boolean {
+  if (requirement.id === highlightedId) return true;
+  if (requirement.nestedRequirements?.some((r) => isDescendant(r, highlightedId))) return true;
+  if (
+    requirement.exceptions?.some((e) => e.requirements?.some((r) => isDescendant(r, highlightedId)))
+  )
+    return true;
+  return false;
+}
+
 export default function RequirementItem({
   requirement,
   number,
   level = 0,
+  parentNumber,
   projectId,
   validatedUseCaseId,
   highlightedRequirementId,
@@ -37,7 +49,7 @@ export default function RequirementItem({
   const [openEdit, setOpenEdit] = useState(false);
   const [openExceptionForm, setOpenExceptionForm] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const { expandedItems, toggleItem } = useExpansion();
+  const { expandedItems, toggleItem, expandItems } = useExpansion();
   const [isDeleteExceptionOpen, setIsDeleteExceptionOpen] = useState(false);
   const [deleteExceptionId, setDeleteExceptionId] = useState<string | null>(null);
   const [openRequirementExceptionForm, setOpenRequirementExceptionForm] = useState<{
@@ -55,6 +67,44 @@ export default function RequirementItem({
   const headerRef = useRef<HTMLDivElement>(null);
   const itemRef = useRef<HTMLDivElement>(null);
   const [isHighlighted, setHighlightedRequirementId] = useState<boolean>(false);
+
+  const requirementNumber = parentNumber ? `${parentNumber}.${number}` : number;
+
+  const highlightedRequirementIdRef = useRef(highlightedRequirementId);
+
+  useEffect(() => {
+    if (
+      highlightedExceptionId &&
+      requirement.exceptions?.some((e) => e.id === highlightedExceptionId)
+    ) {
+      expandItems([requirement.id]);
+    }
+  }, [highlightedExceptionId, requirement, expandItems]);
+
+  useEffect(() => {
+    if (
+      highlightedExceptionId &&
+      requirement.exceptions?.some((e) => e.id === highlightedExceptionId)
+    ) {
+      expandItems([requirement.id]);
+    }
+  }, [highlightedExceptionId, requirement, expandItems]);
+
+  useEffect(() => {
+    if (highlightedRequirementId && isDescendant(requirement, highlightedRequirementId)) {
+      if (!expandedItems.has(requirement.id)) {
+        expandItems([requirement.id]);
+      }
+    }
+    if (
+      highlightedExceptionId &&
+      requirement.exceptions?.some((e) => e.id === highlightedExceptionId)
+    ) {
+      if (!expandedItems.has(requirement.id)) {
+        expandItems([requirement.id]);
+      }
+    }
+  }, [highlightedRequirementId, highlightedExceptionId, requirement, expandItems, expandedItems]);
 
   useEffect(() => {
     setHighlightedRequirementId(requirement.id === highlightedRequirementId);
@@ -123,10 +173,10 @@ export default function RequirementItem({
   const hasExceptions = requirement.exceptions?.length ? requirement.exceptions.length > 0 : false;
 
   const actions = [
+    { label: "Add Sub Requirement", onClick: () => setOpenForm(true) },
+    { label: "Add Exception", onClick: () => setOpenExceptionForm(true) },
     { label: "Edit", onClick: () => setOpenEdit(true) },
     { label: "Delete", onClick: () => setIsDeleteOpen(true), danger: true },
-    { label: "Add Exception", onClick: () => setOpenExceptionForm(true) },
-    { label: "Add Sub Requirement", onClick: () => setOpenForm(true) },
   ];
 
   // Right-click context menu state
@@ -170,9 +220,9 @@ export default function RequirementItem({
             ) : null}
           </div>
 
-          {number !== undefined && (
-            <span className="flex items-center justify-center w-2 h-6 text-xs font-semibold rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
-              {number}
+          {requirementNumber !== undefined && (
+            <span className="flex items-center justify-center w-auto px-2 h-6 text-xs font-semibold rounded-full bg-accent/60 text-accent-foreground flex-shrink-0">
+              {requirementNumber}
             </span>
           )}
 
@@ -204,13 +254,6 @@ export default function RequirementItem({
           {/* Sub Flow */}
           {hasNested && (
             <div className="relative border-l border-indigo-300/50">
-              {/* Sub Flow Title */}
-              <div className="mb-1" style={{ marginLeft: 36 }}>
-                <span className="block text-[11px] tracking-wide font-medium text-indigo-500/90">
-                  Sub Flow
-                </span>
-              </div>
-
               {/* Requirements under Sub Flow */}
               <div className="space-y-2">
                 {requirement.nestedRequirements?.map((nested, idx) => (
@@ -218,6 +261,7 @@ export default function RequirementItem({
                     key={nested.id}
                     requirement={nested}
                     number={idx + 1}
+                    parentNumber={requirementNumber?.toString()}
                     level={level + 1}
                     projectId={projectId}
                     validatedUseCaseId={validatedUseCaseId}
@@ -232,91 +276,101 @@ export default function RequirementItem({
           {/* Exceptional Flow */}
           {hasExceptions && (
             <div className="relative border-l border-border">
-              {/* Exceptional Flow Title */}
-              <div className="mb-1" style={{ marginLeft: 36 }}>
-                <span className="block text-[11px] tracking-wide font-medium text-foreground/70">
-                  Exceptional Flow
-                </span>
-              </div>
-
               {/* Exceptions */}
               <div className="space-y-2">
-                {requirement.exceptions?.map((exception, eIdx) => (
-                  <div
-                    key={exception.id}
-                    ref={exception.id === highlightedExceptionId ? exceptionRef : null}
-                  >
-                    {/* Exception Title */}
-                    <div className="flex items-center gap-2 my-1" style={{ marginLeft: 48 }}>
-                      <span className="inline-flex items-center py-1 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
-                        E{eIdx + 1}
-                      </span>
-                      <span className="text-lg text-foreground/80">{exception.name}</span>
-                      <EllipsisMenu
-                        actions={(() => {
-                          const actions: {
-                            label: string;
-                            onClick: () => void;
-                            danger?: boolean;
-                          }[] = [];
+                {requirement.exceptions?.map((exception, eIdx) => {
+                  const isExceptionHighlighted = exception.id === highlightedExceptionId;
 
-                          actions.push({
-                            label: "Edit",
-                            onClick: () =>
-                              setOpenEditException({
-                                id: exception.id,
-                                initial: { name: exception.name },
-                              }),
-                          });
+                  return (
+                    <div key={exception.id}>
+                      <div className="flex items-center gap-2 my-1" style={{ marginLeft: 56 }}>
+                        <span className="inline-flex items-center py-1 px-2 rounded-lg bg-muted text-muted-foreground text-sm font-mono">
+                          E{eIdx + 1}
+                        </span>
 
-                          actions.push({
-                            label: "Add Requirement",
-                            onClick: () =>
-                              setOpenRequirementExceptionForm({ exceptionId: exception.id }),
-                          });
-
-                          actions.push({
-                            label: "Delete",
-                            onClick: () => {
-                              setDeleteExceptionId(exception.id);
-                              setIsDeleteExceptionOpen(true);
-                            },
-                            danger: true,
-                          });
-
-                          return actions;
-                        })()}
-                      />
-                    </div>
-
-                    {/* Exception Requirements */}
-                    <div style={{ marginLeft: 64 }}>
-                      {exception.requirements?.length ? (
-                        exception.requirements
-                          .toReversed()
-                          .map((exReq, exIdx) => (
-                            <RequirementItem
-                              key={exReq.id}
-                              requirement={exReq as any}
-                              number={exIdx + 1}
-                              level={level + 2}
-                              projectId={projectId}
-                              validatedUseCaseId={validatedUseCaseId}
-                              highlightedRequirementId={highlightedRequirementId}
-                              highlightedExceptionId={highlightedExceptionId}
-                            />
-                          ))
-                      ) : (
-                        <div
-                          className="text-xs text-muted-foreground italic"
-                          style={{ marginLeft: 23 }}
+                        {/* Only highlight the name */}
+                        <span
+                          ref={isExceptionHighlighted ? exceptionRef : null}
+                          className="text-sm text-foreground/80 transition-colors duration-300"
+                          style={
+                            isExceptionHighlighted
+                              ? {
+                                  backgroundColor: "rgba(59,130,246,0.15)",
+                                  outline: "2px solid #4f9cf9",
+                                  borderRadius: "2rem",
+                                  padding: "0.1rem 0.5rem",
+                                }
+                              : {}
+                          }
                         >
-                          No requirements in this exception yet.
-                        </div>
-                      )}
+                          {exception.name}
+                        </span>
+
+                        <EllipsisMenu
+                          actions={(() => {
+                            const actions: {
+                              label: string;
+                              onClick: () => void;
+                              danger?: boolean;
+                            }[] = [];
+
+                            actions.push({
+                              label: "Add Requirement",
+                              onClick: () =>
+                                setOpenRequirementExceptionForm({ exceptionId: exception.id }),
+                            });
+                            actions.push({
+                              label: "Edit",
+                              onClick: () =>
+                                setOpenEditException({
+                                  id: exception.id,
+                                  initial: { name: exception.name },
+                                }),
+                            });
+
+                            actions.push({
+                              label: "Delete",
+                              onClick: () => {
+                                setDeleteExceptionId(exception.id);
+                                setIsDeleteExceptionOpen(true);
+                              },
+                              danger: true,
+                            });
+
+                            return actions;
+                          })()}
+                        />
+                      </div>
+
+                      {/* Exception Requirements */}
+                      <div style={{ marginLeft: 64 }}>
+                        {exception.requirements?.length ? (
+                          exception.requirements
+                            .toReversed()
+                            .map((exReq, exIdx) => (
+                              <RequirementItem
+                                key={exReq.id}
+                                requirement={exReq as any}
+                                number={exIdx + 1}
+                                level={level + 2}
+                                projectId={projectId}
+                                validatedUseCaseId={validatedUseCaseId}
+                                highlightedRequirementId={highlightedRequirementId}
+                                highlightedExceptionId={highlightedExceptionId}
+                              />
+                            ))
+                        ) : (
+                          <div
+                            className="text-xs text-muted-foreground italic"
+                            style={{ marginLeft: 23 }}
+                          >
+                            No requirements in this exception yet.
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

@@ -11,6 +11,8 @@ import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { useDeleteRequirementException } from "../hooks/useDeleteRequirementException";
 import * as React from "react";
+import { route } from "nextjs-routes";
+import { useRouter } from "next/navigation";
 
 interface RecursiveFlowSectionProps {
   requirements: RequirementDto[];
@@ -31,6 +33,8 @@ export default function RecursiveFlowSection({
   parentIndex = "",
   isRoot = true,
 }: RecursiveFlowSectionProps) {
+  const router = useRouter();
+
   const [openEditRequirement, setOpenEditRequirement] = useState<null | {
     id: string;
     initial: { operation: string; condition?: string; actorIds: string[] };
@@ -284,12 +288,8 @@ export default function RecursiveFlowSection({
                     const hasSecondary = Boolean(normSec?.id);
 
                     actions.push({
-                      label: "Edit",
-                      onClick: () =>
-                        setOpenEditException({
-                          id: exception.id,
-                          initial: { name: exception.name },
-                        }),
+                      label: "Add Requirement",
+                      onClick: () => setOpenExceptionForm({ exceptionId: exception.id }),
                     });
 
                     if (hasSecondary) {
@@ -307,9 +307,14 @@ export default function RecursiveFlowSection({
                         onClick: () => setOpenSecondaryForException({ exceptionId: exception.id }),
                       });
                     }
+
                     actions.push({
-                      label: "Add Requirement",
-                      onClick: () => setOpenExceptionForm({ exceptionId: exception.id }),
+                      label: "Edit",
+                      onClick: () =>
+                        setOpenEditException({
+                          id: exception.id,
+                          initial: { name: exception.name },
+                        }),
                     });
 
                     actions.push({
@@ -319,6 +324,20 @@ export default function RecursiveFlowSection({
                         setIsDeleteExceptionOpen(true);
                       },
                       danger: true,
+                    });
+                    actions.push({
+                      label: "View in Requirements",
+                      onClick: () =>
+                        router.push(
+                          route({
+                            pathname: "/projects/[project-id]/requirements",
+                            query: {
+                              "project-id": projectId,
+                              useCaseId: validatedUseCaseId,
+                              exceptionId: exception.id,
+                            },
+                          }),
+                        ),
                     });
 
                     return actions;
@@ -360,6 +379,14 @@ export default function RecursiveFlowSection({
                       <EllipsisMenu
                         actions={[
                           {
+                            label: "Add Exception",
+                            onClick: () => setOpenExceptionParentId(child.id),
+                          },
+                          {
+                            label: "Add Sub Requirement",
+                            onClick: () => setOpenFormParentId(child.id),
+                          },
+                          {
                             label: "Edit",
                             onClick: () =>
                               setOpenEditRequirement({
@@ -380,12 +407,18 @@ export default function RecursiveFlowSection({
                             danger: true,
                           },
                           {
-                            label: "Add Exception",
-                            onClick: () => setOpenExceptionParentId(child.id),
-                          },
-                          {
-                            label: "Add Sub Requirement",
-                            onClick: () => setOpenFormParentId(child.id),
+                            label: "View in Requirements",
+                            onClick: () =>
+                              router.push(
+                                route({
+                                  pathname: "/projects/[project-id]/requirements",
+                                  query: {
+                                    "project-id": projectId,
+                                    useCaseId: validatedUseCaseId,
+                                    requirementId: child.id,
+                                  },
+                                }),
+                              ),
                           },
                         ]}
                       />
@@ -459,6 +492,10 @@ export default function RecursiveFlowSection({
                               const actions: { label: string; onClick: () => void }[] = [];
                               if (flow.secondaryUseCaseId) {
                                 actions.push({
+                                  label: "Add Sub Requirement",
+                                  onClick: () => setOpenFormParentId(flow.id),
+                                });
+                                actions.push({
                                   label: "Edit Secondary Use Case",
                                   onClick: () =>
                                     setOpenEditSecondary({
@@ -474,8 +511,18 @@ export default function RecursiveFlowSection({
                                 });
                               }
                               actions.push({
-                                label: "Add Sub Requirement",
-                                onClick: () => setOpenFormParentId(flow.id),
+                                label: "View in Requirements",
+                                onClick: () =>
+                                  router.push(
+                                    route({
+                                      pathname: "/projects/[project-id]/requirements",
+                                      query: {
+                                        "project-id": projectId,
+                                        useCaseId: validatedUseCaseId,
+                                        requirementId: flow.id,
+                                      },
+                                    }),
+                                  ),
                               });
                               return actions;
                             })()}
@@ -500,6 +547,14 @@ export default function RecursiveFlowSection({
                           <EllipsisMenu
                             actions={[
                               {
+                                label: "Add Exception",
+                                onClick: () => setOpenExceptionParentId(child.id),
+                              },
+                              {
+                                label: "Add Sub Requirement",
+                                onClick: () => setOpenFormParentId(child.id),
+                              },
+                              {
                                 label: "Edit",
                                 onClick: () =>
                                   setOpenEditRequirement({
@@ -519,13 +574,20 @@ export default function RecursiveFlowSection({
                                 },
                                 danger: true,
                               },
+
                               {
-                                label: "Add Exception",
-                                onClick: () => setOpenExceptionParentId(child.id),
-                              },
-                              {
-                                label: "Add Sub Requirement",
-                                onClick: () => setOpenFormParentId(child.id),
+                                label: "View in Requirements",
+                                onClick: () =>
+                                  router.push(
+                                    route({
+                                      pathname: "/projects/[project-id]/requirements",
+                                      query: {
+                                        "project-id": projectId,
+                                        useCaseId: validatedUseCaseId,
+                                        requirementId: child.id,
+                                      },
+                                    }),
+                                  ),
                               },
                             ]}
                           />

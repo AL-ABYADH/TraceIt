@@ -28,8 +28,14 @@ export const ExpansionProvider = ({ children }: { children: ReactNode }) => {
   const expandItems = useCallback((ids: string[]) => {
     setExpandedItems((prev) => {
       const newSet = new Set(prev);
-      ids.forEach((id) => newSet.add(id));
-      return newSet;
+      let changed = false;
+      ids.forEach((id) => {
+        if (!newSet.has(id)) {
+          newSet.add(id);
+          changed = true;
+        }
+      });
+      return changed ? newSet : prev;
     });
   }, []);
 

@@ -10,6 +10,8 @@ import RequirementSection from "./RequirementSection";
 import RequirementForm from "./RequirementForm";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { useDeleteRequirement } from "../hooks/useDeleteRequirement";
+import { useRouter } from "next/navigation";
+import { route } from "nextjs-routes";
 
 interface MainFlowSectionProps {
   requirements: RequirementDto[];
@@ -26,6 +28,8 @@ export default function MainFlowSection({
     id: string;
     initial: { operation: string; condition?: string; actorIds: string[] };
   }>(null);
+  const router = useRouter();
+
   const [openFormParentId, setOpenFormParentId] = useState<string | null>(null);
   const [openMainForm, setOpenMainForm] = useState(false);
   const [openExceptionParentId, setOpenExceptionParentId] = useState<string | null>(null);
@@ -82,6 +86,11 @@ export default function MainFlowSection({
             <EllipsisMenu
               actions={[
                 {
+                  label: "Add Sub Requirement",
+                  onClick: () => setOpenFormParentId(req.id),
+                },
+                { label: "Add Exception", onClick: () => setOpenExceptionParentId(req.id) },
+                {
                   label: "Edit",
                   onClick: () =>
                     setOpenEditRequirement({
@@ -101,10 +110,19 @@ export default function MainFlowSection({
                   },
                   danger: true,
                 },
-                { label: "Add Exception", onClick: () => setOpenExceptionParentId(req.id) },
                 {
-                  label: "Add Sub Requirement",
-                  onClick: () => setOpenFormParentId(req.id),
+                  label: "View in Requirements",
+                  onClick: () =>
+                    router.push(
+                      route({
+                        pathname: "/projects/[project-id]/requirements",
+                        query: {
+                          "project-id": projectId,
+                          useCaseId: validatedUseCaseId,
+                          requirementId: req.id,
+                        },
+                      }),
+                    ),
                 },
               ]}
             />

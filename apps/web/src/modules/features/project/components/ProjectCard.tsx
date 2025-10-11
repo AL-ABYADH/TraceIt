@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { route } from "nextjs-routes";
@@ -19,6 +20,7 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  const router = useRouter();
   const [timeAgo, setTimeAgo] = useState("");
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -96,6 +98,17 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <span className="text-muted-foreground text-sm">{timeAgo || "Recently"}</span>
           <EllipsisMenu
             actions={[
+              {
+                label: "View",
+                onClick: () => {
+                  router.push(
+                    route({
+                      pathname: "/projects/[project-id]/actors",
+                      query: { "project-id": project.id },
+                    }),
+                  );
+                },
+              },
               { label: "Edit", onClick: () => setIsUpdateOpen(true) },
               { label: "Delete", onClick: () => setIsDeleteOpen(true), danger: true }, // OPEN CONFIRMATION
             ]}
