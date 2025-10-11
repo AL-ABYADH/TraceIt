@@ -5,7 +5,6 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import ErrorMessage from "@/components/ErrorMessage";
 import Loading from "@/components/Loading";
 import Table, { Column } from "@/components/Table";
-import { notifications } from "@mantine/notifications";
 import { UseCaseListDto } from "@repo/shared-schemas";
 import { useRouter } from "next/navigation";
 import { route } from "nextjs-routes";
@@ -18,9 +17,10 @@ import { useDeleteSecondaryUseCase } from "../hooks/useDeleteSecondaryUseCase";
 
 interface UseCasesTableProps {
   projectId: string;
+  highlightedUseCaseId?: string | null;
 }
 
-export default function UseCasesTable({ projectId }: UseCasesTableProps) {
+export default function UseCasesTable({ projectId, highlightedUseCaseId }: UseCasesTableProps) {
   const [isPrimaryFormOpen, setIsPrimaryFormOpen] = useState(false);
   const [isSecondaryFormOpen, setIsSecondaryFormOpen] = useState(false);
   const [editUseCase, setEditUseCase] = useState<UseCaseListDto | null>(null);
@@ -49,11 +49,6 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
   });
 
   const handleDeleteSuccess = () => {
-    notifications.show({
-      title: "Deleted",
-      message: "Use case deleted successfully",
-      color: "green",
-    });
     resetDeleteState();
   };
 
@@ -113,7 +108,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
     {
       key: "id",
       title: "Actions",
-      width: "20%",
+      width: "10%",
       render: (_, useCase) => (
         <div className="flex items-center gap-2">
           <button
@@ -156,6 +151,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
       {data?.length ? (
         <Table
           columns={columns}
+          highlightedId={highlightedUseCaseId}
           data={data.toReversed()}
           onRowClick={(useCase) =>
             router.push(
@@ -164,7 +160,7 @@ export default function UseCasesTable({ projectId }: UseCasesTableProps) {
                 query: {
                   "project-id": projectId,
                   "use-case-id": useCase.id,
-                  type: useCase.subtype, // ✅ added type here
+                  type: useCase.subtype,
                 },
               }),
             )

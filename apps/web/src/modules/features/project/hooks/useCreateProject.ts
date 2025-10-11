@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectClient } from "../api/clients/project-client";
 import { CreateProjectDto } from "@repo/shared-schemas";
 import { projectQueryKeys } from "../query/project-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseCreateProjectOptions = {
   onSuccess?: (data: unknown, variables: CreateProjectDto) => void;
@@ -18,6 +19,7 @@ export function useCreateProject(opts?: UseCreateProjectOptions) {
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: projectQueryKeys.list });
+      showSuccessNotification("Project created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

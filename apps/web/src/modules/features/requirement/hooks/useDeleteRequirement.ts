@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { requirementClient } from "../api/clients/requirement-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseDeleteRequirementOptions = {
   onSuccess?: (data: unknown) => void;
@@ -25,6 +26,7 @@ export function useDeleteRequirement(
       qc.invalidateQueries({
         queryKey: requirementQueryKeys.useCaseRequirementList(useCaseIdToInvalidate),
       });
+      showSuccessNotification("Requirement deleted successfully");
       opts?.onSuccess?.(data);
     },
     onError: (error) => {

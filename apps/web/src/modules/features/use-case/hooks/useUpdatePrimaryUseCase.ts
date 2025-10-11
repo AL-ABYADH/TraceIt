@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { primaryUseCaseClient } from "../api/clients/primary-use-case-client";
 import { primaryUseCaseQueryKeys } from "../query/primary-use-case-query-keys";
 import { useCaseQueryKeys } from "../query/use-case-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseUpdatePrimaryUseCaseOptions = {
   onSuccess?: (data: unknown, variables: UpdatePrimaryUseCaseDto) => void;
@@ -21,6 +22,7 @@ export function useUpdatePrimaryUseCase(useCaseId: string, opts?: UseUpdatePrima
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
       qc.invalidateQueries({ queryKey: primaryUseCaseQueryKeys.detail(useCaseId) });
+      showSuccessNotification("Use case updated successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

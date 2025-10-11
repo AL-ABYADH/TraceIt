@@ -2,6 +2,7 @@ import { CreateActivityDto, ActivityDto } from "@repo/shared-schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { activityClient } from "../api/clients/activityClient";
 import { activityQueryKeys } from "../query/activity-query-key";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseCreateActivityOptions = {
   onSuccess?: (data: ActivityDto, variables: CreateActivityDto) => void;
@@ -18,6 +19,7 @@ export function useCreateActivity(opts?: UseCreateActivityOptions) {
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: activityQueryKeys.list });
+      showSuccessNotification("Activity created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

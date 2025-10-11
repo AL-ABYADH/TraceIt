@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { actorClient } from "../api/clients/actor-client";
 import { actorQueryKeys } from "../query/actor-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseDeleteActorOptions = {
   onSuccess?: (data: unknown) => void;
@@ -17,6 +18,7 @@ export function useDeleteActor(actorId: string, opts?: UseDeleteActorOptions) {
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: actorQueryKeys.list });
+      showSuccessNotification("Actor deleted successfully");
       opts?.onSuccess?.(data);
     },
     onError: (error) => {

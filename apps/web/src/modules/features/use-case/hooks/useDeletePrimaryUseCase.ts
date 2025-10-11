@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { primaryUseCaseClient } from "../api/clients/primary-use-case-client";
 import { useCaseQueryKeys } from "../query/use-case-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseDeletePrimaryUseCaseOptions = {
   onSuccess?: (data: unknown) => void;
@@ -17,6 +18,7 @@ export function useDeletePrimaryUseCase(useCaseId: string, opts?: UseDeletePrima
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: useCaseQueryKeys.list() });
+      showSuccessNotification("Use case deleted successfully");
       opts?.onSuccess?.(data);
     },
     onError: (error) => {

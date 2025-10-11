@@ -13,6 +13,7 @@ import { Notifications } from "@mantine/notifications";
 // Mantine styles (important!)
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
+import { MaximizationProvider } from "@/contexts/MaximizationContext";
 
 wireTokenServiceToStore(store);
 
@@ -30,8 +31,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
             fontFamily: "Inter, sans-serif",
           }}
         >
-          <Notifications position="top-right" zIndex={9999} />
-          {children}
+          <MaximizationProvider>
+            <Notifications position="top-right" zIndex={9999} />
+            {children}
+          </MaximizationProvider>
         </MantineProvider>
       </QueryClientProvider>
     </ReduxProvider>

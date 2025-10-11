@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { actorClient } from "../api/clients/actor-client";
 import { AddActorDto } from "@repo/shared-schemas";
 import { actorQueryKeys } from "../query/actor-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseAddActorOptions = {
   onSuccess?: (data: unknown, variables: AddActorDto) => void;
@@ -18,6 +19,7 @@ export function useAddActor(opts?: UseAddActorOptions) {
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: actorQueryKeys.list });
+      showSuccessNotification("Actor added successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

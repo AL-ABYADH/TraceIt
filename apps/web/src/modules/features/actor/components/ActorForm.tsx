@@ -40,11 +40,6 @@ export default function ActorForm({ isOpen, onClose, projectId }: ActorFormProps
   const createActor = useAddActor({
     onSuccess: () => {
       reset();
-      notifications.show({
-        title: "Created",
-        message: "Actor created successfully",
-        color: "green",
-      });
       onClose();
     },
     onError: (err: any) => {

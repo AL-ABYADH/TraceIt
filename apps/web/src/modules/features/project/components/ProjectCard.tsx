@@ -6,7 +6,6 @@ import { route } from "nextjs-routes";
 import { FolderIcon } from "lucide-react";
 import { ProjectDto, UpdateProjectDto } from "@repo/shared-schemas";
 
-import { notifications } from "@mantine/notifications";
 import EllipsisMenu from "@/components/EllipsisMenu";
 import ProjectForm from "./ProjectForm";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -26,14 +25,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const deleteProject = useDeleteProject(project.id, {
-    onSuccess: () => {
-      notifications.show({
-        title: "Deleted",
-        message: "Project deleted successfully!",
-        color: "green",
-        autoClose: 3000,
-      });
-    },
+    onSuccess: () => {},
     onError: (err: any) => {
       const msg = err?.response?.data?.message ?? err?.message ?? "Failed to delete project";
       setServerError(msg);
@@ -41,14 +33,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   });
 
   const updateProject = useUpdateProject(project.id, {
-    onSuccess: () => {
-      notifications.show({
-        title: "Updated",
-        message: "Project updated successfully!",
-        color: "green",
-        autoClose: 3000,
-      });
-    },
+    onSuccess: () => {},
     onError: (err: any) => {
       const msg = err?.response?.data?.message ?? err?.message ?? "Failed to update project";
       setServerError(msg);
@@ -112,7 +97,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <EllipsisMenu
             actions={[
               { label: "Edit", onClick: () => setIsUpdateOpen(true) },
-              { label: "Delete", onClick: () => setIsDeleteOpen(true) }, // OPEN CONFIRMATION
+              { label: "Delete", onClick: () => setIsDeleteOpen(true), danger: true }, // OPEN CONFIRMATION
             ]}
           />
         </div>

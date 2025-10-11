@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UpdateRequirementDto } from "@repo/shared-schemas";
 import { requirementClient } from "../api/clients/requirement-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 export function useUpdateRequirement(
   requirementId: string,
@@ -22,6 +23,7 @@ export function useUpdateRequirement(
       });
     },
     onSuccess: (data, variables) => {
+      showSuccessNotification("Requirement updated successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

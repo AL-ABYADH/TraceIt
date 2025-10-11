@@ -86,15 +86,7 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
   }, [diagram, dispatch]);
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <>
       {/* Dialogs */}
       <UseCaseSelection
         isOpen={isUseCasesDialogOpen}
@@ -115,10 +107,7 @@ export default function UseCaseDiagramFlow({ diagram }: { diagram: DiagramDetail
         }}
       />
 
-      {/* The Flow itself fills remaining height */}
-      <div style={{ flex: 1, overflow: "hidden" }}>
-        <Flow onConnect={handleConnect} onAddNode={handleAddNode} type={DiagramType.USE_CASE} />
-      </div>
-    </div>
+      <Flow onConnect={handleConnect} onAddNode={handleAddNode} type={DiagramType.USE_CASE} />
+    </>
   );
 }

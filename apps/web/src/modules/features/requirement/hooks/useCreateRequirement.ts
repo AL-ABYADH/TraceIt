@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react"; // <-- Add this line
 import { requirementClient } from "../api/clients/requirement-client";
 import { requirementQueryKeys } from "../query/requirement-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseCreateRequirementOptions = {
   onSuccess?: (data: unknown, variables: CreateRequirementDto) => void;
@@ -25,6 +26,7 @@ export function useCreateRequirement(useCaseId: string, opts?: UseCreateRequirem
       setIsUpdating(false);
     },
     onSuccess: (data, variables) => {
+      showSuccessNotification("Requirement created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {

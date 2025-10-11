@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectClient } from "../api/clients/project-client";
 import { UpdateProjectDto } from "@repo/shared-schemas";
 import { projectQueryKeys } from "../query/project-query-keys";
+import { showSuccessNotification } from "@/components/notifications";
 
 type UseUpdateProjectOptions = {
   onSuccess?: (data: unknown, variables: UpdateProjectDto) => void;
@@ -18,6 +19,7 @@ export function useUpdateProject(projectId: string, opts?: UseUpdateProjectOptio
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: projectQueryKeys.list });
+      showSuccessNotification("Project updated successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
