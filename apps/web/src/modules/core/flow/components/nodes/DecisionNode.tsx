@@ -548,14 +548,15 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
                     query: {
                       "project-id": projectId,
                       useCaseId: useCaseId!,
-                      requirementId: data.id,
+                      requirementId: isException ? undefined : data.id,
+                      exceptionId: isException ? data.id : undefined,
                     },
                   }),
                 );
                 closeMenu();
               }}
             >
-              Navigate to Requirement
+              Navigate to {isException ? "Exception" : "Requirement"}
             </DropdownMenuItem>
 
             {/* Edit Condition Label - only for condition nodes */}
