@@ -4,9 +4,6 @@ interface UseCaseShapeProps {
   name: string;
   selected?: boolean;
   isDeleted?: boolean;
-  // Optional explicit dimensions to keep canvas container and shape perfectly aligned
-  width?: number;
-  height?: number;
   maxWidth?: number;
   minWidth?: number;
   paddingX?: number;
@@ -26,27 +23,22 @@ export function UseCaseShape({
   name,
   selected = false,
   isDeleted = false,
-  width,
-  height,
   maxWidth = 200,
-  minWidth = 120,
-  paddingX = 32,
-  paddingY = 20,
-  fontSize = 11,
-  lineHeight = 16,
+  minWidth = 100,
+  paddingX = 28,
+  paddingY = 14,
+  fontSize = 14,
+  lineHeight = 20,
   fillColor = "#000",
   strokeColor = selected ? "var(--primary)" : isDeleted ? "var(--destructive)" : "#fff",
-  strokeWidth = isDeleted ? 3 : 2, // ← Add this line to make border thicker when deleted
+  strokeWidth = 2,
   textColor = "#fff",
   className,
   style,
   onClick,
 }: UseCaseShapeProps) {
-  // Calculate dimensions based on text content unless explicit width/height are provided
+  // Calculate dimensions based on text content
   const { svgWidth, svgHeight } = useMemo(() => {
-    if (typeof width === "number" && typeof height === "number") {
-      return { svgWidth: width, svgHeight: height };
-    }
     // Rough character width estimation for the font size
     const avgCharWidth = fontSize * 0.6;
     const maxCharsPerLine = Math.floor((maxWidth - paddingX * 2) / avgCharWidth);
@@ -56,24 +48,21 @@ export function UseCaseShape({
 
     // Calculate width needed (but don't exceed maxWidth)
     const textWidth = Math.min(name.length * avgCharWidth + paddingX * 2, maxWidth);
-    const computedWidth = Math.max(minWidth, textWidth);
+    const width = Math.max(minWidth, textWidth);
 
-    // Calculate height based on number of lines with minimum height
-    const calculatedHeight = lines * lineHeight + paddingY * 2;
-    const computedHeight = Math.max(60, calculatedHeight);
+    // Calculate height based on number of lines
+    const height = lines * lineHeight + paddingY * 2;
 
     return {
-      svgWidth: computedWidth,
-      svgHeight: computedHeight,
+      svgWidth: width,
+      svgHeight: height,
     };
-  }, [name, width, height, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
+  }, [name, maxWidth, minWidth, paddingX, paddingY, lineHeight, fontSize]);
 
-  // Calculate stadium/oval-like border radius (pill shape)
-  const stadiumBorderRadius = useMemo(() => {
-    // For stadium shape, use half of the height for both X and Y radius
-    // This creates the oval/pill shape characteristic of certain UseCase nodes
-    return svgHeight / 2;
-  }, [svgHeight]);
+  const rx = svgWidth / 2;
+  const ry = svgHeight / 2;
+  const cx = svgWidth / 2;
+  const cy = svgHeight / 2;
 
   return (
     <div
@@ -90,7 +79,7 @@ export function UseCaseShape({
       }}
       onClick={onClick}
     >
-      {/* SVG stadium/oval shape (pill shape) */}
+      {/* SVG ellipse */}
       <svg
         width={svgWidth}
         height={svgHeight}
@@ -105,13 +94,11 @@ export function UseCaseShape({
         aria-hidden
         focusable={false}
       >
-        <rect
-          x={strokeWidth / 2}
-          y={strokeWidth / 2}
-          width={svgWidth - strokeWidth}
-          height={svgHeight - strokeWidth}
-          rx={stadiumBorderRadius}
-          ry={stadiumBorderRadius}
+        <ellipse
+          cx={cx}
+          cy={cy}
+          rx={rx - 1}
+          ry={ry - 1}
           fill={fillColor}
           stroke={strokeColor}
           strokeWidth={strokeWidth}
@@ -134,7 +121,6 @@ export function UseCaseShape({
           boxSizing: "border-box",
           color: textColor,
           fontSize: fontSize,
-          fontWeight: "500",
           lineHeight: `${lineHeight}px`,
           whiteSpace: "normal",
           overflow: "hidden",
@@ -142,18 +128,7 @@ export function UseCaseShape({
           pointerEvents: "auto",
         }}
       >
-        <div
-          style={{
-            maxWidth: svgWidth - paddingX * 2,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {name}
-        </div>
+        <div style={{ maxWidth: svgWidth - paddingX * 2 }}>{name}</div>
       </div>
     </div>
   );
