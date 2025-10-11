@@ -91,20 +91,17 @@ export default function RequirementItem({
   }, [highlightedExceptionId, requirement, expandItems]);
 
   useEffect(() => {
+    // Expand once when a new highlight happens
     if (highlightedRequirementId && isDescendant(requirement, highlightedRequirementId)) {
-      if (!expandedItems.has(requirement.id)) {
-        expandItems([requirement.id]);
-      }
-    }
-    if (
+      expandItems([requirement.id]);
+    } else if (
       highlightedExceptionId &&
       requirement.exceptions?.some((e) => e.id === highlightedExceptionId)
     ) {
-      if (!expandedItems.has(requirement.id)) {
-        expandItems([requirement.id]);
-      }
+      expandItems([requirement.id]);
     }
-  }, [highlightedRequirementId, highlightedExceptionId, requirement, expandItems, expandedItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [highlightedRequirementId, highlightedExceptionId]);
 
   useEffect(() => {
     setHighlightedRequirementId(requirement.id === highlightedRequirementId);
@@ -188,6 +185,18 @@ export default function RequirementItem({
     setMenuPosition({ x: e.clientX, y: e.clientY });
   };
 
+  const handleRequirementClick = () => {
+    // Expand if the item has nested requirements or exceptions
+    if (hasNested || hasExceptions) {
+      // toggleItem already handles expand/collapse
+      toggleItem(requirement.id);
+    }
+
+    // Remove highlight when clicked
+    if (headerRef.current) headerRef.current.style.outline = "none";
+    setHighlightedRequirementId(false);
+  };
+
   const closeMenu = () => setMenuPosition(null);
 
   const baseIndent = 28; // base indentation step
@@ -238,8 +247,7 @@ export default function RequirementItem({
               if (!isHighlighted) e.currentTarget.style.backgroundColor = "";
             }}
             onClick={() => {
-              if (headerRef.current) headerRef.current.style.outline = "none";
-              setHighlightedRequirementId(false);
+              handleRequirementClick();
             }}
             onContextMenu={handleContextMenu}
           >
