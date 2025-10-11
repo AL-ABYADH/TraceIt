@@ -11,10 +11,13 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { useProjects } from "@/modules/features/project/hooks/useProjects";
 import { useCreateProject } from "@/modules/features/project/hooks/useCreateProject";
 import { CreateProjectDto } from "@repo/shared-schemas";
+import { useCurrentUser } from "@/modules/features/user/hooks/useCurrentUser";
 
 export default function Projects() {
   const [showForm, setShowForm] = useState(false);
   const { data, isLoading, isError, error } = useProjects();
+
+  const { data: user } = useCurrentUser();
 
   const createProject = useCreateProject({
     onSuccess: () => {
@@ -55,7 +58,9 @@ export default function Projects() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Welcome back</h1>
+            <h1 className="text-3xl font-semibold text-foreground mb-2">
+              Welcome back, {user!.displayName}
+            </h1>
             <h2 className="text-xl font-semibold text-foreground">Recent Projects</h2>
           </div>
 
