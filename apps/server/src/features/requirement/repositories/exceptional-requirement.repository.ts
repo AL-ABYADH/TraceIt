@@ -72,44 +72,67 @@ export class ExceptionalRequirementRepository {
   //     throw new Error(`Failed to delete requirement exception: ${error.message}`);
   //   }
   // }
+  // async delete(id: string): Promise<boolean> {
+  //   try {
+  //     const query = `
+  //     MATCH (ex:RequirementException {id: $id})
+
+  //     OPTIONAL MATCH (ex)-[:BELONGS_TO]->(childReq:Requirement)
+
+  //     OPTIONAL MATCH (childReq)<-[:DETAILS*0..]-(nestedReq:Requirement)
+
+  //     OPTIONAL MATCH (childReq)<-[:EXCEPTION_AT]-(childException:RequirementException)
+
+  //     OPTIONAL MATCH (childException)-[:BELONGS_TO]->(childExceptionReq:Requirement)
+
+  //     OPTIONAL MATCH (childExceptionReq)<-[:DETAILS*0..]-(childExceptionNestedReq:Requirement)
+
+  //     WITH COLLECT(DISTINCT ex) +
+  //          COLLECT(DISTINCT childReq) +
+  //          COLLECT(DISTINCT nestedReq) +
+  //          COLLECT(DISTINCT childException) +
+  //          COLLECT(DISTINCT childExceptionReq) +
+  //          COLLECT(DISTINCT childExceptionNestedReq) AS nodesToDelete
+
+  //     UNWIND nodesToDelete AS node
+  //     WITH DISTINCT node
+  //     WHERE node IS NOT NULL
+  //     DETACH DELETE node
+
+  //     RETURN COUNT(node) as deletedCount
+  //   `;
+
+  //     const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
+  //     const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+  //     return deletedCount > 0;
+  //   } catch (error) {
+  //     throw new Error(`Failed to delete requirement exception: ${error.message}`);
+  //   }
+  // }
+
   async delete(id: string): Promise<boolean> {
     try {
       const query = `
-      MATCH (ex:RequirementException {id: $id})
-      
-      OPTIONAL MATCH (ex)-[:BELONGS_TO]->(childReq:Requirement)
-      
-      OPTIONAL MATCH (childReq)<-[:DETAILS*0..]-(nestedReq:Requirement)
-      
-      OPTIONAL MATCH (childReq)<-[:EXCEPTION_AT]-(childException:RequirementException)
-      
-      OPTIONAL MATCH (childException)-[:BELONGS_TO]->(childExceptionReq:Requirement)
-      
-      OPTIONAL MATCH (childExceptionReq)<-[:DETAILS*0..]-(childExceptionNestedReq:Requirement)
-      
-      WITH COLLECT(DISTINCT ex) + 
-           COLLECT(DISTINCT childReq) + 
-           COLLECT(DISTINCT nestedReq) + 
-           COLLECT(DISTINCT childException) + 
-           COLLECT(DISTINCT childExceptionReq) +
-           COLLECT(DISTINCT childExceptionNestedReq) AS nodesToDelete
-      
-      UNWIND nodesToDelete AS node
-      WITH DISTINCT node
-      WHERE node IS NOT NULL
-      DETACH DELETE node
-      
-      RETURN COUNT(node) as deletedCount
+    MATCH (ex:RequirementException {id: $id})
+    WITH ex
+    MATCH (connected)
+    WHERE (connected:Requirement OR connected:RequirementException)
+    AND shortestPath((ex)<-[:BELONGS_TO|DETAILS|EXCEPTION_AT*0..10]-(connected)) IS NOT NULL
+    WITH COLLECT(DISTINCT ex) + COLLECT(DISTINCT connected) AS nodesToDelete
+    UNWIND nodesToDelete AS node
+    DETACH DELETE node
+    RETURN COUNT(node) as deletedCount
     `;
 
       const result = await this.neo4jService.getNeogma().queryRunner.run(query, { id });
       const deletedCount = result.records[0]?.get("deletedCount")?.toNumber() || 0;
+
+      console.log(`✅ Deleted exception ${id} and ${deletedCount - 1} related nodes`);
       return deletedCount > 0;
     } catch (error) {
       throw new Error(`Failed to delete requirement exception: ${error.message}`);
     }
   }
-
   async addRequirement(exceptionId: string, requirementId: string): Promise<RequirementException> {
     try {
       await this.exceptionalRequirementModel.relateTo({
