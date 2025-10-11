@@ -90,8 +90,8 @@ export default function RecursiveFlowSection({
   // REPLACE existing buildSDisplayLabel with this
   function buildSDisplayLabel(sectionId: string, parentCtx?: string) {
     if (parentCtx) {
-      const lastSegment = String(sectionId).split("-").slice(-1)[0];
-      return `S(${parentCtx}-${lastSegment})`;
+      const lastSegment = String(sectionId).split("-").pop();
+      return `S((${parentCtx})-${lastSegment})`;
     }
     return `S${sectionId}`;
   }
@@ -219,8 +219,6 @@ export default function RecursiveFlowSection({
 
     const exceptionFlows: FlowWithContext[] = [];
 
-    // For every aggregated exception, check its requirements and collect nestedRequirements as flows.
-    // Use flattenFlows to get deeper nested flows and mark them with the exception label (context).
     aggregated.forEach(({ exception, label, baseSRef }) => {
       const exReqs = exception.requirements ?? [];
       const baseIndex = baseSRef.startsWith("S") ? baseSRef.slice(1) : baseSRef;
@@ -231,6 +229,7 @@ export default function RecursiveFlowSection({
         if (child.nestedRequirements && child.nestedRequirements.length > 0) {
           const rawSecUC = (child as any)?.secondaryUseCase;
           const secUC = Array.isArray(rawSecUC) ? rawSecUC[0] : rawSecUC;
+
           exceptionFlows.push({
             id: child.id,
             sectionId: childNumericS,
@@ -241,10 +240,11 @@ export default function RecursiveFlowSection({
             contextLabel: label,
           });
 
+          const deeperContext = `${label}-${childIdx + 1}`;
           // also flatten deeper nested flows and tag them with the same context
           const deeper = flattenFlows(childNumericS, child.nestedRequirements).map((f) => ({
             ...f,
-            contextLabel: label,
+            contextLabel: deeperContext,
           }));
           exceptionFlows.push(...deeper);
         }
@@ -274,7 +274,7 @@ export default function RecursiveFlowSection({
                 <span className="inline-flex items-center px-2 rounded-md bg-muted text-muted-foreground text-xs font-mono">
                   {label}
                 </span>
-                <Chip label="Exception" value={exception.name} color="rose" />
+                <Chip label="Exception" value={exception.name.toLowerCase()} color="rose" />
                 {(() => {
                   const s = (exception as any)?.secondaryUseCase;
                   const x = Array.isArray(s) ? s[0] : s;
@@ -349,7 +349,7 @@ export default function RecursiveFlowSection({
         >
           {exceptionReqs.length > 0 ? (
             <>
-              {exceptionReqs.toReversed().map((child: RequirementDto, idx: number) => {
+              {exceptionReqs.map((child: RequirementDto, idx: number) => {
                 const childNumericS = baseIndex ? `${baseIndex}-${idx + 1}` : `${idx + 1}`;
                 const childSRef = `S${childNumericS}`;
 
@@ -477,7 +477,7 @@ export default function RecursiveFlowSection({
 
                           <Chip
                             label="Operation"
-                            value={flow.parentRequirement.operation}
+                            value={flow.parentRequirement.operation.toLowerCase()}
                             color="emerald"
                           />
                           {flow.secondaryUseCaseName && (
