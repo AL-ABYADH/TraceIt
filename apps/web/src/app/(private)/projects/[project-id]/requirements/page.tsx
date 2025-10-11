@@ -51,7 +51,7 @@ function RequirementsPageContent() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-24">
       {sortedUseCases.map((useCase, index) => (
         <UseCaseItem
           key={useCase.id}

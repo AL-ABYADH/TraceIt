@@ -199,7 +199,7 @@ export default function UseCaseItem({
 
       {/* Requirements List */}
       {isExpanded && (
-        <div className="border-t border-border">
+        <div className="mb-2">
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">Loading requirements...</div>
           ) : isError ? (
