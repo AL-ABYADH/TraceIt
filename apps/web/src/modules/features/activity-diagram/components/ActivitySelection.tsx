@@ -35,7 +35,7 @@ export default function ActivitySelection({
       {isError && <ErrorMessage message={`Error loading requirements: ${error!.message}`} />}
 
       {requirements && requirements.length > 0 ? (
-        <div className="lex flex-col item-center gap-3 p-1 max-h-96 overflow-y-auto">
+        <div className="flex flex-col item-center gap-3 p-1 max-h-96 overflow-y-auto">
           {requirements.map((requirement) => (
             <button
               key={requirement.id}
