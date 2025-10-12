@@ -274,7 +274,7 @@ export default function RecursiveFlowSection({
                 <span className="inline-flex items-center px-2 rounded-md bg-muted text-muted-foreground text-xs font-mono">
                   {label}
                 </span>
-                <Chip label="Exception" value={exception.name.toLowerCase()} color="rose" />
+                <Chip label="Exception" value={exception.name} color="rose" />
                 {(() => {
                   const s = (exception as any)?.secondaryUseCase;
                   const x = Array.isArray(s) ? s[0] : s;
@@ -477,7 +477,7 @@ export default function RecursiveFlowSection({
 
                           <Chip
                             label="Operation"
-                            value={flow.parentRequirement.operation.toLowerCase()}
+                            value={flow.parentRequirement.operation}
                             color="emerald"
                           />
                           {flow.secondaryUseCaseName && (
