@@ -13,6 +13,7 @@ import {
 } from "@/modules/core/flow/store/flow-slice";
 import { useUpdateDiagram } from "@/modules/core/flow/hooks/useUpdateDiagram";
 import { RequirementListDto, UpdateRequirementLabelsDto } from "@repo/shared-schemas";
+import { showErrorNotification } from "@/components/notifications";
 
 export function useUpdateRequirementLabels(
   requirementId: string,
@@ -46,7 +47,7 @@ export function useUpdateRequirementLabels(
           dispatch(markAsSaved()); // Mark as saved in Redux
           console.log("Diagram saved successfully before requirement label update");
         } catch (error) {
-          console.error("Failed to save diagram before requirement label update:", error);
+          showErrorNotification(`Failed to save diagram before requirement label update: ${error}`);
           // Continue with requirement update even if diagram save fails
         }
       }

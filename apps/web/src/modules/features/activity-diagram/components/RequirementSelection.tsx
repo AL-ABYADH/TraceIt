@@ -7,6 +7,7 @@ import { RequirementDto, RequirementListDto } from "@repo/shared-schemas";
 import { useUseCasesRequirements } from "../../requirement/hooks/useUseCaseRequirements";
 import { requirementClient } from "../../requirement/api/clients/requirement-client";
 import { useAllRequirementsUnderUseCase } from "../../requirement/hooks/useAllUseCaseRequirements";
+import { showErrorNotification } from "@/components/notifications";
 
 interface RequirementSelectionProps {
   isOpen: boolean;
@@ -73,8 +74,7 @@ export default function RequirementSelection({
           .getRequirementRelationships({ requirementId: req.id })
           .then((res) => ({ id: req.id, status: res }))
           .catch((err) => {
-            // If a single check fails, we still continue — default to false/false for that item.
-            console.error(`Failed to fetch relationships for requirement ${req.id}`, err);
+            showErrorNotification(`Failed to fetch relationships for requirement: ${err}`);
             return { id: req.id, status: { hasActivity: false, hasCondition: false } };
           }),
       ),

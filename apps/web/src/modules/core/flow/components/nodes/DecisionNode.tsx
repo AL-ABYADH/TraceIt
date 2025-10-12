@@ -13,6 +13,7 @@ import { route } from "nextjs-routes";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useUpdateRequirementStale } from "@/modules/features/requirement/hooks/useUpdateRequirementStale";
 import { useUpdateRequirementLabels } from "@/modules/features/requirement/hooks/useUpdateRequirementLabels";
+import { showErrorNotification } from "@/components/notifications";
 
 export default function DecisionNode({ data, selected }: NodeProps<any>) {
   const params = useParams<"/projects/[project-id]/activity-diagrams">();
@@ -31,7 +32,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
 
   const updateStaleMutation = useUpdateRequirementStale(data?.id, data?.useCaseId, {
     onSuccess: () => console.log("Condition stale status updated successfully"),
-    onError: (error) => console.error("Failed to update condition stale status:", error),
+    onError: (error) => showErrorNotification(`Failed to update condition stale status: ${error}`),
   });
 
   const updateRequirementLabelsMutation = useUpdateRequirementLabels(data?.id, data?.useCaseId, {
@@ -41,7 +42,7 @@ export default function DecisionNode({ data, selected }: NodeProps<any>) {
       setMinEditingWidth(0);
     },
     onError: (error) => {
-      console.error("Failed to update condition label:", error);
+      showErrorNotification(`Failed to update condition label: ${error}`);
       setEditedLabel(name);
     },
   });

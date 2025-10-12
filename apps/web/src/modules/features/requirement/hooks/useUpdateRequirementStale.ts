@@ -12,6 +12,7 @@ import {
   markAsSaved,
 } from "@/modules/core/flow/store/flow-slice";
 import { useUpdateDiagram } from "@/modules/core/flow/hooks/useUpdateDiagram";
+import { showErrorNotification, showSuccessNotification } from "@/components/notifications";
 
 export function useUpdateRequirementStale(
   requirementId: string,
@@ -43,9 +44,9 @@ export function useUpdateRequirementStale(
             },
           });
           dispatch(markAsSaved()); // Mark as saved in Redux
-          console.log("Diagram saved successfully before requirement update");
+          showSuccessNotification(`Diagram saved successfully before requirement update`);
         } catch (error) {
-          console.error("Failed to save diagram before requirement update:", error);
+          showErrorNotification(`Failed to save diagram before requirement update: ${error}`);
           // Continue with requirement update even if diagram save fails
         }
       }

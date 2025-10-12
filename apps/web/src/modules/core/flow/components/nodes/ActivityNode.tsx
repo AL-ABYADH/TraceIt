@@ -7,6 +7,7 @@ import { route } from "nextjs-routes";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useUpdateRequirementStale } from "@/modules/features/requirement/hooks/useUpdateRequirementStale";
 import { useUpdateRequirementLabels } from "@/modules/features/requirement/hooks/useUpdateRequirementLabels"; // Updated import
+import { showErrorNotification } from "@/components/notifications";
 
 export default function ActivityNode({ data, selected }: NodeProps<any>) {
   const params = useParams<"/projects/[project-id]/activity-diagrams">();
@@ -37,7 +38,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
       console.log("Requirement stale status updated successfully");
     },
     onError: (error) => {
-      console.error("Failed to update requirement stale status:", error);
+      showErrorNotification(`Failed to update requirement stale status: ${error}`);
     },
   });
 
@@ -48,7 +49,7 @@ export default function ActivityNode({ data, selected }: NodeProps<any>) {
       setIsEditing(false);
     },
     onError: (error) => {
-      console.error("Failed to update activity label:", error);
+      showErrorNotification(`Failed to update activity label: ${error}`);
       // Revert to original name on error
       setEditedLabel(name);
     },

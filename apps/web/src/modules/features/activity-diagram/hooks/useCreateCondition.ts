@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { conditionClient } from "../api/clients/conditionClient";
 import { CreateConditionDto, ConditionDto } from "@repo/shared-schemas";
 import { conditionQueryKeys } from "../query/condition-query-key";
-import { showSuccessNotification } from "@/components/notifications";
+import { showErrorNotification, showSuccessNotification } from "@/components/notifications";
 
 type UseCreateConditionOptions = {
   onSuccess?: (data: ConditionDto, variables: CreateConditionDto) => void;
@@ -28,12 +28,11 @@ export function useCreateCondition(opts?: UseCreateConditionOptions) {
         queryKey: conditionQueryKeys.list,
       });
 
-      console.log("✅ Conditions queries invalidated for use case:", variables.useCaseId);
       showSuccessNotification("Condition created successfully");
       opts?.onSuccess?.(data, variables);
     },
     onError: (error, variables) => {
-      console.error("❌ Condition creation failed:", error);
+      showErrorNotification(`Condition creation failed: ${error}`);
       opts?.onError?.(error, variables);
     },
   });

@@ -24,6 +24,7 @@ import Flow from "@/modules/core/flow/components/Flow";
 import DecisionTypeSelection from "./DecisionTypeSelection";
 import ConditionSelection from "./ConditionSelection";
 import ExceptionSelection from "./ExceptionSelection";
+import { showErrorNotification } from "@/components/notifications";
 
 export default function ActivityDiagramFlow({
   diagram,
@@ -51,7 +52,7 @@ export default function ActivityDiagramFlow({
   // Validate useCaseId for activity diagram
   useEffect(() => {
     if (diagram.type === DiagramType.ACTIVITY && !useCaseId) {
-      console.error("ActivityDiagramFlow: missing useCaseId prop for an activity diagram.");
+      showErrorNotification("ActivityDiagramFlow: missing useCaseId prop for an activity diagram.");
     }
   }, [diagram, useCaseId]);
 
@@ -66,7 +67,7 @@ export default function ActivityDiagramFlow({
       case NodeType.INITIAL_NODE:
         // Add validation back from old code
         if (hasInitialNode) {
-          console.error("Only one initial node is allowed");
+          showErrorNotification("Only one initial node is allowed");
           return;
         }
         dispatch(addNode({ type: NodeType.INITIAL_NODE }));
@@ -74,7 +75,7 @@ export default function ActivityDiagramFlow({
       case NodeType.FINAL_NODE:
         // Add validation back from old code
         if (hasFinalNode) {
-          console.error("Only one final node is allowed");
+          showErrorNotification("Only one final node is allowed");
           return;
         }
         dispatch(addNode({ type: NodeType.FINAL_NODE }));
