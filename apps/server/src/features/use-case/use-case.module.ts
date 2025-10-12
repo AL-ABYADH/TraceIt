@@ -14,6 +14,8 @@ import { SecondaryUseCaseService } from "./services/secondary-use-case/secondary
 import { ProjectModule } from "../project/project.module";
 import { ActorModule } from "../actor/actor.module";
 import { RequirementModule } from "../requirement/requirement.module";
+import { RequirementRepository } from "../requirement/repositories/requirement.repository";
+import { DiagramRepository } from "../diagram/repositories/diagram.repository";
 
 @Module({
   imports: [ProjectModule, ActorModule, forwardRef(() => RequirementModule)],
@@ -27,6 +29,8 @@ import { RequirementModule } from "../requirement/requirement.module";
     UseCaseRepository,
     PrimaryUseCaseRepository,
     SecondaryUseCaseRepository,
+    RequirementRepository,
+    DiagramRepository,
     // UseCaseDiagramRepository,
     PrimaryUseCaseService,
     UseCaseService,
