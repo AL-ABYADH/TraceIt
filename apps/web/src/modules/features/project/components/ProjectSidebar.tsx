@@ -4,10 +4,11 @@ import { useProjectDetail } from "@/modules/features/project/hooks/useProjectDet
 import { ProjectDto } from "@repo/shared-schemas";
 import clsx from "clsx";
 import {
-  Activity,
-  GitBranchIcon,
-  UsersIcon,
-  Ellipsis,
+  Users, // for Actors
+  FileText, // for Requirements
+  UserStar, // for Use Cases (workflow/branching)
+  Workflow, // for Use Case Diagram
+  Waypoints,
   ChevronRightIcon,
   ChevronLeftIcon,
 } from "lucide-react";
@@ -17,18 +18,18 @@ import { usePathname } from "next/navigation";
 import { route } from "nextjs-routes";
 
 const pages = [
-  { title: "Actors", href: "/projects/[project-id]/actors", icon: UsersIcon },
-  { title: "Use Cases", href: "/projects/[project-id]/use-cases", icon: GitBranchIcon },
-  { title: "Requirements", href: "/projects/[project-id]/requirements", icon: Ellipsis },
+  { title: "Actors", href: "/projects/[project-id]/actors", icon: Users },
+  { title: "Use Cases", href: "/projects/[project-id]/use-cases", icon: UserStar },
+  { title: "Requirements", href: "/projects/[project-id]/requirements", icon: FileText },
   {
     title: "Use Case Diagram",
     href: "/projects/[project-id]/use-case-diagram",
-    icon: GitBranchIcon,
+    icon: Waypoints,
   },
   {
     title: "Activity Diagram",
     href: "/projects/[project-id]/activity-diagrams",
-    icon: Activity,
+    icon: Workflow,
   },
 ] as const;
 

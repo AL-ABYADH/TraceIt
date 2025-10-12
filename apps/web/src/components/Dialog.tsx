@@ -9,9 +9,17 @@ interface DialogProps {
   children: ReactNode;
   title?: string;
   className?: string;
+  dissmissible?: boolean;
 }
 
-export default function Dialog({ isOpen, onClose, children, title, className = "" }: DialogProps) {
+export default function Dialog({
+  isOpen,
+  onClose,
+  children,
+  title,
+  className = "",
+  dissmissible = true,
+}: DialogProps) {
   // Handle ESC key press
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -46,9 +54,14 @@ export default function Dialog({ isOpen, onClose, children, title, className = "
         {title && (
           <div className="flex items-center justify-between p-6 border-b border-border">
             <h2 className="text-xl font-semibold text-foreground">{title}</h2>
-            <button onClick={onClose} className="p-1 hover:bg-accent rounded-lg transition-colors">
-              <XIcon className="w-5 h-5 text-muted-foreground" />
-            </button>
+            {dissmissible && (
+              <button
+                onClick={onClose}
+                className="p-1 hover:bg-accent rounded-lg transition-colors"
+              >
+                <XIcon className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
           </div>
         )}
 

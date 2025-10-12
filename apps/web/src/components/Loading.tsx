@@ -19,7 +19,13 @@ export default function Loading({
 
   if (mode === "dialog") {
     return (
-      <Dialog isOpen={isOpen} onClose={onClose || (() => {})} title="Loading" className="max-w-xs">
+      <Dialog
+        isOpen={isOpen}
+        onClose={onClose || (() => {})}
+        title="Loading"
+        className="max-w-xs"
+        dissmissible={false}
+      >
         <div className="flex flex-col items-center justify-center py-6">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted-foreground border-t-transparent mb-4" />
           <p className="text-sm text-center text-muted-foreground">{message}</p>
