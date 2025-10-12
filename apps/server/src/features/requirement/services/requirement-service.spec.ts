@@ -6,6 +6,7 @@ import { Requirement } from "../entities/requirement.entity";
 import { ExceptionalRequirementRepository } from "../repositories/exceptional-requirement.repository";
 import { RequirementRepository } from "../repositories/requirement.repository";
 import { RequirementService } from "./requirement.service";
+import { PrimaryUseCaseRepository } from "src/features/use-case/repositories/primary-use-case/primary-use-case.repository";
 
 describe("RequirementService", () => {
   let service: RequirementService;
@@ -22,6 +23,8 @@ describe("RequirementService", () => {
     updatedAt: "2025-10-08T12:00:00Z",
     nestedRequirements: [],
     exceptions: [],
+    isActivityStale: true,
+    isConditionStale: false,
   };
 
   beforeEach(async () => {
@@ -48,6 +51,13 @@ describe("RequirementService", () => {
         },
         {
           provide: ExceptionalRequirementRepository,
+          useValue: {
+            getById: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
+        {
+          provide: PrimaryUseCaseRepository,
           useValue: {
             getById: jest.fn(),
             delete: jest.fn(),
