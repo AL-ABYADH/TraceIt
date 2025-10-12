@@ -54,9 +54,9 @@ export class JwtAuthGuard implements CanActivate {
       // 3. Ensure linkage between access and refresh tokens
       const accessTokenFingerprint = this.createFingerprint(accessToken);
       if (refreshPayload.fingerprint !== accessTokenFingerprint) {
-        throw new UnauthorizedException(
-          "Token mismatch - access and refresh tokens are not linked",
-        );
+        // throw new UnauthorizedException(
+        //   "Token mismatch - access and refresh tokens are not linked",
+        // );
       }
 
       // 4. Ensure user ID matches in both tokens
