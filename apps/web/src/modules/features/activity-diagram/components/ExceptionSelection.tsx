@@ -30,15 +30,6 @@ export default function ExceptionSelection({
     enabled: isOpen && !!useCaseId, // This ensures the query only runs when dialog is open
   });
 
-  // Add debug logging to see what's happening
-  console.log("ExceptionSelection:", {
-    isOpen,
-    useCaseId,
-    hasUseCaseId: !!useCaseId,
-    isLoading,
-    dataLength: exceptions?.length,
-  });
-
   const handleExceptionClick = (exception: RequirementExceptionDto) => {
     onExceptionSelect(exception);
     onClose();
