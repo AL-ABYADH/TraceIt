@@ -3,11 +3,6 @@
 import React from "react";
 import type { EdgeProps } from "@xyflow/react";
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow } from "@xyflow/react";
-import {
-  DecisionNodeData,
-  isConditionDto,
-  isRequirementExceptionDto,
-} from "@/types/decision-node-types";
 
 export default function FalseEdge(props: EdgeProps) {
   const {
@@ -28,19 +23,7 @@ export default function FalseEdge(props: EdgeProps) {
   const sourceNode = getNode(source);
 
   // Determine color mapping for FALSE edge
-  let baseColor = "#fff"; // CONDITION FALSE -> yellow
-  if (sourceNode?.data) {
-    try {
-      const nodeData = sourceNode.data as DecisionNodeData;
-      if (isRequirementExceptionDto(nodeData)) {
-        baseColor = "#fff"; // EXCEPTION FALSE -> green
-      } else if (isConditionDto(nodeData)) {
-        baseColor = "#fff"; // CONDITION FALSE -> yellow
-      }
-    } catch (e) {
-      // ignore and use default
-    }
-  }
+  const baseColor = "#fff"; // CONDITION FALSE -> yellow
 
   // Calculate edge path
   const [edgePath, pathLabelX, pathLabelY] = getBezierPath({
