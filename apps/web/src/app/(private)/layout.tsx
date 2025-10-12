@@ -13,11 +13,21 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
   const { isMaximized } = useMaximization();
 
   if (isLoading) {
-    return <Loading isOpen={isLoading} message="Initializing..." />;
+    return (
+      <>
+        <ClientAuthGate />
+        <Loading isOpen={isLoading} message="Initializing..." />
+      </>
+    );
   }
 
   if (isError) {
-    return <ErrorMessage message={error?.message} />;
+    return (
+      <>
+        <ClientAuthGate />
+        <ErrorMessage message={error?.message} />
+      </>
+    );
   }
 
   return (
