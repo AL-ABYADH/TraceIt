@@ -1,84 +1,168 @@
-# Turborepo starter
+# TraceIt
 
-This Turborepo starter is maintained by the Turborepo core team.
+TraceIt is a web application for **modeling, managing, and visualizing traceability** between software artifacts during the analysis phase. Artifacts are stored in a central repository and can be composed into diagrams that remain linked to their source artifacts.
 
-## Using this example
+---
 
-Run the following command:
+## Quick Overview
 
-```sh
-npx create-turbo@latest
+* **Define Artifacts:** Actors, Use Cases, Requirements (with conditions and exceptions).
+* **Assemble Diagrams:** Select shapes from a palette; selected shapes appear on the canvas pre-filled with artifacts fetched from the backend.
+* **Real-Time Traceability:** Changes propagate across all linked diagrams.
+
+---
+
+## Technology Stack
+
+### Core
+
+* **Next.js** — Frontend framework
+* **NestJS** — Backend framework
+* **Neo4j** — Graph database
+
+### Monorepo & Tooling
+
+* **pnpm** — Package manager
+* **Turborepo** — Monorepo build system
+
+### Libraries
+
+* **React**, **Redux Toolkit**
+* **Mantine**, **React Flow (@xyflow/react)**
+* **Zod** — Shared schema validation
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+* Node.js v18+
+* pnpm v9+
+
+---
+
+### Clone & Install
+
+```bash
+git clone <repository-url>
+cd TraceIt
+pnpm install
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+### Database (Neo4j)
 
-### Apps and Packages
+Use Neo4j Desktop or follow Neo4j official installation instructions for your platform. Ensure you have a running Neo4j instance accessible to the backend (Bolt port typically 7687).
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Environment Configuration
 
-### Utilities
+### Backend (`apps/server`)
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
+```bash
+cd apps/server
+cp .env.example .env
 ```
-cd my-turborepo
+
+Edit `apps/server/.env` (example keys):
+
+```env
+NEO4J_CONNECTION_SCHEME=bolt
+NEO4J_HOST=localhost
+NEO4J_SERVICE_PORT_EXPOSE=7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=<your-password>
+NEO4J_DATABASE=neo4j
+
+JWT_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=604800
+
+COOKIE_SECURE=false
+COOKIE_DOMAIN=127.0.0.1
+```
+
+### Frontend (`apps/web`)
+
+```bash
+cd apps/web
+cp .env.example .env
+```
+
+Set API base URL:
+
+```env
+API_BASE_URL=http://127.0.0.1:8000
+```
+
+---
+
+## Generate JWT Keys
+
+From project root:
+
+```bash
+pnpm --filter server run generate:keys
+```
+
+This populates `JWT_SECRET` and `JWT_REFRESH_SECRET` in `apps/server/.env`. To regenerate:
+
+```bash
+pnpm --filter server run update:keys
+```
+
+---
+
+## Build Local Packages
+
+```bash
 pnpm build
 ```
 
-### Develop
+Builds local packages in `packages/` required by the apps (for example `@repo/custom-neogma`, `@repo/shared-schemas`).
 
-To develop all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
+## Run
+
+### Development
+
+```bash
 pnpm dev
 ```
 
-### Remote Caching
+* Backend: `http://127.0.0.1:3000` (as configured)
+* Frontend: `http://127.0.0.1:8000`
+* Hot-reload enabled
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### Production
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+```bash
+pnpm build
+pnpm start
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+Ensure environment variables and database connection are set for the production environment.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+---
 
-```
-npx turbo link
-```
+## TraceIt Workflow
 
-## Useful Links
+1. **Define Artifacts** — Create Actors, Use Cases, Requirements (including conditions and exceptions).
+2. **Assemble Diagrams** — Open a diagram canvas, select a shape from the palette; the selected shape appears on the canvas pre-filled with the corresponding artifact fetched from the backend.
+3. **Maintain Traceability** — Changes to artifacts update all linked diagrams; deletions cascade to dependent items.
 
-Learn more about the power of Turborepo:
+---
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+## Host Configuration (Requirement)
+
+Ensure host/address values used for cookies and API endpoints are consistent:
+
+* `apps/server/.env` → `COOKIE_DOMAIN`
+* `apps/web/.env` → `API_BASE_URL`
+* The browser URL used to access the frontend should match the chosen host (e.g., `127.0.0.1` vs `localhost`).
+
+---
+
